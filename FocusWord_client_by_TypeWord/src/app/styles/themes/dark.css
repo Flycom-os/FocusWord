@@ -1,0 +1,9 @@
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --secondary-color: #004377;
+  --muted-foreground: 240 5% 64.9%;
+  --muted: 240 3.7% 15.9%;
+  --color: #fafafa;
+  --border: 240 3.7% 15.9%;
+}

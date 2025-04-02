@@ -1,0 +1,75 @@
+.buttonD {
+  background: var(--bg-button-color);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 5px;
+  color: var(--color);
+  border: none;
+  padding: var(--padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.primary {
+  --bg-button-color: white;
+  --color: #003d6c;
+  --padding: 5px 10px;
+}
+.primary:hover {
+  --bg-button-color: #003d6c;
+  --color: #eaf5ff;
+}
+.secondary {
+  --bg-button-color: #003d6c;
+  --color: white;
+  --padding: 5px 10px;
+}
+.secondary:hover {
+  --bg-button-color: #003055;
+  --color: white;
+}
+.third {
+  --bg-button-color: #eaf5ff;
+  --color: #003d6c;
+  --padding: 5px 10px;
+}
+.third:hover {
+  --bg-button-color: #003d6c;
+  --color: white;
+}
+.warning {
+  --bg-button-color: #c80000;
+  --color: white;
+  --padding: 5px 10px;
+}
+.warning:hover {
+  --bg-button-color: #8d0000;
+  --color: #eaf5ff;
+}
+.close {
+  --bg-button-color: white;
+  --color: #003d6c;
+  --padding: 0px;
+}
+.close:hover {
+  --bg-button-color: #003d6c;
+  --color: #eaf5ff;
+  --padding: 0px;
+}
+
+.breadcrumb {
+  --color: #a3a3a3;
+}
+.breadcrumb:hover {
+  --color: #003d6c;
+}
+.mini {
+  --bg-button-color: #eaf5ff;
+  --color: #003d6c;
+  --padding: 3px 5px;
+}
+.mini:hover {
+  --bg-button-color: #003d6c;
+  --color: white;
+  --padding: 3px 5px;
+}

@@ -1,0 +1,19 @@
+.header {
+  display: flex;
+  background-color: white;
+  padding: 10px 12.5px;
+  width: 100%;
+}
+.button_name {
+  margin-left: auto;
+  background-color: #fff;
+}
+.button_name:hover {
+  color: #003d6c;
+  background-color: #eaf5ff;
+}
+.button:hover {
+  .chevron {
+    color: white;
+  }
+}

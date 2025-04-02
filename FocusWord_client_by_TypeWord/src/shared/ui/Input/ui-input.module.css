@@ -1,0 +1,33 @@
+.input_global {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-input-color);
+  color: var(--color);
+  height: 40px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border-color);
+}
+.input {
+  width: 100%;
+  padding: 0px 8px;
+}
+.secondary {
+  --bg-input-color: white;
+  --border-color: #003d6c;
+  --color: black;
+  .span {
+    display: flex;
+    align-items: center;
+    padding: 0px 8px;
+  }
+}
+.primary {
+  --bg-input-color: white;
+  --border-color: #003d6c;
+  --color: black;
+  padding: 0px 10px;
+}
+.error {
+  --border-color: #ef4444;
+}
