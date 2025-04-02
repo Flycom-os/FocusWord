@@ -1,0 +1,30 @@
+.input {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  appearance: none;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.input:checked {
+  background-color: #fff;
+  border-color: #003d6c;
+}
+
+.input:checked::after {
+  content: "";
+  position: absolute;
+  left: 3.9px;
+  top: 4.2px;
+  transform: rotate(-45deg) scaleX(-1);
+  width: 14px;
+  height: 9px;
+  border: solid #003d6c;
+  border-width: 0 2.6px 2.6px 0;
+}
