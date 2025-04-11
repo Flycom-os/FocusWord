@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./ui-button.module.css";
+import styles from "@/src/shared/ui/Button/ui-button.module.css";
 import classNames from "@/src/shared/lib/classnames/classnames";
 
 export interface Button extends React.ButtonHTMLAttributes<HTMLButtonElement> {

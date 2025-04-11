@@ -16,7 +16,7 @@ const config: StorybookConfig = {
   viteFinal: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, '../src'), // Убедись, что алиас настроен правильно
+      '@/src': path.resolve(__dirname, '../src'), // Убедись, что алиас настроен правильно
     };
     return config;
   },
