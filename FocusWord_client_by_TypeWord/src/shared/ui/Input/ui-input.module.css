@@ -9,6 +9,8 @@
   border: 1.5px solid var(--border-color);
 }
 .input {
+  border: none;
+  outline: none;
   width: 100%;
   padding: 0px 8px;
 }
