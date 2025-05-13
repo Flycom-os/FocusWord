@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Button } from "@/src/shared/ui";
 import styles from "@/src/widgets/header/index.module.css";
 import { ChevronLeft, ChevronDown } from "lucide-react";
 import classNames from "@/src/shared/lib/classnames/classnames";
+import Button from "@/src/shared/ui/Button/ui-button";
+
 const username = "Global_layout";
 const Header = ({ className }: { className?: string }) => {
   return (

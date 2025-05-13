@@ -1,6 +1,7 @@
-import { Button } from "@/src/shared/ui";
+
 import { ChevronDown, Plus, X } from "lucide-react";
 import styles from "@/src/widgets/block_management/index.module.css";
+import Button from "@/src/shared/ui/Button/ui-button";
 
 interface searchProps {
   type?: VariantsType;
