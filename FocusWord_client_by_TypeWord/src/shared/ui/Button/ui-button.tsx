@@ -16,7 +16,7 @@ type VariantsType =
   | "mini"
   | "";
 const Button = (props: Button) => {
-  const { className, children, theme = "primary", type = "default", ...otherProps } = props;
+  const { className, children, theme = "primary", type = "button", ...otherProps } = props;
   return (
     <button
       className={classNames(styles.buttonD, { [styles[theme]]: true }, [className || ""])}

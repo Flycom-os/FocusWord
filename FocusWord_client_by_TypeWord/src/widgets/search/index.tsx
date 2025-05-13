@@ -1,7 +1,9 @@
-import { Button } from "@/src/shared/ui";
+import React from "react";
 import Input from "@/src/shared/ui/Input/ui-input";
 import { useState } from "react";
 import styles from "@/src/widgets/search/index.module.css";
+import Button from "@/src/shared/ui/Button/ui-button";
+
 
 interface searchProps {
   setSearchValue: (searchInput: string) => void;

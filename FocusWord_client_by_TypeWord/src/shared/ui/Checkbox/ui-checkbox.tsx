@@ -1,4 +1,5 @@
 import styles from "@/src/shared/ui/Checkbox/input.module.css";
+import React from "react";
 import classNames from "../../lib/classnames/classnames";
 
 interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
