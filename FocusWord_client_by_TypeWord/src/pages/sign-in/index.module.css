@@ -1,0 +1,20 @@
+.containerSignin{
+    background-color: #fafafa;
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    color:black;
+}
+.contentSignIn{
+    background-color: white;
+    padding:48px;
+    width: 456px;
+    height: auto;
+}
+.logo{
+    justify-content: center;
+    display: flex;
+    margin-bottom: 40px;
+}

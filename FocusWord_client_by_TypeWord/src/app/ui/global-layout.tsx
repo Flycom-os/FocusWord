@@ -14,6 +14,7 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang="ru">
+
       <head>
       </head>
       <body>
