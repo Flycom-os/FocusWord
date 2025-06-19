@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Home,
   FileText,
@@ -31,12 +31,34 @@ const menuItems = [
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [fullyCollapsed, setFullyCollapsed] = useState(false);
+  const asideRef = useRef(null);
   const router = useRouter();
 
+  useEffect(() => {
+    if (collapsed) {
+      const timeout = setTimeout(() => setFullyCollapsed(true), 800); // 800ms = время transition
+      return () => clearTimeout(timeout);
+    } else {
+      setFullyCollapsed(false);
+    }
+  }, [collapsed]);
+
   return (
-    <aside className={collapsed ? styles.sidebarCollapsed : styles.sidebar}>
+    <aside
+      ref={asideRef}
+      className={
+        collapsed
+          ? styles.sidebarCollapsed + (fullyCollapsed ? ' ' + styles.fullyCollapsed : '')
+          : styles.sidebar
+      }
+    >
       <div className={styles.logo}>
-        {collapsed ? <div style={{margin: '0 auto'}}><Image width={40} height={40} alt={'FW'} src={logosmall} /> </div> : <div className={styles.sidebarContent} style={{margin: '0 auto'}}> <Image width={200} height={40} alt={'FW'} src={logo} /></div>}
+        {collapsed ? (
+          <div style={{margin: '0 auto'}}><Image width={40} height={40} alt={'FW'} src={logosmall} /></div>
+        ) : (
+          <div className={styles.sidebarContent} style={{margin: '0 auto'}}><Image width={200} height={40} alt={'FW'} src={logo} /></div>
+        )}
       </div>
       <nav>
         <ul className={styles.menu}>
@@ -47,21 +69,17 @@ const Sidebar = () => {
               onClick={() => item.url && router.push(item.url)}
               style={{ cursor: item.url ? 'pointer' : 'default' }}
             >
-              {collapsed ? (
-                <span className={styles.icon}>{item.icon}</span>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: 'flex' }}>
-                    <span className={styles.icon}>{item.icon}</span>
-                    <span className={collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent}>{item.label}</span>
-                  </div>
-                </div>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                <span className={styles.icon + (fullyCollapsed && collapsed ? ' ' + styles.iconCentered : '')}>{item.icon}</span>
+                <span className={styles.sidebarContent}>{item.label}</span>
+              </div>
             </li>
           ))}
           <li className={styles.menuItem + ' ' + (collapsed ? styles.menuItemCollapsed : '')} onClick={() => setCollapsed(v => !v)} style={{ cursor: 'pointer' }}>
-            <span className={styles.icon}>{collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}</span>
-            <span className={collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent}>{collapsed ? "Show" : "Hide"}</span>
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              <span className={styles.icon + (fullyCollapsed && collapsed ? ' ' + styles.iconCentered : '')}>{collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}</span>
+              <span className={styles.sidebarContent}>{collapsed ? "Show" : "Hide"}</span>
+            </div>
           </li>
         </ul>
       </nav>
