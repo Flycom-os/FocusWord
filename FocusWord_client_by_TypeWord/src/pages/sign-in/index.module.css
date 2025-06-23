@@ -11,6 +11,9 @@
     background-color: white;
     padding:48px;
     width: 456px;
+    display: flex;
+    gap:15px;
+    flex-direction: column;
     height: auto;
 }
 .logo{

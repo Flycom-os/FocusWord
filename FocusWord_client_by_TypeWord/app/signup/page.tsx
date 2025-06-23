@@ -1,3 +1,3 @@
-import SignUp from "@/src/pages/sign-in";
+import SignUp from "@/src/pages/sign-up";
 
 export default SignUp;
