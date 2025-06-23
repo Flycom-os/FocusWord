@@ -1,38 +1,30 @@
 /**
- * @page SignIn/Registration
+ * @page SignUp/Registration
  */
 'use client'
 import React, { useState } from "react";
 import styles from "./index.module.css"
 import Input from "@/src/shared/ui/Input/ui-input";
-import { Checkbox } from "@/src/shared/ui";
 // @ts-ignore
 import Button from '@/src/shared/ui/button/ui-button';
 import logo from '@/src/public/logo.svg'
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "@/src/shared/api/auth";
+import { registration } from "@/src/shared/api/reg";
 import { useRouter } from "next/navigation";
 
-const SESSION_EXP_KEY = "session_expire_at";
-
-const SignIn = () => {
+const SignUp = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
+  const [password2, setPassword2] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: (data: { email: string; password: string }) => login({ ...data, remember }),
+    mutationFn: (data: {name:string; email: string; password: string; password2:string }) => registration({ ...data}),
     onSuccess: () => {
-      if (!remember) {
-        const expireAt = Date.now() + 60 * 60 * 1000; // +1 час
-        localStorage.setItem(SESSION_EXP_KEY, expireAt.toString());
-      } else {
-        localStorage.removeItem(SESSION_EXP_KEY);
-      }
-      router.push("/admin");
+      router.push("/signin");
     },
     onError: (err: any) => {
       setError(err?.response?.data?.message || "Ошибка авторизации");
@@ -42,7 +34,7 @@ const SignIn = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    mutation.mutate({ email, password });
+    mutation.mutate({name, email, password, password2 });
   };
 
   const isError = Boolean(error);
@@ -51,6 +43,16 @@ const SignIn = () => {
     <div className={styles.containerSignin}>
       <form className={styles.contentSignIn} onSubmit={handleSubmit}>
         <div className={styles.logo}><Image src={logo} alt={'logo'} height={40}/></div>
+        <div>Name</div>
+        <Input
+          placeholder={'Name'}
+          value={name}
+          error={isError}
+          onChange={e => setName(e.target.value)}
+          name="name"
+          type="text"
+          required
+        />
         <div>Login</div>
         <Input
           placeholder={'Email or phone number'}
@@ -71,28 +73,33 @@ const SignIn = () => {
           type="password"
           required
         />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Checkbox checked={remember} onChange={() => setRemember(v => !v)} />
-          <div>Remember me</div>
-        </div>
+        <div>Check password</div>
+        <Input
+          placeholder={'Enter password'}
+          value={password2}
+          error={isError}
+          onChange={e => setPassword2(e.target.value)}
+          name="password"
+          type="password"
+          required
+        />
         <Button
           style={{ width: '360px', height: '40px' }}
           theme={'secondary'}
           type="submit"
           disabled={mutation.isPending}
         >
-          {mutation.isPending ? 'Logging in...' : 'Login'}
+          {mutation.isPending ? 'Registration...' : 'Registration'}
         </Button>
         {error && <div style={{ color: 'red' }}>{error}</div>}
         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center',gap:'10px', borderTop:'1px solid #808080',paddingTop:'15px',marginTop:'10px', fontSize:'12px'}}>
-          <div>Dont have an account?</div>
-          <a href={'/signup'}>Sign up now</a>
+          <div>Do have an account?</div>
+          <a href={'/signin'}>Sign in now</a>
         </div>
-
-
       </form>
     </div>
   </div>;
 };
 
-export default SignIn;
+
+export default SignUp;

@@ -1,73 +1,103 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# FocusWord CMS (Backend)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**FocusWord Backend** is a modern open-source CMS server inspired by WordPress, built with NestJS, TypeScript, and Docker. The project provides API, authentication, media, users, categories, and is fully ready for containerized deployment.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS + TypeScript**: Modern, scalable backend.
+- **Docker & Docker Compose**: Fast launch and deployment.
+- **PostgreSQL**: Reliable database.
+- **Redis**: Caching and queues.
+- **Swagger**: Auto-generated API documentation.
+- **Modular architecture**: Easy to extend and maintain.
+- **Testing**: Unit and e2e with Jest.
 
-## Installation
+---
 
+## Quick Start (Docker)
+
+### 1. Clone the repository
 ```bash
-$ npm install
+git clone https://github.com/your-org/focusword-backend.git
+cd focusword-backend
 ```
 
-## Running the app
+### 2. Create .env files (or use provided ones)
+- `.production.env` — for production
+- `.development.env` — for local development
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+### 3. Start with Docker Compose
+```bash 
+  docker-compose up --build
 ```
 
-## Test
+This will start:
+- **main** — API server (NestJS) on port 5000
+- **postgres** — PostgreSQL on port 5432
+- **redis** — Redis on port 6379
+- **pgadmin** — PgAdmin on port 8080
 
+> All environment variables for services are taken from `.production.env` and `.development.env` (see docker-compose.yml).
+
+### 4. Swagger documentation
+- [http://localhost:5000/api](http://localhost:5000/api)
+
+### 5. Stop containers
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+  docker-compose down
 ```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Local Development (without Docker)
 
-## Stay in touch
+```bash
+  npm install
+  npm run start:dev
+```
+> You need to have local PostgreSQL and Redis running, configure environment variables in `.development.env`.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
+
+## Scripts
+
+- `npm run start:dev` — start in development mode (watch mode)
+- `npm run start` — start in production
+- `npm run build` — build the project
+- `npm run test` — unit tests
+- `npm run test:e2e` — e2e tests
+- `npm run test:cov` — test coverage
+
+---
+
+## Project Structure
+
+```
+├── src/                # NestJS source code
+├── test/               # Tests
+├── Dockerfile
+├── docker-compose.yml
+├── .production.env
+├── .development.env
+├── package.json
+└── ...
+```
+
+---
+
+## Technologies
+
+- **NestJS**
+- **TypeScript**
+- **PostgreSQL**
+- **Redis**
+- **Docker, Docker Compose**
+- **Jest**
+
+---
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+MIT (or your license)
