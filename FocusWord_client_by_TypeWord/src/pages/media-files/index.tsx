@@ -7,7 +7,7 @@ import BlockManagement from "@/src/widgets/block_management";
 const MediaFilesPage = () => {
   return (
     <div>
-      <BlockManagement type={"primary"} />
+      <BlockManagement type={"third"} />
     </div>
   );
 };
