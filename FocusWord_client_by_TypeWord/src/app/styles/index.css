@@ -16,3 +16,16 @@ html {
 .body{
   font-family: "Raleway", sans-serif;
 }
+
+/* Admin Layout Styles */
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8fafc;
+}
