@@ -2,6 +2,7 @@
 import SideBar from "@/src/widgets/sidebar/index"
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Header from "@/src/widgets/header";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -31,7 +32,9 @@ const AdminLayout = ({
     <AuthGuard>
       <div className="admin-layout" style={{display:'flex'}}>
         <SideBar/>
+
         <main className="admin-content">
+          <Header/>
           {children}
         </main>
       </div>
