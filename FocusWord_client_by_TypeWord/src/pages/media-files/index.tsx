@@ -159,7 +159,7 @@ const mockMediaFiles: MediaFile[] = [
 ];
 
 type ViewMode = "list" | "grid";
-
+import Cookies from "js-cookie";
 const MediaFilesPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchQuery, setSearchQuery] = useState("");
@@ -235,6 +235,17 @@ const MediaFilesPage = () => {
     link.download = file.name;
     link.click();
   };
+  const token = Cookies.get("access_token");
+  const fetchFiles = async () => {
+    const res = await fetch('http://localhost:5000/api/files/search/1/10?image=true',{
+      method: 'GET',Cookie:{
+        'Authorization': 'Bearer '+ token
+      }
+    })
+    .then(res => res.json())
+    console.log(res)
+  }
+  fetchFiles();
 
   return (
     <div className={styles.container}>
