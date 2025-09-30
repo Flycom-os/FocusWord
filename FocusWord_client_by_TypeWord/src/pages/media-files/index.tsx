@@ -166,7 +166,7 @@ const MediaFilesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingFile, setEditingFile] = useState<MediaFile | null>(null);
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(mockMediaFiles);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const itemsPerPage = 6;
 
   // Фильтрация файлов по поисковому запросу
@@ -234,28 +234,26 @@ const MediaFilesPage = () => {
     link.download = file.name;
     link.click();
   };
+
   const fetchFiles = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/files/search/1/10?image=true', {
+      // const res = await fetch(`http://localhost:5000/api/files/search/${currentPage}/${itemsPerPage}?image=true&search=${encodeURIComponent(searchQuery)}`, {
+        const res = await fetch(`http://localhost:5000/api/files/search/${currentPage}/${itemsPerPage}?image=true`, {
         method: 'GET',
-        credentials: 'include', // 🔑 разрешает отправку cookie на бекенд
-        headers: {
-          'Accept': 'application/json'
-        }
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
       });
-
-      if (!res.ok) {
-        throw new Error(`Ошибка: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`Ошибка: ${res.status}`);
       const data = await res.json();
-      console.log(data);
+      setMediaFiles(data.rows);
     } catch (error) {
       console.error("Ошибка при запросе:", error);
     }
   };
 
-  fetchFiles();
+  React.useEffect(() => {
+    fetchFiles();
+  }, [currentPage, searchQuery]);
 
 
   return (
@@ -366,7 +364,7 @@ const MediaFilesPage = () => {
                     <TableCell>
                       <div className={styles.fileInfo}>
                         <img
-                          src={file.thumbnail}
+                          src={file.filepath}
                           alt={file.name}
                           className={styles.thumbnail}
                         />
@@ -407,7 +405,7 @@ const MediaFilesPage = () => {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <img
-                    src={file.thumbnail}
+                    src={file.filepath}
                     alt={file.name}
                     className={styles.gridThumbnail}
                     onClick={() => handleEditFile(file)}
