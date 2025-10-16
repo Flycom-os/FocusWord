@@ -52,6 +52,7 @@
 }
 .table_cell {
   padding: 16px;
+  color:black;
   vertical-align: middle;
 }
 .table_cell:has([role="checkbox"]) {

@@ -199,10 +199,22 @@ const MediaFilesPage = () => {
     }
   };
 
-  const handleDeleteSelected = () => {
-    // Здесь будет логика удаления выбранных файлов
-    console.log("Удаление файлов:", selectedFiles);
-    setSelectedFiles([]);
+  const handleDeleteSelected = async () => {
+    if (selectedFiles.length === 0) return;
+    try {
+      const res = await fetch('http://localhost:5000/api/files/delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_ids: selectedFiles }),
+      });
+      if (!res.ok) throw new Error(`Ошибка удаления: ${res.status}`);
+      // Удалить из списка
+      setMediaFiles(prev => prev.filter(file => !selectedFiles.includes(file.id)));
+      setSelectedFiles([]);
+    } catch (e) {
+      console.error('Ошибка при удалении файлов:', e);
+    }
   };
 
   const handleSearch = () => {
@@ -214,15 +226,46 @@ const MediaFilesPage = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveFile = (updatedFile: MediaFile) => {
-    setMediaFiles(prev => 
-      prev.map(file => file.id === updatedFile.id ? updatedFile : file)
-    );
+  const handleSaveFile = async (updatedFile: MediaFile) => {
+    // If file exists in list -> update, otherwise prepend (created)
+    setMediaFiles(prev => {
+      // Normalize shape: if backend returned different keys (filename, filepath, miniature)
+      const normalize = (f: any): MediaFile => ({
+        id: f.id,
+        name: f.name || f.filename || f.seo_label || `file-${f.id}`,
+        type: f.type || (f.image ? 'image' : 'file'),
+        url: f.url || f.filepath || f.filepathSystem || f.filepath_system || '',
+        thumbnail: (f.miniature && f.miniature.filepath) || f.thumbnail || f.filepath || '',
+        author: f.author || '—',
+        date: f.date || f.createdAt || f.updatedAt || '',
+        size: f.size || '—',
+        alt: f.alt || f.name || f.filename || '',
+        compression: f.compression || 'none',
+      });
+
+      const normalized = normalize(updatedFile as any);
+      const exists = prev.some(f => f.id === normalized.id);
+      if (exists) {
+        return prev.map(f => f.id === normalized.id ? normalized : f);
+      }
+      return [normalized, ...prev];
+    });
   };
 
-  const handleDeleteFile = (fileId: number) => {
-    setMediaFiles(prev => prev.filter(file => file.id !== fileId));
-    setSelectedFiles(prev => prev.filter(id => id !== fileId));
+  const handleDeleteFile = async (fileId: number) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/files/delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_ids: [fileId] }),
+      });
+      if (!res.ok) throw new Error(`Ошибка удаления: ${res.status}`);
+      setMediaFiles(prev => prev.filter(file => file.id !== fileId));
+      setSelectedFiles(prev => prev.filter(id => id !== fileId));
+    } catch (e) {
+      console.error('Ошибка при удалении файла:', e);
+    }
   };
 
   const handleDownloadFile = (file: MediaFile) => {
@@ -265,7 +308,15 @@ const MediaFilesPage = () => {
           <p className={styles.subtitle}>Медиафайлы/</p>
         </div>
         <div className={styles.headerActions}>
-          <Button theme="secondary" className={styles.addButton}>
+          <Button
+            theme="secondary"
+            className={styles.addButton}
+            onClick={() => {
+              setEditingFile(null);
+              setIsEditModalOpen(false);
+              setTimeout(() => setIsEditModalOpen(true), 0);
+            }}
+          >
             <Plus size={16} />
             Добавить
           </Button>
@@ -364,7 +415,7 @@ const MediaFilesPage = () => {
                     <TableCell>
                       <div className={styles.fileInfo}>
                         <img
-                          src={file.filepath}
+                          src={file.thumbnail || file.url}
                           alt={file.name}
                           className={styles.thumbnail}
                         />
@@ -405,7 +456,7 @@ const MediaFilesPage = () => {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <img
-                    src={file.filepath}
+                    src={file.thumbnail || file.url}
                     alt={file.name}
                     className={styles.gridThumbnail}
                     onClick={() => handleEditFile(file)}
