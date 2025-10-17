@@ -173,8 +173,7 @@ const MediaFilesPage = () => {
   const filteredFiles = useMemo(() => {
     if (!searchQuery) return mediaFiles;
     return mediaFiles.filter(file =>
-      file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      file.author.toLowerCase().includes(searchQuery.toLowerCase())
+      file.filename.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, mediaFiles]);
 
