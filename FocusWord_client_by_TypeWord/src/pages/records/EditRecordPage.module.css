@@ -1,0 +1,428 @@
+/* Основной контейнер */
+.container {
+  padding: 24px;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Заголовок */
+.header {
+  margin-bottom: 24px;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Основной контент */
+.mainContent {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.editorSection {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.editorHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Панель инструментов */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.formatSelect {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.toolbarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.toolbarButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.toolbarButton:active {
+  background: #e5e7eb;
+}
+
+/* Область редактирования */
+.editorContainer {
+  padding: 24px;
+}
+
+.editor {
+  min-height: 400px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  outline: none;
+  overflow-y: auto;
+}
+
+.editor:focus {
+  border-color: #003d6c;
+  box-shadow: 0 0 0 3px rgba(0, 61, 108, 0.1);
+}
+
+.editor h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.editor h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #1e293b;
+}
+
+.editor h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1e293b;
+}
+
+.editor p {
+  margin: 0 0 12px 0;
+}
+
+.editor ul, .editor ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+}
+
+.editor li {
+  margin: 0 0 4px 0;
+}
+
+.editor a {
+  color: #003d6c;
+  text-decoration: underline;
+}
+
+.editor a:hover {
+  color: #003055;
+}
+
+.editor pre {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 0 0 12px 0;
+  overflow-x: auto;
+}
+
+.editor code {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.editor blockquote {
+  border-left: 4px solid #003d6c;
+  padding-left: 16px;
+  margin: 0 0 12px 0;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Боковая панель */
+.sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebarSection {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.sidebarTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.sidebarContent {
+  padding: 20px;
+}
+
+/* Поля формы */
+.field {
+  margin-bottom: 16px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: #003d6c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 61, 108, 0.1);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Кнопки действий */
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actionButtons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Категории */
+.categoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.categoryItem input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Миниатюра */
+.thumbnailContainer {
+  text-align: center;
+}
+
+.thumbnail {
+  width: 100%;
+  max-width: 200px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 120px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #003d6c;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.uploadButton:hover {
+  background: #003055;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .toolbarGroup {
+    gap: 2px;
+  }
+  
+  .toolbarButton {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .editorContainer {
+    padding: 16px;
+  }
+  
+  .editor {
+    min-height: 300px;
+  }
+  
+  .sidebarContent {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    padding: 8px 12px;
+  }
+  
+  .editorContainer {
+    padding: 12px;
+  }
+  
+  .editor {
+    min-height: 250px;
+    padding: 12px;
+  }
+  
+  .sidebarContent {
+    padding: 12px;
+  }
+  
+  .actionButtons {
+    gap: 6px;
+  }
+  
+  .actionButtons button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}

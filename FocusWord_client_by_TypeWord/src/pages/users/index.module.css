@@ -1,0 +1,58 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filters {
+  background: #fff;
+  border-radius: 3px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterBtn {
+  font-size: 12px;
+}
+
+.filterBtnActive {
+  outline: 2px solid #003d6c;
+}
+.tableWrap {
+  background: #fff;
+  border-radius: 3px;
+  padding: 8px 8px 2px 8px;
+}
+
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 540px;
+}
+
+.fieldLabel {
+  color: #003d6c;
+  font-weight: 600;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+}
+
+.footerLeft,
+.footerRight {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .modalForm {
+    min-width: 320px;
+  }
+}
