@@ -356,6 +356,45 @@
   background: #003055;
 }
 
+/* Сообщения об ошибках */
+.errorMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* Поля формы */
+.field {
+  margin-bottom: 16px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  color: #374151;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.textarea:focus {
+  border-color: #003d6c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 61, 108, 0.1);
+}
+
 /* Адаптивность */
 @media (max-width: 1024px) {
   .mainContent {

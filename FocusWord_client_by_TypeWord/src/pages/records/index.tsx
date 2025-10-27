@@ -3,112 +3,57 @@
  */
 
 'use client'
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, Plus, Trash2, Eye, Edit, EyeOff, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Button from "@/src/shared/ui/Button/ui-button";
 import Input from "@/src/shared/ui/Input/ui-input";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/src/shared/ui/Table/ui-table";
+import { getPostsPagination, deletePosts, publishPosts } from "@/src/shared/api/posts";
+import { PostsPaginationResponse } from "@/src/shared/types/posts";
 import styles from "./index.module.css";
-
-// Заготовленные данные записей
-const mockRecords = [
-  {
-    id: 1,
-    title: "Заголовок",
-    author: "Админ",
-    category: "Без категории",
-    date: "01.01.2024",
-    status: "published",
-    content: "Содержимое записи..."
-  },
-  {
-    id: 2,
-    title: "Привет, мир!",
-    author: "Админ",
-    category: "Без категории",
-    date: "01.01.2024",
-    status: "published",
-    content: "Это первая запись в блоге..."
-  },
-  {
-    id: 3,
-    title: "Слон - это вкусно!",
-    author: "Админ",
-    category: "Блюда",
-    date: "02.01.2024",
-    status: "draft",
-    content: "Рецепт приготовления слона..."
-  },
-  {
-    id: 4,
-    title: "Шины - не бананы!",
-    author: "Админ",
-    category: "Автомобили",
-    date: "03.01.2024",
-    status: "published",
-    content: "Почему шины нельзя есть..."
-  },
-  {
-    id: 5,
-    title: "Рефераты",
-    author: "Админ",
-    category: "Обучение",
-    date: "04.01.2024",
-    status: "draft",
-    content: "Как правильно писать рефераты..."
-  },
-  {
-    id: 6,
-    title: "Новая запись",
-    author: "Админ",
-    category: "Без категории",
-    date: "05.01.2024",
-    status: "published",
-    content: "Содержимое новой записи..."
-  },
-  {
-    id: 7,
-    title: "Еще одна запись",
-    author: "Админ",
-    category: "Блюда",
-    date: "06.01.2024",
-    status: "draft",
-    content: "Описание еще одной записи..."
-  },
-  {
-    id: 8,
-    title: "Последняя запись",
-    author: "Админ",
-    category: "Автомобили",
-    date: "07.01.2024",
-    status: "published",
-    content: "Финальная запись в списке..."
-  }
-];
 
 const RecordsPage = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRecords, setSelectedRecords] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [records, setRecords] = useState(mockRecords);
+  const [records, setRecords] = useState<PostsPaginationResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 6;
+
+  // Загрузка записей
+  useEffect(() => {
+    loadRecords();
+  }, [currentPage]);
+
+  const loadRecords = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getPostsPagination(currentPage, itemsPerPage);
+      setRecords(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка загрузки записей");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Фильтрация записей по поисковому запросу
   const filteredRecords = useMemo(() => {
-    if (!searchQuery) return records;
-    return records.filter(record =>
+    if (!records || !searchQuery) return records?.rows || [];
+    return records.rows.filter(record =>
       record.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.category.toLowerCase().includes(searchQuery.toLowerCase())
+      record.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.category.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, records]);
 
   // Пагинация
-  const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = records?.total_pages || 1;
+  const paginatedRecords = filteredRecords;
 
   const handleRecordSelect = (recordId: number) => {
     setSelectedRecords(prev =>
@@ -126,33 +71,39 @@ const RecordsPage = () => {
     }
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (window.confirm("Вы уверены, что хотите удалить выбранные записи?")) {
-      setRecords(prev => prev.filter(record => !selectedRecords.includes(record.id)));
-      setSelectedRecords([]);
+      try {
+        setIsLoading(true);
+        setError(null);
+        await deletePosts({ ids: selectedRecords });
+        setSelectedRecords([]);
+        await loadRecords();
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Ошибка удаления записей");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handlePublishSelected = () => {
-    setRecords(prev => 
-      prev.map(record => 
-        selectedRecords.includes(record.id) 
-          ? { ...record, status: "published" }
-          : record
-      )
-    );
-    setSelectedRecords([]);
+  const handlePublishSelected = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await publishPosts({ ids: selectedRecords });
+      setSelectedRecords([]);
+      await loadRecords();
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка публикации записей");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUnpublishSelected = () => {
-    setRecords(prev => 
-      prev.map(record => 
-        selectedRecords.includes(record.id) 
-          ? { ...record, status: "draft" }
-          : record
-      )
-    );
-    setSelectedRecords([]);
+  const handleUnpublishSelected = async () => {
+    // Для снятия с публикации нужно будет добавить отдельный API метод
+    console.log("Снятие с публикации не реализовано");
   };
 
   const handleEditRecord = (recordId: number) => {
@@ -168,11 +119,33 @@ const RecordsPage = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    return status === "published" ? "Опубликовано" : "Черновик";
+    switch (status) {
+      case "PUBLISHED":
+        return "Опубликовано";
+      case "DRAFT":
+        return "Черновик";
+      case "WAIT_FOR_PUBLISH":
+        return "Ожидает публикации";
+      default:
+        return "Неизвестно";
+    }
   };
 
   const getStatusClass = (status: string) => {
-    return status === "published" ? styles.published : styles.draft;
+    switch (status) {
+      case "PUBLISHED":
+        return styles.published;
+      case "DRAFT":
+        return styles.draft;
+      case "WAIT_FOR_PUBLISH":
+        return styles.waiting;
+      default:
+        return styles.draft;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ru-RU');
   };
 
   return (
@@ -190,6 +163,13 @@ const RecordsPage = () => {
           </Button>
         </div>
       </div>
+
+      {/* Отображение ошибок */}
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
 
       {/* Поиск */}
       <div className={styles.searchSection}>
@@ -258,45 +238,59 @@ const RecordsPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedRecords.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell>
-                  <input
-                    type="checkbox"
-                    checked={selectedRecords.includes(record.id)}
-                    onChange={() => handleRecordSelect(record.id)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className={styles.titleCell}>
-                    <span className={styles.recordTitle}>{record.title}</span>
-                  </div>
-                </TableCell>
-                <TableCell>{record.author}</TableCell>
-                <TableCell>{record.category}</TableCell>
-                <TableCell>
-                  <div className={styles.dateCell}>
-                    <Calendar size={14} />
-                    {record.date}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className={`${styles.statusBadge} ${getStatusClass(record.status)}`}>
-                    {getStatusBadge(record.status)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className={styles.rowActions}>
-                    <Button theme="mini" onClick={() => handleEditRecord(record.id)}>
-                      <Edit size={14} />
-                    </Button>
-                    <Button theme="mini" onClick={() => handleDeleteSelected()}>
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
+                  Загрузка...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : paginatedRecords.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
+                  Записи не найдены
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedRecords.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedRecords.includes(record.id)}
+                      onChange={() => handleRecordSelect(record.id)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className={styles.titleCell}>
+                      <span className={styles.recordTitle}>{record.title}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{record.user.name}</TableCell>
+                  <TableCell>{record.category.name}</TableCell>
+                  <TableCell>
+                    <div className={styles.dateCell}>
+                      <Calendar size={14} />
+                      {formatDate(record.updatedAt)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`${styles.statusBadge} ${getStatusClass(record.status || 'DRAFT')}`}>
+                      {getStatusBadge(record.status || 'DRAFT')}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className={styles.rowActions}>
+                      <Button theme="mini" onClick={() => handleEditRecord(record.id)}>
+                        <Edit size={14} />
+                      </Button>
+                      <Button theme="mini" onClick={() => handleDeleteSelected()}>
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
