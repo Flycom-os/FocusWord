@@ -1,0 +1,347 @@
+/* Основной контейнер */
+.container {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+/* Герой секция */
+.hero {
+  background: linear-gradient(135deg, #003d6c 0%, #004d8c 100%);
+  color: white;
+  padding: 80px 0;
+  display: flex;
+  align-items: center;
+  min-height: 600px;
+}
+
+.heroContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  line-height: 1.1;
+}
+
+.highlight {
+  color: #60a5fa;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.heroActions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ctaButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.secondaryButton {
+  padding: 16px 24px;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.heroImage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imagePlaceholder {
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Особенности */
+.features {
+  padding: 80px 0;
+  background: white;
+}
+
+.featuresContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.featuresTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 60px 0;
+  color: #1e293b;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.featureCard {
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #003d6c;
+}
+
+.featureIcon {
+  width: 80px;
+  height: 80px;
+  background: #003d6c;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+}
+
+.featureTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #1e293b;
+}
+
+.featureDescription {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* CTA секция */
+.cta {
+  background: #1e293b;
+  color: white;
+  padding: 80px 0;
+}
+
+.ctaContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+}
+
+.ctaSubtitle {
+  font-size: 1.25rem;
+  margin: 0 0 32px 0;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.ctaActions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaActions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* Футер */
+.footer {
+  background: #0f172a;
+  color: white;
+  padding: 40px 0;
+}
+
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.footerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+.footerText {
+  margin: 0;
+  color: #94a3b8;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .hero {
+    padding: 60px 0;
+    min-height: 500px;
+  }
+  
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.125rem;
+  }
+  
+  .heroActions {
+    justify-content: center;
+  }
+  
+  .imagePlaceholder {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .features {
+    padding: 60px 0;
+  }
+  
+  .featuresTitle {
+    font-size: 2rem;
+    margin-bottom: 40px;
+  }
+  
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .featureCard {
+    padding: 32px 20px;
+  }
+  
+  .cta {
+    padding: 60px 0;
+  }
+  
+  .ctaTitle {
+    font-size: 2rem;
+  }
+  
+  .ctaSubtitle {
+    font-size: 1.125rem;
+  }
+  
+  .ctaActions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .footerContent {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 40px 0;
+    min-height: 400px;
+  }
+  
+  .heroTitle {
+    font-size: 2rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+  
+  .ctaButton, .secondaryButton {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+  
+  .imagePlaceholder {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .features {
+    padding: 40px 0;
+  }
+  
+  .featuresTitle {
+    font-size: 1.75rem;
+  }
+  
+  .featureCard {
+    padding: 24px 16px;
+  }
+  
+  .cta {
+    padding: 40px 0;
+  }
+  
+  .ctaTitle {
+    font-size: 1.75rem;
+  }
+  
+  .ctaSubtitle {
+    font-size: 1rem;
+  }
+}
