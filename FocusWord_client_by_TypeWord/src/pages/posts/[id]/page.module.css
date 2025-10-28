@@ -1,0 +1,367 @@
+/* Основной контейнер */
+.container {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 24px;
+}
+
+/* Кнопка назад */
+.backButton {
+  max-width: 1200px;
+  margin: 0 auto 32px auto;
+}
+
+/* Заголовок поста */
+.postHeader {
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.category {
+  background: #003d6c;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date, .readingTime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.postTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.postAnnouncement {
+  font-size: 1.25rem;
+  color: #64748b;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.postAuthor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Изображение поста */
+.postImageContainer {
+  max-width: 1000px;
+  margin: 0 auto 40px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.postImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Содержимое поста */
+.postContent {
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.postText {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.postText h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 32px 0 16px 0;
+  line-height: 1.3;
+}
+
+.postText h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 28px 0 12px 0;
+  line-height: 1.4;
+}
+
+.postText h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 24px 0 8px 0;
+  line-height: 1.4;
+}
+
+.postText p {
+  margin: 0 0 16px 0;
+}
+
+.postText ul, .postText ol {
+  margin: 0 0 16px 0;
+  padding-left: 24px;
+}
+
+.postText li {
+  margin: 0 0 8px 0;
+}
+
+.postText a {
+  color: #003d6c;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.postText a:hover {
+  color: #002a4d;
+}
+
+.postText blockquote {
+  border-left: 4px solid #003d6c;
+  padding-left: 20px;
+  margin: 24px 0;
+  color: #64748b;
+  font-style: italic;
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 0 8px 8px 0;
+}
+
+.postText pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 24px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.postText code {
+  background: #f1f5f9;
+  color: #dc2626;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+.postText img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* SEO информация */
+.seoInfo {
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+  background: #f8fafc;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.seoInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.seoDescription {
+  color: #64748b;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+.seoKeywords {
+  margin: 0;
+}
+
+.keywordsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.keyword {
+  background: white;
+  color: #003d6c;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+}
+
+/* Навигация */
+.postNavigation {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Состояния загрузки и ошибок */
+.loading, .errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #003d6c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorState h2 {
+  font-size: 1.5rem;
+  color: #dc2626;
+  margin: 0 0 8px 0;
+}
+
+.errorState p {
+  color: #64748b;
+  margin: 0 0 20px 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .postHeader, .postContent {
+    padding: 24px;
+  }
+  
+  .postTitle {
+    font-size: 2rem;
+  }
+  
+  .postAnnouncement {
+    font-size: 1.125rem;
+  }
+  
+  .postMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .postText {
+    font-size: 1rem;
+  }
+  
+  .postText h1 {
+    font-size: 1.75rem;
+  }
+  
+  .postText h2 {
+    font-size: 1.375rem;
+  }
+  
+  .postText h3 {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .postHeader, .postContent {
+    padding: 20px;
+  }
+  
+  .postTitle {
+    font-size: 1.75rem;
+  }
+  
+  .postAnnouncement {
+    font-size: 1rem;
+  }
+  
+  .postText {
+    font-size: 0.875rem;
+  }
+  
+  .postText h1 {
+    font-size: 1.5rem;
+  }
+  
+  .postText h2 {
+    font-size: 1.25rem;
+  }
+  
+  .postText h3 {
+    font-size: 1.125rem;
+  }
+  
+  .keywordsList {
+    gap: 6px;
+  }
+  
+  .keyword {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+  }
+}

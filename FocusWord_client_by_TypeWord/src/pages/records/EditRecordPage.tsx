@@ -3,7 +3,7 @@
  */
 
 'use client'
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
   Bold, 
   Italic, 
@@ -22,20 +22,29 @@ import {
   Eye,
   Save
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/src/shared/ui/Button/ui-button";
 import Input from "@/src/shared/ui/Input/ui-input";
+import { createPost, savePost, getPostById, updatePostPublish, updatePostSave, deletePosts } from "@/src/shared/api/posts";
+import { CreatePostRequest, Post, SeoData } from "@/src/shared/types/posts";
 import styles from "./EditRecordPage.module.css";
 
 interface Record {
   id?: number;
   title: string;
   content: string;
+  announcement: string;
   status: "draft" | "published";
-  visibility: "public" | "private";
+  visibility: boolean;
   publishDate: string;
   template: string;
   categories: string[];
   thumbnail?: string;
+  seo: SeoData;
+  category_id?: number;
+  file_id?: number;
+  seo_preset_id?: number;
+  date_to_publish?: string;
 }
 
 const categories = [
@@ -46,26 +55,94 @@ const categories = [
 ];
 
 const EditRecordPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const postId = searchParams.get('id');
+  const isEdit = !!postId;
+
   const [record, setRecord] = useState<Record>({
     title: "",
     content: "",
+    announcement: "",
     status: "draft",
-    visibility: "public",
+    visibility: false,
     publishDate: "Сейчас",
     template: "Запись",
     categories: ["Без категории"],
-    thumbnail: undefined
+    thumbnail: undefined,
+    seo: {
+      seo_title: "",
+      seo_label: "",
+      seo_keywords: [],
+      seo_description: ""
+    },
+    category_id: 1,
+    file_id: undefined,
+    seo_preset_id: 1,
+    date_to_publish: undefined
   });
 
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Загрузка данных поста при редактировании
+  useEffect(() => {
+    if (isEdit && postId) {
+      loadPost(parseInt(postId));
+    }
+  }, [isEdit, postId]);
+
+  const loadPost = async (id: number) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const post = await getPostById(id);
+      setRecord({
+        id: post.id,
+        title: post.title,
+        content: post.text,
+        announcement: post.announcement,
+        status: post.status === 'PUBLISHED' ? 'published' : 'draft',
+        visibility: post.visibility,
+        publishDate: "Сейчас",
+        template: "Запись",
+        categories: [post.category.name],
+        thumbnail: post.image?.filepath,
+        seo: post.seo,
+        category_id: post.category.id,
+        file_id: post.image?.id,
+        seo_preset_id: 1,
+        date_to_publish: undefined
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка загрузки поста");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRecord(prev => ({ ...prev, title: e.target.value }));
   };
 
+  const handleAnnouncementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRecord(prev => ({ ...prev, announcement: e.target.value }));
+  };
+
   const handleContentChange = (e: React.ChangeEvent<HTMLDivElement>) => {
     setRecord(prev => ({ ...prev, content: e.target.innerHTML }));
+  };
+
+  const handleSeoChange = (field: keyof SeoData, value: string | string[]) => {
+    setRecord(prev => ({
+      ...prev,
+      seo: {
+        ...prev.seo,
+        [field]: value
+      }
+    }));
   };
 
   const handleCategoryToggle = (category: string) => {
@@ -88,21 +165,82 @@ const EditRecordPage = () => {
     }
   };
 
-  const handleSave = () => {
-    console.log("Сохранение записи:", record);
-    // Здесь будет логика сохранения
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const postData: CreatePostRequest = {
+        title: record.title,
+        announcement: record.announcement,
+        text: record.content,
+        visibility: record.visibility,
+        category_id: record.category_id,
+        file_id: record.file_id,
+        seo: record.seo,
+        seo_preset_id: record.seo_preset_id,
+        date_to_publish: record.date_to_publish
+      };
+
+      if (isEdit && record.id) {
+        await updatePostSave(record.id, postData);
+      } else {
+        await savePost(postData);
+      }
+      
+      router.push('/admin/records');
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка сохранения записи");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handlePublish = () => {
-    setRecord(prev => ({ ...prev, status: "published" }));
-    console.log("Публикация записи:", record);
-    // Здесь будет логика публикации
+  const handlePublish = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const postData: CreatePostRequest = {
+        title: record.title,
+        announcement: record.announcement,
+        text: record.content,
+        visibility: record.visibility,
+        category_id: record.category_id,
+        file_id: record.file_id,
+        seo: record.seo,
+        seo_preset_id: record.seo_preset_id,
+        date_to_publish: record.date_to_publish
+      };
+
+      if (isEdit && record.id) {
+        await updatePostPublish(record.id, postData);
+      } else {
+        await createPost(postData);
+      }
+      
+      router.push('/admin/records');
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка публикации записи");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (!record.id) return;
+    
     if (window.confirm("Вы уверены, что хотите удалить эту запись?")) {
-      console.log("Удаление записи");
-      // Здесь будет логика удаления
+      try {
+        setIsLoading(true);
+        setError(null);
+        await deletePosts({ ids: [record.id] });
+        router.push('/admin/records');
+      } catch (err: any) {
+        setError(err.response?.data?.message || "Ошибка удаления записи");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -140,11 +278,38 @@ const EditRecordPage = () => {
         </div>
       </div>
 
+      {/* Отображение ошибок */}
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
+
       <div className={styles.mainContent}>
         {/* Основной контент */}
         <div className={styles.editorSection}>
           <div className={styles.editorHeader}>
-            <h2 className={styles.sectionTitle}>Новая запись</h2>
+            <h2 className={styles.sectionTitle}>{isEdit ? 'Редактировать запись' : 'Новая запись'}</h2>
+          </div>
+
+          {/* Заголовок */}
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Заголовок</label>
+            <Input
+              value={record.title}
+              onChange={handleTitleChange}
+              placeholder="Введите заголовок записи"
+            />
+          </div>
+
+          {/* Анонс */}
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Анонс</label>
+            <Input
+              value={record.announcement}
+              onChange={handleAnnouncementChange}
+              placeholder="Введите анонс записи"
+            />
           </div>
 
           {/* Панель инструментов */}
@@ -311,8 +476,8 @@ const EditRecordPage = () => {
                 <label className={styles.fieldLabel}>Видимость</label>
                 <select 
                   className={styles.select}
-                  value={record.visibility}
-                  onChange={(e) => setRecord(prev => ({ ...prev, visibility: e.target.value as "public" | "private" }))}
+                  value={record.visibility ? "public" : "private"}
+                  onChange={(e) => setRecord(prev => ({ ...prev, visibility: e.target.value === "public" }))}
                 >
                   <option value="public">Открыто</option>
                   <option value="private">Закрыто</option>
@@ -344,17 +509,23 @@ const EditRecordPage = () => {
               </div>
 
               <div className={styles.actionButtons}>
-                <Button theme="warning" onClick={handleDelete}>
-                  <Trash2 size={16} />
-                  Удалить
-                </Button>
-                <Button theme="third" onClick={handlePreview}>
+                {isEdit && (
+                  <Button theme="warning" onClick={handleDelete} disabled={isLoading}>
+                    <Trash2 size={16} />
+                    Удалить
+                  </Button>
+                )}
+                <Button theme="third" onClick={handlePreview} disabled={isLoading}>
                   <Eye size={16} />
                   Просмотреть
                 </Button>
-                <Button theme="secondary" onClick={handlePublish}>
+                <Button theme="secondary" onClick={handleSave} disabled={isLoading}>
                   <Save size={16} />
-                  Опубликовать
+                  {isLoading ? 'Сохранение...' : 'Сохранить'}
+                </Button>
+                <Button theme="primary" onClick={handlePublish} disabled={isLoading}>
+                  <Save size={16} />
+                  {isLoading ? 'Публикация...' : 'Опубликовать'}
                 </Button>
               </div>
             </div>
@@ -401,6 +572,47 @@ const EditRecordPage = () => {
                 <label htmlFor="thumbnail-upload" className={styles.uploadButton}>
                   Загрузить изображение
                 </label>
+              </div>
+            </div>
+          </div>
+
+          {/* SEO */}
+          <div className={styles.sidebarSection}>
+            <h3 className={styles.sidebarTitle}>SEO</h3>
+            <div className={styles.sidebarContent}>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>SEO заголовок</label>
+                <Input
+                  value={record.seo.seo_title}
+                  onChange={(e) => handleSeoChange('seo_title', e.target.value)}
+                  placeholder="SEO заголовок"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>SEO метка</label>
+                <Input
+                  value={record.seo.seo_label}
+                  onChange={(e) => handleSeoChange('seo_label', e.target.value)}
+                  placeholder="SEO метка"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>SEO ключевые слова</label>
+                <Input
+                  value={record.seo.seo_keywords.join(', ')}
+                  onChange={(e) => handleSeoChange('seo_keywords', e.target.value.split(',').map(k => k.trim()))}
+                  placeholder="Ключевые слова через запятую"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>SEO описание</label>
+                <textarea
+                  className={styles.textarea}
+                  value={record.seo.seo_description}
+                  onChange={(e) => handleSeoChange('seo_description', e.target.value)}
+                  placeholder="SEO описание"
+                  rows={3}
+                />
               </div>
             </div>
           </div>
