@@ -1,4 +1,8 @@
 # FocusWord
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/Flycom-os/FocusWord/actions/workflows/ci.yml/badge.svg)](https://github.com/Flycom-os/FocusWord/actions/workflows/ci.yml)
+
 ![img.png](img.png)
 FocusWord is a modern, open-source content management system (CMS) based on Next.js 14, React 18, and TypeScript. The project is inspired by the flexibility of WordPress, but focuses on ease of development using modern tools and practices.
 
