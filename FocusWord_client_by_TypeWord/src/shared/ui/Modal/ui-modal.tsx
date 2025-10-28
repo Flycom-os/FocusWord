@@ -10,6 +10,7 @@ export interface ModalProps {
   className?: string;
 }
 
+
 const Modal = ({ isOpen, onClose, title, children, className }: ModalProps) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
