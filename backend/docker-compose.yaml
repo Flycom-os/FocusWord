@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db_n
+    restart: always
+    environment:
+      POSTGRES_DB: flowersShop
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nikita12345
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      retries: 5
+
+  nest_backend:
+    build: .
+    container_name: nest_backend_2
+    restart: on-failure
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:nikita12345@postgres_db:5432/flowersShop?schema=public"
+
+    ports:
+      - "3000"
+      - "3000:3000"
+    command: ["sh", "-c", "npm run start:prod"]
+
+volumes:
+  pgdata:
