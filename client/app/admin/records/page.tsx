@@ -1,3 +1,3 @@
-import RecordsPage from "@/src/pagess/records";
+import RecordsPage from "@/src/pages/records";
 
 export default RecordsPage;

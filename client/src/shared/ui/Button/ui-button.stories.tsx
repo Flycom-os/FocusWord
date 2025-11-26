@@ -14,7 +14,7 @@ const meta: Meta<typeof UiButton> = {
   argTypes: {
     theme: {
       control: { type: "select" },
-      options: ["primary", "secondary", "third", "warning", "close", "breadcrumb", "mini", ""],
+      options: ["primary", "secondary", "third", "warning", "close", "breadcrumb", "mini", "soft", ""],
     },
     onClick: { action: "clicked" }, // автоматический лог в Storybook actions tab
   },
@@ -51,5 +51,16 @@ export const WithAction: Story = {
     theme: "primary",
     children: "Click Me",
     onClick: action("Button clicked"), // лог в Storybook actions
+  },
+};
+
+export const Learn: Story = {
+  args: {
+    theme: 'soft',
+    children: (
+      <>
+        Learn About Machines <span style={{ marginLeft: 8 }}>↗</span>
+      </>
+    ),
   },
 };

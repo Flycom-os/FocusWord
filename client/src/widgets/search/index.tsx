@@ -13,6 +13,11 @@ const Search = ({ setSearchValue }: searchProps) => {
   const handleClick = () => {
     setSearchValue(searchInput);
   };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchValue(searchInput);
+    }
+  };
   return (
     <div className={styles.search}>
       <Input
@@ -21,14 +26,12 @@ const Search = ({ setSearchValue }: searchProps) => {
         theme="secondary"
         error={false}
         icon="left"
-        placeholder="Введите текст..."
+        placeholder="Search"
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
-      <div className={styles.button}>
-        <Button onClick={handleClick} theme="secondary">
-          Поиск
-        </Button>
+      <div className={styles.kbd} role="button" aria-label="Search shortcut" onClick={handleClick}>/
       </div>
     </div>
   );

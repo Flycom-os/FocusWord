@@ -1,3 +1,3 @@
-import SettingsPage from "@/src/pagess/settings";
+import SettingsPage from "@/src/pages/settings";
 
 export default SettingsPage;

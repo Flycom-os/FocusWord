@@ -1,0 +1,38 @@
+.select_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.label {
+  font-size: 13px;
+  color: #3b3b4f;
+}
+.select_box {
+  position: relative;
+  display: inline-block;
+  width: 220px;
+}
+.select {
+  width: 100%;
+  padding: 8px 36px 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d9d7e6;
+  background: white;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b6b80;
+  pointer-events: none;
+}
+.primary .select {
+  border-color: #dcd7f5;
+}
+.secondary .select {
+  border-color: #e9e6ff;
+  background: #fbf8ff;
+}

@@ -1,3 +1,3 @@
-import MediaFilesPage from "@/src/pagess/media-files";
+import MediaFilesPage from "@/src/pages/media-files";
 
 export default MediaFilesPage;

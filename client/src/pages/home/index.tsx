@@ -1,6 +1,6 @@
 'use client'
 import Input from "@/src/shared/ui/Input/ui-input";
-import styles from "@/src/pagess/home/index.module.css";
+import styles from "@/src/pages/home/index.module.css";
 import { Checkbox } from "@/src/shared/ui";
 import Search from "@/src/widgets/search";
 import { useEffect, useState } from "react";

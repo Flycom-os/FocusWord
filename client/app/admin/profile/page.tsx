@@ -1,3 +1,3 @@
-import ProfilePage from "@/src/pagess/profile";
+import ProfilePage from "@/src/pages/profile";
 
 export default ProfilePage;

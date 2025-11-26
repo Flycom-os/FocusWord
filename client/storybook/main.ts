@@ -1,39 +1,34 @@
-import { StorybookConfig } from '@storybook/react-vite';
-import * as path from "path";
+// .storybook/main.js
+const { mergeConfig } = require('vite');
+// vite-tsconfig-paths may be published as an ESM module — require(...) can return
+// an object with a `default` property. Make sure we get a callable plugin factory.
+const _tsconfigPaths = require('vite-tsconfig-paths');
+const tsconfigPaths = _tsconfigPaths && (_tsconfigPaths.default || _tsconfigPaths);
 
-
-const config: StorybookConfig = {
-  stories: ['../src/**/*.stories.@(js|jsx|ts|tsx)'],
+module.exports = {
+  stories: ['../src/**/*.stories.@(js|jsx|ts|tsx|mdx)'],
   addons: [
-    '@storybook/addon-links',
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
+    '@storybook/addon-links',
     '@storybook/nextjs',
   ],
   framework: {
     name: '@storybook/react-vite',
     options: {},
   },
-  viteFinal: (config) => {
-    if (config.resolve) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@/src': path.resolve(__dirname, '../src'), // Убедись, что алиас настроен правильно
-      };
-    }
-    
-    // Добавляем настройки для React
-    config.define = {
-      ...config.define,
-      'process.env.NODE_ENV': JSON.stringify('development'),
-      'global': 'window',
-    };
-    
-    return config;
-  },
   docs: {
     autodocs: 'tag',
   },
+  core: {
+    builder: '@storybook/builder-vite', // ЭТО ГЛАВНОЕ — принудительно включаем Vite
+  },
+  async viteFinal(config) {
+    return mergeConfig(config, {
+      plugins: [tsconfigPaths()],
+      define: {
+        global: 'window',
+      },
+    });
+  },
 };
-
-export default config;
