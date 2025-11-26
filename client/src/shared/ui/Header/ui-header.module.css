@@ -1,0 +1,30 @@
+.header {
+  background-color: #ffff;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 5px 2px 15px;
+}
+
+.header_main_nav {
+  display: flex;
+}
+
+.header_main_title {
+  padding-top: 4px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #003d6c;
+}
+
+.header_sub_title {
+  font-size: 11px;
+  font-weight: 400;
+  color: #a3a3a3;
+}
+
+.header_sub_title:hover {
+  font-weight: 400;
+  color: #003d6c;
+  cursor: pointer;
+}

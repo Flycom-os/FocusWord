@@ -1,0 +1,41 @@
+.default {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  background: white;
+  max-height: 42px;
+  font-size: 14px;
+  padding: 5px;
+  color: #003d6c;
+  gap: 10px;
+}
+.primary_or_secondary {
+  gap: 20px;
+  display: flex;
+  flex-direction: row;
+}
+.secondary_or_third {
+  display: flex;
+  gap: 10px;
+}
+.add {
+  margin-left: auto;
+}
+.text {
+  display: flex;
+  align-items: center;
+}
+.close {
+  width: 30px;
+  height: 30px;
+  background-color: #eaf5ff;
+}
+.close:hover {
+  background-color: #003d6c;
+  .x {
+    color: white;
+  }
+}
+.x {
+  color: black;
+}

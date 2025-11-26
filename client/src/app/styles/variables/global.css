@@ -1,0 +1,19 @@
+:root {
+  --font-family-main: Inter, sans-serif;
+  --font-size-m: 16px;
+  --font-line-m: 24px;
+  --font-m: var(--font-size-m) / var(--font-line-m) var(--font-family-main);
+
+  --font-size-l: 24px;
+  --font-line-l: 32px;
+  --font-l: var(--font-size-l) / var(--font-line-l) var(--font-family-main);
+
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --secondary-color: #003d6c;
+  --muted-foreground: 240 3.8% 46.1%;
+  --muted: 240 4.8% 95.9%;
+  --border: 240 5.9% 90%;
+
+  height: 100vh;
+}

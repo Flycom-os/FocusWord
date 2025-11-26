@@ -1,0 +1,35 @@
+.input {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  appearance: none;
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: all 140ms ease;
+}
+
+.input:checked {
+  background: linear-gradient(90deg,#6b49ff,#5b35ff);
+  border-color: transparent;
+}
+
+.input:checked::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 6px;
+  border: solid white;
+  border-width: 0 0 3px 3px;
+  transform: rotate(-45deg);
+}
+
+.input:focus {
+  box-shadow: 0 6px 18px rgba(91, 53, 255, 0.12);
+  border-color: rgba(91, 53, 255, 0.6);
+}

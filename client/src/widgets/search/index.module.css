@@ -1,0 +1,31 @@
+.search {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border-radius: 18px;
+  padding: 10px 10px;
+  box-shadow: 0 6px 20px rgba(33,26,43,0.06);
+  border: 1px solid #efeaf9;
+}
+.input {
+  width: 100%;
+  padding: 0px;
+  /* override Input.component visuals so the container provides the shell */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.kbd {
+  min-width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #f0e9ff;
+  background: #fbf8ff;
+  color: #6b49ff;
+  font-weight: 600;
+}
