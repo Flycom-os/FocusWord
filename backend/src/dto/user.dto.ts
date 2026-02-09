@@ -3,28 +3,15 @@ import { IsOptional, IsString, IsPhoneNumber, IsNotEmpty, IsEmail } from "class-
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UpdateUserDto {
-  @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    description: 'image balloon'
-  })
-  @IsOptional()
-  face?: string;
-  
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'golder', description:'gas golder'})
-  name?: string;
+  @ApiProperty({example:'John', description:'user first name'})
+  firstName?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'golder', description:'gas golder'})
-  surname?: string;
-
-  @IsOptional()
-  @ApiProperty({example:'golder', description:'gas golder'})
-  @IsPhoneNumber('RU') // или 'ZZ' если без проверки страны
-  phone?: string;
+  @ApiProperty({example:'Doe', description:'user last name'})
+  lastName?: string;
 
   @IsOptional()
   @IsEmail()
@@ -35,13 +22,23 @@ export class UpdateUserDto {
   @IsString()
   @ApiProperty({example:'password123', description:'user password'})
   password?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({example:'/uploads/avatar.jpg', description:'URL to user avatar'})
+  avatarUrl?: string;
 }
 
 export class SearchUsersDto {
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'John', description:'search by name', required: false})
-  name?: string;
+  @ApiProperty({example:'John', description:'search by first name', required: false})
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({example:'Doe', description:'search by last name', required: false})
+  lastName?: string;
 
   @IsOptional()
   @IsString()
@@ -53,3 +50,4 @@ export class SearchUsersDto {
   @ApiProperty({example:'10', description:'items per page', required: false})
   limit?: string;
 }
+

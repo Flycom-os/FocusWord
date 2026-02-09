@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags, ApiBody } from "@nestjs/swagger";
 import {
   Body,
   Controller, Delete, Get,
@@ -12,12 +12,15 @@ import {
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../jwt-auth.guard";
 import { GetUserId } from "../../../user/auth/get-user-id.decorator";
-import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dro";
+import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
+import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUserDto
 import { UserService } from "./user_service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname } from "node:path";
 import { Express } from "express";
+import { RequiredRoles } from "../../../common/decorators/roles.decorator"; // Import RequiredRoles
+import { RolesGuard } from "../../../common/guards/roles.guard"; // Import RolesGuard
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -25,6 +28,15 @@ import { Express } from "express";
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequiredRoles('user:create')
+  @ApiOperation({ summary: 'Создать нового пользователя (только для администраторов)' })
+  @ApiBody({ type: CreateUserDto })
+  async createUser(@Body() dto: CreateUserDto) {
+    return this.userService.createUser(dto);
+  }
 
   @Get('me')
   @ApiOperation({ summary: 'Получить информацию о текущем пользователе' })
@@ -62,7 +74,7 @@ export class UserController {
     
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
-      updatedDto.face = imagePath;
+      updatedDto.avatarUrl = imagePath;
     }
     
     return this.userService.updateUser(userId, updatedDto);
@@ -104,14 +116,16 @@ export class UserController {
     
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
-      updatedDto.face = imagePath;
+      updatedDto.avatarUrl = imagePath;
     }
     
     return this.userService.updateUser(parseInt(id), updatedDto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Удалить пользователя по ID' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequiredRoles('user:delete')
+  @ApiOperation({ summary: 'Удалить пользователя по ID (требует user:delete разрешение)' })
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(parseInt(id));
   }
