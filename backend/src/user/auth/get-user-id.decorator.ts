@@ -6,7 +6,7 @@ export const GetUserId = createParamDecorator(
     const user = request.user;
 
     if (!user || typeof user.id !== 'number') {
-      throw new Error('User ID не найден в токене');
+      throw new Error('User ID not found in token');
     }
 
     return user.id;
