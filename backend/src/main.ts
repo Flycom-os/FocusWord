@@ -11,16 +11,16 @@ async function bootstrap() {
     cors: {
       origin: [
         'http://localhost:3000',
-        'https://flowers-shop-1.vercel.app',
         'http://localhost:5173'
       ],
+      //TODO: cors for production
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },});
   const config = new DocumentBuilder()
-    .setTitle('API документация')
-    .setDescription('Описание API')
-    .setVersion('1.0')
+    .setTitle('API documentation')
+    .setDescription('API requests for FocusWord 2.0')
+    .setVersion('2.0')
     .addTag('Auth')
     .addBearerAuth()
     .build();
@@ -31,7 +31,7 @@ async function bootstrap() {
   });
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 1331, '0.0.0.0');
 }
 bootstrap();
 //TODO: USERS, ROLES, PAGES, LISTS, MEDIAFILES
