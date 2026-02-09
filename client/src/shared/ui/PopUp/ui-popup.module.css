@@ -1,0 +1,59 @@
+.wrapper {}
+.popup {
+  position: absolute;
+  z-index: 2200;
+  background: linear-gradient(180deg,#ffffff,#fbf8ff);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 30px rgba(33,26,43,0.16);
+  min-width: 120px;
+  font-size: 13px;
+  color: #241b3f;
+}
+.arrow {
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(180deg,#ffffff,#fbf8ff);
+  position: absolute;
+  transform: rotate(45deg);
+}
+.top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.top .arrow {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+.bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+.bottom .arrow {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+.left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.left .arrow {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.right .arrow {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}

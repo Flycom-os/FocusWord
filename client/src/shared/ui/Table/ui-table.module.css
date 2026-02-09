@@ -1,0 +1,59 @@
+.table_contain {
+  width: 100%;
+  overflow: auto;
+  position: relative;
+}
+.table {
+  width: 100%;
+  caption-side: bottom;
+  font-size: 14px;
+  border-collapse: collapse;
+}
+.table_header {
+  border-bottom: 1px solid hsl(var(--border));
+}
+.table_body tr:last-child {
+  border: 0;
+}
+.table_footer {
+  border-top: 1px hsl(var(--border)) solid;
+  background-color: hsl(var(--muted) / 0.5);
+  font-weight: 500;
+}
+.table_footer tr:last-child {
+  border-top-width: 0;
+}
+.table_row {
+  border-bottom: hsl(var(--border)) solid 1px;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.table_row:hover {
+  background-color: hsl(var(--muted) / 0.5);
+}
+.table_row[state="selected"] {
+  background-color: hsl(var(--muted));
+}
+.table_row:last-child {
+  border-bottom: 0;
+}
+.table_head {
+  height: 48px;
+  padding-left: 16px;
+  padding-right: 16px;
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.table_head:has([role="checkbox"]) {
+  padding-right: 0;
+}
+.table_cell {
+  padding: 16px;
+  vertical-align: middle;
+}
+.table_cell:has([role="checkbox"]) {
+  padding-right: 0;
+}

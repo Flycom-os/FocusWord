@@ -1,0 +1,32 @@
+.player {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  background: linear-gradient(180deg,#fff,#faf7ff);
+  border: 1px solid #e8e6ff;
+}
+.play {
+  border: none;
+  background: linear-gradient(90deg,#6b49ff,#5b35ff);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.progressWrap {
+  width: 220px;
+  height: 8px;
+  background: #efeaf9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.progress {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#6b49ff,#5b35ff);
+}
+.secondary .play {
+  background: linear-gradient(90deg,#a3a0ff,#d6ccff);
+}
