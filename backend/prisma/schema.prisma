@@ -1,186 +1,369 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:nikita12345@postgres_db:5432/flowersShop?schema=public"
-  // url      = "postgresql://postgres:nikita12345@localhost:5432/flowersShop?schema=public"
-}
-
-model Address {
-  id           Int    @id @default(autoincrement()) @map("_id")
-  address      String
-  date_created String
-  date_updated String
-  User         User?  @relation(fields: [userId], references: [id])
-  userId       Int?
-}
-
-model Promocodes {
-  id           Int    @id @default(autoincrement()) @map("_id")
-  address      String
-  date_expired String
-  date_created String
-  date_updated String
+  // url      = "postgresql://postgres:nikita12345@postgres_db:5432/focusWord?schema=public"
+  url      = "postgresql://postgres:nikita12345@localhost:5432/focusWord?schema=public"
 }
 
 model User {
-  id             Int        @id @default(autoincrement()) @map("_id")
-  permission     Int        @default(0)
-  email          String     @unique
-  name           String?    @default("")
-  surname        String?    @default("")
-  phone          String     @unique
-  cart           Cart[]
-  history_orders Order[]
-  password       String
-  comments       comments[]
-  address        Address[]
-  face           String?
-  date_created   String
-  date_updated   String
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  username  String?   @unique
+  firstName String?
+  lastName  String?
+  phone     String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+
+  avatarUrl String?
+
+  role   Role? @relation(fields: [roleId], references: [id])
+  roleId Int?
+
+  posts        Post[]
+  pages        Page[]
+  mediaFiles   MediaFile[]
+  comments     Comment[]
+  activityLogs ActivityLog[]
 }
 
-model Cart {
-  id            Int                         @id @default(autoincrement()) @map("_id")
-  date          String
-  status        String
-  date_delivery String
-  count_product Int
-  product       CartandAndOrdersOnProduct[]
-  date_updated  String
-  User          User?                       @relation(fields: [userId], references: [id])
-  userId        Int?
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
 }
 
-model CartandAndOrdersOnProduct {
-  id Int @id @default(autoincrement()) @map("_id")
+model MediaFile {
+  id         Int      @id @default(autoincrement())
+  filename   String
+  filepath   String   @unique
+  mimetype   String
+  fileSize   Int
+  altText    String?
+  caption    String?
+  uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  date_created String
-  date_updated String
-  Cart         Cart?    @relation(fields: [cartId], references: [id])
-  cartId       Int?
-  Order        Order?   @relation(fields: [orderId], references: [id])
-  orderId      Int?
-  Product      Product? @relation(fields: [productId], references: [id])
-  productId    Int?
+  uploadedBy   User? @relation(fields: [uploadedById], references: [id])
+  uploadedById Int?
+
+  isImage Boolean @default(false)
+  isVideo Boolean @default(false)
+  isAudio Boolean @default(false)
+
+  thumbnailUrl String?
+  duration     Int?
+  width        Int?
+  height       Int?
+
+  featuredImageOfPosts Post[]  @relation("FeaturedImageOfPost")
+  featuredImageOfPages Page[]  @relation("FeaturedImageOfPage")
+  slideImage           Slide[]
 }
 
-model Shops {
-  id           Int        @id @default(autoincrement()) @map("_id")
-  locate       String
-  name         String
-  abount       String
-  stats        Int
-  comments     comments[]
-  date_created String
-  date_updated String
+model Page {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  status      String    @default("draft")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  parentPage   Page?  @relation("PageHierarchy", fields: [parentPageId], references: [id])
+  parentPageId Int?
+  childPages   Page[] @relation("PageHierarchy")
+
+  template String @default("default")
+
+  featuredImage   MediaFile? @relation("FeaturedImageOfPage", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
+
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+  menuItems      MenuItem[] @relation("MenuItemPage")
+
+  analyticsEntries AnalyticsEntry[] @relation("PageAnalytics")
+  structuredData   StructuredData[] @relation("PageStructuredData")
 }
 
-model Order {
-  id            Int                         @id @default(autoincrement()) @map("_id")
-  date          String
-  status        String
-  date_delivery String
-  address       String
-  total_service String
-  count_product Int
-  product       CartandAndOrdersOnProduct[]
-  date_created  String
-  date_updated  String
-  User          User?                       @relation(fields: [userId], references: [id])
-  userId        Int?
-}
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String?
+  status      String    @default("draft")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
 
-model Flowers {
-  id            Int              @id @default(autoincrement()) @map("_id")
-  name          String
-  date_created  String
-  date_updated  String
-  flowerConnect FlowersProduct[]
-}
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
 
-model FlowersProduct {
-  id           Int      @id @default(autoincrement()) @map("_id")
-  name         String
-  date_created String
-  date_updated String
-  Flowers      Flowers? @relation(fields: [flowersId], references: [id])
-  flowersId    Int?
-  Product      Product? @relation(fields: [productId], references: [id])
-  productId    Int?
-}
+  categories Category[] @relation("PostCategories")
+  tags       Tag[]      @relation("PostTags")
 
-model ProductSize {
-  id           Int    @id @default(autoincrement()) @map("_id")
-  name         String
-  size         Int
-  date_created String
-  date_updated String
+  featuredImage   MediaFile? @relation("FeaturedImageOfPost", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
 
-  Product SizesProduct[]
-}
+  comments Comment[]
 
-model SizesProduct {
-  id Int @id @default(autoincrement()) @map("_id")
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+  menuItems      MenuItem[] @relation("MenuItemPost")
 
-  date_created  String
-  date_updated  String
-  ProductSize   ProductSize? @relation(fields: [productSizeId], references: [id])
-  productSizeId Int?
-  Product       Product?     @relation(fields: [productId], references: [id])
-  productId     Int?
+  analyticsEntries AnalyticsEntry[] @relation("PostAnalytics")
+  structuredData   StructuredData[] @relation("PostStructuredData")
 }
 
 model Category {
-  id           Int       @id @default(autoincrement()) @map("_id")
-  name         String
-  icon         String
-  Product      Product[]
-  date_created String
-  date_updated String
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts Post[] @relation("PostCategories")
+
+  parentCategory   Category?  @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
+  parentCategoryId Int?
+  childCategories  Category[] @relation("CategoryHierarchy")
+
+  menuItems MenuItem[] @relation("MenuItemCategory")
 }
 
-model Product {
-  id           Int                         @id @default(autoincrement()) @map("_id")
-  image        String
-  name         String
-  color        String
-  sizes        SizesProduct[]
-  volume       String
-  amount       Int
-  flowers      FlowersProduct[]
-  count        Int
-  quantity     Int
-  total_count  Int
-  date_created String
-  comments     comments[]
-  date_updated String
-  actions      CartandAndOrdersOnProduct[]
+model Tag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  Category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
+  posts Post[] @relation("PostTags")
 }
 
-model comments {
-  id           Int      @id @default(autoincrement()) @map("_id")
-  name         String
-  description  String
-  image        String
-  about        String
-  date_created String
-  date_updated String
-  Shops        Shops?   @relation(fields: [shopsId], references: [id])
-  shopsId      Int?
-  User         User?    @relation(fields: [userId], references: [id])
-  userId       Int?
-  Product      Product? @relation(fields: [productId], references: [id])
-  productId    Int?
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    String   @default("pending")
+
+  authorName  String?
+  authorEmail String?
+  author      User?   @relation(fields: [authorId], references: [id])
+  authorId    Int?
+
+  post   Post? @relation(fields: [postId], references: [id])
+  postId Int?
+
+  parentComment   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  parentCommentId Int?
+  childComments   Comment[] @relation("CommentReplies")
+}
+
+model Slider {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  slides Slide[]
+}
+
+model Slide {
+  id          Int      @id @default(autoincrement())
+  title       String?
+  description String?
+  linkUrl     String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  image   MediaFile? @relation(fields: [imageId], references: [id])
+  imageId Int?
+
+  slider   Slider? @relation(fields: [sliderId], references: [id])
+  sliderId Int?
+}
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Redirect {
+  id          Int      @id @default(autoincrement())
+  sourceUrl   String   @unique
+  targetUrl   String
+  statusCode  Int      @default(301)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Menu {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items MenuItem[]
+}
+
+model MenuItem {
+  id        Int     @id @default(autoincrement())
+  title     String
+  url       String?
+  sortOrder Int     @default(0)
+  type      String  @default("custom")
+  cssClass  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menu   Menu? @relation(fields: [menuId], references: [id])
+  menuId Int?
+
+  parentMenuItem   MenuItem?  @relation("SubMenuItems", fields: [parentMenuItemId], references: [id])
+  parentMenuItemId Int?
+  subMenuItems     MenuItem[] @relation("SubMenuItems")
+
+  relatedPage       Page?     @relation("MenuItemPage", fields: [relatedPageId], references: [id])
+  relatedPageId     Int?
+  relatedPost       Post?     @relation("MenuItemPost", fields: [relatedPostId], references: [id])
+  relatedPostId     Int?
+  relatedCategory   Category? @relation("MenuItemCategory", fields: [relatedCategoryId], references: [id])
+  relatedCategoryId Int?
+}
+
+model PaymentGateway {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  slug         String   @unique
+  description  String?
+  isEnabled    Boolean  @default(false)
+  settings     Json?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  paymentMethods PaymentMethod[]
+}
+
+model PaymentMethod {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isEnabled   Boolean  @default(false)
+  type        String   @default("card")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gateway          PaymentGateway? @relation(fields: [paymentGatewayId], references: [id])
+  paymentGatewayId Int?
+}
+
+model AnalyticsEntry {
+  id            Int      @id @default(autoincrement())
+  date          DateTime @default(now()) @db.Date
+  totalViews    Int      @default(0)
+  uniqueViews   Int      @default(0)
+  bounceRate    Float?
+  avgTimeOnPage Int?
+
+  page   Page? @relation("PageAnalytics", fields: [pageId], references: [id])
+  pageId Int?
+  post   Post? @relation("PostAnalytics", fields: [postId], references: [id])
+  postId Int?
+
+  referrers ReferrerDetail[]
+}
+
+model ReferrerDetail {
+  id          Int    @id @default(autoincrement())
+  referrerUrl String
+  count       Int    @default(0)
+
+  analyticsEntry   AnalyticsEntry? @relation(fields: [analyticsEntryId], references: [id])
+  analyticsEntryId Int?
+}
+
+model SEOSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String?
+  type        String   @default("string")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StructuredData {
+  id        Int      @id @default(autoincrement())
+  type      String
+  jsonLd    Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page   Page? @relation("PageStructuredData", fields: [pageId], references: [id])
+  pageId Int?
+  post   Post? @relation("PostStructuredData", fields: [postId], references: [id])
+  postId Int?
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  action     String
+  entityType String?
+  entityId   Int?
+  details    Json?
+  timestamp  DateTime @default(now())
+  ipAddress  String?
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+model Block {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  type        String
+  content     Json
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

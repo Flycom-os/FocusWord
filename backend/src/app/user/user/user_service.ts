@@ -1,75 +1,39 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject } from "@nestjs/common";
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dro";
+import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma:PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
   
   async getUserInfo(userId: number) {
+    const cacheKey = `user_${userId}`;
+    const cachedUser = await this.cacheManager.get(cacheKey);
+
+    if (cachedUser) {
+      return cachedUser;
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        cart: {
-          include: {
-            product: {
-              include: {
-                Product: {
-                  include: {
-                    Category: true,
-                    sizes: {
-                      include: {
-                        ProductSize: true
-                      }
-                    },
-                    flowers: {
-                      include: {
-                        Flowers: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        history_orders: {
-          include: {
-            product: {
-              include: {
-                Product: {
-                  include: {
-                    Category: true,
-                    sizes: {
-                      include: {
-                        ProductSize: true
-                      }
-                    },
-                    flowers: {
-                      include: {
-                        Flowers: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         comments: {
           include: {
-            Product: true,
-            Shops: true
           }
         },
-        address: true
+        role: true,
       },
     });
 
     if (!user) throw new NotFoundException('Пользователь не найден');
 
-    // Не возвращаем пароль
     const { password, ...safeUser } = user;
+    await this.cacheManager.set(cacheKey, safeUser);
     return safeUser;
   }
 
@@ -77,67 +41,24 @@ export class UserService {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
-        ...dto,
-        date_updated: new Date().toISOString(),
+        email: dto.email,
+        password: dto.password,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        updatedAt: new Date(),
       },
       include: {
-        cart: {
-          include: {
-            product: {
-              include: {
-                Product: {
-                  include: {
-                    Category: true,
-                    sizes: {
-                      include: {
-                        ProductSize: true
-                      }
-                    },
-                    flowers: {
-                      include: {
-                        Flowers: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        history_orders: {
-          include: {
-            product: {
-              include: {
-                Product: {
-                  include: {
-                    Category: true,
-                    sizes: {
-                      include: {
-                        ProductSize: true
-                      }
-                    },
-                    flowers: {
-                      include: {
-                        Flowers: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
         comments: {
           include: {
-            Product: true,
-            Shops: true
+            // Removed Product: true, Shops: true as they are not valid relations for comments
           }
         },
-        address: true
+        role: true, // Assuming Role is a direct relation as per schema.prisma
       },
     });
 
     const { password, ...safeUser } = user;
+    await this.cacheManager.del(`user_${userId}`); // Invalidate cache
     return safeUser;
   }
 
@@ -145,19 +66,21 @@ export class UserService {
     await this.prisma.user.delete({
       where: { id: userId },
     });
+    await this.cacheManager.del(`user_${userId}`); // Invalidate cache
 
     return { message: 'Пользователь успешно удалён' };
   }
 
   async getAllUsers(searchDto: SearchUsersDto) {
-    const { name, page = '0', limit = '10' } = searchDto;
+    const { lastName, page = '0', limit = '10' } = searchDto;
     const skip = parseInt(page) * parseInt(limit);
     const take = parseInt(limit);
+    const name = lastName ;
 
     const where = name ? {
       OR: [
-        { name: { contains: name, mode: 'insensitive' as const } },
-        { surname: { contains: name, mode: 'insensitive' as const } },
+        { firstName: { contains: name, mode: 'insensitive' as const } },
+        { lastName: { contains: name, mode: 'insensitive' as const } },
         { email: { contains: name, mode: 'insensitive' as const } }
       ]
     } : {};
@@ -167,13 +90,7 @@ export class UserService {
         where,
         skip,
         take,
-        include: {
-          cart: true,
-          history_orders: true,
-          comments: true,
-          address: true
-        },
-        orderBy: { date_created: 'desc' }
+        orderBy: { createdAt: 'desc' }
       }),
       this.prisma.user.count({ where })
     ]);

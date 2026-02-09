@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../jwt-auth.guard";
 import { GetUserId } from "../../../user/auth/get-user-id.decorator";
-import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dro";
+import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
 import { UserService } from "./user_service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -62,7 +62,7 @@ export class UserController {
     
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
-      updatedDto.face = imagePath;
+      updatedDto.avatarUrl = imagePath;
     }
     
     return this.userService.updateUser(userId, updatedDto);
@@ -104,7 +104,7 @@ export class UserController {
     
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
-      updatedDto.face = imagePath;
+      updatedDto.avatarUrl = imagePath;
     }
     
     return this.userService.updateUser(parseInt(id), updatedDto);
