@@ -1,6 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject, BadRequestException } from "@nestjs/common";
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
+import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUserDto
+import * as bcrypt from 'bcrypt'; // Import bcrypt
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 
@@ -69,6 +71,45 @@ export class UserService {
     await this.cacheManager.del(`user_${userId}`); // Invalidate cache
 
     return { message: 'Пользователь успешно удалён' };
+  }
+
+  async createUser(dto: CreateUserDto) {
+    const userExists = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (userExists) {
+      throw new BadRequestException('Email is already in use');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    let roleId: number | undefined;
+    if (dto.roleName) {
+      const role = await this.prisma.role.findUnique({
+        where: { name: dto.roleName },
+      });
+      if (!role) {
+        throw new NotFoundException(`Role with name ${dto.roleName} not found`);
+      }
+      roleId = role.id;
+    }
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: hashedPassword,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        roleId: roleId,
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 
   async getAllUsers(searchDto: SearchUsersDto) {

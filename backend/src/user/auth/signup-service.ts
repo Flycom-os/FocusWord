@@ -36,20 +36,43 @@ export class AuthService {
   async signIn(identifer:string, password:string) {
 
     const user = await this.prisma.user.findFirst({
-      where: { OR:[{email:identifer}] },
-    })
-    if(!user){
-      throw new UnauthorizedException('User not found')
+      where: { OR: [{ email: identifer }] },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            permissions: true,
+          },
+        },
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if(!isPasswordValid){
-      throw new UnauthorizedException('password is incorrect')
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('password is incorrect');
     }
 
-    const access_token = this.jwtService.sign({id:user.id, email:user.email, role:user.roleId, firstName:user.firstName, lastName:user.lastName, username:user.username},
-      {expiresIn: '15h'});
-    const refreash_token = this.jwtService.sign({id:user.id, email:user.email, role:user.roleId, firstName:user.firstName, lastName:user.lastName, username:user.username},
-      {expiresIn: '15d'});
+    // Ensure user.role is not null before accessing its properties
+    const userRole = user.role ? {
+      id: user.role.id,
+      name: user.role.name,
+      permissions: user.role.permissions,
+    } : undefined;
+
+    const access_token_payload = {
+      id: user.id,
+      email: user.email,
+      role: userRole, // Include the full role object or undefined
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+    };
+
+    const access_token = this.jwtService.sign(access_token_payload, { expiresIn: '15h' });
+    const refreash_token = this.jwtService.sign(access_token_payload, { expiresIn: '15d' });
 
     return { message: 'Authorization success', user: user, access_token: access_token, refreash_token: refreash_token };
   }
