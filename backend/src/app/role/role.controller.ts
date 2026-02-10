@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { RoleService } from './role.service'; // Adjust path as necessary
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from "../../jwt-auth.guard";
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateRoleDto } from "../../dto/roles/create-role.dto";
 import { UpdateRoleDto } from "../../dto/roles/update-role.dto";
+import { SearchRolesDto } from "../../dto/roles/search-roles.dto";
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -21,8 +22,8 @@ export class RoleController {
 
   @Get()
   @Roles('roles:0') // Read access (level 0) required for viewing all roles
-  findAll() {
-    return this.roleService.findAll();
+  findAll(@Query() searchDto: SearchRolesDto) {
+    return this.roleService.findAll(searchDto);
   }
 
   @Get(':id')

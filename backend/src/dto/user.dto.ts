@@ -1,6 +1,6 @@
-// dto/update-user.dto.ts
-import { IsOptional, IsString, IsPhoneNumber, IsNotEmpty, IsEmail } from "class-validator";
+import { IsOptional, IsString, IsPhoneNumber, IsNotEmpty, IsEmail, IsEnum, IsInt, Min, Max } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { SearchQueryDto, SortOrder } from "./common/search-query.dto";
 
 export class UpdateUserDto {
   @IsOptional()
@@ -30,6 +30,54 @@ export class UpdateUserDto {
 }
 
 export class SearchUsersDto {
+  @ApiProperty({
+    description: 'Search term to filter results across relevant fields',
+    required: false,
+    example: 'admin',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty({
+    description: 'Field to sort the results by',
+    required: false,
+    example: 'createdAt',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @ApiProperty({
+    description: 'Sort order (asc or desc)',
+    required: false,
+    enum: SortOrder,
+    example: SortOrder.DESC,
+  })
+  @IsOptional()
+  @IsEnum(SortOrder)
+  sortOrder?: SortOrder;
+
+  @ApiProperty({
+    description: 'Page number for pagination',
+    required: false,
+    default: 1,
+    example: 1,
+  })
+  @IsInt()
+  @Min(1)
+  page: number = 1;
+
+  @ApiProperty({
+    description: 'Number of items per page for pagination',
+    required: false,
+    default: 10,
+    example: 10,
+  })
+  @IsInt()
+  @Min(1)
+  @Max(100) // Assuming a reasonable max limit
+  limit: number = 10;
   @IsOptional()
   @IsString()
   @ApiProperty({example:'John', description:'search by first name', required: false})
@@ -39,15 +87,5 @@ export class SearchUsersDto {
   @IsString()
   @ApiProperty({example:'Doe', description:'search by last name', required: false})
   lastName?: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({example:'0', description:'page number', required: false})
-  page?: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({example:'10', description:'items per page', required: false})
-  limit?: string;
 }
 

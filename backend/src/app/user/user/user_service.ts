@@ -5,6 +5,7 @@ import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUs
 import * as bcrypt from 'bcrypt'; // Import bcrypt
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -113,27 +114,41 @@ export class UserService {
   }
 
   async getAllUsers(searchDto: SearchUsersDto) {
-    const { lastName, page = '0', limit = '10' } = searchDto;
-    const skip = parseInt(page) * parseInt(limit);
-    const take = parseInt(limit);
-    const name = lastName ;
+    const { search, sortBy, sortOrder, page, limit } = searchDto;
 
-    const where = name ? {
-      OR: [
-        { firstName: { contains: name, mode: 'insensitive' as const } },
-        { lastName: { contains: name, mode: 'insensitive' as const } },
-        { email: { contains: name, mode: 'insensitive' as const } }
-      ]
-    } : {};
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { username: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        {
+          role: {
+            name: { contains: search, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
+
+    const orderBy: Prisma.UserOrderByWithRelationInput = sortBy
+      ? { [sortBy]: sortOrder }
+      : { createdAt: 'desc' }; // Default sort
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
         skip,
-        take,
-        orderBy: { createdAt: 'desc' }
+        take: Number( limit),
+        orderBy,
+        include: {
+          role: true, // Include role for searching and for response
+        },
       }),
-      this.prisma.user.count({ where })
+      this.prisma.user.count({ where }),
     ]);
 
     // Убираем пароли из всех пользователей
@@ -142,9 +157,9 @@ export class UserService {
     return {
       users: safeUsers,
       total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages: Math.ceil(total / parseInt(limit))
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 }
