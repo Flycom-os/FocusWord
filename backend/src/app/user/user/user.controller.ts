@@ -19,19 +19,18 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { extname } from "node:path";
 import { Express } from "express";
-import { RequiredRoles } from "../../../common/decorators/roles.decorator"; // Import RequiredRoles
-import { RolesGuard } from "../../../common/guards/roles.guard"; // Import RolesGuard
+import { Roles } from "../../common/decorators/roles.decorator";
+import { UsersGuard } from "../../../common/guards/users.guard"; // Import RolesGuard
 
 @ApiTags('User')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, UsersGuard) // Apply both guards at the controller level
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequiredRoles('user:create')
+  @Roles('users:2') // Full access (level 2) required for creating users
   @ApiOperation({ summary: 'Создать нового пользователя (только для администраторов)' })
   @ApiBody({ type: CreateUserDto })
   async createUser(@Body() dto: CreateUserDto) {
@@ -39,18 +38,21 @@ export class UserController {
   }
 
   @Get('me')
+  @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
   @ApiOperation({ summary: 'Получить информацию о текущем пользователе' })
   getMe(@GetUserId() userId: number) {
     return this.userService.getUserInfo(userId);
   }
 
   @Get('all')
+  @Roles('users:0') // Read access (level 0) required for viewing all users
   @ApiOperation({ summary: 'Получить всех пользователей с поиском' })
   getAllUsers(@Query() searchDto: SearchUsersDto) {
     return this.userService.getAllUsers(searchDto);
   }
 
   @Patch('me')
+  @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
   @ApiOperation({ summary: 'Обновить данные текущего пользователя' })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
@@ -81,18 +83,21 @@ export class UserController {
   }
 
   @Delete('me')
+  @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
   @ApiOperation({ summary: 'Удалить текущего пользователя' })
   deleteMe(@GetUserId() userId: number) {
     return this.userService.deleteUser(userId);
   }
 
   @Get(':id')
+  @Roles('users:0') // Read access (level 0) required for viewing a user by ID
   @ApiOperation({ summary: 'Получить пользователя по ID' })
   getUserById(@Param('id') id: string) {
     return this.userService.getUserInfo(parseInt(id));
   }
 
   @Patch(':id')
+  @Roles('users:1') // Read/Update access (level 1) required for updating users
   @ApiOperation({ summary: 'Обновить пользователя по ID' })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
@@ -123,8 +128,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @RequiredRoles('user:delete')
+  @Roles('users:2') // Full access (level 2) required for deleting users
   @ApiOperation({ summary: 'Удалить пользователя по ID (требует user:delete разрешение)' })
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(parseInt(id));

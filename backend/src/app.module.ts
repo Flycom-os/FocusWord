@@ -6,6 +6,7 @@ import { AppService } from "./app.service";
 import { UserModule } from "./app/user/user.module";
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from './redis/redis.module';
+import { RoleModule } from './app/role/role.module'; // Import RoleModule
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RedisModule } from './redis/redis.module';
     // ShopsModule,
     // ProductModule,
     UserModule,
+    RoleModule, // Add RoleModule here
     // CartModule,
     // OrdersModule,
     // AddressModule

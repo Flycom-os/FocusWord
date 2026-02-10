@@ -3,12 +3,12 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt'; // Import JwtService
 
 @Injectable()
-export class RolesGuard implements CanActivate {
+export class UsersGuard implements CanActivate {
   constructor(private reflector: Reflector, private jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
     // Get the required levels from the @Roles decorator
-    const requiredLevels = this.reflector.get<number[]>('roles', context.getHandler());
+    const requiredLevels = this.reflector.get<number[]>('users', context.getHandler());
 
     if (!requiredLevels || requiredLevels.length === 0) {
       return true; // No roles specified, so allow access
@@ -22,7 +22,7 @@ export class RolesGuard implements CanActivate {
     }
 
     // Assume the resource is 'roles' for now, given the context of the problem
-    const resource = 'roles'; // This needs to be dynamic in a real-world scenario
+    const resource = 'users'; // This needs to be dynamic in a real-world scenario
 
     // Find the user's permission level for the specified resource
     let userLevelForResource: number | undefined;
