@@ -1,27 +1,36 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject, BadRequestException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject, BadRequestException, Logger } from "@nestjs/common";
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
 import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUserDto
 import * as bcrypt from 'bcrypt'; // Import bcrypt
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Cache } from 'cache-manager'; // Keep Cache import for type if needed, but won't be used for injection
 import { Prisma } from '@prisma/client';
+import { REDIS_CLIENT } from '../../../redis/redis.module'; // Import our custom REDIS_CLIENT token
+import IORedis from 'ioredis'; // Import IORedis for type hinting
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     private prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    @Inject(REDIS_CLIENT) private readonly redisClient: IORedis, // Inject our custom Redis client
+  ) {
+    // This log is no longer relevant for the in-memory cache, but will remain for clarity on the change
+    this.logger.log('UserService is now using direct IORedis client.');
+  }
   
   async getUserInfo(userId: number) {
     const cacheKey = `user_${userId}`;
-    const cachedUser = await this.cacheManager.get(cacheKey);
+    this.logger.log(`[GET] Checking Redis for key: ${cacheKey}`);
+    const cachedUser = await this.redisClient.get(cacheKey);
 
     if (cachedUser) {
-      return cachedUser;
+      this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
+      return JSON.parse(cachedUser); // Parse the stored string back to an object
     }
 
+    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -36,7 +45,9 @@ export class UserService {
     if (!user) throw new NotFoundException('Пользователь не найден');
 
     const { password, ...safeUser } = user;
-    await this.cacheManager.set(cacheKey, safeUser);
+    this.logger.log(`[SET] Setting Redis cache for key: ${cacheKey}`);
+    // Stringify the object before storing, and set a TTL (e.g., 3600 seconds)
+    await this.redisClient.set(cacheKey, JSON.stringify(safeUser), 'EX', 3600);
     return safeUser;
   }
 
@@ -61,7 +72,10 @@ export class UserService {
     });
 
     const { password, ...safeUser } = user;
-    await this.cacheManager.del(`user_${userId}`); // Invalidate cache
+    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: user_${userId}`);
+    await this.redisClient.del(`user_${userId}`); // Invalidate cache
+    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: users`);
+    await this.redisClient.del('users');
     return safeUser;
   }
 
@@ -69,7 +83,10 @@ export class UserService {
     await this.prisma.user.delete({
       where: { id: userId },
     });
-    await this.cacheManager.del(`user_${userId}`); // Invalidate cache
+    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: user_${userId}`);
+    await this.redisClient.del(`user_${userId}`); // Invalidate cache
+    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: users`);
+    await this.redisClient.del('users');
 
     return { message: 'Пользователь успешно удалён' };
   }
@@ -108,12 +125,24 @@ export class UserService {
         role: true,
       },
     });
+    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: users`);
+    await this.redisClient.del('users');
 
     const { password, ...safeUser } = user;
     return safeUser;
   }
 
   async getAllUsers(searchDto: SearchUsersDto) {
+    const cacheKey = `users_${JSON.stringify(searchDto)}`;
+    this.logger.log(`[GET] Checking Redis cache for key: ${cacheKey}`);
+    const cachedUsers = await this.redisClient.get(cacheKey);
+
+    if (cachedUsers) {
+      this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
+      return JSON.parse(cachedUsers); // Parse the stored string back to an object
+    }
+
+    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { search, sortBy, sortOrder, page, limit } = searchDto;
 
     const skip = (page - 1) * limit;
@@ -142,7 +171,7 @@ export class UserService {
       this.prisma.user.findMany({
         where,
         skip,
-        take: Number( limit),
+        take: Number(limit),
         orderBy,
         include: {
           role: true, // Include role for searching and for response
@@ -154,12 +183,15 @@ export class UserService {
     // Убираем пароли из всех пользователей
     const safeUsers = users.map(({ password, ...user }) => user);
 
-    return {
+    const result = {
       users: safeUsers,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     };
+    this.logger.log(`[SET] Setting Redis cache for key: ${cacheKey}`);
+    await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600); // Stringify and set TTL
+    return result;
   }
 }

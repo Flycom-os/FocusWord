@@ -14,22 +14,15 @@ import { SlidersModule } from "./app/sliders/sliders.module"; // Import RoleModu
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule available everywhere
+      isGlobal: true,
     }),
     RedisModule,
     AuthModule,
-    // PromocodesModule,
-    // FlowersModule,
-    // ShopsModule,
-    // ProductModule,
     UserModule,
-    RoleModule, // Add RoleModule here
-    PagesModule, // Add PagesModule here
-    MediafilesModule, // Add MediafilesModule here
-    SlidersModule, // Add SlidersModule here
-    // CartModule,
-    // OrdersModule,
-    // AddressModule
+    RoleModule,
+    PagesModule,
+    MediafilesModule,
+    SlidersModule
   ],
   controllers: [AppController],
   providers: [PrismaService, AppService],
