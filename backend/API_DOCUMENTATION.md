@@ -28,7 +28,6 @@ Content-Type: multipart/form-data
 {
   "name": "Новое имя",
   "surname": "Новая фамилия",
-  "phone": "+7900123456",
   "email": "new@example.com",
   "face": <файл изображения>
 }

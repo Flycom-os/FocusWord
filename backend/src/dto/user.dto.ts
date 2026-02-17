@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsPhoneNumber, IsNotEmpty, IsEmail, IsEnum, IsInt, Min, Max } from "class-validator";
+import { IsOptional, IsString, IsNotEmpty, IsEmail, IsEnum, IsInt, Min, Max } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { SearchQueryDto, SortOrder } from "./common/search-query.dto";
 

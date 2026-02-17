@@ -9,6 +9,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { RegisterDto } from '../../dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
     // 1. Check if any roles exist in the database
     const roleCount = await this.prisma.role.count();
 
-    let assignedRole: any | null = null; // Changed from Role to any to match Prisma's return type for role
+    let assignedRole: Role | null = null;
 
     if (roleCount === 0) {
       // First registration: Create Admin role if it doesn't exist, and assign it

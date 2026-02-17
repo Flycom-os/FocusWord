@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsInt, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { SwaggerSchemaProperty } from '../../../common/interfaces/swagger-schema-property.interface';
 
 export class CreateMediaFileDto {
   @ApiProperty({ description: 'The original filename of the media file' })
@@ -64,7 +65,7 @@ export class CreateMediaFileDto {
   height?: number;
 
   // Static property for Swagger schema when used with ApiFileWithBody
-  static swaggerSchema: Record<string, any> = {
+  static swaggerSchema: Record<string, SwaggerSchemaProperty> = {
     altText: { type: 'string', required: false, description: 'Alternative text for the media file' },
     caption: { type: 'string', required: false, description: 'Caption for the media file' },
   };

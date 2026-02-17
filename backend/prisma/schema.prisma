@@ -15,7 +15,6 @@ model User {
   username  String?   @unique
   firstName String?
   lastName  String?
-  phone     String?   @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   lastLogin DateTime?

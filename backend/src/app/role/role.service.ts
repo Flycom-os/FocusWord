@@ -4,8 +4,8 @@ import { CreateRoleDto } from "../../dto/roles/create-role.dto";
 import { UpdateRoleDto } from "../../dto/roles/update-role.dto";
 import { SearchRolesDto } from "../../dto/roles/search-roles.dto";
 import { Prisma } from '@prisma/client';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import IORedis from 'ioredis';
+import { REDIS_CLIENT } from "../../redis/redis.module";
 
 @Injectable()
 export class RoleService {
@@ -13,7 +13,7 @@ export class RoleService {
 
   constructor(
     private prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
   ) {}
 
   async create(createRoleDto: CreateRoleDto) {
@@ -21,18 +21,21 @@ export class RoleService {
       data: createRoleDto,
     });
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'roles'`);
-    await this.cacheManager.del('roles'); // Invalidate the cache for all roles
+    const keys = await this.redisClient.keys('roles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
     return newRole;
   }
 
   async findAll(searchDto: SearchRolesDto) {
     const cacheKey = `roles_${JSON.stringify(searchDto)}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
-    const cachedRoles = await this.cacheManager.get(cacheKey);
+    const cachedRoles = await this.redisClient.get(cacheKey);
 
     if (cachedRoles) {
       this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
-      return cachedRoles;
+      return JSON.parse(cachedRoles);
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
@@ -71,18 +74,18 @@ export class RoleService {
       totalPages: Math.ceil(total / limit),
     };
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
-    await this.cacheManager.set(cacheKey, result);
+    await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);
     return result;
   }
 
   async findOne(id: number) {
     const cacheKey = `role_${id}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
-    const cachedRole = await this.cacheManager.get(cacheKey);
+    const cachedRole = await this.redisClient.get(cacheKey);
 
     if (cachedRole) {
       this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
-      return cachedRole;
+      return JSON.parse(cachedRole);
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
@@ -93,7 +96,7 @@ export class RoleService {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
-    await this.cacheManager.set(cacheKey, role);
+    await this.redisClient.set(cacheKey, JSON.stringify(role), 'EX', 3600);
     return role;
   }
 
@@ -106,9 +109,12 @@ export class RoleService {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: role_${id}`);
-    await this.cacheManager.del(`role_${id}`); // Invalidate single role cache
+    await this.redisClient.del(`role_${id}`); // Invalidate single role cache
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'roles'`);
-    await this.cacheManager.del('roles'); // Invalidate all roles cache
+    const keys = await this.redisClient.keys('roles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
     return role;
   }
 
@@ -120,9 +126,12 @@ export class RoleService {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: role_${id}`);
-    await this.cacheManager.del(`role_${id}`); // Invalidate single role cache
+    await this.redisClient.del(`role_${id}`); // Invalidate single role cache
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'roles'`);
-    await this.cacheManager.del('roles'); // Invalidate all roles cache
+    const keys = await this.redisClient.keys('roles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
     return role;
   }
 }

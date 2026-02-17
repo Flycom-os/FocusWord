@@ -16,7 +16,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT'; // Token for our custom provider
         const logger = new Logger('RedisModule');
         const host = configService.get<string>('REDIS_HOST') || 'localhost';
         const port = parseInt(
-          configService.get<string>('REDIS_PORT') || '6380',
+          configService.get<string>('REDIS_PORT') || '6379',
           10,
         );
         const ttl = configService.get<number>('CACHE_TTL') || 3600;
@@ -50,7 +50,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT'; // Token for our custom provider
         const logger = new Logger('RedisModule');
         const host = configService.get<string>('REDIS_HOST') || 'localhost';
         const port = parseInt(
-          configService.get<string>('REDIS_PORT') || '6380',
+          configService.get<string>('REDIS_PORT') || '6379',
           10,
         );
         logger.log(`Attempting to connect to direct IORedis client at host: ${host}, port: ${port}`);

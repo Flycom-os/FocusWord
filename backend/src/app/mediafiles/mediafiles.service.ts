@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { MediaFile } from '@prisma/client';
+import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateMediaFileDto } from '../dto/mediafiles/create-media-file.dto';
 import { UpdateMediaFileDto } from '../dto/mediafiles/update-media-file.dto';
-import { QueryMediaFileDto, SortOrder } from '../dto/mediafiles/query-media-file.dto'; // Import QueryMediaFileDto and SortOrder
+import { QueryMediaFileDto, SortOrder } from '../dto/mediafiles/query-media-file.dto';
+import IORedis from 'ioredis';
+import { REDIS_CLIENT } from "../../redis/redis.module";
+import { Prisma, MediaFile } from '@prisma/client';
 
 export interface PaginatedMediaFiles {
   data: MediaFile[];
@@ -14,17 +16,38 @@ export interface PaginatedMediaFiles {
 
 @Injectable()
 export class MediafilesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(MediafilesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
+  ) {}
 
   async create(data: CreateMediaFileDto): Promise<MediaFile> {
-    return this.prisma.mediaFile.create({ data });
+    const newMediaFile = await this.prisma.mediaFile.create({ data });
+    this.logger.log(`[INVALIDATE] Deleting cache for key: 'mediafiles'`);
+    const keys = await this.redisClient.keys('mediafiles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
+    return newMediaFile;
   }
 
   async findAll(query: QueryMediaFileDto): Promise<PaginatedMediaFiles> {
+    const cacheKey = `mediafiles_${JSON.stringify(query)}`;
+    this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
+    const cachedMediaFiles = await this.redisClient.get(cacheKey);
+
+    if (cachedMediaFiles) {
+      this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
+      return JSON.parse(cachedMediaFiles);
+    }
+
+    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { page = 1, limit = 10, search, mimetype, isImage, isVideo, isAudio, sortBy, sortOrder } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.MediaFileWhereInput = {};
     if (search) {
       where.OR = [
         { filename: { contains: search, mode: 'insensitive' } },
@@ -45,7 +68,7 @@ export class MediafilesService {
       where.isAudio = isAudio;
     }
 
-    const orderBy: any = {};
+    const orderBy: Prisma.MediaFileOrderByWithRelationInput = {};
     if (sortBy) {
         orderBy[sortBy] = sortOrder || SortOrder.DESC;
     } else {
@@ -62,19 +85,36 @@ export class MediafilesService {
       this.prisma.mediaFile.count({ where }),
     ]);
 
-    return {
+    const result = {
       data,
       total,
       page,
       limit,
     };
+
+    this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
+    await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);
+    return result;
   }
 
   async findOne(id: number): Promise<MediaFile> {
+    const cacheKey = `mediafile_${id}`;
+    this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
+    const cachedMediaFile = await this.redisClient.get(cacheKey);
+
+    if (cachedMediaFile) {
+      this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
+      return JSON.parse(cachedMediaFile);
+    }
+
+    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const mediaFile = await this.prisma.mediaFile.findUnique({ where: { id } });
     if (!mediaFile) {
       throw new NotFoundException(`MediaFile with ID ${id} not found`);
     }
+
+    this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
+    await this.redisClient.set(cacheKey, JSON.stringify(mediaFile), 'EX', 3600);
     return mediaFile;
   }
 
@@ -86,6 +126,13 @@ export class MediafilesService {
     if (!mediaFile) {
         throw new NotFoundException(`MediaFile with ID ${id} not found`);
     }
+    this.logger.log(`[INVALIDATE] Deleting cache for key: mediafile_${id}`);
+    await this.redisClient.del(`mediafile_${id}`);
+    this.logger.log(`[INVALIDATE] Deleting cache for key: 'mediafiles'`);
+    const keys = await this.redisClient.keys('mediafiles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
     return mediaFile;
   }
 
@@ -93,6 +140,13 @@ export class MediafilesService {
     const mediaFile = await this.prisma.mediaFile.delete({ where: { id } });
     if (!mediaFile) {
         throw new NotFoundException(`MediaFile with ID ${id} not found`);
+    }
+    this.logger.log(`[INVALIDATE] Deleting cache for key: mediafile_${id}`);
+    await this.redisClient.del(`mediafile_${id}`);
+    this.logger.log(`[INVALIDATE] Deleting cache for key: 'mediafiles'`);
+    const keys = await this.redisClient.keys('mediafiles_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
     }
     return mediaFile;
   }

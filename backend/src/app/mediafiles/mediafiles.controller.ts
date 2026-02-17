@@ -7,21 +7,21 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Response } from 'express';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger'; // Added ApiQuery
-import { MediafilesGuard } from "../common/guards/mediafiles.guard"; // Corrected path
-import { MediafilesAccess } from "../common/decorators/mediafiles.decorator"; // Corrected path
-import { ApiFileWithBody } from "../common/decorators/api-file.decorator"; // Corrected path
-import { QueryMediaFileDto } from '../dto/mediafiles/query-media-file.dto'; // Import QueryMediaFileDto
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiFileWithBody } from "../common/decorators/api-file.decorator";
+import { QueryMediaFileDto } from '../dto/mediafiles/query-media-file.dto';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { HasPermission } from '../../common/decorators/has-permission.decorator';
 
 @ApiBearerAuth()
 @ApiTags('mediafiles')
-@UseGuards(JwtAuthGuard, MediafilesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('mediafiles')
 export class MediafilesController {
   constructor(private readonly mediafilesService: MediafilesService) {}
 
   @Post('upload')
-  @MediafilesAccess(2)
+  @HasPermission('mediafiles:2')
   @ApiOperation({ summary: 'Upload a new media file' })
   @ApiFileWithBody('file', CreateMediaFileDto)
   @ApiResponse({ status: 201, description: 'The media file has been successfully uploaded.' })
@@ -35,7 +35,7 @@ export class MediafilesController {
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
             .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
+          cb(null, `${extname(file.originalname)}${randomName}`);
         },
       }),
     }),
@@ -60,7 +60,7 @@ export class MediafilesController {
   }
 
   @Get('file/:filename')
-  @MediafilesAccess(0)
+  @HasPermission('mediafiles:0')
   @ApiOperation({ summary: 'Serve a media file by filename' })
   @ApiResponse({ status: 200, description: 'The media file.' })
   @ApiResponse({ status: 404, description: 'File not found.' })
@@ -69,7 +69,7 @@ export class MediafilesController {
   }
 
   @Get()
-  @MediafilesAccess(0)
+  @HasPermission('mediafiles:0')
   @ApiOperation({ summary: 'Retrieve all media files with pagination and filtering' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
@@ -85,7 +85,7 @@ export class MediafilesController {
     description: 'Paginated list of media files.',
     schema: {
       properties: {
-        data: { type: 'array', items: { '$ref': '#/components/schemas/MediaFile' } }, // Assuming MediaFile is defined in global schema
+        data: { type: 'array', items: { '$ref': '#/components/schemas/MediaFile' } },
         total: { type: 'number' },
         page: { type: 'number' },
         limit: { type: 'number' },
@@ -98,7 +98,7 @@ export class MediafilesController {
   }
 
   @Get(':id')
-  @MediafilesAccess(0)
+  @HasPermission('mediafiles:0')
   @ApiOperation({ summary: 'Retrieve a single media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })
@@ -108,7 +108,7 @@ export class MediafilesController {
   }
 
   @Patch(':id')
-  @MediafilesAccess(1)
+  @HasPermission('mediafiles:1')
   @ApiOperation({ summary: 'Update a media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })
@@ -118,7 +118,7 @@ export class MediafilesController {
   }
 
   @Delete(':id')
-  @MediafilesAccess(2)
+  @HasPermission('mediafiles:2')
   @ApiOperation({ summary: 'Delete a media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })

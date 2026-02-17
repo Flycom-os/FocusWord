@@ -1,0 +1,69 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search {
+  max-width: 320px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.headerRow {
+  display: grid;
+  grid-template-columns: 2fr 2fr 3fr 1.5fr;
+  background: #f9fafb;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #111827;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 3fr 1.5fr;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-top: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.description {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.actionsCol {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input {
+  width: 100%;
+}
+

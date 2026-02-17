@@ -7,20 +7,19 @@ import { UpdateSlideDto } from '../dto/sliders/update-slide.dto';
 import { QuerySliderDto } from '../dto/sliders/query-slider.dto';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
-import { SlidersGuard } from '../common/guards/sliders.guard'; // Corrected path
-import { SlidersAccess } from '../common/decorators/sliders.decorator'; // Corrected path
-import { Slider, Slide } from '@prisma/client'; // Import Prisma models for response types
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { HasPermission } from '../../common/decorators/has-permission.decorator';
 
 @ApiBearerAuth()
 @ApiTags('sliders')
-@UseGuards(JwtAuthGuard, SlidersGuard) // Apply both JWT and Sliders guards
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('sliders')
 export class SlidersController {
   constructor(private readonly slidersService: SlidersService) {}
 
   // Slider endpoints
   @Post()
-  @SlidersAccess(2) // Requires sliders:2 for creation
+  @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Create a new slider' })
   @ApiResponse({ status: 201, description: 'The slider has been successfully created.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
@@ -29,7 +28,7 @@ export class SlidersController {
   }
 
   @Get()
-  @SlidersAccess(0) // Requires sliders:0 for listing
+  @HasPermission('sliders:0')
   @ApiOperation({ summary: 'Retrieve all sliders with pagination and filtering' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
@@ -54,7 +53,7 @@ export class SlidersController {
   }
 
   @Get(':id')
-  @SlidersAccess(0) // Requires sliders:0 for getting by ID
+  @HasPermission('sliders:0')
   @ApiOperation({ summary: 'Retrieve a single slider by ID' })
   @ApiResponse({ status: 200, description: 'The slider.' })
   @ApiResponse({ status: 404, description: 'Slider not found.' })
@@ -64,7 +63,7 @@ export class SlidersController {
   }
 
   @Patch(':id')
-  @SlidersAccess(1) // Requires sliders:1 for updating
+  @HasPermission('sliders:1')
   @ApiOperation({ summary: 'Update a slider by ID' })
   @ApiResponse({ status: 200, description: 'The slider has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Slider not found.' })
@@ -74,7 +73,7 @@ export class SlidersController {
   }
 
   @Delete(':id')
-  @SlidersAccess(2) // Requires sliders:2 for deletion
+  @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Delete a slider by ID' })
   @ApiResponse({ status: 200, description: 'The slider has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Slider not found.' })
@@ -85,7 +84,7 @@ export class SlidersController {
 
   // Slide endpoints for a specific slider
   @Post(':sliderId/slides')
-  @SlidersAccess(2) // Requires sliders:2 for creation
+  @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Create a new slide for a specific slider' })
   @ApiResponse({ status: 201, description: 'The slide has been successfully created.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
@@ -94,7 +93,7 @@ export class SlidersController {
   }
 
   @Get(':sliderId/slides')
-  @SlidersAccess(0) // Requires sliders:0 for listing
+  @HasPermission('sliders:0')
   @ApiOperation({ summary: 'Retrieve all slides for a specific slider with pagination and filtering' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
@@ -119,7 +118,7 @@ export class SlidersController {
   }
 
   @Get(':sliderId/slides/:slideId')
-  @SlidersAccess(0) // Requires sliders:0 for getting by ID
+  @HasPermission('sliders:0')
   @ApiOperation({ summary: 'Retrieve a single slide by ID for a specific slider' })
   @ApiResponse({ status: 200, description: 'The slide.' })
   @ApiResponse({ status: 404, description: 'Slide not found.' })
@@ -129,7 +128,7 @@ export class SlidersController {
   }
 
   @Patch(':sliderId/slides/:slideId')
-  @SlidersAccess(1) // Requires sliders:1 for updating
+  @HasPermission('sliders:1')
   @ApiOperation({ summary: 'Update a slide by ID for a specific slider' })
   @ApiResponse({ status: 200, description: 'The slide has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Slide not found.' })
@@ -139,7 +138,7 @@ export class SlidersController {
   }
 
   @Delete(':sliderId/slides/:slideId')
-  @SlidersAccess(2) // Requires sliders:2 for deletion
+  @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Delete a slide by ID for a specific slider' })
   @ApiResponse({ status: 200, description: 'The slide has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Slide not found.' })

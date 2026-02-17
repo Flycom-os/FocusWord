@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { RequestWithUser } from './common/interfaces/request-with-user.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const user = this.jwtService.verify(token, { secret: process.env.JWT_SECRET || 'kkll' });
-      (request as any).user = user as any;
+      (request as RequestWithUser).user = user;
       return true;
     } catch (error) {
       if (error.name === 'TokenExpiredError') {

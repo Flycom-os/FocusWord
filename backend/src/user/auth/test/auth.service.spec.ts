@@ -42,7 +42,6 @@ describe('Authenticate User Controller', () => {
       name: 'Test',
       surname: "tt",
       permission:1,
-      phone: '+1234567890',
     });
 
     expect(result).toEqual({ message: 'Регистрация успешна', user:{id:1}});
@@ -59,7 +58,6 @@ describe('Authenticate User Controller', () => {
         surname: "tt",
         permission:1,
         name: 'Test',
-        phone: '+1234567890',
       }),
     ).rejects.toThrow(BadRequestException);
   });
