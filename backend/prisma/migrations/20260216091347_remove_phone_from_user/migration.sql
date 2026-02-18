@@ -9,6 +9,7 @@ CREATE TABLE "public"."User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "lastLogin" TIMESTAMP(3),
+    "avatarUrl" TEXT,
     "roleId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")

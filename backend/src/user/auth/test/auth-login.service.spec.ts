@@ -32,7 +32,6 @@ describe('AuthService = Login', () => {
     prisma.user.findFirst = jest.fn().mockResolvedValue({
       id: 12,
       email: 'newuuser@example.com',
-      phone: '+1244567890',
       password: await bcrypt.hash('mypassword', 10),
     });
 
@@ -54,7 +53,6 @@ describe('AuthService = Login', () => {
     prisma.user.findFirst = jest.fn().mockResolvedValue({
       id: 1,
       email: 'test@example.com',
-      phone: '+1234567890',
       password: await bcrypt.hash('mypassword', 10),
     });
 

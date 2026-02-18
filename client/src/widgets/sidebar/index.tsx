@@ -17,6 +17,7 @@ import logo from "@/src/public/logo.svg"
 import logosmall from "@/src/public/small-log.svg"
 import Image from "next/image"
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/app/providers/auth-provider";
 
 const menuItems = [
   { icon: <Home size={24} />, label: "Home", url: "/admin/" },
@@ -32,6 +33,17 @@ const menuItems = [
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
+  const { hasPermission, logout } = useAuth();
+
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.label === "Users") {
+      return hasPermission("users", 0);
+    }
+    if (item.label === "Settings") {
+      return hasPermission("pages", 0) || hasPermission("sliders", 0) || hasPermission("mediafiles", 0);
+    }
+    return true;
+  });
 
   return (
     <aside className={collapsed ? styles.sidebarCollapsed : styles.sidebar}>
@@ -40,7 +52,7 @@ const Sidebar = () => {
       </div>
       <nav>
         <ul className={styles.menu}>
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <li
               key={item.label}
               className={styles.menuItem + ' ' + (collapsed ? styles.menuItemCollapsed : '')}
@@ -59,6 +71,14 @@ const Sidebar = () => {
               )}
             </li>
           ))}
+          <li
+            className={styles.menuItem + ' ' + (collapsed ? styles.menuItemCollapsed : '')}
+            onClick={() => logout()}
+            style={{ cursor: 'pointer' }}
+          >
+            <span className={styles.icon}>⎋</span>
+            <span className={collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent}>Logout</span>
+          </li>
           <li className={styles.menuItem + ' ' + (collapsed ? styles.menuItemCollapsed : '')} onClick={() => setCollapsed(v => !v)} style={{ cursor: 'pointer' }}>
             <span className={styles.icon}>{collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}</span>
             <span className={collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent}>{collapsed ? "Show" : "Hide"}</span>
