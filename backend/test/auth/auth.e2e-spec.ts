@@ -33,7 +33,6 @@ describe('Auth (E2E)', () => {
       .post('/auth/register')
       .send({
         email: 'newuuser@example.com',
-        phone: '+1244567890',
         password: 'mypassword',
         name: 'NewUser',
       })

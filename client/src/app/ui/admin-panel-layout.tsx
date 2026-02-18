@@ -1,4 +1,5 @@
 import SideBar from "@/src/widgets/sidebar/index"
+import { ProtectedRoute } from "@/src/app/providers/protected-route";
 
 const AdminLayout = ({
                        children,
@@ -6,12 +7,12 @@ const AdminLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <div className="admin-layout" style={{display:'flex'}}>
-      <SideBar/>
-      <main className="admin-content">
-        {children}
-      </main>
-    </div>
+    <ProtectedRoute>
+      <div className="admin-layout" style={{ display: "flex" }}>
+        <SideBar />
+        <main className="admin-content">{children}</main>
+      </div>
+    </ProtectedRoute>
   );
 };
 

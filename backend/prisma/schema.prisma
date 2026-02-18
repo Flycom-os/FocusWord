@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = "postgresql://postgres:nikita12345@postgres_db:5432/focusWord?schema=public"
+  // url      = env("DATABASE_URL")
   url      = "postgresql://postgres:nikita12345@localhost:5432/focusWord?schema=public"
 }
 
@@ -15,7 +15,6 @@ model User {
   username  String?   @unique
   firstName String?
   lastName  String?
-  phone     String?   @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   lastLogin DateTime?
