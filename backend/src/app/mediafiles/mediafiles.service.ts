@@ -44,7 +44,13 @@ export class MediafilesService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const { page = 1, limit = 10, search, mimetype, isImage, isVideo, isAudio, sortBy, sortOrder } = query;
+    const { page = 1, limit = 10, search, mimetype, sortBy, sortOrder } = query;
+    // @ts-ignore
+    const isImage = query.isImage === 'true' ? true : query.isImage === 'false' ? false : undefined;
+    // @ts-ignore
+    const isVideo = query.isVideo === 'true' ? true : query.isVideo === 'false' ? false : undefined;
+    // @ts-ignore
+    const isAudio = query.isAudio === 'true' ? true : query.isAudio === 'false' ? false : undefined;
     const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
     const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
     const skip = (pageNum - 1) * limitNum;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/src/app/providers/auth-provider';
 import {
   fetchMediaFiles,
@@ -10,18 +10,46 @@ import {
   MediaFilesQuery,
 } from '@/src/shared/api/mediafiles';
 import { showToast, Notifications, UiButton } from '@/src/shared/ui';
+import { useDebounce } from '@/src/shared/hooks/use-debounce';
 
 const MediaFilesPage = () => {
   const { accessToken } = useAuth();
   const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState<MediaFilesQuery>({ page: 1, limit: 20 });
+  const [filters, setFilters] = useState({
+    search: '',
+    isImage: false,
+    isVideo: false,
+    isAudio: false,
+  });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+  });
+
+  const debouncedSearch = useDebounce(filters.search, 500);
+
+  const query = useMemo(() => {
+    const q: MediaFilesQuery = { ...pagination };
+    if (debouncedSearch) {
+      q.search = debouncedSearch;
+    }
+    if (filters.isImage) {
+      q.isImage = true;
+    } else if (filters.isVideo) {
+      q.isVideo = true;
+    } else if (filters.isAudio) {
+      q.isAudio = true;
+    }
+    return q;
+  }, [pagination, debouncedSearch, filters]);
 
   const loadMedia = async () => {
     setIsLoading(true);
     try {
       const res = await fetchMediaFiles(accessToken, query);
       setMediaFiles(res.data);
+      // It's a good practice to also update total pages for pagination controls
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Failed to load media files';
       showToast({ type: 'error', message });
@@ -32,7 +60,33 @@ const MediaFilesPage = () => {
 
   useEffect(() => {
     loadMedia();
-  }, [accessToken, query]);
+  }, [query, accessToken]);
+
+  const handleFilterChange = (name: keyof typeof filters, value: any) => {
+    setFilters((prev) => {
+      const newFilters = { ...prev, [name]: value };
+      if (name === 'isImage' && value) {
+        newFilters.isVideo = false;
+        newFilters.isAudio = false;
+      } else if (name === 'isVideo' && value) {
+        newFilters.isImage = false;
+        newFilters.isAudio = false;
+      } else if (name === 'isAudio' && value) {
+        newFilters.isImage = false;
+        newFilters.isVideo = false;
+      }
+      return newFilters;
+    });
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      isImage: false,
+      isVideo: false,
+      isAudio: false,
+    });
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
@@ -72,16 +126,48 @@ const MediaFilesPage = () => {
     <div style={{ padding: '24px' }}>
       <Notifications />
       <h1>Media Files</h1>
-      <div style={{ marginBottom: '16px' }}>
-        <UiButton theme="primary" >
-            <label htmlFor="upload-button">Upload File</label>
-        </UiButton>
+      <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
         <input
-          id="upload-button"
-          type="file"
-          onChange={handleUpload}
-          style={{ display: 'none' }}
+          type="text"
+          placeholder="Search by filename..."
+          value={filters.search}
+          onChange={(e) => handleFilterChange('search', e.target.value)}
+          style={{ padding: '8px', width: '300px' }}
         />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            id="isImage"
+            checked={filters.isImage}
+            onChange={(e) => handleFilterChange('isImage', e.target.checked)}
+          />
+          <label htmlFor="isImage">Images only</label>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            id="isVideo"
+            checked={filters.isVideo}
+            onChange={(e) => handleFilterChange('isVideo', e.target.checked)}
+          />
+          <label htmlFor="isVideo">Videos only</label>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="checkbox"
+            id="isAudio"
+            checked={filters.isAudio}
+            onChange={(e) => handleFilterChange('isAudio', e.target.checked)}
+          />
+          <label htmlFor="isAudio">Audio only</label>
+        </div>
+        <UiButton theme="secondary" onClick={clearFilters}>
+          Clear Filters
+        </UiButton>
+        <UiButton theme="primary">
+          <label htmlFor="upload-button">Upload File</label>
+        </UiButton>
+        <input id="upload-button" type="file" onChange={handleUpload} style={{ display: 'none' }} />
       </div>
       {isLoading ? (
         <p>Loading...</p>
