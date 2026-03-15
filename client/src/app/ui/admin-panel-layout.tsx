@@ -1,5 +1,8 @@
 import SideBar from "@/src/widgets/sidebar/index"
 import { ProtectedRoute } from "@/src/app/providers/protected-route";
+import styles from "./admin-panel-layout.module.css";
+import { Header } from "@/src/app/ui/header";
+import React from "react";
 
 const AdminLayout = ({
                        children,
@@ -8,9 +11,9 @@ const AdminLayout = ({
 }>) => {
   return (
     <ProtectedRoute>
-      <div className="admin-layout" style={{ display: "flex" }}>
+      <div className={styles.adminLayout}>
         <SideBar />
-        <main className="admin-content">{children}</main>
+        <main className={styles.adminContent}>  <Header />{children}</main>
       </div>
     </ProtectedRoute>
   );

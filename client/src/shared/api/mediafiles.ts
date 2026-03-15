@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AuthUser } from "@/src/shared/types/auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 export interface MediaFileDto {
   id: number;
@@ -34,6 +34,7 @@ export interface MediaFilesQuery {
   isImage?: boolean;
   isVideo?: boolean;
   isAudio?: boolean;
+  uploadedById?: number; // Add this line
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
