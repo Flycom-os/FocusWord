@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AuthResponse } from "@/src/shared/types/auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 export interface LoginPayload {
   identifier: string;

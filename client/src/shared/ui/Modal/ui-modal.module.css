@@ -10,10 +10,14 @@
 .modal {
   width: 680px;
   max-width: 92%;
+  height: 80vw;
+  max-height: 80vh;
   background: linear-gradient(180deg, #ffffff 0%, #fbf8ff 100%);
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(33, 26, 43, 0.2);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .header {
   display: flex;
@@ -35,4 +39,7 @@
 }
 .content {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }

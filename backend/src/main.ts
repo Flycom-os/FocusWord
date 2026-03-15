@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as express from 'express';
 import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -29,6 +30,16 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
+  // Статическая раздача файлов из backend/uploads
+  app.useStaticAssets(join(process.cwd(), 'backend', 'uploads'), {
+    prefix: '/backend/uploads',
+  });
+
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+  }));
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ?? 1331, '0.0.0.0');
