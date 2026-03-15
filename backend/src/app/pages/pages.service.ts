@@ -44,7 +44,9 @@ export class PagesService {
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { search, status, authorId, page = 1, limit = 10 } = filterDto;
-    const skip = (page - 1) * limit;
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.PageWhereInput = {};
 
@@ -64,7 +66,7 @@ export class PagesService {
     const pages = await this.prisma.page.findMany({
       where,
       skip,
-      take: limit,
+      take: limitNum,
       orderBy: { createdAt: 'desc' },
     });
 

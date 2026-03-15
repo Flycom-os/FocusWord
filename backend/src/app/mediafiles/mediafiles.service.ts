@@ -45,7 +45,9 @@ export class MediafilesService {
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { page = 1, limit = 10, search, mimetype, isImage, isVideo, isAudio, sortBy, sortOrder } = query;
-    const skip = (page - 1) * limit;
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.MediaFileWhereInput = {};
     if (search) {
@@ -79,7 +81,7 @@ export class MediafilesService {
       this.prisma.mediaFile.findMany({
         where,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy,
       }),
       this.prisma.mediaFile.count({ where }),
@@ -88,8 +90,8 @@ export class MediafilesService {
     const result = {
       data,
       total,
-      page,
-      limit,
+      page: pageNum,
+      limit: limitNum,
     };
 
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);

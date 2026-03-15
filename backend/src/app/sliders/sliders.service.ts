@@ -54,7 +54,9 @@ export class SlidersService {
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { page = 1, limit = 10, search, sortBy, sortOrder } = query;
-    const skip = (page - 1) * limit;
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.SliderWhereInput = {};
     if (search) {
@@ -75,7 +77,7 @@ export class SlidersService {
       this.prisma.slider.findMany({
         where,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy,
       }),
       this.prisma.slider.count({ where }),
@@ -84,8 +86,8 @@ export class SlidersService {
     const result = {
       data,
       total,
-      page,
-      limit,
+      page: pageNum,
+      limit: limitNum,
     };
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
     await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);
@@ -184,7 +186,9 @@ export class SlidersService {
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
     const { page = 1, limit = 10, search, sortBy, sortOrder } = query;
-    const skip = (page - 1) * limit;
+    const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
+    const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+    const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.SlideWhereInput = {
       sliderId,
@@ -207,7 +211,7 @@ export class SlidersService {
       this.prisma.slide.findMany({
         where,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy,
       }),
       this.prisma.slide.count({ where }),
@@ -216,8 +220,8 @@ export class SlidersService {
     const result = {
       data,
       total,
-      page,
-      limit,
+      page: pageNum,
+      limit: limitNum,
     };
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
     await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);

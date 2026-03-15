@@ -1,4 +1,5 @@
 import { IsOptional, IsInt, Min, Max, IsString, IsBoolean, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 // Enum for sorting direction
@@ -15,6 +16,7 @@ export class QueryMediaFileDto {
     minimum: 1,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
@@ -27,6 +29,7 @@ export class QueryMediaFileDto {
     maximum: 100,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)

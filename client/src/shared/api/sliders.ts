@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 export interface SliderDto {
   id: number;
@@ -19,6 +19,11 @@ export interface SlideDto {
   sortOrder: number;
   sliderId: number;
   imageId?: number | null;
+  image?: {
+    id: number;
+    filename: string;
+    filepath: string;
+  } | null;
 }
 
 export interface PaginatedSlidersResponse {
@@ -101,6 +106,43 @@ export const deleteSlide = async (token: string | null, sliderId: number, slideI
   await axios.delete(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, {
     headers: authHeaders(token),
   });
+};
+
+export const updateSlider = async (
+  token: string | null,
+  id: number,
+  payload: Partial<{ name: string; slug: string; description?: string }>,
+): Promise<SliderDto> => {
+  const { data } = await axios.patch<SliderDto>(`${API_URL}/sliders/${id}`, payload, {
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const getSlider = async (token: string | null, id: number): Promise<SliderDto> => {
+  const { data } = await axios.get<SliderDto>(`${API_URL}/sliders/${id}`, {
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const updateSlide = async (
+  token: string | null,
+  sliderId: number,
+  slideId: number,
+  payload: Partial<{ title?: string; description?: string; linkUrl?: string; sortOrder?: number; imageId?: number }>,
+): Promise<SlideDto> => {
+  const { data } = await axios.patch<SlideDto>(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, payload, {
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const getSlide = async (token: string | null, sliderId: number, slideId: number): Promise<SlideDto> => {
+  const { data } = await axios.get<SlideDto>(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, {
+    headers: authHeaders(token),
+  });
+  return data;
 };
 
 

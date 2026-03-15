@@ -12,6 +12,7 @@ import { ApiFileWithBody } from "../common/decorators/api-file.decorator";
 import { QueryMediaFileDto } from '../dto/mediafiles/query-media-file.dto';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiBearerAuth()
 @ApiTags('mediafiles')
@@ -31,11 +32,13 @@ export class MediafilesController {
       storage: diskStorage({
         destination: './backend/uploads',
         filename: (req, file, cb) => {
+          // Генерируем уникальное имя для сохранения на диске
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
             .join('');
-          cb(null, `${extname(file.originalname)}${randomName}`);
+          const fileExt = extname(file.originalname);
+          cb(null, `${randomName}${fileExt}`);
         },
       }),
     }),
@@ -44,9 +47,13 @@ export class MediafilesController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createMediafileDto: CreateMediaFileDto,
   ) {
+    // Формируем полный URL для доступа к файлу
+    const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331';
+    const fileUrl = `${API_URL}/backend/uploads/${file.filename}`;
+    
     const newMediaFile = {
-      filename: file.filename,
-      filepath: file.path,
+      filename: file.originalname, // Сохраняем оригинальное имя файла
+      filepath: fileUrl, // Сохраняем полный URL
       mimetype: file.mimetype,
       fileSize: file.size,
       altText: createMediafileDto.altText,
@@ -60,8 +67,8 @@ export class MediafilesController {
   }
 
   @Get('file/:filename')
-  @HasPermission('mediafiles:0')
-  @ApiOperation({ summary: 'Serve a media file by filename' })
+  @Public()
+  @ApiOperation({ summary: 'Serve a media file by filename (public, no auth required)' })
   @ApiResponse({ status: 200, description: 'The media file.' })
   @ApiResponse({ status: 404, description: 'File not found.' })
   async getFile(@Param('filename') filename: string, @Res() res: Response) {

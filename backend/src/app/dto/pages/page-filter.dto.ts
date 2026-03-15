@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 
 
 export class PageFilterDto {
@@ -14,14 +15,16 @@ export class PageFilterDto {
   @IsOptional()
   authorId?: number; // Filter by author
 
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  @IsOptional()
   page?: number = 1; // Current page number for pagination
 
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
-  @IsOptional()
   limit?: number = 10; // Number of items per page
 }

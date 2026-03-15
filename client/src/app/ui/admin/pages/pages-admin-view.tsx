@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * @page Records
+ * @page Pages
  */
 
 import { useEffect, useMemo, useState } from "react";
 import BlockManagement from "@/src/widgets/block_management";
-import styles from "@/src/pages/records/index.module.css";
+import styles from "./pages-admin-view.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import {
   fetchPages,
@@ -49,14 +49,14 @@ const defaultMediaQuery: MediaFilesQuery = {
   sortOrder: "desc",
 };
 
-const RecordsPage = () => {
+const PagesPage = () => {
   const { accessToken } = useAuth();
   const [query, setQuery] = useState<PagesQuery>(defaultQuery);
-  const [records, setRecords] = useState<PageDto[]>([]);
+  const [pages, setPages] = useState<PageDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<PageDto | null>(null);
+  const [editingPage, setEditingPage] = useState<PageDto | null>(null);
   const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
   const [mediaTotal, setMediaTotal] = useState(0);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
@@ -76,10 +76,10 @@ const RecordsPage = () => {
       setIsLoading(true);
       try {
         const res = await fetchPages(accessToken, query);
-        setRecords(res);
+        setPages(res);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить записи";
-        showToast(message, "error");
+        const message = error?.response?.data?.message || "Не удалось загрузить страницы";
+        showToast({ type: "error", message });
       } finally {
         setIsLoading(false);
       }
@@ -97,7 +97,7 @@ const RecordsPage = () => {
           setMediaTotal(res.total);
         } catch (error: any) {
           const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
-          showToast(message, "error");
+          showToast({ type: "error", message });
         } finally {
           setIsLoadingMedia(false);
         }
@@ -118,7 +118,7 @@ const RecordsPage = () => {
   };
 
   const handleCreate = () => {
-    setEditingRecord(null);
+    setEditingPage(null);
     setTitle("");
     setSlug("");
     setContent("");
@@ -129,26 +129,26 @@ const RecordsPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (record: PageDto) => {
-    setEditingRecord(record);
-    setTitle(record.title);
-    setSlug(record.slug);
-    setContent(record.content);
-    setStatus(record.status);
-    setSelectedImageId(record.featuredImageId || null);
-    setSeoTitle(record.seoTitle || "");
-    setSeoDescription(record.seoDescription || "");
+  const handleEdit = (page: PageDto) => {
+    setEditingPage(page);
+    setTitle(page.title);
+    setSlug(page.slug);
+    setContent(page.content);
+    setStatus(page.status);
+    setSelectedImageId(page.featuredImageId || null);
+    setSeoTitle(page.seoTitle || "");
+    setSeoDescription(page.seoDescription || "");
     setIsModalOpen(true);
   };
 
   const handleSave = async () => {
     if (!title || !slug || !content) {
-      showToast("Заполните обязательные поля", "error");
+      showToast({ type: "error", message: "Заполните обязательные поля" });
       return;
     }
     try {
-      if (editingRecord) {
-        await updatePage(accessToken, editingRecord.id, {
+      if (editingPage) {
+        await updatePage(accessToken, editingPage.id, {
           title,
           slug,
           content,
@@ -157,7 +157,7 @@ const RecordsPage = () => {
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
         });
-        showToast("Запись обновлена", "success");
+        showToast({ type: "success", message: "Страница обновлена" });
       } else {
         await createPage(accessToken, {
           title,
@@ -168,47 +168,47 @@ const RecordsPage = () => {
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
         });
-        showToast("Запись создана", "success");
+        showToast({ type: "success", message: "Страница создана" });
       }
       setIsModalOpen(false);
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить запись";
-      showToast(message, "error");
+      const message = error?.response?.data?.message || "Не удалось сохранить страницу";
+      showToast({ type: "error", message });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить эту запись?")) return;
+    if (!confirm("Вы уверены, что хотите удалить эту страницу?")) return;
     try {
       await deletePage(accessToken, id);
-      showToast("Запись удалена", "success");
+      showToast({ type: "success", message: "Страница удалена" });
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить запись";
-      showToast(message, "error");
+      const message = error?.response?.data?.message || "Не удалось удалить страницу";
+      showToast({ type: "error", message });
     }
   };
 
   const handlePublish = async (id: number) => {
     try {
       await publishPage(accessToken, id);
-      showToast("Запись опубликована", "success");
+      showToast({ type: "success", message: "Страница опубликована" });
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось опубликовать запись";
-      showToast(message, "error");
+      const message = error?.response?.data?.message || "Не удалось опубликовать страницу";
+      showToast({ type: "error", message });
     }
   };
 
   const handleUnpublish = async (id: number) => {
     try {
       await unpublishPage(accessToken, id);
-      showToast("Запись снята с публикации", "success");
+      showToast({ type: "success", message: "Страница снята с публикации" });
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось снять запись с публикации";
-      showToast(message, "error");
+      const message = error?.response?.data?.message || "Не удалось снять страницу с публикации";
+      showToast({ type: "error", message });
     }
   };
 
@@ -227,8 +227,8 @@ const RecordsPage = () => {
 
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
-    return Math.max(1, Math.ceil(records.length / query.limit));
-  }, [records.length, query.limit]);
+    return Math.max(1, Math.ceil(pages.length / query.limit));
+  }, [pages.length, query.limit]);
 
   return (
     <div className={styles.root}>
@@ -241,13 +241,13 @@ const RecordsPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск записей..."
+            placeholder="Поиск страниц..."
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <PermissionGate resource="pages" level={2}>
           <UiButton theme="primary" onClick={handleCreate}>
-            Добавить запись
+            Добавить страницу
           </UiButton>
         </PermissionGate>
       </div>
@@ -263,42 +263,42 @@ const RecordsPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {records.map((record) => (
-            <TableRow key={record.id}>
+          {pages.map((page) => (
+            <TableRow key={page.id}>
               <TableCell>
                 <button
-                  className={styles.recordName}
-                  onClick={() => handleEdit(record)}
+                  className={styles.pageName}
+                  onClick={() => handleEdit(page)}
                 >
-                  {record.title}
+                  {page.title}
                 </button>
               </TableCell>
-              <TableCell>{record.slug}</TableCell>
+              <TableCell>{page.slug}</TableCell>
               <TableCell>
-                <span className={`${styles.status} ${styles[`status${record.status}`]}`}>
-                  {record.status === 'published' ? 'Опубликовано' : record.status === 'draft' ? 'Черновик' : record.status}
+                <span className={`${styles.status} ${styles[`status${page.status}`]}`}>
+                  {page.status === 'published' ? 'Опубликовано' : page.status === 'draft' ? 'Черновик' : page.status}
                 </span>
               </TableCell>
-              <TableCell>{formatDate(record.createdAt)}</TableCell>
+              <TableCell>{formatDate(page.createdAt)}</TableCell>
               <TableCell className={styles.actionsColumn}>
-                <UiButton theme="secondary" onClick={() => handleEdit(record)}>
+                <UiButton theme="secondary" onClick={() => handleEdit(page)}>
                   Редактировать
                 </UiButton>
-                {record.status === 'published' ? (
+                {page.status === 'published' ? (
                   <PermissionGate resource="pages" level={2}>
-                    <UiButton theme="secondary" onClick={() => handleUnpublish(record.id)}>
+                    <UiButton theme="secondary" onClick={() => handleUnpublish(page.id)}>
                       Снять с публикации
                     </UiButton>
                   </PermissionGate>
                 ) : (
                   <PermissionGate resource="pages" level={2}>
-                    <UiButton theme="primary" onClick={() => handlePublish(record.id)}>
+                    <UiButton theme="primary" onClick={() => handlePublish(page.id)}>
                       Опубликовать
                     </UiButton>
                   </PermissionGate>
                 )}
                 <PermissionGate resource="pages" level={2}>
-                  <UiButton theme="warning" onClick={() => handleDelete(record.id)}>
+                  <UiButton theme="warning" onClick={() => handleDelete(page.id)}>
                     Удалить
                   </UiButton>
                 </PermissionGate>
@@ -310,10 +310,9 @@ const RecordsPage = () => {
 
       <div className={styles.footer}>
         <Pagination
-          page={query.page || 1}
-          total={records.length}
-          perPage={query.limit || 20}
-          onChange={handlePageChange}
+          currentPage={query.page || 1}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
         />
       </div>
 
@@ -321,7 +320,7 @@ const RecordsPage = () => {
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={editingRecord ? "Редактировать запись" : "Создать запись"}
+          title={editingPage ? "Редактировать страницу" : "Создать страницу"}
         >
           <div className={styles.modalContent}>
             <div className={styles.formField}>
@@ -330,7 +329,7 @@ const RecordsPage = () => {
                 className={styles.input}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Название записи"
+                placeholder="Название страницы"
               />
             </div>
             <div className={styles.formField}>
@@ -339,7 +338,7 @@ const RecordsPage = () => {
                 className={styles.input}
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                placeholder="slug-zapisi"
+                placeholder="slug-stranicy"
               />
             </div>
             <div className={styles.formField}>
@@ -361,7 +360,7 @@ const RecordsPage = () => {
                 className={styles.textarea}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Содержимое записи"
+                placeholder="Содержимое страницы"
                 rows={10}
               />
             </div>
@@ -375,12 +374,12 @@ const RecordsPage = () => {
                       if (selectedMedia) {
                         return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
                       }
-                      if (editingRecord?.featuredImage) {
+                      if (editingPage?.featuredImage) {
                         const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                        const imageUrl = editingRecord.featuredImage.filepath.startsWith('http')
-                          ? editingRecord.featuredImage.filepath
-                          : `${API_URL}/uploads/${editingRecord.featuredImage.filepath}`;
-                        return <img src={imageUrl} alt={editingRecord.featuredImage.filename} />;
+                        const imageUrl = editingPage.featuredImage.filepath.startsWith('http')
+                          ? editingPage.featuredImage.filepath
+                          : `${API_URL}/uploads/${editingPage.featuredImage.filepath}`;
+                        return <img src={imageUrl} alt={editingPage.featuredImage.filename} />;
                       }
                       return null;
                     })()}
@@ -474,10 +473,9 @@ const RecordsPage = () => {
               {mediaTotal > 0 && (
                 <div className={styles.mediaFooter}>
                   <Pagination
-                    page={mediaQuery.page || 1}
-                    total={mediaTotal}
-                    perPage={mediaQuery.limit || 50}
-                    onChange={(page) => setMediaQuery((prev) => ({ ...prev, page }))}
+                    currentPage={mediaQuery.page || 1}
+                    totalPages={Math.ceil(mediaTotal / (mediaQuery.limit || 50))}
+                    onPageChange={(page) => setMediaQuery((prev) => ({ ...prev, page }))}
                   />
                 </div>
               )}
@@ -489,4 +487,4 @@ const RecordsPage = () => {
   );
 };
 
-export default RecordsPage;
+export default PagesPage;
