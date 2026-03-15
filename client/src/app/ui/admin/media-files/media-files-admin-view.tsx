@@ -46,12 +46,14 @@ const MediaFilesPage = () => {
 
   const loadMedia = async () => {
     setIsLoading(true);
+    console.log('loadMedia called with query:', query);
     try {
       const res = await fetchMediaFiles(accessToken, query);
       setMediaFiles(res.data);
       // It's a good practice to also update total pages for pagination controls
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Failed to load media files';
+      console.error('Error loading media files:', error);
       showToast({ type: 'error', message });
     } finally {
       setIsLoading(false);
@@ -59,6 +61,7 @@ const MediaFilesPage = () => {
   };
 
   useEffect(() => {
+    console.log('useEffect triggered for media files. Current query:', query);
     loadMedia();
   }, [query, accessToken]);
 

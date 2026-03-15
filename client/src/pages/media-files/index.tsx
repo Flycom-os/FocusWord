@@ -35,6 +35,7 @@ const MediaFilesPage = () => {
   const [caption, setCaption] = useState("");
   const [fileTypeFilter, setFileTypeFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("");
+  const [authorFilter, setAuthorFilter] = useState<string>("");
 
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
@@ -173,39 +174,54 @@ const MediaFilesPage = () => {
   const handleFileTypeFilter = (value: string) => {
     setFileTypeFilter(value);
     setQuery((prev) => {
-      const newQuery = { ...prev, page: 1 };
+      const newQuery: MediaFilesQuery = { ...prev, page: 1 };
+      newQuery.isImage = undefined;
+      newQuery.isVideo = undefined;
+      newQuery.isAudio = undefined;
+
       if (value === "image") {
         newQuery.isImage = true;
-        newQuery.isVideo = undefined;
-        newQuery.isAudio = undefined;
       } else if (value === "video") {
         newQuery.isVideo = true;
-        newQuery.isImage = undefined;
-        newQuery.isAudio = undefined;
       } else if (value === "audio") {
         newQuery.isAudio = true;
-        newQuery.isImage = undefined;
-        newQuery.isVideo = undefined;
-      } else {
-        newQuery.isImage = undefined;
-        newQuery.isVideo = undefined;
-        newQuery.isAudio = undefined;
       }
+      console.log("handleFileTypeFilter - newQuery:", newQuery);
       return newQuery;
     });
   };
 
   const handleDateFilter = (value: string) => {
     setDateFilter(value);
-    // Можно добавить фильтрацию по дате, если нужно
-    // Пока просто обновляем сортировку
-    if (value === "newest") {
-      setQuery((prev) => ({ ...prev, page: 1, sortBy: "uploadedAt", sortOrder: "desc" }));
-    } else if (value === "oldest") {
-      setQuery((prev) => ({ ...prev, page: 1, sortBy: "uploadedAt", sortOrder: "asc" }));
-    } else {
-      setQuery((prev) => ({ ...prev, page: 1, sortBy: "uploadedAt", sortOrder: "desc" }));
-    }
+    setQuery((prev) => {
+      const newQuery: MediaFilesQuery = { ...prev, page: 1 };
+      newQuery.sortBy = "uploadedAt";
+      newQuery.sortOrder = "desc";
+
+      if (value === "newest") {
+        newQuery.sortBy = "uploadedAt";
+        newQuery.sortOrder = "desc";
+      } else if (value === "oldest") {
+        newQuery.sortBy = "uploadedAt";
+        newQuery.sortOrder = "asc";
+      }
+      return newQuery;
+    });
+  };
+
+  const handleAuthorFilter = (value: string) => {
+    setAuthorFilter(value);
+    setQuery((prev) => {
+      const newQuery: MediaFilesQuery = { ...prev, page: 1 };
+      newQuery.uploadedById = undefined;
+      
+      const adminUserId = 1;
+
+      if (value === "admin") {
+        newQuery.uploadedById = adminUserId;
+      }
+      return newQuery;
+    });
   };
 
   const handlePageChange = (page: number) => {
@@ -279,8 +295,8 @@ const MediaFilesPage = () => {
               { value: "", label: "Автор" },
               { value: "admin", label: "Админ" }
             ]} 
-            value="" 
-            onChange={() => {}} 
+            value={authorFilter} 
+            onChange={(value) => handleAuthorFilter(value as string)} 
           />
           <Select 
             className={styles.filterSelect} 

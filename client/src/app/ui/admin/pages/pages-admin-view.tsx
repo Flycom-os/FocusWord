@@ -73,11 +73,25 @@ const PagesPage = () => {
 
   useEffect(() => {
     const load = async () => {
+      console.log('Pages: useEffect triggered');
+      console.log('Pages: accessToken available:', !!accessToken);
+      console.log('Pages: accessToken length:', accessToken?.length || 0);
+      
+      if (!accessToken) {
+        console.log('Pages: No token available, skipping API call');
+        return;
+      }
+      
+      console.log('Pages: Loading pages with token:', accessToken ? 'exists' : 'missing');
+      console.log('Pages: Token value:', accessToken);
+      
       setIsLoading(true);
       try {
         const res = await fetchPages(accessToken, query);
         setPages(res);
       } catch (error: any) {
+        console.error('Pages: Error loading pages:', error);
+        console.error('Pages: Error response:', error?.response?.data);
         const message = error?.response?.data?.message || "Не удалось загрузить страницы";
         showToast({ type: "error", message });
       } finally {

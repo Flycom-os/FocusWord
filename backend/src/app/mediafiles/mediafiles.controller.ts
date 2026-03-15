@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Query, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Query, Res, Req } from '@nestjs/common';
 import { MediafilesService } from './mediafiles.service';
 import { CreateMediaFileDto } from '../dto/mediafiles/create-media-file.dto';
 import { UpdateMediaFileDto } from '../dto/mediafiles/update-media-file.dto';
@@ -13,6 +13,7 @@ import { QueryMediaFileDto } from '../dto/mediafiles/query-media-file.dto';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { RequestWithUser } from '../../common/interfaces/request-with-user.interface';
 
 @ApiBearerAuth()
 @ApiTags('mediafiles')
@@ -46,6 +47,7 @@ export class MediafilesController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() createMediafileDto: CreateMediaFileDto,
+    @Req() req: RequestWithUser,
   ) {
     // Формируем полный URL для доступа к файлу
     const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331';
@@ -61,7 +63,7 @@ export class MediafilesController {
       isImage: file.mimetype.startsWith('image'),
       isVideo: file.mimetype.startsWith('video'),
       isAudio: file.mimetype.startsWith('audio'),
-      // uploadedById: req.user.id,
+      uploadedById: req.user.userId,
     };
     return this.mediafilesService.create(newMediaFile);
   }

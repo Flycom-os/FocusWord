@@ -10,7 +10,6 @@
 .select_box {
   position: relative;
   display: inline-block;
-  width: 220px;
 }
 .select {
   width: 100%;

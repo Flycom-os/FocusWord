@@ -34,6 +34,7 @@ export interface MediaFilesQuery {
   isImage?: boolean;
   isVideo?: boolean;
   isAudio?: boolean;
+  uploadedById?: number; // Add this line
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }

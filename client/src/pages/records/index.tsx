@@ -73,11 +73,22 @@ const RecordsPage = () => {
 
   useEffect(() => {
     const load = async () => {
+      console.log('Records: useEffect triggered');
+      console.log('Records: accessToken available:', !!accessToken);
+      console.log('Records: accessToken length:', accessToken?.length || 0);
+      
+      if (!accessToken) {
+        console.log('Records: No token available, skipping API call');
+        return;
+      }
+      
+      console.log('Records: Loading records with token');
       setIsLoading(true);
       try {
         const res = await fetchPages(accessToken, query);
         setRecords(res);
       } catch (error: any) {
+        console.error('Records: Error loading records:', error);
         const message = error?.response?.data?.message || "Не удалось загрузить записи";
         showToast(message, "error");
       } finally {

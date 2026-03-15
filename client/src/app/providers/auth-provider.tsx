@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AuthUser, PermissionString } from "@/src/shared/types/auth";
 import { loginRequest, LoginPayload, registerRequest, RegisterPayload } from "@/src/shared/api/auth";
+import { useRouter } from "next/navigation";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -21,7 +22,11 @@ const STORAGE_KEY = "focusword_auth";
 interface StoredAuth {
   user: AuthUser;
   accessToken: string;
+  createdAt: number;
+  expiresAt: number;
 }
+
+const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 час в миллисекундах
 
 const parsePermission = (permission: PermissionString) => {
   const [resource, levelStr] = permission.split(":");
@@ -33,39 +38,104 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        setIsLoading(false);
-        return;
-      }
-      const parsed: StoredAuth = JSON.parse(raw);
-      setUser(parsed.user);
-      setAccessToken(parsed.accessToken);
-    } catch {
-      // ignore
-    } finally {
-      setIsLoading(false);
+  const checkTokenExpiration = useCallback((storedAuth: StoredAuth) => {
+    const now = Date.now();
+    if (now >= storedAuth.expiresAt) {
+      // Токен истек, очищаем и редиректим
+      clear();
+      router.push('/signin');
+      return false;
     }
-  }, []);
-
-  const persist = useCallback((nextUser: AuthUser, token: string) => {
-    setUser(nextUser);
-    setAccessToken(token);
-    if (typeof window !== "undefined") {
-      const toStore: StoredAuth = { user: nextUser, accessToken: token };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-    }
-  }, []);
+    return true;
+  }, [router]);
 
   const clear = useCallback(() => {
     setUser(null);
     setAccessToken(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      console.log('Auth: Raw storage data:', raw);
+      
+      if (!raw) {
+        console.log('Auth: No auth data found, redirecting to signin');
+        setIsLoading(false);
+        router.push('/signin');
+        return;
+      }
+      
+      const parsed: StoredAuth = JSON.parse(raw);
+      console.log('Auth: Parsed data:', parsed);
+      
+      // Проверяем наличие полей времени
+      if (!parsed.createdAt || !parsed.expiresAt) {
+        console.log('Auth: Old format data, clearing and redirecting');
+        // Старый формат данных, очищаем и редиректим
+        clear();
+        router.push('/signin');
+        return;
+      }
+      
+      // Проверяем время жизни токена
+      if (!checkTokenExpiration(parsed)) {
+        console.log('Auth: Token expired, clearing and redirecting');
+        return;
+      }
+      
+      console.log('Auth: Setting user and token');
+      setUser(parsed.user);
+      setAccessToken(parsed.accessToken);
+    } catch (error) {
+      console.error('Auth: Error parsing auth data:', error);
+      clear();
+      router.push('/signin');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [checkTokenExpiration, clear, router]);
+
+  // Проверяем токен каждую минуту
+  useEffect(() => {
+    if (!accessToken || typeof window === "undefined") return;
+
+    const interval = setInterval(() => {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed: StoredAuth = JSON.parse(raw);
+          checkTokenExpiration(parsed);
+        } catch {
+          clear();
+          router.push('/signin');
+        }
+      }
+    }, 60000); // Проверяем каждую минуту
+
+    return () => clearInterval(interval);
+  }, [accessToken, checkTokenExpiration, clear, router]);
+
+  const persist = useCallback((nextUser: AuthUser, token: string) => {
+    const now = Date.now();
+    const toStore: StoredAuth = { 
+      user: nextUser, 
+      accessToken: token,
+      createdAt: now,
+      expiresAt: now + TOKEN_LIFETIME
+    };
+    
+    setUser(nextUser);
+    setAccessToken(token);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     }
   }, []);
 
@@ -87,7 +157,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = useCallback(() => {
     clear();
-  }, [clear]);
+    router.push('/signin');
+  }, [clear, router]);
 
   const hasPermission = useCallback(
     (resource: string, minLevel: number) => {

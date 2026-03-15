@@ -43,9 +43,14 @@ const authHeaders = (token: string | null) =>
   token ? { Authorization: `Bearer ${token}` } : {};
 
 export const fetchPages = async (token: string | null, params: PagesQuery): Promise<PageDto[]> => {
+  const headers = authHeaders(token);
+  console.log('API: Fetching pages with headers:', headers);
+  console.log('API: Request URL:', `${API_URL}/pages`);
+  console.log('API: Request params:', params);
+  
   const { data } = await axios.get<PageDto[]>(`${API_URL}/pages`, {
     params,
-    headers: authHeaders(token),
+    headers,
   });
   return data;
 };

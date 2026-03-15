@@ -19,9 +19,9 @@
 
 .sidebar {
   width: 250px;
-  background: #fff;
+  background: #f3f0ff;
   height: 100vh;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #e6e0ff;
   transition: width 0.8s cubic-bezier(0.77,0,0.175,1);
   display: flex;
   flex-direction: column;
@@ -31,9 +31,9 @@
 
 .sidebarCollapsed {
   width: 60px;
-  background: #fff;
+  background: #f3f0ff;
   height: 100vh;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #e6e0ff;
   transition: width 0.8s cubic-bezier(0.77,0,0.175,1);
   display: flex;
   flex-direction: column;
@@ -71,7 +71,7 @@
 .logoText {
   font-weight: bold;
   font-size: 20px;
-  color: #222;
+  color: #4a4a4a;
   transition: opacity 0.2s, transform 0.2s;
 }
 .menu {
@@ -83,7 +83,7 @@
   display: flex;
   align-items: center;
   padding: 8px 16px;
-  color: #234;
+  color: #4a4a4a;
   cursor: pointer;
   font-size: 15px;
   border-radius: 4px;
@@ -100,10 +100,10 @@
   display: none;
 }
 .menuItem:hover {
-  background: #e3eefd;
+  background: #e6e0ff;
 }
 .menuItemActive {
-  background: #074574;
+  background: #8b7cf6;
   color: #fff;
 }
 .icon {
@@ -127,18 +127,18 @@
 }
 .subMenuItem {
   padding: 6px 0 6px 8px;
-  color: #234;
+  color: #4a4a4a;
   font-size: 14px;
   cursor: pointer;
   border-radius: 3px;
   transition: background 0.2s, color 0.2s;
 }
 .subMenuItem:hover {
-  background: #e3eefd;
+  background: #e6e0ff;
 }
 .subMenuItemActive {
-  background: #e3f1fd;
-  color: #174ea6;
+  background: #f0edff;
+  color: #8b7cf6;
 }
 .button {
   display: flex;
