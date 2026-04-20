@@ -95,6 +95,15 @@ model Page {
   seoTitle       String?
   seoDescription String?
   metaKeywords   String[]   @default([])
+  
+  // Content blocks - слайдеры, медиа и другой контент
+  featuredSlider   Slider? @relation("FeaturedSliderOfPage", fields: [featuredSliderId], references: [id])
+  featuredSliderId Int?
+  
+  // JSON массив с метаданными о вставленных контент блоках
+  // Структура: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
+  contentBlocks Json? @default("[]")
+  
   menuItems      MenuItem[] @relation("MenuItemPage")
 
   analyticsEntries AnalyticsEntry[] @relation("PageAnalytics")
@@ -189,6 +198,9 @@ model Slider {
   updatedAt   DateTime @updatedAt
 
   slides Slide[]
+  
+  // Страницы, которые используют этот слайдер как основной
+  featuredInPages Page[] @relation("FeaturedSliderOfPage")
 }
 
 model Slide {

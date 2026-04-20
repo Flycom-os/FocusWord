@@ -4,9 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './pages-admin-view.module.css';
 import { useAuth } from '@/src/app/providers/auth-provider';
 import { completePageWithAi, createPage, deletePage, fetchPages, PageDto, PagesQuery, updatePage } from '@/src/shared/api/pages';
-import { Modal, Notifications, Pagination, PermissionGate, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, UiButton, showToast } from '@/src/shared/ui';
+import { Modal, Notifications, Pagination, PermissionGate, PageSlider, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, UiButton, showToast } from '@/src/shared/ui';
 import Input from '@/src/shared/ui/Input/ui-input';
 import { useDebounce } from '@/src/shared/hooks/use-debounce';
+import { fetchSliders, getSlider, SliderDto, SliderDetailsDto } from '@/src/shared/api/sliders';
 
 const defaultQuery: PagesQuery = { page: 1, limit: 20 };
 
@@ -18,6 +19,7 @@ type EditorForm = {
   seoTitle: string;
   seoDescription: string;
   metaKeywords: string;
+  featuredSliderId?: number | null;
 };
 
 const defaultForm: EditorForm = {
@@ -28,6 +30,7 @@ const defaultForm: EditorForm = {
   seoTitle: '',
   seoDescription: '',
   metaKeywords: '',
+  featuredSliderId: null,
 };
 
 const PagesPage = () => {
@@ -43,6 +46,14 @@ const PagesPage = () => {
   const [initialEditorHtml, setInitialEditorHtml] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewSlider, setPreviewSlider] = useState<SliderDetailsDto | null>(null);
+  const [isLoadingPreviewSlider, setIsLoadingPreviewSlider] = useState(false);
+  
+  // Sliders
+  const [sliders, setSliders] = useState<SliderDto[]>([]);
+  const [isLoadingSliders, setIsLoadingSliders] = useState(false);
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const debouncedSearch = useDebounce(search, 300);
@@ -68,9 +79,28 @@ const PagesPage = () => {
     }
   };
 
+  const loadSliders = async () => {
+    if (!accessToken) return;
+    setIsLoadingSliders(true);
+    try {
+      const data = await fetchSliders(accessToken, { page: 1, limit: 100 });
+      setSliders(data.data);
+    } catch (error: any) {
+      console.error('Error loading sliders:', error);
+    } finally {
+      setIsLoadingSliders(false);
+    }
+  };
+
   useEffect(() => {
     loadPages();
   }, [accessToken, query.page, query.limit, debouncedSearch]);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      loadSliders();
+    }
+  }, [isModalOpen, accessToken]);
 
   useEffect(() => {
     if (!isModalOpen || !editorRef.current) return;
@@ -95,6 +125,7 @@ const PagesPage = () => {
       seoTitle: page.seoTitle || '',
       seoDescription: page.seoDescription || '',
       metaKeywords: (page.metaKeywords || []).join(', '),
+      featuredSliderId: page.featuredSliderId || null,
     });
     setInitialEditorHtml(page.content || '');
     setIsModalOpen(true);
@@ -137,6 +168,30 @@ const PagesPage = () => {
     }
   };
 
+  const handlePreview = async () => {
+    const html = editorRef.current?.innerHTML || '';
+    setPreviewHtml(html);
+    setPreviewSlider(null);
+
+    if (form.featuredSliderId) {
+      if (!accessToken) {
+        showToast({ type: 'error', message: 'Токен доступа отсутствует для предпросмотра слайдера' });
+        return;
+      }
+      setIsLoadingPreviewSlider(true);
+      try {
+        const slider = await getSlider(accessToken, form.featuredSliderId);
+        setPreviewSlider(slider);
+      } catch (error: any) {
+        showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось загрузить слайдер для предпросмотра' });
+      } finally {
+        setIsLoadingPreviewSlider(false);
+      }
+    }
+
+    setIsPreviewOpen(true);
+  };
+
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
@@ -159,6 +214,7 @@ const PagesPage = () => {
             .split(',')
             .map((item) => item.trim())
             .filter(Boolean),
+          featuredSliderId: form.featuredSliderId || null,
         });
         setPages((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
         showToast({ type: 'success', message: 'Страница обновлена' });
@@ -175,6 +231,7 @@ const PagesPage = () => {
             .split(',')
             .map((item) => item.trim())
             .filter(Boolean),
+          featuredSliderId: form.featuredSliderId || undefined,
         });
         setPages((prev) => [created, ...prev]);
         showToast({ type: 'success', message: 'Страница создана' });
@@ -306,7 +363,7 @@ const PagesPage = () => {
                     { value: 'published', label: 'Опубликовано' },
                   ]}
                   value={form.status}
-                  onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+                  onChange={(value) => setForm((prev) => ({ ...prev, status: value as string }))}
                 />
 
                 <label className={styles.label}>Шаблон</label>
@@ -324,12 +381,29 @@ const PagesPage = () => {
 
                 <label className={styles.label}>Ключевые слова (через запятую)</label>
                 <Input value={form.metaKeywords} onChange={(event) => setForm((prev) => ({ ...prev, metaKeywords: event.target.value }))} />
+
+                <label className={styles.label}>Основной слайдер</label>
+                <Select
+                  options={[
+                    { value: '', label: 'Без слайдера' },
+                    ...sliders.map((slider) => ({ value: slider.id.toString(), label: slider.name })),
+                  ]}
+                  value={form.featuredSliderId?.toString() || ''}
+                  onChange={(value) => setForm((prev) => ({ 
+                    ...prev, 
+                    featuredSliderId: value ? parseInt(value as string) : null 
+                  }))}
+                  disabled={isLoadingSliders}
+                />
               </div>
             </div>
 
             <div className={styles.modalActions}>
               <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
                 Отмена
+              </UiButton>
+              <UiButton theme="secondary" onClick={handlePreview}>
+                Предпросмотр
               </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
                 {isSaving ? 'Сохранение...' : 'Сохранить'}
@@ -338,6 +412,35 @@ const PagesPage = () => {
           </div>
         </Modal>
       </PermissionGate>
+
+      <Modal open={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Предпросмотр страницы">
+        <div className={styles.previewModalContent}>
+          <div className={styles.previewHeader}>
+            <h2>{form.title || 'Предпросмотр страницы'}</h2>
+            <p className={styles.previewSubtitle}>
+              Статус: {form.status === 'published' ? 'Опубликовано' : 'Черновик'} · Шаблон: {form.template}
+            </p>
+          </div>
+
+          {isLoadingPreviewSlider ? (
+            <div className={styles.previewLoader}>Загрузка слайдера...</div>
+          ) : previewSlider ? (
+            <div className={styles.previewSliderWrapper}>
+              <PageSlider slider={previewSlider} autoPlay={false} showArrows={true} showDots={true} />
+            </div>
+          ) : form.featuredSliderId ? (
+            <div className={styles.previewEmpty}>Не удалось загрузить слайдер для предпросмотра.</div>
+          ) : null}
+
+          <div className={styles.previewBody} dangerouslySetInnerHTML={{ __html: previewHtml }} />
+
+          <div className={styles.modalActions}>
+            <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}>
+              Закрыть
+            </UiButton>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

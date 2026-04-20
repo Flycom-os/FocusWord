@@ -105,7 +105,15 @@ export class SlidersService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const slider = await this.prisma.slider.findUnique({ where: { id } });
+    const slider = await this.prisma.slider.findUnique({
+      where: { id },
+      include: {
+        slides: {
+          orderBy: { sortOrder: 'asc' },
+          include: { image: true },
+        },
+      },
+    });
     if (!slider) {
       throw new NotFoundException(`Slider with ID ${id} not found`);
     }
@@ -164,6 +172,7 @@ export class SlidersService {
 
     const newSlide = await this.prisma.slide.create({
       data: slideCreateInput,
+      include: { image: true },
     });
 
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'slides_in_slider_${sliderId}'`);
@@ -213,6 +222,7 @@ export class SlidersService {
         skip,
         take: limitNum,
         orderBy,
+        include: { image: true },
       }),
       this.prisma.slide.count({ where }),
     ]);
@@ -239,7 +249,10 @@ export class SlidersService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const slide = await this.prisma.slide.findUnique({ where: { id } });
+    const slide = await this.prisma.slide.findUnique({ 
+      where: { id },
+      include: { image: true },
+    });
     if (!slide) {
       throw new NotFoundException(`Slide with ID ${id} not found`);
     }
@@ -253,6 +266,7 @@ export class SlidersService {
     const slide = await this.prisma.slide.update({
       where: { id },
       data,
+      include: { image: true },
     });
     if (!slide) {
         throw new NotFoundException(`Slide with ID ${id} not found`);

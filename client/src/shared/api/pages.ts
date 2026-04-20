@@ -13,11 +13,13 @@ export interface PageDto {
   publishedAt?: string | null;
   authorId?: number | null;
   featuredImageId?: number | null;
+  featuredSliderId?: number | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   metaKeywords?: string[];
   parentPageId?: number | null;
   template?: string;
+  contentBlocks?: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }>;
   author?: {
     id: number;
     username: string | null;
@@ -28,6 +30,24 @@ export interface PageDto {
     id: number;
     filename: string;
     filepath: string;
+  } | null;
+  featuredSlider?: {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    slides?: Array<{
+      id: number;
+      title?: string;
+      description?: string;
+      linkUrl?: string;
+      sortOrder: number;
+      image?: {
+        id: number;
+        filename: string;
+        filepath: string;
+      } | null;
+    }>;
   } | null;
 }
 
@@ -77,11 +97,13 @@ export const createPage = async (
     content: string;
     status?: string;
     featuredImageId?: number;
+    featuredSliderId?: number;
     seoTitle?: string;
     seoDescription?: string;
     metaKeywords?: string[];
     parentPageId?: number;
     template?: string;
+    contentBlocks?: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }>;
   },
 ): Promise<PageDto> => {
   const { data } = await axios.post<PageDto>(`${API_URL}/pages`, payload, {
@@ -112,12 +134,14 @@ export const updatePage = async (
     content: string;
     status: string;
     featuredImageId: number;
+    featuredSliderId: number | null;
     seoTitle: string;
     seoDescription: string;
     metaKeywords: string[];
     parentPageId: number;
     template: string;
     publishedAt: string;
+    contentBlocks: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }> | null;
   }>,
 ): Promise<PageDto> => {
   const { data } = await axios.patch<PageDto>(`${API_URL}/pages/${id}`, payload, {

@@ -272,6 +272,19 @@ export class PagesService {
             filepath: true,
           },
         },
+        featuredSlider: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            slides: {
+              include: {
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -312,6 +325,19 @@ export class PagesService {
             filepath: true,
           },
         },
+        featuredSlider: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            slides: {
+              include: {
+                image: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -329,7 +355,7 @@ export class PagesService {
       throw new NotFoundException(`Page with ID ${id} not found.`);
     }
 
-    const { metaKeywords, publishedAt, ...rest } = updatePageDto;
+    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, ...rest } = updatePageDto;
 
     const updatedPage = await this.prisma.page.update({
       where: { id },
@@ -337,7 +363,13 @@ export class PagesService {
         ...rest,
         ...(metaKeywords !== undefined && { metaKeywords }),
         ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
+        ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
+        ...(contentBlocks !== undefined && { contentBlocks: contentBlocks || [] }),
         updatedAt: new Date(),
+      },
+      include: {
+        featuredSlider: true,
+        featuredImage: true,
       },
     });
 

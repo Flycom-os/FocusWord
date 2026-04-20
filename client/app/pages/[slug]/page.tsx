@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { fetchPageBySlug, PageDto } from '@/src/shared/api/pages';
 import { useAuth } from '@/src/app/providers/auth-provider';
-import { Body, Header, Footer } from "@/src/shared/ui";
+import { Body, Header, Footer, PageSlider } from "@/src/shared/ui";
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
@@ -86,9 +86,22 @@ const Page = ({ params }: { params: { slug: string } }) => {
 
         {/* Заголовок страницы */}
         <h1>{page.title}</h1>
+
+        {/* Featured Slider если есть */}
+        {page.featuredSlider && (
+          <div className="my-8">
+            <PageSlider 
+              slider={page.featuredSlider}
+              autoPlay={true}
+              interval={5000}
+              showArrows={true}
+              showDots={true}
+            />
+          </div>
+        )}
         
         {/* Изображение если есть */}
-        {page.featuredImage && (
+        {page.featuredImage && !page.featuredSlider && (
           <div className="mb-6">
             <img 
               src={page.featuredImage.filepath.startsWith('http') 
