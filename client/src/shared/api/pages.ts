@@ -81,9 +81,23 @@ export const createPage = async (
     seoDescription?: string;
     metaKeywords?: string[];
     parentPageId?: number;
+    template?: string;
   },
 ): Promise<PageDto> => {
   const { data } = await axios.post<PageDto>(`${API_URL}/pages`, payload, {
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const createPageDraft = async (
+  token: string | null,
+  payload?: {
+    title?: string;
+    content?: string;
+  },
+): Promise<PageDto> => {
+  const { data } = await axios.post<PageDto>(`${API_URL}/pages/draft`, payload || {}, {
     headers: authHeaders(token),
   });
   return data;
@@ -102,6 +116,7 @@ export const updatePage = async (
     seoDescription: string;
     metaKeywords: string[];
     parentPageId: number;
+    template: string;
     publishedAt: string;
   }>,
 ): Promise<PageDto> => {
@@ -126,6 +141,16 @@ export const publishPage = async (token: string | null, id: number): Promise<Pag
 
 export const unpublishPage = async (token: string | null, id: number): Promise<PageDto> => {
   const { data } = await axios.patch<PageDto>(`${API_URL}/pages/${id}/unpublish`, {}, {
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const completePageWithAi = async (
+  token: string | null,
+  payload: { prompt: string; content?: string },
+): Promise<{ text: string }> => {
+  const { data } = await axios.post<{ text: string }>(`${API_URL}/pages/ai/complete`, payload, {
     headers: authHeaders(token),
   });
   return data;

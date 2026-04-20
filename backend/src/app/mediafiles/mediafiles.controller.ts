@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Query, Res, Req } from '@nestjs/common';
 import { MediafilesService } from './mediafiles.service';
 import { CreateMediaFileDto } from '../dto/mediafiles/create-media-file.dto';
+import { UploadMediaFileDto } from '../dto/mediafiles/upload-media-file.dto';
 import { UpdateMediaFileDto } from '../dto/mediafiles/update-media-file.dto';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -25,7 +26,7 @@ export class MediafilesController {
   @Post('upload')
   @HasPermission('mediafiles:2')
   @ApiOperation({ summary: 'Upload a new media file' })
-  @ApiFileWithBody('file', CreateMediaFileDto)
+  @ApiFileWithBody('file', UploadMediaFileDto)
   @ApiResponse({ status: 201, description: 'The media file has been successfully uploaded.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @UseInterceptors(
@@ -46,7 +47,7 @@ export class MediafilesController {
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createMediafileDto: CreateMediaFileDto,
+    @Body() createMediafileDto: UploadMediaFileDto,
     @Req() req: RequestWithUser,
   ) {
     // Формируем полный URL для доступа к файлу

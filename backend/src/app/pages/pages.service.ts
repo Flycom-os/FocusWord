@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, Logger, BadRequestException, BadGatewayException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreatePageDto } from "../dto/pages/create-page.dto";
+import { CreatePageDraftDto } from "../dto/pages/create-page-draft.dto";
 import { PageFilterDto } from "../dto/pages/page-filter.dto";
 import { UpdatePageDto } from "../dto/pages/update-page.dto";
 import IORedis from 'ioredis';
 import { REDIS_CLIENT } from "../../redis/redis.module";
 import { Prisma, Page } from '@prisma/client';
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
 
 @Injectable()
 export class PagesService {
@@ -13,8 +17,56 @@ export class PagesService {
 
   constructor(
     private prisma: PrismaService,
+    private readonly configService: ConfigService,
     @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
   ) {}
+
+  private readKeyFromEnvFile(): string | undefined {
+    const candidates = [
+      resolve(process.cwd(), '.env'),
+      resolve(process.cwd(), '../.env'),
+      resolve(__dirname, '../../../../.env'),
+    ];
+
+    for (const filePath of candidates) {
+      if (!existsSync(filePath)) continue;
+      const content = readFileSync(filePath, 'utf8');
+      const lines = content.split(/\r?\n/);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        if (trimmed.startsWith('DEEPSEEK_API_KEY=')) {
+          return trimmed.slice('DEEPSEEK_API_KEY='.length).trim();
+        }
+        if (trimmed.startsWith('NEXT_PUBLIC_DEEPSEEK_API_KEY=')) {
+          return trimmed.slice('NEXT_PUBLIC_DEEPSEEK_API_KEY='.length).trim();
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  private async generateUniqueSlug(base: string): Promise<string> {
+    const normalized = (base || 'new-page')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9а-яё\s-]/gi, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    const baseSlug = normalized || `page-${Date.now()}`;
+    let slug = baseSlug;
+    let suffix = 1;
+
+    while (await this.prisma.page.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${suffix}`;
+      suffix += 1;
+    }
+
+    return slug;
+  }
 
   async create(createPageDto: CreatePageDto): Promise<Page> {
     const { metaKeywords, ...rest } = createPageDto;
@@ -32,7 +84,106 @@ export class PagesService {
     return newPage;
   }
 
-  async findAll(filterDto: PageFilterDto): Promise<Page[]> {
+  async createDraft(createPageDraftDto: CreatePageDraftDto): Promise<Page> {
+    const title = createPageDraftDto.title?.trim() || 'Новая запись';
+    const slug = await this.generateUniqueSlug(title);
+
+    const draft = await this.prisma.page.create({
+      data: {
+        title,
+        slug,
+        content: createPageDraftDto.content || '',
+        status: 'draft',
+        template: 'default',
+        authorId: createPageDraftDto.authorId,
+      },
+    });
+
+    const keys = await this.redisClient.keys('pages_*');
+    if (keys.length > 0) {
+      await this.redisClient.del(keys);
+    }
+
+    return draft;
+  }
+
+  async completeWithAi(prompt: string, content?: string): Promise<{ text: string }> {
+    const apiKey =
+      this.configService.get<string>('DEEPSEEK_API_KEY') ||
+      this.configService.get<string>('NEXT_PUBLIC_DEEPSEEK_API_KEY') ||
+      process.env.DEEPSEEK_API_KEY ||
+      process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY ||
+      this.readKeyFromEnvFile();
+    if (!apiKey) {
+      throw new BadRequestException('DeepSeek API key is not configured on server');
+    }
+
+    const baseUrlRaw =
+      this.configService.get<string>('DEEPSEEK_BASE_URL') ||
+      process.env.DEEPSEEK_BASE_URL ||
+      'https://api.deepseek.com/v1';
+    const baseUrl = baseUrlRaw.replace(/\/$/, '');
+    const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const endpoint = baseUrl.endsWith('/v1') ? `${baseUrl}/chat/completions` : `${baseUrl}/v1/chat/completions`;
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an assistant that edits web page content. Return only the final HTML body fragment.',
+          },
+          {
+            role: 'user',
+            content: `Instruction:\n${prompt}\n\nCurrent content:\n${content || ''}`,
+          },
+        ],
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      this.logger.error(`DeepSeek request failed: ${response.status} ${errorText}`);
+
+      let providerMessage = 'AI generation failed';
+      try {
+        const parsed = JSON.parse(errorText) as { error?: { message?: string } | string; message?: string };
+        if (typeof parsed.error === 'string') {
+          providerMessage = parsed.error;
+        } else if (parsed.error?.message) {
+          providerMessage = parsed.error.message;
+        } else if (parsed.message) {
+          providerMessage = parsed.message;
+        }
+      } catch {
+        if (errorText?.trim()) {
+          providerMessage = errorText.slice(0, 300);
+        }
+      }
+
+      throw new BadGatewayException(`AI generation failed: ${providerMessage}`);
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) {
+      throw new BadRequestException('AI returned empty response');
+    }
+
+    return { text };
+  }
+
+  async findAll(filterDto: PageFilterDto): Promise<any[]> {
     const cacheKey = `pages_${JSON.stringify(filterDto)}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPages = await this.redisClient.get(cacheKey);
@@ -68,6 +219,23 @@ export class PagesService {
       skip,
       take: limitNum,
       orderBy: { createdAt: 'desc' },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        featuredImage: {
+          select: {
+            id: true,
+            filename: true,
+            filepath: true,
+          },
+        },
+      },
     });
 
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
@@ -75,7 +243,7 @@ export class PagesService {
     return pages;
   }
 
-  async findOne(id: number): Promise<Page | null> {
+  async findOne(id: number): Promise<any | null> {
     const cacheKey = `page_${id}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPage = await this.redisClient.get(cacheKey);
@@ -86,7 +254,26 @@ export class PagesService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const page = await this.prisma.page.findUnique({ where: { id } });
+    const page = await this.prisma.page.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        featuredImage: {
+          select: {
+            id: true,
+            filename: true,
+            filepath: true,
+          },
+        },
+      },
+    });
 
     if (page) {
       this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
@@ -96,7 +283,7 @@ export class PagesService {
     return page;
   }
 
-  async findOneBySlug(slug: string): Promise<Page | null> {
+  async findOneBySlug(slug: string): Promise<any | null> {
     const cacheKey = `page_slug_${slug}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPage = await this.redisClient.get(cacheKey);
@@ -107,7 +294,26 @@ export class PagesService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const page = await this.prisma.page.findUnique({ where: { slug } });
+    const page = await this.prisma.page.findUnique({
+      where: { slug },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        featuredImage: {
+          select: {
+            id: true,
+            filename: true,
+            filepath: true,
+          },
+        },
+      },
+    });
 
     if (page) {
       this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
@@ -129,8 +335,8 @@ export class PagesService {
       where: { id },
       data: {
         ...rest,
-        ...(metaKeywords && { metaKeywords }),
-        ...(publishedAt && { publishedAt: new Date(publishedAt) }),
+        ...(metaKeywords !== undefined && { metaKeywords }),
+        ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
         updatedAt: new Date(),
       },
     });

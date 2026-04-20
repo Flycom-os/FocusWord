@@ -44,7 +44,7 @@ export class MediafilesService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const { page = 1, limit = 10, search, mimetype, sortBy, sortOrder, isImage, isisVideo, isAudio, uploadedById } = query;
+    const { page = 1, limit = 10, search, mimetype, sortBy, sortOrder, isImage, isVideo, isAudio, uploadedById } = query;
     const pageNum = page;
     const limitNum = limit;
     const skip = (pageNum - 1) * limitNum;

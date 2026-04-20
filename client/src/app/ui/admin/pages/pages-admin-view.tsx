@@ -1,267 +1,220 @@
 'use client';
 
-/**
- * @page Pages
- */
+import { useEffect, useMemo, useRef, useState } from 'react';
+import styles from './pages-admin-view.module.css';
+import { useAuth } from '@/src/app/providers/auth-provider';
+import { completePageWithAi, createPage, deletePage, fetchPages, PageDto, PagesQuery, updatePage } from '@/src/shared/api/pages';
+import { Modal, Notifications, Pagination, PermissionGate, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, UiButton, showToast } from '@/src/shared/ui';
+import Input from '@/src/shared/ui/Input/ui-input';
+import { useDebounce } from '@/src/shared/hooks/use-debounce';
 
-import { useEffect, useMemo, useState } from "react";
-import BlockManagement from "@/src/widgets/block_management";
-import styles from "./pages-admin-view.module.css";
-import { useAuth } from "@/src/app/providers/auth-provider";
-import {
-  fetchPages,
-  createPage,
-  updatePage,
-  deletePage,
-  publishPage,
-  unpublishPage,
-  PageDto,
-  PagesQuery,
-} from "@/src/shared/api/pages";
-import { fetchMediaFiles, MediaFileDto, MediaFilesQuery } from "@/src/shared/api/mediafiles";
-import {
-  Pagination,
-  PermissionGate,
-  UiButton,
-  Modal,
-  Notifications,
-  showToast,
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-  Select,
-} from "@/src/shared/ui";
-import Input from "@/src/shared/ui/Input/ui-input";
+const defaultQuery: PagesQuery = { page: 1, limit: 20 };
 
-const defaultQuery: PagesQuery = {
-  page: 1,
-  limit: 20,
+type EditorForm = {
+  title: string;
+  slug: string;
+  status: string;
+  template: string;
+  seoTitle: string;
+  seoDescription: string;
+  metaKeywords: string;
 };
 
-const defaultMediaQuery: MediaFilesQuery = {
-  page: 1,
-  limit: 50,
-  isImage: true,
-  sortBy: "uploadedAt",
-  sortOrder: "desc",
+const defaultForm: EditorForm = {
+  title: '',
+  slug: '',
+  status: 'draft',
+  template: 'default',
+  seoTitle: '',
+  seoDescription: '',
+  metaKeywords: '',
 };
 
 const PagesPage = () => {
   const { accessToken } = useAuth();
   const [query, setQuery] = useState<PagesQuery>(defaultQuery);
+  const [search, setSearch] = useState('');
   const [pages, setPages] = useState<PageDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<PageDto | null>(null);
-  const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
-  const [mediaTotal, setMediaTotal] = useState(0);
-  const [isLoadingMedia, setIsLoadingMedia] = useState(false);
-  const [mediaQuery, setMediaQuery] = useState<MediaFilesQuery>(defaultMediaQuery);
+  const [form, setForm] = useState<EditorForm>(defaultForm);
+  const [initialEditorHtml, setInitialEditorHtml] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
-  // Form states
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [content, setContent] = useState("");
-  const [status, setStatus] = useState("draft");
-  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
-  const [seoTitle, setSeoTitle] = useState("");
-  const [seoDescription, setSeoDescription] = useState("");
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const debouncedSearch = useDebounce(search, 300);
 
-  useEffect(() => {
-    const load = async () => {
-      console.log('Pages: useEffect triggered');
-      console.log('Pages: accessToken available:', !!accessToken);
-      console.log('Pages: accessToken length:', accessToken?.length || 0);
-      
-      if (!accessToken) {
-        console.log('Pages: No token available, skipping API call');
-        return;
-      }
-      
-      console.log('Pages: Loading pages with token:', accessToken ? 'exists' : 'missing');
-      console.log('Pages: Token value:', accessToken);
-      
-      setIsLoading(true);
-      try {
-        const res = await fetchPages(accessToken, query);
-        setPages(res);
-      } catch (error: any) {
-        console.error('Pages: Error loading pages:', error);
-        console.error('Pages: Error response:', error?.response?.data);
-        const message = error?.response?.data?.message || "Не удалось загрузить страницы";
-        showToast({ type: "error", message });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, [accessToken, query]);
+  const totalPages = useMemo(() => {
+    if (!query.limit) return 1;
+    return Math.max(1, Math.ceil((pages.length || 1) / query.limit));
+  }, [pages.length, query.limit]);
 
-  useEffect(() => {
-    if (isMediaModalOpen) {
-      setIsLoadingMedia(true);
-      const loadMedia = async () => {
-        try {
-          const res = await fetchMediaFiles(accessToken, mediaQuery);
-          setMediaFiles(res.data);
-          setMediaTotal(res.total);
-        } catch (error: any) {
-          const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
-          showToast({ type: "error", message });
-        } finally {
-          setIsLoadingMedia(false);
-        }
-      };
-      loadMedia();
-    } else {
-      setMediaFiles([]);
-      setMediaTotal(0);
+  const loadPages = async () => {
+    if (!accessToken) return;
+    setIsLoading(true);
+    try {
+      const data = await fetchPages(accessToken, {
+        ...query,
+        search: debouncedSearch || undefined,
+      });
+      setPages(data);
+    } catch (error: any) {
+      showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось загрузить страницы' });
+    } finally {
+      setIsLoading(false);
     }
-  }, [accessToken, isMediaModalOpen, mediaQuery]);
-
-  const handleSearchChange = (value: string) => {
-    setQuery((prev) => ({ ...prev, page: 1, search: value }));
   };
 
-  const handlePageChange = (page: number) => {
-    setQuery((prev) => ({ ...prev, page }));
-  };
+  useEffect(() => {
+    loadPages();
+  }, [accessToken, query.page, query.limit, debouncedSearch]);
 
-  const handleCreate = () => {
+  useEffect(() => {
+    if (!isModalOpen || !editorRef.current) return;
+    editorRef.current.innerHTML = initialEditorHtml || '';
+    editorRef.current.focus();
+  }, [isModalOpen, initialEditorHtml]);
+
+  const openCreateModal = () => {
     setEditingPage(null);
-    setTitle("");
-    setSlug("");
-    setContent("");
-    setStatus("draft");
-    setSelectedImageId(null);
-    setSeoTitle("");
-    setSeoDescription("");
+    setForm(defaultForm);
+    setInitialEditorHtml('');
     setIsModalOpen(true);
   };
 
-  const handleEdit = (page: PageDto) => {
+  const openEditModal = (page: PageDto) => {
     setEditingPage(page);
-    setTitle(page.title);
-    setSlug(page.slug);
-    setContent(page.content);
-    setStatus(page.status);
-    setSelectedImageId(page.featuredImageId || null);
-    setSeoTitle(page.seoTitle || "");
-    setSeoDescription(page.seoDescription || "");
+    setForm({
+      title: page.title || '',
+      slug: page.slug || '',
+      status: page.status || 'draft',
+      template: page.template || 'default',
+      seoTitle: page.seoTitle || '',
+      seoDescription: page.seoDescription || '',
+      metaKeywords: (page.metaKeywords || []).join(', '),
+    });
+    setInitialEditorHtml(page.content || '');
     setIsModalOpen(true);
+  };
+
+  const execCommand = (event: React.MouseEvent<HTMLButtonElement>, command: string, value?: string) => {
+    event.preventDefault();
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    document.execCommand(command, false, value);
+  };
+
+  const insertLink = () => {
+    const url = window.prompt('Введите URL');
+    if (!url) return;
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    document.execCommand('createLink', false, url);
+  };
+
+  const handleAiAssist = async () => {
+    if (!accessToken) return;
+    const prompt = window.prompt('Что сделать с текстом? Например: "сделай короче и структурированнее"');
+    if (!prompt?.trim()) return;
+    setIsAiLoading(true);
+    try {
+      const content = editorRef.current?.innerHTML || '';
+      const result = await completePageWithAi(accessToken, { prompt: prompt.trim(), content });
+      if (editorRef.current) {
+        editorRef.current.innerHTML = result.text;
+        editorRef.current.focus();
+      }
+      showToast({ type: 'success', message: 'AI обновил текст' });
+    } catch (error: any) {
+      showToast({ type: 'error', message: error?.response?.data?.message || 'AI недоступен' });
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   const handleSave = async () => {
-    if (!title || !slug || !content) {
-      showToast({ type: "error", message: "Заполните обязательные поля" });
+    if (!accessToken) return;
+    if (!form.title.trim() || !form.slug.trim()) {
+      showToast({ type: 'error', message: 'Название и slug обязательны' });
       return;
     }
+    setIsSaving(true);
+    const content = editorRef.current?.innerHTML || '';
     try {
       if (editingPage) {
-        await updatePage(accessToken, editingPage.id, {
-          title,
-          slug,
+        const updated = await updatePage(accessToken, editingPage.id, {
+          title: form.title.trim(),
+          slug: form.slug.trim(),
           content,
-          status,
-          featuredImageId: selectedImageId || undefined,
-          seoTitle: seoTitle || undefined,
-          seoDescription: seoDescription || undefined,
+          status: form.status,
+          template: form.template,
+          seoTitle: form.seoTitle || undefined,
+          seoDescription: form.seoDescription || undefined,
+          metaKeywords: form.metaKeywords
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean),
         });
-        showToast({ type: "success", message: "Страница обновлена" });
+        setPages((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        showToast({ type: 'success', message: 'Страница обновлена' });
       } else {
-        await createPage(accessToken, {
-          title,
-          slug,
+        const created = await createPage(accessToken, {
+          title: form.title.trim(),
+          slug: form.slug.trim(),
           content,
-          status,
-          featuredImageId: selectedImageId || undefined,
-          seoTitle: seoTitle || undefined,
-          seoDescription: seoDescription || undefined,
+          status: form.status,
+          template: form.template,
+          seoTitle: form.seoTitle || undefined,
+          seoDescription: form.seoDescription || undefined,
+          metaKeywords: form.metaKeywords
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean),
         });
-        showToast({ type: "success", message: "Страница создана" });
+        setPages((prev) => [created, ...prev]);
+        showToast({ type: 'success', message: 'Страница создана' });
       }
       setIsModalOpen(false);
-      setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить страницу";
-      showToast({ type: "error", message });
+      showToast({ type: 'error', message: error?.response?.data?.message || 'Ошибка сохранения' });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить эту страницу?")) return;
+    if (!accessToken) return;
+    if (!confirm('Удалить страницу?')) return;
     try {
       await deletePage(accessToken, id);
-      showToast({ type: "success", message: "Страница удалена" });
-      setQuery((prev) => ({ ...prev }));
+      setPages((prev) => prev.filter((item) => item.id !== id));
+      showToast({ type: 'success', message: 'Страница удалена' });
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить страницу";
-      showToast({ type: "error", message });
+      showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось удалить страницу' });
     }
   };
-
-  const handlePublish = async (id: number) => {
-    try {
-      await publishPage(accessToken, id);
-      showToast({ type: "success", message: "Страница опубликована" });
-      setQuery((prev) => ({ ...prev }));
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось опубликовать страницу";
-      showToast({ type: "error", message });
-    }
-  };
-
-  const handleUnpublish = async (id: number) => {
-    try {
-      await unpublishPage(accessToken, id);
-      showToast({ type: "success", message: "Страница снята с публикации" });
-      setQuery((prev) => ({ ...prev }));
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось снять страницу с публикации";
-      showToast({ type: "error", message });
-    }
-  };
-
-  const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
-      return item.filepath;
-    }
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-    return `${API_URL}/uploads/${item.filepath}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  };
-
-  const totalPages = useMemo(() => {
-    if (!query.limit) return 1;
-    return Math.max(1, Math.ceil(pages.length / query.limit));
-  }, [pages.length, query.limit]);
 
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type={"third"} />
 
       <div className={styles.toolbar}>
-        <div className={styles.searchContainer}>
-          <Input
-            className={styles.search}
-            theme="secondary"
-            icon="left"
-            placeholder="Поиск страниц..."
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
-        </div>
+        <Input
+          className={styles.search}
+          theme="secondary"
+          icon="left"
+          placeholder="Поиск страниц..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
         <PermissionGate resource="pages" level={2}>
-          <UiButton theme="primary" onClick={handleCreate}>
-            Добавить страницу
+          <UiButton theme="primary" onClick={openCreateModal}>
+            Создать страницу
           </UiButton>
         </PermissionGate>
       </div>
@@ -272,231 +225,119 @@ const PagesPage = () => {
             <TableHead>Название</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>Статус</TableHead>
-            <TableHead>Дата создания</TableHead>
-            <TableHead className={styles.actionsColumn}>Действия</TableHead>
+            <TableHead>Действия</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {pages.map((page) => (
-            <TableRow key={page.id}>
-              <TableCell>
-                <button
-                  className={styles.pageName}
-                  onClick={() => handleEdit(page)}
-                >
-                  {page.title}
-                </button>
-              </TableCell>
-              <TableCell>{page.slug}</TableCell>
-              <TableCell>
-                <span className={`${styles.status} ${styles[`status${page.status}`]}`}>
-                  {page.status === 'published' ? 'Опубликовано' : page.status === 'draft' ? 'Черновик' : page.status}
-                </span>
-              </TableCell>
-              <TableCell>{formatDate(page.createdAt)}</TableCell>
-              <TableCell className={styles.actionsColumn}>
-                <UiButton theme="secondary" onClick={() => handleEdit(page)}>
-                  Редактировать
-                </UiButton>
-                {page.status === 'published' ? (
-                  <PermissionGate resource="pages" level={2}>
-                    <UiButton theme="secondary" onClick={() => handleUnpublish(page.id)}>
-                      Снять с публикации
-                    </UiButton>
-                  </PermissionGate>
-                ) : (
-                  <PermissionGate resource="pages" level={2}>
-                    <UiButton theme="primary" onClick={() => handlePublish(page.id)}>
-                      Опубликовать
-                    </UiButton>
-                  </PermissionGate>
-                )}
-                <PermissionGate resource="pages" level={2}>
-                  <UiButton theme="warning" onClick={() => handleDelete(page.id)}>
-                    Удалить
-                  </UiButton>
-                </PermissionGate>
-              </TableCell>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={4}>Загрузка...</TableCell>
             </TableRow>
-          ))}
+          ) : pages.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4}>Страницы не найдены</TableCell>
+            </TableRow>
+          ) : (
+            pages.map((page) => (
+              <TableRow key={page.id}>
+                <TableCell>{page.title}</TableCell>
+                <TableCell>{page.slug}</TableCell>
+                <TableCell>{page.status === 'published' ? 'Опубликовано' : 'Черновик'}</TableCell>
+                <TableCell className={styles.actions}>
+                  <UiButton theme="secondary" onClick={() => openEditModal(page)}>
+                    Редактировать
+                  </UiButton>
+                  <PermissionGate resource="pages" level={2}>
+                    <UiButton theme="warning" onClick={() => handleDelete(page.id)}>
+                      Удалить
+                    </UiButton>
+                  </PermissionGate>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 
-      <div className={styles.footer}>
-        <Pagination
-          currentPage={query.page || 1}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+      <div className={styles.pagination}>
+        <Pagination currentPage={query.page || 1} totalPages={totalPages} onPageChange={(page) => setQuery((prev) => ({ ...prev, page }))} />
       </div>
 
       <PermissionGate resource="pages" level={2}>
-        <Modal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title={editingPage ? "Редактировать страницу" : "Создать страницу"}
-        >
+        <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingPage ? 'Редактировать страницу' : 'Создать страницу'}>
           <div className={styles.modalContent}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Название *</label>
-              <Input
-                className={styles.input}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Название страницы"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Slug *</label>
-              <Input
-                className={styles.input}
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="slug-stranicy"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Статус</label>
-              <Select
-                className={styles.input}
-                options={[
-                  { value: 'draft', label: 'Черновик' },
-                  { value: 'published', label: 'Опубликовано' },
-                  { value: 'pending', label: 'Ожидает' },
-                ]}
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Контент *</label>
-              <textarea
-                className={styles.textarea}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Содержимое страницы"
-                rows={10}
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Изображение</label>
-              <div className={styles.imageSelector}>
-                {selectedImageId ? (
-                  <div className={styles.selectedImage}>
-                    {(() => {
-                      const selectedMedia = mediaFiles.find((m) => m.id === selectedImageId);
-                      if (selectedMedia) {
-                        return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
-                      }
-                      if (editingPage?.featuredImage) {
-                        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                        const imageUrl = editingPage.featuredImage.filepath.startsWith('http')
-                          ? editingPage.featuredImage.filepath
-                          : `${API_URL}/uploads/${editingPage.featuredImage.filepath}`;
-                        return <img src={imageUrl} alt={editingPage.featuredImage.filename} />;
-                      }
-                      return null;
-                    })()}
-                    <div className={styles.imageActions}>
-                      <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                        Изменить
-                      </UiButton>
-                      <UiButton theme="warning" onClick={() => setSelectedImageId(null)}>
-                        Удалить
-                      </UiButton>
-                    </div>
-                  </div>
-                ) : (
-                  <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                    Выбрать изображение
-                  </UiButton>
-                )}
+            <div className={styles.grid}>
+              <div className={styles.mainCol}>
+                <Input
+                  className={styles.input}
+                  value={form.title}
+                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                  placeholder="Название"
+                />
+                <div className={styles.formatToolbar}>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'bold')}>B</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'italic')}>I</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'underline')}>U</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'h2')}>H2</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'h3')}>H3</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'insertUnorderedList')}>• List</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'insertOrderedList')}>1. List</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'blockquote')}>Quote</button>
+                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'pre')}>Code</button>
+                  <button type="button" onClick={insertLink}>Link</button>
+                  <button type="button" onClick={handleAiAssist}>{isAiLoading ? 'AI...' : 'AI'}</button>
+                </div>
+                <div
+                  ref={editorRef}
+                  className={styles.editor}
+                  contentEditable
+                  suppressContentEditableWarning
+                />
+              </div>
+
+              <div className={styles.sideCol}>
+                <label className={styles.label}>Slug</label>
+                <Input value={form.slug} onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))} />
+
+                <label className={styles.label}>Статус</label>
+                <Select
+                  options={[
+                    { value: 'draft', label: 'Черновик' },
+                    { value: 'published', label: 'Опубликовано' },
+                  ]}
+                  value={form.status}
+                  onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+                />
+
+                <label className={styles.label}>Шаблон</label>
+                <Input value={form.template} onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))} />
+
+                <label className={styles.label}>SEO заголовок</label>
+                <Input value={form.seoTitle} onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))} />
+
+                <label className={styles.label}>SEO описание</label>
+                <textarea
+                  className={styles.textarea}
+                  value={form.seoDescription}
+                  onChange={(event) => setForm((prev) => ({ ...prev, seoDescription: event.target.value }))}
+                />
+
+                <label className={styles.label}>Ключевые слова (через запятую)</label>
+                <Input value={form.metaKeywords} onChange={(event) => setForm((prev) => ({ ...prev, metaKeywords: event.target.value }))} />
               </div>
             </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>SEO Заголовок</label>
-              <Input
-                className={styles.input}
-                value={seoTitle}
-                onChange={(e) => setSeoTitle(e.target.value)}
-                placeholder="SEO заголовок"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>SEO Описание</label>
-              <textarea
-                className={styles.textarea}
-                value={seoDescription}
-                onChange={(e) => setSeoDescription(e.target.value)}
-                placeholder="SEO описание"
-                rows={3}
-              />
-            </div>
-            <div className={styles.modalFooter}>
+
+            <div className={styles.modalActions}>
               <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
                 Отмена
               </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
-                Сохранить
+                {isSaving ? 'Сохранение...' : 'Сохранить'}
               </UiButton>
             </div>
           </div>
         </Modal>
       </PermissionGate>
-
-      <Modal
-        open={isMediaModalOpen}
-        onClose={() => setIsMediaModalOpen(false)}
-        title="Выбрать изображение"
-      >
-        <div className={styles.mediaModalContent}>
-          {isLoadingMedia ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Загрузка медиафайлов...
-            </div>
-          ) : mediaFiles.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Медиафайлы не найдены
-            </div>
-          ) : (
-            <>
-              <div className={styles.mediaGrid}>
-                {mediaFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`${styles.mediaCard} ${selectedImageId === file.id ? styles.mediaCardSelected : ""}`}
-                    onClick={() => {
-                      setSelectedImageId(file.id);
-                      setIsMediaModalOpen(false);
-                    }}
-                  >
-                    <div className={styles.mediaPreview}>
-                      {file.isImage ? (
-                        <img src={getFileUrl(file)} alt={file.altText || file.filename} />
-                      ) : (
-                        <div className={styles.mediaPlaceholder}>{file.mimetype}</div>
-                      )}
-                    </div>
-                    <div className={styles.mediaMeta}>
-                      <div className={styles.mediaFilename}>{file.filename}</div>
-                      <div className={styles.mediaCaption}>{file.caption}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {mediaTotal > 0 && (
-                <div className={styles.mediaFooter}>
-                  <Pagination
-                    currentPage={mediaQuery.page || 1}
-                    totalPages={Math.ceil(mediaTotal / (mediaQuery.limit || 50))}
-                    onPageChange={(page) => setMediaQuery((prev) => ({ ...prev, page }))}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 };

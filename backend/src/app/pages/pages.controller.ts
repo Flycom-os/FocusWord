@@ -23,6 +23,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CreatePageDto } from "../dto/pages/create-page.dto";
+import { CreatePageDraftDto } from "../dto/pages/create-page-draft.dto";
+import { PageAiCompleteDto } from "../dto/pages/page-ai-complete.dto";
 import { PageFilterDto } from "../dto/pages/page-filter.dto";
 import { UpdatePageDto } from "../dto/pages/update-page.dto";
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
@@ -44,6 +46,25 @@ export class PagesController {
   async create(@Body() createPageDto: CreatePageDto, @Req() req: RequestWithUser) {
     createPageDto.authorId = req.user.userId;
     return this.pagesService.create(createPageDto);
+  }
+
+  @Post('draft')
+  @HasPermission('pages:2')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a page draft with defaults' })
+  @ApiCreatedResponse({ description: 'The page draft has been successfully created.' })
+  async createDraft(@Body() createPageDraftDto: CreatePageDraftDto, @Req() req: RequestWithUser) {
+    createPageDraftDto.authorId = req.user.userId;
+    return this.pagesService.createDraft(createPageDraftDto);
+  }
+
+  @Post('ai/complete')
+  @HasPermission('pages:1')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Generate page content via AI helper' })
+  @ApiOkResponse({ description: 'AI-generated content result.' })
+  completeWithAi(@Body() dto: PageAiCompleteDto) {
+    return this.pagesService.completeWithAi(dto.prompt, dto.content);
   }
 
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for title or content' })

@@ -53,4 +53,9 @@ export class CreatePageDto {
   @IsInt()
   @IsOptional()
   parentPageId?: number;
+
+  @ApiProperty({ description: 'Page template name', required: false, default: 'default' })
+  @IsString()
+  @IsOptional()
+  template?: string;
 }
