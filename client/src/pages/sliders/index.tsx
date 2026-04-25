@@ -1,13 +1,9 @@
-'use client';
+'use client'
 
-/**
- * @page Sliders
- */
-
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from 'react'
 import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/sliders/index.module.css";
-import { useAuth } from "@/src/app/providers/auth-provider";
+import { useAuth } from '@/src/app/providers/auth-provider'
 import {
   fetchSliders,
   createSlider,
@@ -21,7 +17,7 @@ import {
   SlideDto,
   SliderQuery,
 } from "@/src/shared/api/sliders";
-import { fetchMediaFiles, MediaFileDto, MediaFilesQuery } from "@/src/shared/api/mediafiles";
+import { MediaFileDto } from "@/src/shared/api/mediafiles";
 import {
   Pagination,
   PermissionGate,
@@ -35,22 +31,14 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  VideoPlayer,
-  AudioPlayer,
 } from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
+import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
 
 const defaultQuery: SliderQuery = {
   page: 1,
   limit: 20,
   sortBy: "createdAt",
-  sortOrder: "desc",
-};
-
-const defaultMediaQuery: MediaFilesQuery = {
-  page: 1,
-  limit: 50,
-  sortBy: "uploadedAt",
   sortOrder: "desc",
 };
 
@@ -69,10 +57,6 @@ const SlidersPage = () => {
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [editingSlider, setEditingSlider] = useState<SliderDto | null>(null);
   const [editingSlide, setEditingSlide] = useState<SlideDto | null>(null);
-  const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
-  const [mediaTotal, setMediaTotal] = useState(0);
-  const [isLoadingMedia, setIsLoadingMedia] = useState(false);
-  const [mediaQuery, setMediaQuery] = useState<MediaFilesQuery>(defaultMediaQuery);
 
   // Form states
   const [sliderName, setSliderName] = useState("");
@@ -82,7 +66,7 @@ const SlidersPage = () => {
   const [slideDescription, setSlideDescription] = useState("");
   const [slideLinkUrl, setSlideLinkUrl] = useState("");
   const [slideSortOrder, setSlideSortOrder] = useState(0);
-  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<MediaFileDto | null>(null);
 
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
@@ -129,28 +113,6 @@ const SlidersPage = () => {
       setSlidesTotal(0);
     }
   }, [accessToken, selectedSliderId, slidesQuery]);
-
-  useEffect(() => {
-    if (isMediaModalOpen) {
-      setIsLoadingMedia(true);
-      const loadMedia = async () => {
-        try {
-          const res = await fetchMediaFiles(accessToken, mediaQuery);
-          setMediaFiles(res.data);
-          setMediaTotal(res.total);
-        } catch (error: any) {
-          const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
-          showToast(message, "error");
-        } finally {
-          setIsLoadingMedia(false);
-        }
-      };
-      loadMedia();
-    } else {
-      setMediaFiles([]);
-      setMediaTotal(0);
-    }
-  }, [accessToken, isMediaModalOpen, mediaQuery]);
 
   const handleSearchChange = (value: string) => {
     setQuery((prev) => ({ ...prev, page: 1, search: value }));
@@ -205,7 +167,7 @@ const SlidersPage = () => {
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось сохранить слайдер";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -220,7 +182,7 @@ const SlidersPage = () => {
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось удалить слайдер";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -234,7 +196,7 @@ const SlidersPage = () => {
     setSlideDescription("");
     setSlideLinkUrl("");
     setSlideSortOrder(0);
-    setSelectedImageId(null);
+    setSelectedImage(null);
     setIsSlideModalOpen(true);
   };
 
@@ -244,37 +206,43 @@ const SlidersPage = () => {
     setSlideDescription(slide.description || "");
     setSlideLinkUrl(slide.linkUrl || "");
     setSlideSortOrder(slide.sortOrder);
-    setSelectedImageId(slide.imageId || null);
+    setSelectedImage(slide.image ? { 
+  ...slide.image, 
+  mimetype: '', 
+  fileSize: 0, 
+  uploadedAt: '', 
+  updatedAt: '', 
+  altText: '', 
+  caption: '',
+  isImage: slide.image.filepath.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null,
+  isVideo: slide.image.filepath.match(/\.(mp4|avi|mov|webm)$/i) !== null,
+  isAudio: slide.image.filepath.match(/\.(mp3|wav|ogg)$/i) !== null
+} : null);
     setIsSlideModalOpen(true);
   };
 
   const handleSaveSlide = async () => {
     if (!selectedSliderId) return;
     try {
+      const slideData = {
+        title: slideTitle || undefined,
+        description: slideDescription || undefined,
+        linkUrl: slideLinkUrl || undefined,
+        sortOrder: slideSortOrder,
+        imageId: selectedImage?.id,
+      };
       if (editingSlide) {
-        await updateSlide(accessToken, selectedSliderId, editingSlide.id, {
-          title: slideTitle || undefined,
-          description: slideDescription || undefined,
-          linkUrl: slideLinkUrl || undefined,
-          sortOrder: slideSortOrder,
-          imageId: selectedImageId || undefined,
-        });
+        await updateSlide(accessToken, selectedSliderId, editingSlide.id, slideData);
         showToast("Слайд обновлен", "success");
       } else {
-        await createSlide(accessToken, selectedSliderId, {
-          title: slideTitle || undefined,
-          description: slideDescription || undefined,
-          linkUrl: slideLinkUrl || undefined,
-          sortOrder: slideSortOrder,
-          imageId: selectedImageId || undefined,
-        });
+        await createSlide(accessToken, selectedSliderId, slideData);
         showToast("Слайд создан", "success");
       }
       setIsSlideModalOpen(false);
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось сохранить слайд";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -287,16 +255,13 @@ const SlidersPage = () => {
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось удалить слайд";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
-
-  const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
-      return item.filepath;
-    }
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-    return `${API_URL}/uploads/${item.filepath}`;
+  
+  const handleMediaSelect = (media: MediaFileDto) => {
+    setSelectedImage(media);
+    setIsMediaModalOpen(false);
   };
 
   const getSlideMediaPreview = (slide: SlideDto) => {
@@ -304,10 +269,18 @@ const SlidersPage = () => {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
       const imageUrl = slide.image.filepath.startsWith('http')
         ? slide.image.filepath
-        : `${API_URL}/uploads/${slide.image.filepath}`;
+        : `${API_URL}/backend/uploads/${slide.image.filepath}`;
       return <img src={imageUrl} alt={slide.image.filename} className={styles.slidePreview} />;
     }
     return <div className={styles.slidePreviewPlaceholder}>Нет изображения</div>;
+  };
+  
+  const getFileUrl = (item: MediaFileDto) => {
+    if (item.filepath && item.filepath.startsWith('http')) {
+      return item.filepath;
+    }
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+    return `${API_URL}/backend/uploads/${item.filepath}`;
   };
 
   return (
@@ -384,17 +357,18 @@ const SlidersPage = () => {
           <div className={styles.slidesSection}>
             <div className={styles.slidesHeader}>
               <h2 className={styles.sectionTitle}>Слайды</h2>
-              <PermissionGate resource="sliders" level={2}>
+              <PermissionGate resource="sliders" level={1}>
                 <UiButton theme="primary" onClick={handleCreateSlide}>
                   Добавить слайд
                 </UiButton>
               </PermissionGate>
             </div>
+            
             <Table className={styles.table}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Медиа</TableHead>
-                  <TableHead>Название</TableHead>
+                  <TableHead>Превью</TableHead>
+                  <TableHead>Заголовок</TableHead>
                   <TableHead>Описание</TableHead>
                   <TableHead>Ссылка</TableHead>
                   <TableHead>Порядок</TableHead>
@@ -404,9 +378,7 @@ const SlidersPage = () => {
               <TableBody>
                 {slides.map((slide) => (
                   <TableRow key={slide.id}>
-                    <TableCell>
-                      {getSlideMediaPreview(slide)}
-                    </TableCell>
+                    <TableCell>{getSlideMediaPreview(slide)}</TableCell>
                     <TableCell>{slide.title || '-'}</TableCell>
                     <TableCell>{slide.description || '-'}</TableCell>
                     <TableCell>{slide.linkUrl || '-'}</TableCell>
@@ -439,210 +411,141 @@ const SlidersPage = () => {
         )}
       </div>
 
-      <PermissionGate resource="sliders" level={2}>
-        <Modal
-          open={isSliderModalOpen}
-          onClose={() => setIsSliderModalOpen(false)}
-          title={editingSlider ? "Редактировать слайдер" : "Создать слайдер"}
-        >
-          <div className={styles.modalContent}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Название *</label>
-              <Input
-                className={styles.input}
-                value={sliderName}
-                onChange={(e) => setSliderName(e.target.value)}
-                placeholder="Название слайдера"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Slug *</label>
-              <Input
-                className={styles.input}
-                value={sliderSlug}
-                onChange={(e) => setSliderSlug(e.target.value)}
-                placeholder="slug-slidera"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Описание</label>
-              <Input
-                className={styles.input}
-                value={sliderDescription}
-                onChange={(e) => setSliderDescription(e.target.value)}
-                placeholder="Описание слайдера"
-              />
-            </div>
-            <div className={styles.modalFooter}>
-              <UiButton theme="secondary" onClick={() => setIsSliderModalOpen(false)}>
-                Отмена
-              </UiButton>
-              <UiButton theme="primary" onClick={handleSaveSlider}>
-                Сохранить
-              </UiButton>
-            </div>
+      {/* Slider Modal */}
+      <Modal open={isSliderModalOpen} onClose={() => setIsSliderModalOpen(false)} title={editingSlider ? 'Редактировать слайдер' : 'Создать слайдер'}>
+        <div className={styles.modalContent}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Название</label>
+            <Input
+              className={styles.input}
+              value={sliderName}
+              onChange={(e) => setSliderName(e.target.value)}
+              placeholder="Название слайдера"
+            />
           </div>
-        </Modal>
-      </PermissionGate>
-
-      <PermissionGate resource="sliders" level={2}>
-        <Modal
-          open={isSlideModalOpen}
-          onClose={() => setIsSlideModalOpen(false)}
-          title={editingSlide ? "Редактировать слайд" : "Создать слайд"}
-        >
-          <div className={styles.modalContent}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Название</label>
-              <Input
-                className={styles.input}
-                value={slideTitle}
-                onChange={(e) => setSlideTitle(e.target.value)}
-                placeholder="Название слайда"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Описание</label>
-              <Input
-                className={styles.input}
-                value={slideDescription}
-                onChange={(e) => setSlideDescription(e.target.value)}
-                placeholder="Описание слайда"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Ссылка</label>
-              <Input
-                className={styles.input}
-                value={slideLinkUrl}
-                onChange={(e) => setSlideLinkUrl(e.target.value)}
-                placeholder="https://example.com"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Порядок сортировки</label>
-              <Input
-                className={styles.input}
-                type="number"
-                value={slideSortOrder}
-                onChange={(e) => setSlideSortOrder(parseInt(e.target.value) || 0)}
-                placeholder="0"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Медиа</label>
-              <div className={styles.imageSelector}>
-                {selectedImageId ? (
-                  <div className={styles.selectedImage}>
-                    {(() => {
-                      const selectedMedia = mediaFiles.find((m) => m.id === selectedImageId);
-                      if (selectedMedia) {
-                        if (selectedMedia.isImage) {
-                          return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
-                        } else if (selectedMedia.isVideo) {
-                          return <VideoPlayer src={getFileUrl(selectedMedia)} width="100%" height="150px" />;
-                        } else if (selectedMedia.isAudio) {
-                          return <AudioPlayer src={getFileUrl(selectedMedia)} theme="primary" />;
-                        }
-                      }
-                      if (editingSlide?.image) {
-                        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                        const imageUrl = editingSlide.image.filepath.startsWith('http')
-                          ? editingSlide.image.filepath
-                          : `${API_URL}/uploads/${editingSlide.image.filepath}`;
-                        return <img src={imageUrl} alt={editingSlide.image.filename} />;
-                      }
-                      return null;
-                    })()}
-                    <div className={styles.imageActions}>
-                      <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                        Изменить
-                      </UiButton>
-                      <UiButton theme="warning" onClick={() => setSelectedImageId(null)}>
-                        Удалить
-                      </UiButton>
-                    </div>
-                  </div>
-                ) : (
-                  <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                    Выбрать медиа
-                  </UiButton>
-                )}
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
-                Отмена
-              </UiButton>
-              <UiButton theme="primary" onClick={handleSaveSlide}>
-                Сохранить
-              </UiButton>
-            </div>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Slug</label>
+            <Input
+              className={styles.input}
+              value={sliderSlug}
+              onChange={(e) => setSliderSlug(e.target.value)}
+              placeholder="slider-slug"
+            />
           </div>
-        </Modal>
-      </PermissionGate>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Описание</label>
+            <textarea
+              className={styles.textarea}
+              value={sliderDescription}
+              onChange={(e) => setSliderDescription(e.target.value)}
+              placeholder="Описание слайдера"
+              rows={3}
+            />
+          </div>
 
-      <Modal
-        open={isMediaModalOpen}
-        onClose={() => setIsMediaModalOpen(false)}
-        title="Выбрать медиа"
-      >
-        <div className={styles.mediaModalContent}>
-          {isLoadingMedia ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Загрузка медиафайлов...
-            </div>
-          ) : mediaFiles.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Медиафайлы не найдены
-            </div>
-          ) : (
-            <>
-              <div className={styles.mediaGrid}>
-                {mediaFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`${styles.mediaCard} ${selectedImageId === file.id ? styles.mediaCardSelected : ""}`}
-                    onClick={() => {
-                      setSelectedImageId(file.id);
-                      setIsMediaModalOpen(false);
-                    }}
-                  >
-                    <div className={styles.mediaPreview}>
-                      {file.isImage ? (
-                        <img src={getFileUrl(file)} alt={file.altText || file.filename} />
-                      ) : file.isVideo ? (
-                        <VideoPlayer src={getFileUrl(file)} width="100%" height="120px" />
-                      ) : file.isAudio ? (
-                        <AudioPlayer src={getFileUrl(file)} theme="primary" />
-                      ) : (
-                        <div className={styles.mediaPlaceholder}>{file.mimetype}</div>
-                      )}
-                    </div>
-                    <div className={styles.mediaMeta}>
-                      <div className={styles.mediaFilename}>{file.filename}</div>
-                      <div className={styles.mediaCaption}>{file.caption}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {mediaTotal > 0 && (
-                <div className={styles.mediaFooter}>
-                  <Pagination
-                    page={mediaQuery.page || 1}
-                    total={mediaTotal}
-                    perPage={mediaQuery.limit || 50}
-                    onChange={(page) => setMediaQuery((prev) => ({ ...prev, page }))}
-                  />
-                </div>
-              )}
-            </>
-          )}
+          <div className={styles.modalFooter}>
+            <UiButton theme="secondary" onClick={() => setIsSliderModalOpen(false)}>
+              Отмена
+            </UiButton>
+            <UiButton theme="primary" onClick={handleSaveSlider}>
+              {editingSlider ? 'Обновить' : 'Создать'}
+            </UiButton>
+          </div>
         </div>
       </Modal>
+
+      {/* Slide Modal */}
+      <Modal open={isSlideModalOpen} onClose={() => setIsSlideModalOpen(false)} title={editingSlide ? 'Редактировать слайд' : 'Создать слайд'}>
+        <div className={styles.modalContent}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Заголовок</label>
+            <Input
+              className={styles.input}
+              value={slideTitle}
+              onChange={(e) => setSlideTitle(e.target.value)}
+              placeholder="Заголовок слайда"
+            />
+          </div>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Описание</label>
+            <textarea
+              className={styles.textarea}
+              value={slideDescription}
+              onChange={(e) => setSlideDescription(e.target.value)}
+              placeholder="Описание слайда"
+              rows={3}
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Ссылка</label>
+            <Input
+              className={styles.input}
+              value={slideLinkUrl}
+              onChange={(e) => setSlideLinkUrl(e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Порядок сортировки</label>
+            <Input
+              className={styles.input}
+              type="number"
+              value={slideSortOrder}
+              onChange={(e) => setSlideSortOrder(parseInt(e.target.value) || 0)}
+              placeholder="0"
+            />
+          </div>
+
+          <div className={styles.imageSelector}>
+            <label className={styles.formLabel}>Изображение</label>
+            <div className={styles.selectedImage}>
+              {selectedImage ? (
+                <>
+                  <img src={getFileUrl(selectedImage)} alt={selectedImage.filename} />
+                  <div className={styles.imageActions}>
+                    <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
+                      Изменить
+                    </UiButton>
+                    <UiButton theme="warning" onClick={() => setSelectedImage(null)}>
+                      Удалить
+                    </UiButton>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.imagePlaceholder}>
+                  <UiButton theme="primary" onClick={() => setIsMediaModalOpen(true)}>
+                    Выбрать изображение
+                  </UiButton>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.modalFooter}>
+            <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
+              Отмена
+            </UiButton>
+            <UiButton theme="primary" onClick={handleSaveSlide}>
+              {editingSlide ? 'Обновить' : 'Создать'}
+            </UiButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Media Picker Modal */}
+      <MediaPickerModal
+        open={isMediaModalOpen}
+        onClose={() => setIsMediaModalOpen(false)}
+        onSelect={handleMediaSelect}
+        zIndex={2001}
+      />
     </div>
   );
 };
 
 export default SlidersPage;
-

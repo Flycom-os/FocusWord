@@ -1,27 +1,152 @@
-.root {
+.container {
+  padding: 24px;
+}
+
+.loading {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  color: #6b7280;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.sliderCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.sliderCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.sliderInfo {
+  margin-bottom: 16px;
+}
+
+.sliderInfo h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.slug {
+  font-size: 14px;
+  color: #6b7280;
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.description {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sliderActions {
+  display: flex;
+  gap: 12px;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.modalContent {
+  padding: 24px;
+  max-width: 500px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Table styles for compatibility with existing code */
+.root {
   padding: 24px;
 }
 
 .toolbar {
   display: flex;
-  gap: 16px;
-  align-items: center;
   justify-content: space-between;
-}
-
-.searchContainer {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex: 1;
-  max-width: 500px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .search {
-  flex: 1;
+  max-width: 380px;
 }
 
 .content {
@@ -52,6 +177,7 @@
 
 .table {
   width: 100%;
+  border-collapse: collapse;
   background: white;
   border-radius: 8px;
   overflow: hidden;
@@ -92,15 +218,6 @@
   display: flex;
   justify-content: center;
   padding: 16px 0;
-}
-
-.modalContent {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 8px;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 .formField {

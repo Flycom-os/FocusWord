@@ -40,6 +40,10 @@ export interface PaginatedSlidesResponse {
   limit: number;
 }
 
+export interface SliderDetailsDto extends SliderDto {
+  slides: SlideDto[];
+}
+
 export interface SliderQuery {
   page?: number;
   limit?: number;
@@ -119,8 +123,8 @@ export const updateSlider = async (
   return data;
 };
 
-export const getSlider = async (token: string | null, id: number): Promise<SliderDto> => {
-  const { data } = await axios.get<SliderDto>(`${API_URL}/sliders/${id}`, {
+export const getSlider = async (token: string | null, id: number): Promise<SliderDetailsDto> => {
+  const { data } = await axios.get<SliderDetailsDto>(`${API_URL}/sliders/${id}`, {
     headers: authHeaders(token),
   });
   return data;

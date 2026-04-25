@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreatePageDto {
   @ApiProperty({ description: 'The title of the page', minLength: 1 })
@@ -33,6 +34,11 @@ export class CreatePageDto {
   @IsOptional()
   featuredImageId?: number;
 
+  @ApiProperty({ description: 'The ID of the featured slider', required: false })
+  @IsInt()
+  @IsOptional()
+  featuredSliderId?: number | null;
+
   @ApiProperty({ description: 'The SEO title for the page', required: false })
   @IsString()
   @IsOptional()
@@ -49,8 +55,23 @@ export class CreatePageDto {
   @IsOptional()
   metaKeywords?: string[];
 
+  @ApiProperty({ 
+    description: 'Content blocks configuration - array of objects with type (slider|media|gallery), id, position', 
+    required: false,
+    example: [{ type: 'slider', id: 1, position: 0 }],
+    type: 'array'
+  })
+  @IsOptional()
+  @Type(() => Object)
+  contentBlocks?: Record<string, any>[] | null;
+
   @ApiProperty({ description: 'The ID of the parent page for hierarchical structure', required: false })
   @IsInt()
   @IsOptional()
   parentPageId?: number;
+
+  @ApiProperty({ description: 'Page template name', required: false, default: 'default' })
+  @IsString()
+  @IsOptional()
+  template?: string;
 }

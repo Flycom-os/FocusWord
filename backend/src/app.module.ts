@@ -15,6 +15,7 @@ import { SlidersModule } from "./app/sliders/sliders.module"; // Import RoleModu
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', 'backend/.env', '../.env'],
     }),
     RedisModule,
     AuthModule,

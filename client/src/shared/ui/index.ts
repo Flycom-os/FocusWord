@@ -38,3 +38,5 @@ export { Header, Footer };
 // export type { Button };
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
 export { default as PermissionGate } from "./PermissionGate";
+import PageSlider from './PageSlider/PageSlider';
+export { PageSlider };
