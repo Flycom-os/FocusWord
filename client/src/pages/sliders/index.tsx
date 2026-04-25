@@ -21,7 +21,7 @@ import {
   SlideDto,
   SliderQuery,
 } from "@/src/shared/api/sliders";
-import { fetchMediaFiles, MediaFileDto, MediaFilesQuery } from "@/src/shared/api/mediafiles";
+import { MediaFileDto } from "@/src/shared/api/mediafiles";
 import {
   Pagination,
   PermissionGate,
@@ -39,18 +39,12 @@ import {
   AudioPlayer,
 } from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
+import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
 
 const defaultQuery: SliderQuery = {
   page: 1,
   limit: 20,
   sortBy: "createdAt",
-  sortOrder: "desc",
-};
-
-const defaultMediaQuery: MediaFilesQuery = {
-  page: 1,
-  limit: 50,
-  sortBy: "uploadedAt",
   sortOrder: "desc",
 };
 
@@ -69,10 +63,6 @@ const SlidersPage = () => {
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [editingSlider, setEditingSlider] = useState<SliderDto | null>(null);
   const [editingSlide, setEditingSlide] = useState<SlideDto | null>(null);
-  const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
-  const [mediaTotal, setMediaTotal] = useState(0);
-  const [isLoadingMedia, setIsLoadingMedia] = useState(false);
-  const [mediaQuery, setMediaQuery] = useState<MediaFilesQuery>(defaultMediaQuery);
 
   // Form states
   const [sliderName, setSliderName] = useState("");
@@ -82,7 +72,7 @@ const SlidersPage = () => {
   const [slideDescription, setSlideDescription] = useState("");
   const [slideLinkUrl, setSlideLinkUrl] = useState("");
   const [slideSortOrder, setSlideSortOrder] = useState(0);
-  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<MediaFileDto | null>(null);
 
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
@@ -129,28 +119,6 @@ const SlidersPage = () => {
       setSlidesTotal(0);
     }
   }, [accessToken, selectedSliderId, slidesQuery]);
-
-  useEffect(() => {
-    if (isMediaModalOpen) {
-      setIsLoadingMedia(true);
-      const loadMedia = async () => {
-        try {
-          const res = await fetchMediaFiles(accessToken, mediaQuery);
-          setMediaFiles(res.data);
-          setMediaTotal(res.total);
-        } catch (error: any) {
-          const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
-          showToast(message, "error");
-        } finally {
-          setIsLoadingMedia(false);
-        }
-      };
-      loadMedia();
-    } else {
-      setMediaFiles([]);
-      setMediaTotal(0);
-    }
-  }, [accessToken, isMediaModalOpen, mediaQuery]);
 
   const handleSearchChange = (value: string) => {
     setQuery((prev) => ({ ...prev, page: 1, search: value }));
@@ -203,7 +171,7 @@ const SlidersPage = () => {
       }
       setIsSliderModalOpen(false);
       setQuery((prev) => ({ ...prev }));
-    } catch (error: any) {
+    } catch (error: any) => {
       const message = error?.response?.data?.message || "Не удалось сохранить слайдер";
       showToast({ type: "error", message });
     }
@@ -234,7 +202,7 @@ const SlidersPage = () => {
     setSlideDescription("");
     setSlideLinkUrl("");
     setSlideSortOrder(0);
-    setSelectedImageId(null);
+    setSelectedImage(null);
     setIsSlideModalOpen(true);
   };
 
@@ -244,30 +212,25 @@ const SlidersPage = () => {
     setSlideDescription(slide.description || "");
     setSlideLinkUrl(slide.linkUrl || "");
     setSlideSortOrder(slide.sortOrder);
-    setSelectedImageId(slide.imageId || null);
+    setSelectedImage(slide.image || null);
     setIsSlideModalOpen(true);
   };
 
   const handleSaveSlide = async () => {
     if (!selectedSliderId) return;
     try {
+      const slideData = {
+        title: slideTitle || undefined,
+        description: slideDescription || undefined,
+        linkUrl: slideLinkUrl || undefined,
+        sortOrder: slideSortOrder,
+        imageId: selectedImage?.id,
+      };
       if (editingSlide) {
-        await updateSlide(accessToken, selectedSliderId, editingSlide.id, {
-          title: slideTitle || undefined,
-          description: slideDescription || undefined,
-          linkUrl: slideLinkUrl || undefined,
-          sortOrder: slideSortOrder,
-          imageId: selectedImageId || undefined,
-        });
+        await updateSlide(accessToken, selectedSliderId, editingSlide.id, slideData);
         showToast("Слайд обновлен", "success");
       } else {
-        await createSlide(accessToken, selectedSliderId, {
-          title: slideTitle || undefined,
-          description: slideDescription || undefined,
-          linkUrl: slideLinkUrl || undefined,
-          sortOrder: slideSortOrder,
-          imageId: selectedImageId || undefined,
-        });
+        await createSlide(accessToken, selectedSliderId, slideData);
         showToast("Слайд создан", "success");
       }
       setIsSlideModalOpen(false);
@@ -290,13 +253,10 @@ const SlidersPage = () => {
       showToast({ type: "error", message });
     }
   };
-
-  const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
-      return item.filepath;
-    }
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-    return `${API_URL}/uploads/${item.filepath}`;
+  
+  const handleMediaSelect = (media: MediaFileDto) => {
+    setSelectedImage(media);
+    setIsMediaModalOpen(false);
   };
 
   const getSlideMediaPreview = (slide: SlideDto) => {
@@ -304,10 +264,18 @@ const SlidersPage = () => {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
       const imageUrl = slide.image.filepath.startsWith('http')
         ? slide.image.filepath
-        : `${API_URL}/uploads/${slide.image.filepath}`;
+        : `${API_URL}/backend/uploads/${slide.image.filepath}`;
       return <img src={imageUrl} alt={slide.image.filename} className={styles.slidePreview} />;
     }
     return <div className={styles.slidePreviewPlaceholder}>Нет изображения</div>;
+  };
+  
+  const getFileUrl = (item: MediaFileDto) => {
+    if (item.filepath && item.filepath.startsWith('http')) {
+      return item.filepath;
+    }
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+    return `${API_URL}/backend/uploads/${item.filepath}`;
   };
 
   return (
@@ -532,25 +500,15 @@ const SlidersPage = () => {
             <div className={styles.formField}>
               <label className={styles.formLabel}>Медиа</label>
               <div className={styles.imageSelector}>
-                {selectedImageId ? (
+                {selectedImage ? (
                   <div className={styles.selectedImage}>
                     {(() => {
-                      const selectedMedia = mediaFiles.find((m) => m.id === selectedImageId);
-                      if (selectedMedia) {
-                        if (selectedMedia.isImage) {
-                          return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
-                        } else if (selectedMedia.isVideo) {
-                          return <VideoPlayer src={getFileUrl(selectedMedia)} width="100%" height="150px" />;
-                        } else if (selectedMedia.isAudio) {
-                          return <AudioPlayer src={getFileUrl(selectedMedia)} theme="primary" />;
-                        }
-                      }
-                      if (editingSlide?.image) {
-                        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                        const imageUrl = editingSlide.image.filepath.startsWith('http')
-                          ? editingSlide.image.filepath
-                          : `${API_URL}/uploads/${editingSlide.image.filepath}`;
-                        return <img src={imageUrl} alt={editingSlide.image.filename} />;
+                      if (selectedImage.isImage) {
+                        return <img src={getFileUrl(selectedImage)} alt={selectedImage.altText || ""} />;
+                      } else if (selectedImage.isVideo) {
+                        return <VideoPlayer src={getFileUrl(selectedImage)} width="100%" height="150px" />;
+                      } else if (selectedImage.isAudio) {
+                        return <AudioPlayer src={getFileUrl(selectedImage)} theme="primary" />;
                       }
                       return null;
                     })()}
@@ -558,7 +516,7 @@ const SlidersPage = () => {
                       <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
                         Изменить
                       </UiButton>
-                      <UiButton theme="warning" onClick={() => setSelectedImageId(null)}>
+                      <UiButton theme="warning" onClick={() => setSelectedImage(null)}>
                         Удалить
                       </UiButton>
                     </div>
@@ -573,7 +531,7 @@ const SlidersPage = () => {
             <div className={styles.modalFooter}>
               <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
                 Отмена
-              </UiButton>
+              </Button>
               <UiButton theme="primary" onClick={handleSaveSlide}>
                 Сохранить
               </UiButton>
@@ -582,67 +540,13 @@ const SlidersPage = () => {
         </Modal>
       </PermissionGate>
 
-      <Modal
+      <MediaPickerModal
         open={isMediaModalOpen}
         onClose={() => setIsMediaModalOpen(false)}
-        title="Выбрать медиа"
-      >
-        <div className={styles.mediaModalContent}>
-          {isLoadingMedia ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Загрузка медиафайлов...
-            </div>
-          ) : mediaFiles.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-              Медиафайлы не найдены
-            </div>
-          ) : (
-            <>
-              <div className={styles.mediaGrid}>
-                {mediaFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`${styles.mediaCard} ${selectedImageId === file.id ? styles.mediaCardSelected : ""}`}
-                    onClick={() => {
-                      setSelectedImageId(file.id);
-                      setIsMediaModalOpen(false);
-                    }}
-                  >
-                    <div className={styles.mediaPreview}>
-                      {file.isImage ? (
-                        <img src={getFileUrl(file)} alt={file.altText || file.filename} />
-                      ) : file.isVideo ? (
-                        <VideoPlayer src={getFileUrl(file)} width="100%" height="120px" />
-                      ) : file.isAudio ? (
-                        <AudioPlayer src={getFileUrl(file)} theme="primary" />
-                      ) : (
-                        <div className={styles.mediaPlaceholder}>{file.mimetype}</div>
-                      )}
-                    </div>
-                    <div className={styles.mediaMeta}>
-                      <div className={styles.mediaFilename}>{file.filename}</div>
-                      <div className={styles.mediaCaption}>{file.caption}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {mediaTotal > 0 && (
-                <div className={styles.mediaFooter}>
-                  <Pagination
-                    page={mediaQuery.page || 1}
-                    total={mediaTotal}
-                    perPage={mediaQuery.limit || 50}
-                    onChange={(page) => setMediaQuery((prev) => ({ ...prev, page }))}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </Modal>
+        onSelect={handleMediaSelect}
+      />
     </div>
   );
 };
 
 export default SlidersPage;
-

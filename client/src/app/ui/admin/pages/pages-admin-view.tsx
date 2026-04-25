@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import styles from './pages-admin-view.module.css';
 import { useAuth } from '@/src/app/providers/auth-provider';
 import { completePageWithAi, createPage, deletePage, fetchPages, PageDto, PagesQuery, updatePage } from '@/src/shared/api/pages';
@@ -8,6 +9,11 @@ import { Modal, Notifications, Pagination, PermissionGate, PageSlider, Select, T
 import Input from '@/src/shared/ui/Input/ui-input';
 import { useDebounce } from '@/src/shared/hooks/use-debounce';
 import { fetchSliders, getSlider, SliderDto, SliderDetailsDto } from '@/src/shared/api/sliders';
+import { OutputData } from '@editorjs/editorjs';
+import { editorToolsToHtml } from '@/src/shared/lib/editor-tools-to-html';
+import { MediaPickerModal } from '@/src/features/Media/ui/MediaPickerModal';
+
+const Editor = dynamic(() => import('@/src/features/Editor/ui/Editor'), { ssr: false });
 
 const defaultQuery: PagesQuery = { page: 1, limit: 20 };
 
@@ -43,7 +49,8 @@ const PagesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<PageDto | null>(null);
   const [form, setForm] = useState<EditorForm>(defaultForm);
-  const [initialEditorHtml, setInitialEditorHtml] = useState('');
+  const [editorData, setEditorData] = useState<OutputData>();
+  
   const [isSaving, setIsSaving] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -54,10 +61,29 @@ const PagesPage = () => {
   // Sliders
   const [sliders, setSliders] = useState<SliderDto[]>([]);
   const [isLoadingSliders, setIsLoadingSliders] = useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaPickerCallback, setMediaPickerCallback] = useState<{ onSelect: (media: any) => void } | null>(null);
 
-  const editorRef = useRef<HTMLDivElement | null>(null);
   const debouncedSearch = useDebounce(search, 300);
 
+  // A bit of a hack to make the access token available to the vanilla JS Editor.js tools
+  if (typeof window !== 'undefined') {
+    (window as any).accessToken = accessToken;
+  }
+
+  useEffect(() => {
+    const handleOpenMediaPicker = (event: CustomEvent) => {
+      setMediaPickerCallback({ onSelect: event.detail.onSelect });
+      setIsMediaPickerOpen(true);
+    };
+
+    window.addEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
+
+    return () => {
+      window.removeEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
+    };
+  }, []);
+  
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
     return Math.max(1, Math.ceil((pages.length || 1) / query.limit));
@@ -102,16 +128,10 @@ const PagesPage = () => {
     }
   }, [isModalOpen, accessToken]);
 
-  useEffect(() => {
-    if (!isModalOpen || !editorRef.current) return;
-    editorRef.current.innerHTML = initialEditorHtml || '';
-    editorRef.current.focus();
-  }, [isModalOpen, initialEditorHtml]);
-
   const openCreateModal = () => {
     setEditingPage(null);
     setForm(defaultForm);
-    setInitialEditorHtml('');
+    setEditorData(undefined);
     setIsModalOpen(true);
   };
 
@@ -127,39 +147,25 @@ const PagesPage = () => {
       metaKeywords: (page.metaKeywords || []).join(', '),
       featuredSliderId: page.featuredSliderId || null,
     });
-    setInitialEditorHtml(page.content || '');
+    setEditorData(page.contentBlocks as OutputData);
     setIsModalOpen(true);
-  };
-
-  const execCommand = (event: React.MouseEvent<HTMLButtonElement>, command: string, value?: string) => {
-    event.preventDefault();
-    const editor = editorRef.current;
-    if (!editor) return;
-    editor.focus();
-    document.execCommand(command, false, value);
-  };
-
-  const insertLink = () => {
-    const url = window.prompt('Введите URL');
-    if (!url) return;
-    const editor = editorRef.current;
-    if (!editor) return;
-    editor.focus();
-    document.execCommand('createLink', false, url);
   };
 
   const handleAiAssist = async () => {
     if (!accessToken) return;
     const prompt = window.prompt('Что сделать с текстом? Например: "сделай короче и структурированнее"');
-    if (!prompt?.trim()) return;
+    if (!prompt?.trim() || !editorData) return;
     setIsAiLoading(true);
     try {
-      const content = editorRef.current?.innerHTML || '';
+      // For AI assistant, we can convert current blocks to a simple text representation
+      const content = editorData.blocks.map(block => block.data.text || '').filter(Boolean).join('\n');
       const result = await completePageWithAi(accessToken, { prompt: prompt.trim(), content });
-      if (editorRef.current) {
-        editorRef.current.innerHTML = result.text;
-        editorRef.current.focus();
-      }
+      
+      // The result is simple text, so we replace the editor content with a single paragraph block
+      setEditorData({
+        blocks: [{ type: 'paragraph', data: { text: result.text } }]
+      });
+
       showToast({ type: 'success', message: 'AI обновил текст' });
     } catch (error: any) {
       showToast({ type: 'error', message: error?.response?.data?.message || 'AI недоступен' });
@@ -169,7 +175,7 @@ const PagesPage = () => {
   };
 
   const handlePreview = async () => {
-    const html = editorRef.current?.innerHTML || '';
+    const html = editorData ? editorToolsToHtml(editorData.blocks) : '';
     setPreviewHtml(html);
     setPreviewSlider(null);
 
@@ -199,40 +205,30 @@ const PagesPage = () => {
       return;
     }
     setIsSaving(true);
-    const content = editorRef.current?.innerHTML || '';
+    
     try {
+      const pageData = {
+        title: form.title.trim(),
+        slug: form.slug.trim(),
+        status: form.status,
+        template: form.template,
+        seoTitle: form.seoTitle || undefined,
+        seoDescription: form.seoDescription || undefined,
+        metaKeywords: form.metaKeywords
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
+        featuredSliderId: form.featuredSliderId || null,
+        contentBlocks: editorData,
+        content: editorData ? editorToolsToHtml(editorData.blocks) : '', // for legacy support
+      };
+
       if (editingPage) {
-        const updated = await updatePage(accessToken, editingPage.id, {
-          title: form.title.trim(),
-          slug: form.slug.trim(),
-          content,
-          status: form.status,
-          template: form.template,
-          seoTitle: form.seoTitle || undefined,
-          seoDescription: form.seoDescription || undefined,
-          metaKeywords: form.metaKeywords
-            .split(',')
-            .map((item) => item.trim())
-            .filter(Boolean),
-          featuredSliderId: form.featuredSliderId || null,
-        });
+        const updated = await updatePage(accessToken, editingPage.id, pageData);
         setPages((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
         showToast({ type: 'success', message: 'Страница обновлена' });
       } else {
-        const created = await createPage(accessToken, {
-          title: form.title.trim(),
-          slug: form.slug.trim(),
-          content,
-          status: form.status,
-          template: form.template,
-          seoTitle: form.seoTitle || undefined,
-          seoDescription: form.seoDescription || undefined,
-          metaKeywords: form.metaKeywords
-            .split(',')
-            .map((item) => item.trim())
-            .filter(Boolean),
-          featuredSliderId: form.featuredSliderId || undefined,
-        });
+        const created = await createPage(accessToken, pageData);
         setPages((prev) => [created, ...prev]);
         showToast({ type: 'success', message: 'Страница создана' });
       }
@@ -259,7 +255,17 @@ const PagesPage = () => {
   return (
     <div className={styles.root}>
       <Notifications />
-
+      <MediaPickerModal
+        open={isMediaPickerOpen}
+        onClose={() => setIsMediaPickerOpen(false)}
+        onSelect={(media) => {
+          if (mediaPickerCallback) {
+            mediaPickerCallback.onSelect(media);
+          }
+          setIsMediaPickerOpen(false);
+        }}
+        zIndex={2001}
+      />
       <div className={styles.toolbar}>
         <Input
           className={styles.search}
@@ -331,25 +337,16 @@ const PagesPage = () => {
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
                   placeholder="Название"
                 />
-                <div className={styles.formatToolbar}>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'bold')}>B</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'italic')}>I</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'underline')}>U</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'h2')}>H2</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'h3')}>H3</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'insertUnorderedList')}>• List</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'insertOrderedList')}>1. List</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'blockquote')}>Quote</button>
-                  <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={(event) => execCommand(event, 'formatBlock', 'pre')}>Code</button>
-                  <button type="button" onClick={insertLink}>Link</button>
-                  <button type="button" onClick={handleAiAssist}>{isAiLoading ? 'AI...' : 'AI'}</button>
+                <div className={styles.editorWrapper}>
+                  <Editor
+                    holder="editorjs-container"
+                    data={editorData}
+                    onChange={setEditorData}
+                  />
+                  <div className={styles.editorAitoolbar}>
+                     <UiButton theme="secondary" onClick={handleAiAssist}>{isAiLoading ? 'AI...' : '✨ AI'}</UiButton>
+                  </div>
                 </div>
-                <div
-                  ref={editorRef}
-                  className={styles.editor}
-                  contentEditable
-                  suppressContentEditableWarning
-                />
               </div>
 
               <div className={styles.sideCol}>

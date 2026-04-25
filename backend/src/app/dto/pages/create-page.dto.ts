@@ -37,7 +37,7 @@ export class CreatePageDto {
   @ApiProperty({ description: 'The ID of the featured slider', required: false })
   @IsInt()
   @IsOptional()
-  featuredSliderId?: number;
+  featuredSliderId?: number | null;
 
   @ApiProperty({ description: 'The SEO title for the page', required: false })
   @IsString()
@@ -63,8 +63,7 @@ export class CreatePageDto {
   })
   @IsOptional()
   @Type(() => Object)
-  contentBlocks?: Record<string, any>[];
-}
+  contentBlocks?: Record<string, any>[] | null;
 
   @ApiProperty({ description: 'The ID of the parent page for hierarchical structure', required: false })
   @IsInt()

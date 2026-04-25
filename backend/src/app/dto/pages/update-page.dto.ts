@@ -17,6 +17,7 @@ export class UpdatePageDto extends PartialType(CreatePageDto) {
   @IsOptional()
   publishedAt?: Date;
 
+  // @ts-ignore
   @ApiProperty({ description: 'The ID of the featured slider', required: false })
   @IsInt()
   @IsOptional()

@@ -6,6 +6,8 @@ import { QueryMediaFileDto, SortOrder } from '../dto/mediafiles/query-media-file
 import IORedis from 'ioredis';
 import { REDIS_CLIENT } from "../../redis/redis.module";
 import { Prisma, MediaFile } from '@prisma/client';
+import { unlink } from 'fs/promises';
+import { join, basename } from 'path';
 
 export interface PaginatedMediaFiles {
   data: MediaFile[];
@@ -142,10 +144,27 @@ export class MediafilesService {
   }
 
   async remove(id: number): Promise<MediaFile> {
-    const mediaFile = await this.prisma.mediaFile.delete({ where: { id } });
+    const mediaFile = await this.prisma.mediaFile.findUnique({ where: { id } });
     if (!mediaFile) {
-        throw new NotFoundException(`MediaFile with ID ${id} not found`);
+      throw new NotFoundException(`MediaFile with ID ${id} not found`);
     }
+
+    // Delete the physical file from disk
+    try {
+      const diskFilename = basename(mediaFile.filepath);
+      const filePath = join(process.cwd(), 'backend', 'uploads', diskFilename);
+      this.logger.log(`Attempting to delete file at: ${filePath}`);
+      await unlink(filePath);
+      this.logger.log(`Successfully deleted file: ${diskFilename}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete file for MediaFile ID ${id}. File may not exist or there was a permission issue. Error: ${error.message}`);
+      // We don't re-throw the error, allowing the DB record to be deleted even if the file is missing.
+    }
+    
+    // Delete the record from the database
+    const deletedMediaFile = await this.prisma.mediaFile.delete({ where: { id } });
+
+    // Invalidate caches
     this.logger.log(`[INVALIDATE] Deleting cache for key: mediafile_${id}`);
     await this.redisClient.del(`mediafile_${id}`);
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'mediafiles'`);
@@ -153,6 +172,6 @@ export class MediafilesService {
     if (keys.length > 0) {
       await this.redisClient.del(keys);
     }
-    return mediaFile;
+    return deletedMediaFile;
   }
 }

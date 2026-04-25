@@ -6,6 +6,7 @@ import { useAuth } from '@/src/app/providers/auth-provider';
 import { Body, Header, Footer, PageSlider } from "@/src/shared/ui";
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
+import { ContentRenderer } from '@/src/widgets/content-renderer/ContentRenderer';
 
 const Page = ({ params }: { params: { slug: string } }) => {
   const { accessToken } = useAuth();
@@ -131,7 +132,7 @@ const Page = ({ params }: { params: { slug: string } }) => {
 
         {/* Контент страницы */}
         <div className="prose prose-lg max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: page.content }} />
+          <ContentRenderer blocks={page.contentBlocks} />
         </div>
 
         {/* SEO информация если есть */}

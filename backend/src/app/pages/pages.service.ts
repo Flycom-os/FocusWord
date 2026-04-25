@@ -8,6 +8,7 @@ import { UpdatePageDto } from "../dto/pages/update-page.dto";
 import IORedis from 'ioredis';
 import { REDIS_CLIENT } from "../../redis/redis.module";
 import { Prisma, Page } from '@prisma/client';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
@@ -69,13 +70,24 @@ export class PagesService {
   }
 
   async create(createPageDto: CreatePageDto): Promise<Page> {
-    const { metaKeywords, ...rest } = createPageDto;
-    const newPage = await this.prisma.page.create({
-      data: {
-        ...rest,
-        metaKeywords: metaKeywords || [], // Ensure metaKeywords is an array
-      },
-    });
+    const data: Prisma.PageCreateInput = {
+      title: createPageDto.title,
+      slug: createPageDto.slug,
+      content: createPageDto.content,
+      status: createPageDto.status || 'draft',
+      template: createPageDto.template || 'default', 
+      seoTitle: createPageDto.seoTitle,
+      seoDescription: createPageDto.seoDescription,
+      metaKeywords: createPageDto.metaKeywords || [],
+      contentBlocks: createPageDto.contentBlocks === null || createPageDto.contentBlocks === undefined ? [] : createPageDto.contentBlocks,
+
+      author: createPageDto.authorId ? { connect: { id: createPageDto.authorId } } : undefined,
+      featuredImage: createPageDto.featuredImageId ? { connect: { id: createPageDto.featuredImageId } } : undefined,
+      featuredSlider: createPageDto.featuredSliderId ? { connect: { id: createPageDto.featuredSliderId } } : undefined,
+      parentPage: createPageDto.parentPageId ? { connect: { id: createPageDto.parentPageId } } : undefined,
+    };
+
+    const newPage = await this.prisma.page.create({ data });
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
     if (keys.length > 0) {
@@ -357,16 +369,18 @@ export class PagesService {
 
     const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, ...rest } = updatePageDto;
 
+    const data: Prisma.PageUpdateInput = {
+      ...rest,
+      ...(metaKeywords !== undefined && { metaKeywords }),
+      ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
+      ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
+      ...(contentBlocks !== undefined && { contentBlocks: contentBlocks === null ? Prisma.DbNull : (contentBlocks as InputJsonValue) }),
+      updatedAt: new Date(),
+    };
+
     const updatedPage = await this.prisma.page.update({
       where: { id },
-      data: {
-        ...rest,
-        ...(metaKeywords !== undefined && { metaKeywords }),
-        ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
-        ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
-        ...(contentBlocks !== undefined && { contentBlocks: contentBlocks || [] }),
-        updatedAt: new Date(),
-      },
+      data,
       include: {
         featuredSlider: true,
         featuredImage: true,
