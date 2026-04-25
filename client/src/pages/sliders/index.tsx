@@ -1,13 +1,9 @@
-'use client';
+'use client'
 
-/**
- * @page Sliders
- */
-
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from 'react'
 import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/sliders/index.module.css";
-import { useAuth } from "@/src/app/providers/auth-provider";
+import { useAuth } from '@/src/app/providers/auth-provider'
 import {
   fetchSliders,
   createSlider,
@@ -35,8 +31,6 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  VideoPlayer,
-  AudioPlayer,
 } from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
 import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
@@ -171,9 +165,9 @@ const SlidersPage = () => {
       }
       setIsSliderModalOpen(false);
       setQuery((prev) => ({ ...prev }));
-    } catch (error: any) => {
+    } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось сохранить слайдер";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -188,7 +182,7 @@ const SlidersPage = () => {
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось удалить слайдер";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -212,7 +206,18 @@ const SlidersPage = () => {
     setSlideDescription(slide.description || "");
     setSlideLinkUrl(slide.linkUrl || "");
     setSlideSortOrder(slide.sortOrder);
-    setSelectedImage(slide.image || null);
+    setSelectedImage(slide.image ? { 
+  ...slide.image, 
+  mimetype: '', 
+  fileSize: 0, 
+  uploadedAt: '', 
+  updatedAt: '', 
+  altText: '', 
+  caption: '',
+  isImage: slide.image.filepath.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null,
+  isVideo: slide.image.filepath.match(/\.(mp4|avi|mov|webm)$/i) !== null,
+  isAudio: slide.image.filepath.match(/\.(mp3|wav|ogg)$/i) !== null
+} : null);
     setIsSlideModalOpen(true);
   };
 
@@ -237,7 +242,7 @@ const SlidersPage = () => {
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось сохранить слайд";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -250,7 +255,7 @@ const SlidersPage = () => {
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось удалить слайд";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
   
@@ -352,17 +357,18 @@ const SlidersPage = () => {
           <div className={styles.slidesSection}>
             <div className={styles.slidesHeader}>
               <h2 className={styles.sectionTitle}>Слайды</h2>
-              <PermissionGate resource="sliders" level={2}>
+              <PermissionGate resource="sliders" level={1}>
                 <UiButton theme="primary" onClick={handleCreateSlide}>
                   Добавить слайд
                 </UiButton>
               </PermissionGate>
             </div>
+            
             <Table className={styles.table}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Медиа</TableHead>
-                  <TableHead>Название</TableHead>
+                  <TableHead>Превью</TableHead>
+                  <TableHead>Заголовок</TableHead>
                   <TableHead>Описание</TableHead>
                   <TableHead>Ссылка</TableHead>
                   <TableHead>Порядок</TableHead>
@@ -372,9 +378,7 @@ const SlidersPage = () => {
               <TableBody>
                 {slides.map((slide) => (
                   <TableRow key={slide.id}>
-                    <TableCell>
-                      {getSlideMediaPreview(slide)}
-                    </TableCell>
+                    <TableCell>{getSlideMediaPreview(slide)}</TableCell>
                     <TableCell>{slide.title || '-'}</TableCell>
                     <TableCell>{slide.description || '-'}</TableCell>
                     <TableCell>{slide.linkUrl || '-'}</TableCell>
@@ -407,143 +411,138 @@ const SlidersPage = () => {
         )}
       </div>
 
-      <PermissionGate resource="sliders" level={2}>
-        <Modal
-          open={isSliderModalOpen}
-          onClose={() => setIsSliderModalOpen(false)}
-          title={editingSlider ? "Редактировать слайдер" : "Создать слайдер"}
-        >
-          <div className={styles.modalContent}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Название *</label>
-              <Input
-                className={styles.input}
-                value={sliderName}
-                onChange={(e) => setSliderName(e.target.value)}
-                placeholder="Название слайдера"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Slug *</label>
-              <Input
-                className={styles.input}
-                value={sliderSlug}
-                onChange={(e) => setSliderSlug(e.target.value)}
-                placeholder="slug-slidera"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Описание</label>
-              <Input
-                className={styles.input}
-                value={sliderDescription}
-                onChange={(e) => setSliderDescription(e.target.value)}
-                placeholder="Описание слайдера"
-              />
-            </div>
-            <div className={styles.modalFooter}>
-              <UiButton theme="secondary" onClick={() => setIsSliderModalOpen(false)}>
-                Отмена
-              </UiButton>
-              <UiButton theme="primary" onClick={handleSaveSlider}>
-                Сохранить
-              </UiButton>
-            </div>
+      {/* Slider Modal */}
+      <Modal open={isSliderModalOpen} onClose={() => setIsSliderModalOpen(false)} title={editingSlider ? 'Редактировать слайдер' : 'Создать слайдер'}>
+        <div className={styles.modalContent}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Название</label>
+            <Input
+              className={styles.input}
+              value={sliderName}
+              onChange={(e) => setSliderName(e.target.value)}
+              placeholder="Название слайдера"
+            />
           </div>
-        </Modal>
-      </PermissionGate>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Slug</label>
+            <Input
+              className={styles.input}
+              value={sliderSlug}
+              onChange={(e) => setSliderSlug(e.target.value)}
+              placeholder="slider-slug"
+            />
+          </div>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Описание</label>
+            <textarea
+              className={styles.textarea}
+              value={sliderDescription}
+              onChange={(e) => setSliderDescription(e.target.value)}
+              placeholder="Описание слайдера"
+              rows={3}
+            />
+          </div>
 
-      <PermissionGate resource="sliders" level={2}>
-        <Modal
-          open={isSlideModalOpen}
-          onClose={() => setIsSlideModalOpen(false)}
-          title={editingSlide ? "Редактировать слайд" : "Создать слайд"}
-        >
-          <div className={styles.modalContent}>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Название</label>
-              <Input
-                className={styles.input}
-                value={slideTitle}
-                onChange={(e) => setSlideTitle(e.target.value)}
-                placeholder="Название слайда"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Описание</label>
-              <Input
-                className={styles.input}
-                value={slideDescription}
-                onChange={(e) => setSlideDescription(e.target.value)}
-                placeholder="Описание слайда"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Ссылка</label>
-              <Input
-                className={styles.input}
-                value={slideLinkUrl}
-                onChange={(e) => setSlideLinkUrl(e.target.value)}
-                placeholder="https://example.com"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Порядок сортировки</label>
-              <Input
-                className={styles.input}
-                type="number"
-                value={slideSortOrder}
-                onChange={(e) => setSlideSortOrder(parseInt(e.target.value) || 0)}
-                placeholder="0"
-              />
-            </div>
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>Медиа</label>
-              <div className={styles.imageSelector}>
-                {selectedImage ? (
-                  <div className={styles.selectedImage}>
-                    {(() => {
-                      if (selectedImage.isImage) {
-                        return <img src={getFileUrl(selectedImage)} alt={selectedImage.altText || ""} />;
-                      } else if (selectedImage.isVideo) {
-                        return <VideoPlayer src={getFileUrl(selectedImage)} width="100%" height="150px" />;
-                      } else if (selectedImage.isAudio) {
-                        return <AudioPlayer src={getFileUrl(selectedImage)} theme="primary" />;
-                      }
-                      return null;
-                    })()}
-                    <div className={styles.imageActions}>
-                      <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                        Изменить
-                      </UiButton>
-                      <UiButton theme="warning" onClick={() => setSelectedImage(null)}>
-                        Удалить
-                      </UiButton>
-                    </div>
+          <div className={styles.modalFooter}>
+            <UiButton theme="secondary" onClick={() => setIsSliderModalOpen(false)}>
+              Отмена
+            </UiButton>
+            <UiButton theme="primary" onClick={handleSaveSlider}>
+              {editingSlider ? 'Обновить' : 'Создать'}
+            </UiButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Slide Modal */}
+      <Modal open={isSlideModalOpen} onClose={() => setIsSlideModalOpen(false)} title={editingSlide ? 'Редактировать слайд' : 'Создать слайд'}>
+        <div className={styles.modalContent}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Заголовок</label>
+            <Input
+              className={styles.input}
+              value={slideTitle}
+              onChange={(e) => setSlideTitle(e.target.value)}
+              placeholder="Заголовок слайда"
+            />
+          </div>
+          
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Описание</label>
+            <textarea
+              className={styles.textarea}
+              value={slideDescription}
+              onChange={(e) => setSlideDescription(e.target.value)}
+              placeholder="Описание слайда"
+              rows={3}
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Ссылка</label>
+            <Input
+              className={styles.input}
+              value={slideLinkUrl}
+              onChange={(e) => setSlideLinkUrl(e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Порядок сортировки</label>
+            <Input
+              className={styles.input}
+              type="number"
+              value={slideSortOrder}
+              onChange={(e) => setSlideSortOrder(parseInt(e.target.value) || 0)}
+              placeholder="0"
+            />
+          </div>
+
+          <div className={styles.imageSelector}>
+            <label className={styles.formLabel}>Изображение</label>
+            <div className={styles.selectedImage}>
+              {selectedImage ? (
+                <>
+                  <img src={getFileUrl(selectedImage)} alt={selectedImage.filename} />
+                  <div className={styles.imageActions}>
+                    <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
+                      Изменить
+                    </UiButton>
+                    <UiButton theme="warning" onClick={() => setSelectedImage(null)}>
+                      Удалить
+                    </UiButton>
                   </div>
-                ) : (
-                  <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                    Выбрать медиа
+                </>
+              ) : (
+                <div className={styles.imagePlaceholder}>
+                  <UiButton theme="primary" onClick={() => setIsMediaModalOpen(true)}>
+                    Выбрать изображение
                   </UiButton>
-                )}
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
-                Отмена
-              </Button>
-              <UiButton theme="primary" onClick={handleSaveSlide}>
-                Сохранить
-              </UiButton>
+                </div>
+              )}
             </div>
           </div>
-        </Modal>
-      </PermissionGate>
 
+          <div className={styles.modalFooter}>
+            <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
+              Отмена
+            </UiButton>
+            <UiButton theme="primary" onClick={handleSaveSlide}>
+              {editingSlide ? 'Обновить' : 'Создать'}
+            </UiButton>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Media Picker Modal */}
       <MediaPickerModal
         open={isMediaModalOpen}
         onClose={() => setIsMediaModalOpen(false)}
         onSelect={handleMediaSelect}
+        zIndex={2001}
       />
     </div>
   );

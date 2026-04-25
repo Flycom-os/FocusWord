@@ -99,7 +99,7 @@ const PagesPage = () => {
       });
       setPages(data);
     } catch (error: any) {
-      showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось загрузить страницы' });
+      showToast(error?.response?.data?.message || 'Не удалось загрузить страницы', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -128,27 +128,12 @@ const PagesPage = () => {
     }
   }, [isModalOpen, accessToken]);
 
-  const openCreateModal = () => {
-    setEditingPage(null);
-    setForm(defaultForm);
-    setEditorData(undefined);
-    setIsModalOpen(true);
+  const handleCreatePage = () => {
+    window.location.href = '/admin/pages/create';
   };
 
-  const openEditModal = (page: PageDto) => {
-    setEditingPage(page);
-    setForm({
-      title: page.title || '',
-      slug: page.slug || '',
-      status: page.status || 'draft',
-      template: page.template || 'default',
-      seoTitle: page.seoTitle || '',
-      seoDescription: page.seoDescription || '',
-      metaKeywords: (page.metaKeywords || []).join(', '),
-      featuredSliderId: page.featuredSliderId || null,
-    });
-    setEditorData(page.contentBlocks as OutputData);
-    setIsModalOpen(true);
+  const handleEditPage = (page: PageDto) => {
+    window.location.href = `/admin/pages/create/${page.id}`;
   };
 
   const handleAiAssist = async () => {
@@ -166,9 +151,9 @@ const PagesPage = () => {
         blocks: [{ type: 'paragraph', data: { text: result.text } }]
       });
 
-      showToast({ type: 'success', message: 'AI обновил текст' });
+      showToast('AI обновил текст', 'success');
     } catch (error: any) {
-      showToast({ type: 'error', message: error?.response?.data?.message || 'AI недоступен' });
+      showToast(error?.response?.data?.message || 'AI недоступен', 'error');
     } finally {
       setIsAiLoading(false);
     }
@@ -181,7 +166,7 @@ const PagesPage = () => {
 
     if (form.featuredSliderId) {
       if (!accessToken) {
-        showToast({ type: 'error', message: 'Токен доступа отсутствует для предпросмотра слайдера' });
+        showToast('Токен доступа отсутствует для предпросмотра слайдера', 'error');
         return;
       }
       setIsLoadingPreviewSlider(true);
@@ -189,7 +174,7 @@ const PagesPage = () => {
         const slider = await getSlider(accessToken, form.featuredSliderId);
         setPreviewSlider(slider);
       } catch (error: any) {
-        showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось загрузить слайдер для предпросмотра' });
+        showToast(error?.response?.data?.message || 'Не удалось загрузить слайдер для предпросмотра', 'error');
       } finally {
         setIsLoadingPreviewSlider(false);
       }
@@ -201,7 +186,7 @@ const PagesPage = () => {
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast({ type: 'error', message: 'Название и slug обязательны' });
+      showToast('Название и slug обязательны', 'error');
       return;
     }
     setIsSaving(true);
@@ -218,23 +203,27 @@ const PagesPage = () => {
           .split(',')
           .map((item) => item.trim())
           .filter(Boolean),
-        featuredSliderId: form.featuredSliderId || null,
-        contentBlocks: editorData,
+        featuredSliderId: form.featuredSliderId || undefined,
+        contentBlocks: editorData ? editorData.blocks.map(block => ({
+          type: block.type as any,
+          id: Date.now() + Math.random(),
+          config: block.data
+        })) : [],
         content: editorData ? editorToolsToHtml(editorData.blocks) : '', // for legacy support
       };
 
       if (editingPage) {
         const updated = await updatePage(accessToken, editingPage.id, pageData);
         setPages((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        showToast({ type: 'success', message: 'Страница обновлена' });
+        showToast('Страница обновлена', 'success');
       } else {
         const created = await createPage(accessToken, pageData);
         setPages((prev) => [created, ...prev]);
-        showToast({ type: 'success', message: 'Страница создана' });
+        showToast('Страница создана', 'success');
       }
       setIsModalOpen(false);
     } catch (error: any) {
-      showToast({ type: 'error', message: error?.response?.data?.message || 'Ошибка сохранения' });
+      showToast(error?.response?.data?.message || 'Ошибка сохранения', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -246,9 +235,9 @@ const PagesPage = () => {
     try {
       await deletePage(accessToken, id);
       setPages((prev) => prev.filter((item) => item.id !== id));
-      showToast({ type: 'success', message: 'Страница удалена' });
+      showToast('Страница удалена', 'success');
     } catch (error: any) {
-      showToast({ type: 'error', message: error?.response?.data?.message || 'Не удалось удалить страницу' });
+      showToast(error?.response?.data?.message || 'Не удалось удалить страницу', 'error');
     }
   };
 
@@ -276,7 +265,7 @@ const PagesPage = () => {
           onChange={(event) => setSearch(event.target.value)}
         />
         <PermissionGate resource="pages" level={2}>
-          <UiButton theme="primary" onClick={openCreateModal}>
+          <UiButton theme="primary" onClick={handleCreatePage}>
             Создать страницу
           </UiButton>
         </PermissionGate>
@@ -307,7 +296,7 @@ const PagesPage = () => {
                 <TableCell>{page.slug}</TableCell>
                 <TableCell>{page.status === 'published' ? 'Опубликовано' : 'Черновик'}</TableCell>
                 <TableCell className={styles.actions}>
-                  <UiButton theme="secondary" onClick={() => openEditModal(page)}>
+                  <UiButton theme="secondary" onClick={() => handleEditPage(page)}>
                     Редактировать
                   </UiButton>
                   <PermissionGate resource="pages" level={2}>
@@ -323,7 +312,7 @@ const PagesPage = () => {
       </Table>
 
       <div className={styles.pagination}>
-        <Pagination currentPage={query.page || 1} totalPages={totalPages} onPageChange={(page) => setQuery((prev) => ({ ...prev, page }))} />
+        <Pagination page={query.page || 1} total={pages.length} perPage={query.limit || 20} onChange={(page) => setQuery((prev) => ({ ...prev, page }))} />
       </div>
 
       <PermissionGate resource="pages" level={2}>

@@ -1,0 +1,201 @@
+export interface RecordDto {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  contentBlocks?: any[];
+  status: 'draft' | 'published';
+  template: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  metaKeywords?: string;
+  featuredSliderId?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRecordDto {
+  title: string;
+  slug: string;
+  content: string;
+  contentBlocks?: any[];
+  status: 'draft' | 'published';
+  template: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  metaKeywords?: string;
+  featuredSliderId?: number;
+}
+
+export interface UpdateRecordDto extends CreateRecordDto {
+  id: number;
+}
+
+export interface PaginatedRecordsResponse {
+  data: RecordDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+
+// Временно используем pages endpoint для записей
+// TODO: Создать отдельный /api/records endpoint на бэкенде
+
+export const recordsApi = {
+  // Получить все записи с пагинацией
+  getAll: async (page = 1, limit = 10, search = ''): Promise<PaginatedRecordsResponse> => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(search && { search })
+    });
+    
+    const response = await fetch(`${API_URL}/api/pages?${params}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch records');
+    }
+    return response.json();
+  },
+
+  // Получить запись по ID
+  getById: async (id: string): Promise<RecordDto> => {
+    const response = await fetch(`${API_URL}/api/pages/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch record');
+    }
+    return response.json();
+  },
+
+  // Создать новую запись
+  create: async (data: CreateRecordDto): Promise<RecordDto> => {
+    const response = await fetch(`${API_URL}/api/pages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to create record');
+    }
+    return response.json();
+  },
+
+  // Обновить запись
+  update: async (id: string, data: UpdateRecordDto): Promise<RecordDto> => {
+    const response = await fetch(`${API_URL}/api/pages/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update record');
+    }
+    return response.json();
+  },
+
+  // Удалить запись
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/api/pages/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete record');
+    }
+  },
+
+  // === КАТЕГОРИИИ ЗАПИСЕЙ ===
+  // Получить все категории записей
+  getCategories: async (page = 1, limit = 10, search = ''): Promise<any> => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(search && { search })
+    });
+    
+    const response = await fetch(`${API_URL}/api/records/categories?${params}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch record categories');
+    }
+    return response.json();
+  },
+
+  // Создать категорию записи
+  createCategory: async (data: any): Promise<any> => {
+    const response = await fetch(`${API_URL}/api/records/categories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to create record category');
+    }
+    return response.json();
+  },
+
+  // Обновить категорию записи
+  updateCategory: async (id: string, data: any): Promise<any> => {
+    const response = await fetch(`${API_URL}/api/records/categories/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to update record category');
+    }
+    return response.json();
+  },
+
+  // Удалить категорию записи
+  deleteCategory: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/api/records/categories/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete record category');
+    }
+  },
+
+
+  // Изменить статус записи
+changeStatus: async (id: string, status: 'draft' | 'published'): Promise<RecordDto> => {
+  const response = await fetch(`${API_URL}/api/pages/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to change record status');
+  }
+  return response.json();
+},};
+
+
+// Экспортируем функции для совместимости со старым кодом
+export const fetchRecords = recordsApi.getAll;
+export const fetchRecord = recordsApi.getById;
+export const createRecord = recordsApi.create;
+export const updateRecord = recordsApi.update;
+export const deleteRecord = recordsApi.delete;
+export const changeStatus = recordsApi.changeStatus;
+export const fetchCategories = recordsApi.getCategories;
+export const createCategory = recordsApi.createCategory;
+export const updateCategory = recordsApi.updateCategory;
+export const deleteCategory = recordsApi.deleteCategory;
