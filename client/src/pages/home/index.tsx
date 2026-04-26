@@ -28,5 +28,10 @@ const HomePage = () => {
     </div>
   );
 };
+//TODO: fix login
+//TODO: fix page, wiki, get pages
+//TODO: fix admin: mediafiles, sliders, pages, records, category records, sidbear
+//TODO: fix header, footer
+//TODO: fix header footer global cms
 
 export default HomePage;
