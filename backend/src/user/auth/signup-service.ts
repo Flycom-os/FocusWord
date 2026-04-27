@@ -43,9 +43,9 @@ export class AuthService {
       let targetRoleName: string;
       let targetPermissions: string[];
 
-      const permissionLevel = dto.permission; // Use the permission from DTO
+      const permissionLevel = dto.permission; // Use permission from DTO (may be undefined)
 
-      if (permissionLevel === 0 || permissionLevel === 1 || permissionLevel === 2) {
+      if (permissionLevel !== undefined && (permissionLevel === 0 || permissionLevel === 1 || permissionLevel === 2)) {
         targetRoleName = `UserLevel${permissionLevel}`;
         switch (permissionLevel) {
           case 0:
@@ -58,13 +58,13 @@ export class AuthService {
             targetPermissions = ['users:2', 'news:2', 'comments:2']; // Read, Create, Delete
             break;
           default:
-            // This case should ideally not be reached due to the outer if
+            // This case should ideally not be reached due to outer if
             targetRoleName = 'Guest';
             targetPermissions = ['users:0', 'news:0', 'comments:0'];
             break;
         }
       } else {
-        // If no valid permission is provided or it's outside 0-2 range, default to Guest
+        // If no valid permission is provided, it's undefined, or it's outside 0-2 range, default to Guest
         targetRoleName = 'Guest';
         targetPermissions = ['users:0', 'news:0', 'comments:0'];
       }
