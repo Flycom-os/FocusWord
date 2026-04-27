@@ -24,8 +24,8 @@ import {
   Hash,
   Target,
   Search,
-  PenTool,
-} from "lucide-react";
+  PenTool, User,
+} from 'lucide-react';
 import styles from "./index.module.css";
 import Button from "@/src/shared/ui/Button/ui-button";
 import logo from "@/src/public/logo.svg"
@@ -56,6 +56,7 @@ const menuItems: MenuItem[] = [
   { icon: <PenTool size={24} />, label: "Posts", url: "/admin/posts" },
   { icon: <Users size={24} />, label: "Users", url: "/admin/users", resource: "users", minLevel: 0 },
   { icon: <Shield size={24} />, label: "Roles", url: "/admin/roles", resource: "roles", minLevel: 0 },
+  { icon: <User size={24} />, label: "Profile", url: "/admin/profile"},
   { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings" },
   { icon: <CreditCard size={24} />, label: "Payments", url: "/admin/payments" },
   { icon: <Activity size={24} />, label: "Activity Logs", url: "/admin/activity-logs" },

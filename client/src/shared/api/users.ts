@@ -117,6 +117,44 @@ export const updateUser = async (
   return data;
 };
 
+export const updateCurrentUser = async (
+  token: string | null,
+  payload: Partial<{
+    email: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    roleId: number;
+    avatarUrl: string;
+    face?: File;
+  }>,
+): Promise<UserDto> => {
+  const formData = new FormData();
+  
+  // Добавляем файл, если он есть
+  if (payload.face) {
+    formData.append('face', payload.face);
+  }
+  
+  // Добавляем остальные поля
+  Object.keys(payload).forEach((key) => {
+    if (key !== 'face') {
+      const value = payload[key as keyof typeof payload];
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    }
+  });
+
+  const { data } = await axios.patch<UserDto>(`${API_URL}/user/me`, formData, {
+    headers: {
+      ...authHeaders(token),
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+};
+
 export const deleteUser = async (token: string | null, id: number): Promise<void> => {
   await axios.delete(`${API_URL}/user/${id}`, {
     headers: authHeaders(token),

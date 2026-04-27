@@ -59,12 +59,12 @@ export class UserService {
         password: dto.password,
         firstName: dto.firstName,
         lastName: dto.lastName,
+        avatarUrl: dto.avatarUrl,
         updatedAt: new Date(),
       },
       include: {
         comments: {
           include: {
-            // Removed Product: true, Shops: true as they are not valid relations for comments
           }
         },
         role: true, // Assuming Role is a direct relation as per schema.prisma
