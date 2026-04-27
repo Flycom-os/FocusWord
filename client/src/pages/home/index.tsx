@@ -30,8 +30,6 @@ const HomePage = () => {
 };
 //TODO: fix page, wiki, get pages
 //TODO: fix admin: mediafiles, sliders, pages, records, category records, roles, users
-//TODO: fix header, footer
-//TODO: fix header footer global cms
 //TODO: roles: fix in server initialization, dix in front access, fix methods, and add roles in admin
 
 export default HomePage;
