@@ -32,6 +32,18 @@ const VideoPlayer = ({ src, width = '480px', height = '270px' }: VideoPlayerProp
     }
   };
 
+  const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const v = ref.current;
+    if (!v) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * v.duration;
+    
+    v.currentTime = newTime;
+  };
+
   return (
     <div className={styles.videoWrap} style={{ width }}>
       <video ref={ref} src={src} width={width} height={height} style={{ display: 'block', borderRadius: 8 }} />
@@ -39,7 +51,7 @@ const VideoPlayer = ({ src, width = '480px', height = '270px' }: VideoPlayerProp
         <button onClick={toggle} className={styles.play} aria-label={playing ? 'Pause' : 'Play'}>
           {playing ? '❚❚' : '▶'}
         </button>
-        <div className={styles.progressWrap}>
+        <div className={styles.progressWrap} onClick={seek}>
           <div className={styles.progress} style={{ width: `${progress}%` }} />
         </div>
       </div>

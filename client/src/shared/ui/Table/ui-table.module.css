@@ -38,6 +38,35 @@
 .table_row:last-child {
   border-bottom: 0;
 }
+
+/* Selectable row styles */
+.table_row.selectable {
+  cursor: pointer;
+}
+
+.table_row.selected {
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+.table_row.focused {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+
+.table_row.selected:hover {
+  background-color: hsl(var(--primary) / 0.15);
+}
+
+.checkboxCell {
+  width: 40px;
+  padding: 16px 8px !important;
+  text-align: center;
+}
+
+.checkboxCell input[type="checkbox"] {
+  cursor: pointer;
+  margin: 0;
+}
 .table_head {
   height: 48px;
   padding-left: 16px;

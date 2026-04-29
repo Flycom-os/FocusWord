@@ -24,7 +24,7 @@ export class MediafilesController {
   constructor(private readonly mediafilesService: MediafilesService) {}
 
   @Post('upload')
-  @HasPermission('mediafiles:2')
+  @HasPermission('media-files:2')
   @ApiOperation({ summary: 'Upload a new media file' })
   @ApiFileWithBody('file', UploadMediaFileDto)
   @ApiResponse({ status: 201, description: 'The media file has been successfully uploaded.' })
@@ -79,7 +79,7 @@ export class MediafilesController {
   }
 
   @Get()
-  @HasPermission('mediafiles:0')
+  @HasPermission('media-files:0')
   @ApiOperation({ summary: 'Retrieve all media files with pagination and filtering' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
@@ -108,7 +108,7 @@ export class MediafilesController {
   }
 
   @Get(':id')
-  @HasPermission('mediafiles:0')
+  @HasPermission('media-files:0')
   @ApiOperation({ summary: 'Retrieve a single media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })
@@ -118,7 +118,7 @@ export class MediafilesController {
   }
 
   @Patch(':id')
-  @HasPermission('mediafiles:1')
+  @HasPermission('media-files:1')
   @ApiOperation({ summary: 'Update a media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file has been successfully updated.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })
@@ -128,7 +128,7 @@ export class MediafilesController {
   }
 
   @Delete(':id')
-  @HasPermission('mediafiles:2')
+  @HasPermission('media-files:2')
   @ApiOperation({ summary: 'Delete a media file by ID' })
   @ApiResponse({ status: 200, description: 'The media file has been successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Media file not found.' })

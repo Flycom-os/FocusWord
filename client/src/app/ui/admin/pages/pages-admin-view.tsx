@@ -5,7 +5,8 @@ import dynamic from 'next/dynamic';
 import styles from './pages-admin-view.module.css';
 import { useAuth } from '@/src/app/providers/auth-provider';
 import { completePageWithAi, createPage, deletePage, fetchPages, PageDto, PagesQuery, updatePage } from '@/src/shared/api/pages';
-import { Modal, Notifications, Pagination, PermissionGate, PageSlider, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, UiButton, showToast } from '@/src/shared/ui';
+import { Modal, Notifications, Pagination, PermissionGate, PageSlider, Select, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, UiButton, showToast, SelectableTableRow, SelectableTableHead } from '@/src/shared/ui';
+import { useTableSelection } from '@/src/shared/hooks/useTableSelection';
 import Input from '@/src/shared/ui/Input/ui-input';
 import { useDebounce } from '@/src/shared/hooks/use-debounce';
 import { fetchSliders, getSlider, SliderDto, SliderDetailsDto } from '@/src/shared/api/sliders';
@@ -45,6 +46,15 @@ const PagesPage = () => {
   const [search, setSearch] = useState('');
   const [pages, setPages] = useState<PageDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Table selection hook
+  const tableSelection = useTableSelection({
+    items: pages,
+    getItemId: (page) => page.id,
+    onSelectionChange: (selectedIds) => {
+      console.log('Selected pages:', selectedIds);
+    },
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<PageDto | null>(null);
@@ -271,9 +281,15 @@ const PagesPage = () => {
         </PermissionGate>
       </div>
 
-      <Table className={styles.table}>
+      <Table className={styles.table} ref={tableSelection.tableRef}>
         <TableHeader>
           <TableRow>
+            <SelectableTableHead
+              selectable={true}
+              onSelectAll={tableSelection.selectAll}
+              isAllSelected={tableSelection.isAllSelected()}
+              isPartiallySelected={tableSelection.isPartiallySelected()}
+            />
             <TableHead>Название</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>Статус</TableHead>
@@ -283,15 +299,21 @@ const PagesPage = () => {
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={4}>Загрузка...</TableCell>
+              <TableCell colSpan={5}>Загрузка...</TableCell>
             </TableRow>
           ) : pages.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4}>Страницы не найдены</TableCell>
+              <TableCell colSpan={5}>Страницы не найдены</TableCell>
             </TableRow>
           ) : (
-            pages.map((page) => (
-              <TableRow key={page.id}>
+            pages.map((page, index) => (
+              <SelectableTableRow
+                key={page.id}
+                selected={tableSelection.isSelected(page.id)}
+                focused={tableSelection.focusedIndex === index}
+                onSelect={(e) => tableSelection.handleRowClick(page.id, e)}
+                checkboxColumn={true}
+              >
                 <TableCell>{page.title}</TableCell>
                 <TableCell>{page.slug}</TableCell>
                 <TableCell>{page.status === 'published' ? 'Опубликовано' : 'Черновик'}</TableCell>
@@ -305,7 +327,7 @@ const PagesPage = () => {
                     </UiButton>
                   </PermissionGate>
                 </TableCell>
-              </TableRow>
+              </SelectableTableRow>
             ))
           )}
         </TableBody>

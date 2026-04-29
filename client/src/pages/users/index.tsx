@@ -31,7 +31,10 @@ import {
   TableRow,
   TableCell,
   Select,
+  SelectableTableRow,
+  SelectableTableHead,
 } from "@/src/shared/ui";
+import { useTableSelection } from "@/src/shared/hooks/useTableSelection";
 import Input from "@/src/shared/ui/Input/ui-input";
 
 const defaultQuery: UsersQuery = {
@@ -48,6 +51,15 @@ const UsersPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserDto | null>(null);
+
+  // Table selection hook
+  const tableSelection = useTableSelection({
+    items: users,
+    getItemId: (user) => user.id,
+    onSelectionChange: (selectedIds) => {
+      console.log('Selected users:', selectedIds);
+    },
+  });
 
   // Form states
   const [email, setEmail] = useState("");
@@ -183,9 +195,15 @@ const UsersPage = () => {
         </PermissionGate>
       </div>
 
-      <Table className={styles.table}>
+      <Table className={styles.table} ref={tableSelection.tableRef}>
         <TableHeader>
           <TableRow>
+            <SelectableTableHead
+              selectable={true}
+              onSelectAll={tableSelection.selectAll}
+              isAllSelected={tableSelection.isAllSelected()}
+              isPartiallySelected={tableSelection.isPartiallySelected()}
+            />
             <TableHead>Email</TableHead>
             <TableHead>Имя</TableHead>
             <TableHead>Роль</TableHead>
@@ -194,8 +212,14 @@ const UsersPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
+          {users.map((user, index) => (
+            <SelectableTableRow
+              key={user.id}
+              selected={tableSelection.isSelected(user.id)}
+              focused={tableSelection.focusedIndex === index}
+              onSelect={(e) => tableSelection.handleRowClick(user.id, e)}
+              checkboxColumn={true}
+            >
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 {user.firstName || user.lastName
@@ -216,7 +240,7 @@ const UsersPage = () => {
                   </UiButton>
                 </PermissionGate>
               </TableCell>
-            </TableRow>
+            </SelectableTableRow>
           ))}
         </TableBody>
       </Table>
@@ -295,7 +319,7 @@ const UsersPage = () => {
                   ...roles.map((role) => ({ value: role.id.toString(), label: role.name })),
                 ]}
                 value={roleId?.toString() || ''}
-                onChange={(e) => setRoleId(e.target.value ? parseInt(e.target.value) : null)}
+                onChange={(value) => setRoleId(value ? parseInt(value) : null)}
               />
             </div>
             <div className={styles.modalFooter}>

@@ -9,6 +9,8 @@ import {
   TableCell,
   TableCaption,
 } from "@/src/shared/ui/Table/ui-table";
+import { SelectableTableRow } from "@/src/shared/ui/Table/ui-table-row-selectable";
+import { SelectableTableHead } from "@/src/shared/ui/Table/ui-table-head-selectable";
 import Checkbox from "@/src/shared/ui/Checkbox/ui-checkbox";
 import Radio from "@/src/shared/ui/Radio/ui-radio";
 import Select from "@/src/shared/ui/Select/ui-select";
@@ -37,6 +39,7 @@ import Footer from './Footer/ui-site-footer';
 export { Header, Footer };
 // export type { Button };
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+export { SelectableTableRow, SelectableTableHead };
 export { default as PermissionGate } from "./PermissionGate";
 import PageSlider from './PageSlider/PageSlider';
 export { PageSlider };

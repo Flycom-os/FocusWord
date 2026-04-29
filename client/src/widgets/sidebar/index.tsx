@@ -44,28 +44,28 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: <Home size={24} />, label: "Home", url: "/admin/" },
-  { icon: <BarChart3 size={24} />, label: "Analytics", url: "/admin/analytics" },
-  { icon: <Package size={24} />, label: "Products", url: "/admin/products" },
-  { icon: <FolderOpen size={24} />, label: "Categories", url: "/admin/product-categories" },
-  { icon: <MessageSquare size={24} />, label: "Feedback", url: "/admin/feedback" },
-  { icon: <ImageIcon size={24} />, label: "Media files", url: "/admin/media-files", resource: "mediafiles", minLevel: 0 },
+  { icon: <BarChart3 size={24} />, label: "Analytics", url: "/admin/analytics",resource: "media-filess", minLevel: 0 },
+  { icon: <Package size={24} />, label: "Products", url: "/admin/products",resource: "media-filess", minLevel: 0 },
+  { icon: <FolderOpen size={24} />, label: "Categories", url: "/admin/product-categories",resource: "media-filess", minLevel: 0 },
+  { icon: <MessageSquare size={24} />, label: "Feedback", url: "/admin/feedback",resource: "media-filess", minLevel: 0 },
+  { icon: <ImageIcon size={24} />, label: "Media files", url: "/admin/media-files", resource: "media-files", minLevel: 0 },
   { icon: <Presentation size={24} />, label: "Sliders", url: "/admin/sliders", resource: "sliders", minLevel: 0 },
-  { icon: <Archive size={24} />, label: "Records", url: "/admin/records" },
-  { icon: <Server size={24} />, label: "Category", url: "/admin/records/categories" },
+  { icon: <Archive size={24} />, label: "Records", url: "/admin/records",resource: "records", minLevel: 0 },
+  { icon: <Server size={24} />, label: "Category", url: "/admin/records/categories",resource: "record-categories", minLevel: 0 },
   { icon: <FileText size={24} />, label: "Pages", url: "/admin/pages", resource: "pages", minLevel: 0 },
-  { icon: <PenTool size={24} />, label: "Posts", url: "/admin/posts" },
+  { icon: <PenTool size={24} />, label: "Posts", url: "/admin/posts",resource: "media-filess", minLevel: 0 },
   { icon: <Users size={24} />, label: "Users", url: "/admin/users", resource: "users", minLevel: 0 },
   { icon: <Shield size={24} />, label: "Roles", url: "/admin/roles", resource: "roles", minLevel: 0 },
   { icon: <User size={24} />, label: "Profile", url: "/admin/profile"},
-  { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings" },
-  { icon: <CreditCard size={24} />, label: "Payments", url: "/admin/payments" },
-  { icon: <Activity size={24} />, label: "Activity Logs", url: "/admin/activity-logs" },
-  { icon: <Code size={24} />, label: "Structured Data", url: "/admin/structured-data" },
-  { icon: <Box size={24} />, label: "Blocks", url: "/admin/blocks" },
-  { icon: <MessageSquare size={24} />, label: "Comments", url: "/admin/comments" },
-  { icon: <Hash size={24} />, label: "Tags", url: "/admin/tags" },
-  { icon: <Target size={24} />, label: "Widgets", url: "/admin/widgets" },
-  { icon: <Search size={24} />, label: "SEO", url: "/admin/seo" },
+  { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings"},
+  { icon: <CreditCard size={24} />, label: "Payments", url: "/admin/payments",resource: "media-filess", minLevel: 0 },
+  { icon: <Activity size={24} />, label: "Activity Logs", url: "/admin/activity-logs",resource: "media-filess", minLevel: 0 },
+  { icon: <Code size={24} />, label: "Structured Data", url: "/admin/structured-data",resource: "media-filess", minLevel: 0 },
+  { icon: <Box size={24} />, label: "Blocks", url: "/admin/blocks",resource: "media-filess", minLevel: 0 },
+  { icon: <MessageSquare size={24} />, label: "Comments", url: "/admin/comments",resource: "media-filess", minLevel: 0 },
+  { icon: <Hash size={24} />, label: "Tags", url: "/admin/tags",resource: "media-filess", minLevel: 0 },
+  { icon: <Target size={24} />, label: "Widgets", url: "/admin/widgets",resource: "media-filess", minLevel: 0 },
+  { icon: <Search size={24} />, label: "SEO", url: "/admin/seo",resource: "media-filess", minLevel: 0 },
 ];
 
 const Sidebar = () => {
@@ -85,7 +85,7 @@ const Sidebar = () => {
     }
     // Для Settings проверяем наличие хотя бы одного из разрешений
     if (item.label === "Settings") {
-      return hasPermission("pages", 0) || hasPermission("sliders", 0) || hasPermission("mediafiles", 0);
+      return hasPermission("pages", 0) || hasPermission("sliders", 0) || hasPermission("settings", 0);
     }
     return true;
   });

@@ -1,0 +1,43 @@
+.formField {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.formItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formItem.w-full {
+  width: 100%;
+}
+
+.formItem.flex-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .formItem.sm\\:flex-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.formLabel {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #374151;
+}
+
+.dark .formLabel {
+  color: #d1d5db;
+}
+
+.formControl {
+  width: 100%;
+}

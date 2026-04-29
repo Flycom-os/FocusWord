@@ -31,13 +31,25 @@ const AudioPlayer = ({ src, theme = 'primary' }: AudioPlayerProps) => {
     }
   };
 
+  const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const a = audioRef.current;
+    if (!a) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * a.duration;
+    
+    a.currentTime = newTime;
+  };
+
   return (
     <div className={`${styles.player} ${styles[theme]}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
       <button onClick={toggle} aria-label={playing ? 'Pause' : 'Play'} className={styles.play}>
         {playing ? '❚❚' : '▶'}
       </button>
-      <div className={styles.progressWrap}>
+      <div className={styles.progressWrap} onClick={seek}>
         <div className={styles.progress} style={{ width: `${progress}%` }} />
       </div>
     </div>
