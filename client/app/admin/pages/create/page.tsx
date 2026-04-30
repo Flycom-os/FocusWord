@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/src/shared/ui/Input/ui-input';
 import Button from '@/src/shared/ui/Button/ui-button';
-import RichEditor from '@/src/features/Editor/RichEditor';
+import DescriptionFieldWrapper from './DescriptionFieldWrapper';
 import { fetchSliders } from '@/src/shared/api/sliders';
 import { createPage } from '@/src/shared/api/pages';
 import { SliderDto } from '@/src/shared/api/sliders';
@@ -80,12 +80,44 @@ const CreatePagePage = () => {
     }
   };
 
+  // Общая функция конвертации блоков в Markdown
+  const convertBlocksToMarkdown = (blocks: any[]): string => {
+    if (!blocks || !Array.isArray(blocks)) return '';
+    
+    return blocks.map(block => {
+      switch (block.type) {
+        case 'paragraph':
+          return block.data?.text || '';
+        case 'header':
+          const level = block.data?.level || 1;
+          const headerText = block.data?.text || '';
+          return `${'#'.repeat(level)} ${headerText}`;
+        case 'list':
+          if (Array.isArray(block.data?.items)) {
+            const items = block.data.items.filter((item: string) => item.trim());
+            if (block.data?.style === 'ordered') {
+              return items.map((item: string, index: number) => `${index + 1}. ${item}`).join('\n');
+            } else {
+              return items.map((item: string) => `- ${item}`).join('\n');
+            }
+          }
+          return '';
+        case 'media':
+          return `📷 Медиа: ${block.data?.filename || 'Без имени'}`;
+        case 'slider':
+          return `🎠 Слайдер: ${block.data?.name || 'Без названия'}`;
+        default:
+          return '';
+      }
+    }).filter(text => text.trim()).join('\n\n');
+  };
+
   const handleMediaSelect = () => {
     // Открываем медиа пикер через кастомное событие
     window.dispatchEvent(new CustomEvent('open-media-picker', {
       detail: {
         onSelect: (media: any) => {
-          // Вставляем медиафайл в редактор
+          // Добавляем медиа блок в JSON
           const mediaBlock = {
             id: Date.now().toString(),
             type: 'media',
@@ -96,12 +128,9 @@ const CreatePagePage = () => {
             }
           };
           
-          const currentData = editorData || { blocks: [] };
-          const newData = {
-            ...currentData,
-            blocks: [...currentData.blocks, mediaBlock]
-          };
-          setEditorData(newData);
+          const currentBlocks = editorData?.blocks || [];
+          const newBlocks = [...currentBlocks, mediaBlock];
+          setEditorData({ blocks: newBlocks });
         }
       }
     }));
@@ -145,7 +174,7 @@ const CreatePagePage = () => {
     
     // Функции для модального окна
     (window as any).selectSlider = (slider: any) => {
-      // Вставляем слайдер в редактор
+      // Добавляем слайдер блок в JSON
       const sliderBlock = {
         id: Date.now().toString(),
         type: 'slider',
@@ -156,12 +185,9 @@ const CreatePagePage = () => {
         }
       };
       
-      const currentData = editorData || { blocks: [] };
-      const newData = {
-        ...currentData,
-        blocks: [...currentData.blocks, sliderBlock]
-      };
-      setEditorData(newData);
+      const currentBlocks = editorData?.blocks || [];
+      const newBlocks = [...currentBlocks, sliderBlock];
+      setEditorData({ blocks: newBlocks });
       (window as any).closeSliderModal();
     };
     
@@ -175,159 +201,294 @@ const CreatePagePage = () => {
   const handlePreview = () => {
     if (!editorData) return;
     
-    // Convert Editor.js blocks to HTML for preview
-    const html = editorData.blocks.map(block => {
-      switch (block.type) {
-        case 'paragraph':
-          return `<p>${block.data.text || ''}</p>`;
-        case 'header':
-          return `<h${block.data.level || 1}>${block.data.text || ''}</h${block.data.level || 1}>`;
-        case 'list':
-          const items = (block.data.items || [])
-            .filter((item: string) => item.trim()) // Фильтруем пустые элементы
-            .map((item: string) => `<li>${item}</li>`).join('');
-          return block.data.style === 'ordered' ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
-        case 'image':
-          if (block.data?.url) {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-            const imageUrl = block.data.url.startsWith('http') 
-              ? block.data.url 
-              : `${API_URL}${block.data.url}`;
-            return `<img src="${imageUrl}" alt="${block.data.caption || ''}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" /><p><em>${block.data.caption || ''}</em></p>`;
-          }
-          return `<div class="preview-placeholder">Изображение: ${block.data?.caption || 'Без заголовка'}</div>`;
-        case 'embed':
-          if (block.data?.url) {
-            return `<div class="preview-embed"><iframe src="${block.data.url}" style="width: 100%; height: 400px; border: 1px solid #ddd; border-radius: 8px;"></iframe></div>`;
-          }
-          return `<div class="preview-placeholder">Встраивание: ${block.data?.url || 'Без URL'}</div>`;
-        case 'slider':
-          // Ищем слайдер в списке sliders по slug
-          const slider = sliders.find(s => s.slug === block.data?.slug);
-          if (slider && (slider as any).slides && (slider as any).slides.length > 0) {
-            const slideItems = (slider as any).slides.map((slide: any, index: number) => {
-              if (slide.media && slide.media.url) {
+    // Enhanced preview with better formatting and media/slider display
+    const html = `
+      <style>
+        .preview-container {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.6;
+          color: #374151;
+          max-width: 100%;
+        }
+        .preview-container h1, .preview-container h2, .preview-container h3 {
+          margin: 24px 0 16px 0;
+          font-weight: 600;
+          color: #111827;
+        }
+        .preview-container h1 { font-size: 2.25rem; }
+        .preview-container h2 { font-size: 1.875rem; }
+        .preview-container h3 { font-size: 1.5rem; }
+        .preview-container p {
+          margin: 16px 0;
+          color: #4b5563;
+        }
+        .preview-container ul, .preview-container ol {
+          margin: 16px 0;
+          padding-left: 24px;
+        }
+        .preview-container li {
+          margin: 8px 0;
+          color: #4b5563;
+        }
+        .preview-container strong {
+          font-weight: 600;
+          color: #111827;
+        }
+        .preview-container em {
+          font-style: italic;
+          color: #6b7280;
+        }
+        .preview-container u {
+          text-decoration: underline;
+        }
+        .preview-container blockquote {
+          margin: 20px 0;
+          padding: 16px 20px;
+          background: #f9fafb;
+          border-left: 4px solid #3b82f6;
+          color: #4b5563;
+          font-style: italic;
+        }
+        .preview-container code {
+          background: #f3f4f6;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.875rem;
+          color: #dc2626;
+        }
+        .preview-container pre {
+          background: #1f2937;
+          color: #f9fafb;
+          padding: 20px;
+          border-radius: 8px;
+          overflow-x: auto;
+          margin: 20px 0;
+        }
+        .preview-container pre code {
+          background: transparent;
+          color: inherit;
+          padding: 0;
+        }
+        .media-block, .slider-block {
+          margin: 24px 0;
+          padding: 20px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+        }
+        .media-block h4, .slider-block h4 {
+          margin: 0 0 12px 0;
+          color: #1e293b;
+          font-size: 1.125rem;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .media-info, .slider-info {
+          margin: 12px 0;
+          font-size: 0.875rem;
+          color: #64748b;
+        }
+        .media-preview img {
+          max-width: 300px;
+          height: auto;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .media-preview video, .media-preview audio {
+          max-width: 100%;
+          border-radius: 8px;
+        }
+        .slider-preview {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 12px;
+          margin-top: 16px;
+        }
+        .slide-item {
+          aspect-ratio: 16/9;
+          background: #f1f5f9;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .slide-item img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .empty-slide {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          color: #94a3b8;
+          font-size: 0.875rem;
+        }
+      </style>
+      <div class="preview-container">
+        ${editorData.blocks.map(block => {
+          switch (block.type) {
+            case 'paragraph':
+              const text = block.data?.text || '';
+              // Enhanced text formatting
+              let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+              
+              // Handle blockquotes
+              if (formattedText.startsWith('> ')) {
+                return `<blockquote>${formattedText.substring(2)}</blockquote>`;
+              }
+              
+              return `<p>${formattedText}</p>`;
+              
+            case 'header':
+              return `<h${block.data?.level || 1}>${block.data?.text || ''}</h${block.data?.level || 1}>`;
+              
+            case 'list':
+              const items = (block.data?.items || [])
+                .filter((item: string) => item.trim())
+                .map((item: string) => {
+                  // Format list items
+                  let formattedItem = item
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/__(.*?)__/g, '<u>$1</u>');
+                  return `<li>${formattedItem}</li>`;
+                }).join('');
+              return block.data?.style === 'ordered' ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
+              
+            case 'image':
+              if (block.data?.url) {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                const mediaUrl = slide.media.url.startsWith('http') 
-                  ? slide.media.url 
-                  : `${API_URL}${slide.media.url}`;
+                const imageUrl = block.data.url.startsWith('http') 
+                  ? block.data.url 
+                  : `${API_URL}${block.data.url}`;
+                return `
+                  <div class="media-block">
+                    <img src="${imageUrl}" alt="${block.data.caption || ''}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+                    ${block.data.caption ? `<p><em>${block.data.caption}</em></p>` : ''}
+                  </div>
+                `;
+              }
+              return '';
+              
+            case 'media':
+              if (block.data?.url || block.data?.filepath) {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+                // Используем filepath или url, prioritize filepath
+                const mediaPath = block.data.filepath || block.data.url;
+                const mediaUrl = mediaPath.startsWith('http') 
+                  ? mediaPath 
+                  : `${API_URL}${mediaPath}`;
                 
-                const filename = slide.media.filename || '';
+                const filename = block.data?.filename || '';
                 const isVideo = filename.match(/\.(mp4|webm|ogg|avi|mov)$/i);
                 const isAudio = filename.match(/\.(mp3|wav|ogg|flac|m4a)$/i);
                 const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
                 
+                console.log('Media preview:', { filename, mediaUrl, isVideo, isAudio, isImage });
+                
+                let mediaContent = '';
                 if (isVideo) {
-                  return `<div class="slide-item">
-                    <video muted loop autoplay style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
-                      <source src="${mediaUrl}" type="video/mp4">
-                    </video>
-                  </div>`;
+                  mediaContent = `<video controls style="max-width: 100%; border-radius: 8px;" preload="metadata"><source src="${mediaUrl}" type="video/mp4">Ваш браузер не поддерживает видео.</video>`;
                 } else if (isAudio) {
-                  return `<div class="slide-item">
-                    <div class="audio-slide">
-                      <div class="audio-icon">🎵</div>
-                      <p>${slide.media.caption || 'Аудио'}</p>
-                    </div>
-                  </div>`;
+                  mediaContent = `<audio controls style="width: 100%; margin: 12px 0;" preload="metadata"><source src="${mediaUrl}" type="audio/mpeg">Ваш браузер не поддерживает аудио.</audio>`;
                 } else if (isImage) {
-                  return `<div class="slide-item">
-                    <img src="${mediaUrl}" alt="${slide.media.caption || ''}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
-                  </div>`;
+                  mediaContent = `<img src="${mediaUrl}" alt="${block.data.caption || ''}" style="max-width: 300px; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" /><div style="display:none; text-align:center; padding:20px; background:#f1f5f9; border-radius:8px;"><div style="font-size:2rem;">🖼️</div><p>Ошибка загрузки изображения</p><p><small>${mediaUrl}</small></p></div>`;
                 } else {
-                  return `<div class="slide-item">
-                    <div class="file-slide">
-                      <div class="file-icon">📄</div>
-                      <p>${slide.media.filename || 'Файл'}</p>
-                    </div>
-                  </div>`;
+                  mediaContent = `<div style="text-align: center; padding: 20px; background: #f1f5f9; border-radius: 8px;"><div style="font-size: 2rem;">📄</div><p>${filename}</p><p><small>Тип файла не поддерживается для предпросмотра</small></p></div>`;
                 }
-              } else {
-                return `<div class="slide-item">
-                  <div class="empty-slide">
-                    <div class="empty-icon">📷</div>
-                    <p>Слайд ${index + 1}</p>
+                
+                return `
+                  <div class="media-block">
+                    <h4>📷 Медиафайл</h4>
+                    <div class="media-info">
+                      <p><strong>Файл:</strong> ${filename}</p>
+                      ${block.data.caption ? `<p><strong>Описание:</strong> ${block.data.caption}</p>` : ''}
+                    </div>
+                    <div class="media-preview">
+                      ${mediaContent}
+                    </div>
                   </div>
-                </div>`;
+                `;
               }
-            }).join('');
-            
-            return `<div class="preview-slider-block">
-              <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
-              <div class="preview-slider-info">
-                <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
-                <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
-                <p><strong>Слайдов:</strong> ${(slider as any).slides.length}</p>
-              </div>
-              <div class="preview-slider-preview">
-                ${slideItems}
-              </div>
-            </div>`;
-          } else {
-            // Если слайдер не найден или нет слайдов
-            return `<div class="preview-slider-block">
-              <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
-              <div class="preview-slider-info">
-                <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
-                <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
-                <p style="color: #ef4444;">⚠️ Слайдер не найден или нет слайдов</p>
-              </div>
-              <div class="preview-slider-preview">
-                <div class="slide-item">
-                  <div class="empty-slide">
-                    <div class="empty-icon">🎠</div>
-                    <p>Нет слайдов</p>
+              return '';
+              
+            case 'slider':
+              const slider = sliders.find(s => s.slug === block.data?.slug);
+              if (slider && (slider as any).slides && (slider as any).slides.length > 0) {
+                const slideItems = (slider as any).slides.map((slide: any, index: number) => {
+                  if (slide.media && (slide.media.url || slide.media.filepath)) {
+                    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+                    // Используем filepath или url, prioritize filepath
+                    const mediaPath = slide.media.filepath || slide.media.url;
+                    const mediaUrl = mediaPath.startsWith('http') 
+                      ? mediaPath 
+                      : `${API_URL}${mediaPath}`;
+                    
+                    const filename = slide.media.filename || '';
+                    const isVideo = filename.match(/\.(mp4|webm|ogg|avi|mov)$/i);
+                    const isAudio = filename.match(/\.(mp3|wav|ogg|flac|m4a)$/i);
+                    const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
+                    
+                    console.log('Slider slide media:', { filename, mediaUrl, isVideo, isAudio, isImage });
+                    
+                    if (isVideo) {
+                      return `<div class="slide-item"><video muted loop autoplay style="width: 100%; height: 100%; object-fit: cover;"><source src="${mediaUrl}" type="video/mp4"></video></div>`;
+                    } else if (isAudio) {
+                      return `<div class="slide-item"><div class="empty-slide"><div style="font-size: 2rem;">🎵</div><p>${slide.media.caption || 'Аудио'}</p></div></div>`;
+                    } else if (isImage) {
+                      return `<div class="slide-item"><img src="${mediaUrl}" alt="${slide.media.caption || ''}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" /><div style="display:none; width:100%; height:100%; object-fit:cover; align-items:center; justify-content:center; background:#f1f5f9; border-radius:8px;"><div style="font-size:2rem;">🖼️</div><p>Ошибка загрузки</p></div></div>`;
+                    } else {
+                      return `<div class="slide-item"><div class="empty-slide"><div style="font-size: 2rem;">📄</div><p>${slide.media.filename || 'Файл'}</p></div></div>`;
+                    }
+                  } else {
+                    return `<div class="slide-item"><div class="empty-slide"><div style="font-size: 2rem;">📷</div><p>Слайд ${index + 1}</p></div></div>`;
+                  }
+                }).join('');
+                
+                return `
+                  <div class="slider-block">
+                    <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
+                    <div class="slider-info">
+                      <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
+                      <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
+                      <p><strong>Слайдов:</strong> ${(slider as any).slides.length}</p>
+                    </div>
+                    <div class="slider-preview">
+                      ${slideItems}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>`;
+                `;
+              } else {
+                return `
+                  <div class="slider-block">
+                    <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
+                    <div class="slider-info">
+                      <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
+                      <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
+                      <p style="color: #ef4444;">⚠️ Слайдер не найден или нет слайдов</p>
+                    </div>
+                    <div class="slider-preview">
+                      <div class="slide-item"><div class="empty-slide"><div style="font-size: 2rem;">🎠</div><p>Нет слайдов</p></div></div>
+                    </div>
+                  </div>
+                `;
+              }
+              
+            default:
+              return '';
           }
-        case 'media':
-          if (block.data?.url) {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-            const mediaUrl = block.data.url.startsWith('http') 
-              ? block.data.url 
-              : `${API_URL}${block.data.url}`;
-            
-            const filename = block.data?.filename || '';
-            const isVideo = filename.match(/\.(mp4|webm|ogg|avi|mov)$/i);
-            const isAudio = filename.match(/\.(mp3|wav|ogg|flac|m4a)$/i);
-            const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
-            
-            if (isVideo) {
-              return `<div class="preview-media-block">
-                <video controls style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <source src="${mediaUrl}" type="video/mp4">
-                  Ваш браузер не поддерживает видео.
-                </video>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else if (isAudio) {
-              return `<div class="preview-media-block">
-                <audio controls style="width: 100%; margin: 8px 0;">
-                  <source src="${mediaUrl}" type="audio/mpeg">
-                  Ваш браузер не поддерживает аудио.
-                </audio>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else if (isImage) {
-              return `<div class="preview-media-block">
-                <img src="${mediaUrl}" alt="${block.data?.caption || ''}" style="max-width: 200px; height: 150px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else {
-              return `<div class="preview-media-block">
-                <div class="preview-file-icon">📄</div>
-                <p><strong>${filename}</strong></p>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            }
-          }
-          return `<div class="preview-placeholder">Медиафайл: ${block.data?.filename || 'Без имени'}</div>`;
-        default:
-          return `<div class="preview-placeholder">${block.type}: ${JSON.stringify(block.data)}</div>`;
-      }
-    }).join('\n');
+        }).join('\n')}
+      </div>
+    `;
     
     setPreviewContent(html);
     setShowPreview(true);
@@ -423,13 +584,29 @@ const CreatePagePage = () => {
             />
             
             <div className={styles.editorWrapper}>
-              <RichEditor
-                holder="editorjs-container"
-                data={editorData}
-                onChange={setEditorData}
+              <DescriptionFieldWrapper
+                value={editorData ? JSON.stringify(editorData.blocks) : ''}
+                onChange={(value) => {
+                  try {
+                    const blocks = value ? JSON.parse(value) : [];
+                    setEditorData({ blocks });
+                  } catch (e) {
+                    // Если не JSON, создаем параграф
+                    setEditorData({ 
+                      blocks: [{
+                        id: Date.now().toString(),
+                        type: 'paragraph',
+                        data: { text: value }
+                      }]
+                    });
+                  }
+                }}
                 placeholder="Начните писать контент страницы здесь..."
+                id="page-content"
+                label="Контент страницы"
                 onMediaSelect={handleMediaSelect}
                 onSliderSelect={handleSliderSelect}
+                convertJsonToMarkdown={(jsonValue) => convertBlocksToMarkdown(JSON.parse(jsonValue || '[]'))}
               />
             </div>
           </div>
@@ -472,12 +649,11 @@ const CreatePagePage = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO описание</label>
-              <textarea
-                className={styles.textarea}
+              <DescriptionFieldWrapper
                 value={form.seoDescription}
-                onChange={(event) => setForm((prev) => ({ ...prev, seoDescription: event.target.value }))}
-                rows={3}
+                onChange={(value) => setForm((prev) => ({ ...prev, seoDescription: value }))}
+                placeholder="Введите SEO описание в Markdown формате..."
+                id="seo-description"
               />
             </div>
 
