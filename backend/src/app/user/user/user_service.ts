@@ -143,9 +143,13 @@ export class UserService {
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const { search, sortBy, sortOrder, page, limit } = searchDto;
+    const { search, sortBy, sortOrder } = searchDto;
+    
+    // Use default values if not provided (inherited from SearchQueryDto)
+    const currentPage = searchDto.page || 1;
+    const currentLimit = searchDto.limit || 10;
 
-    const skip = (page - 1) * limit;
+    const skip = (currentPage - 1) * currentLimit;
 
     const where: Prisma.UserWhereInput = {};
 
@@ -171,7 +175,7 @@ export class UserService {
       this.prisma.user.findMany({
         where,
         skip,
-        take: Number(limit),
+        take: Number(currentLimit),
         orderBy,
         include: {
           role: true, // Include role for searching and for response
@@ -186,9 +190,9 @@ export class UserService {
     const result = {
       users: safeUsers,
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      page: currentPage,
+      limit: currentLimit,
+      totalPages: Math.ceil(total / currentLimit),
     };
     this.logger.log(`[SET] Setting Redis cache for key: ${cacheKey}`);
     await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600); // Stringify and set TTL

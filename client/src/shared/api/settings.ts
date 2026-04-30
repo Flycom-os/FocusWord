@@ -128,6 +128,13 @@ export const settingsApi = {
         description: 'Настройки внешнего вида сайта',
         settings: [
           {
+            key: 'theme_mode',
+            title: 'Режим темы',
+            description: 'Переключение между дневной и ночной темой',
+            type: 'string',
+            defaultValue: 'light'
+          },
+          {
             key: 'theme',
             title: 'Тема',
             description: 'Основная тема сайта',
@@ -267,8 +274,60 @@ export const settingsApi = {
             defaultValue: 'true'
           }
         ]
+      },
+      {
+        category: 'database',
+        title: 'Управление базой данных',
+        description: 'Импорт и экспорт базы данных',
+        settings: [
+          {
+            key: 'auto_backup',
+            title: 'Автоматическое резервное копирование',
+            description: 'Включить автоматическое создание резервных копий',
+            type: 'boolean',
+            defaultValue: 'true'
+          },
+          {
+            key: 'backup_frequency',
+            title: 'Частота резервного копирования',
+            description: 'Как часто создавать резервные копии',
+            type: 'string',
+            defaultValue: 'daily'
+          },
+          {
+            key: 'max_backups',
+            title: 'Максимальное количество копий',
+            description: 'Максимальное количество хранимых резервных копий',
+            type: 'number',
+            defaultValue: '7',
+            validation: { min: 1, max: 30 }
+          }
+        ]
       }
     ];
+  },
+
+  // Экспорт базы данных
+  exportDatabase: async (token: string | null): Promise<Blob> => {
+    const response = await axios.get(`${API_URL}/database/export`, {
+      headers: authHeaders(token),
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Импорт базы данных
+  importDatabase: async (token: string | null, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await axios.post(`${API_URL}/database/import`, formData, {
+      headers: {
+        ...authHeaders(token),
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
   }
 };
 

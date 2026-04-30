@@ -10,6 +10,10 @@ import { RoleModule } from './app/role/role.module';
 import { PagesModule } from "./app/pages/pages.module";
 import { MediafilesModule } from "./app/mediafiles/mediafiles.module";
 import { SlidersModule } from "./app/sliders/sliders.module"; // Import RoleModule
+import { SimpleSettingsModule } from "./app/settings/simple-settings.module";
+import { PrismaModule } from "./prisma/prisma.module";
+import { RecordsModule } from "./app/records/records.module";
+import { CategoriesModule } from "./app/categories/categories.module";
 
 @Module({
   imports: [
@@ -23,7 +27,11 @@ import { SlidersModule } from "./app/sliders/sliders.module"; // Import RoleModu
     RoleModule,
     PagesModule,
     MediafilesModule,
-    SlidersModule
+    SlidersModule,
+    SimpleSettingsModule,
+    PrismaModule,
+    RecordsModule,
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [PrismaService, AppService],

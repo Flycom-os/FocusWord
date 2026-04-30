@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/src/shared/ui/Input/ui-input';
 import Button from '@/src/shared/ui/Button/ui-button';
-import { fetchSettings, updateMultipleSettings } from '@/src/shared/api/settings';
+import { fetchSettings, updateMultipleSettings, settingsApi } from '@/src/shared/api/settings';
 import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
 import { useAuth } from '@/src/app/providers/auth-provider';
 import styles from './settings.module.css';
@@ -16,10 +16,15 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [formData, setFormData] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadSettings();
+    // Apply saved theme on component mount
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
   }, []);
 
   const loadSettings = async () => {
@@ -59,11 +64,67 @@ export default function SettingsPage() {
       }));
       
       await updateMultipleSettings(accessToken, settingsToUpdate);
+      
+      // Apply theme change if theme_mode was updated
+      if (formData.theme_mode) {
+        applyTheme(formData.theme_mode);
+      }
+      
       showToast('Настройки сохранены', 'success');
     } catch (error) {
       showToast('Ошибка при сохранении настроек', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const applyTheme = (theme: string) => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
+    }
+    localStorage.setItem('theme', theme);
+  };
+
+  const handleExportDatabase = async () => {
+    try {
+      setExporting(true);
+      const blob = await settingsApi.exportDatabase(accessToken);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `database-backup-${new Date().toISOString().split('T')[0]}.sql`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast('База данных успешно экспортирована', 'success');
+    } catch (error) {
+      showToast('Ошибка при экспорте базы данных', 'error');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleImportDatabase = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      await settingsApi.importDatabase(accessToken, file);
+      showToast('База данных успешно импортирована', 'success');
+      // Reload settings after import
+      loadSettings();
+    } catch (error) {
+      showToast('Ошибка при импорте базы данных', 'error');
+    } finally {
+      setImporting(false);
+      // Clear file input
+      event.target.value = '';
     }
   };
 
@@ -104,6 +165,28 @@ export default function SettingsPage() {
           />
         );
       default:
+        // Special handling for theme_mode
+        if (setting.key === 'theme_mode') {
+          return (
+            <div className={styles.themeSwitcher}>
+              <button
+                type="button"
+                className={`${styles.themeButton} ${value === 'light' ? styles.active : ''}`}
+                onClick={() => handleInputChange(setting.key, 'light')}
+              >
+                ☀️ Дневная
+              </button>
+              <button
+                type="button"
+                className={`${styles.themeButton} ${value === 'dark' ? styles.active : ''}`}
+                onClick={() => handleInputChange(setting.key, 'dark')}
+              >
+                🌙 Ночная
+              </button>
+            </div>
+          );
+        }
+        
         return (
           <Input
             type={setting.key.includes('password') ? 'password' : setting.key.includes('url') ? 'url' : 'text'}
@@ -165,6 +248,42 @@ export default function SettingsPage() {
                     {renderField(setting)}
                   </div>
                 ))}
+                
+                {/* Add database import/export buttons for database category */}
+                {group.category === 'database' && (
+                  <div className={styles.databaseActions}>
+                    <h3>Управление базой данных</h3>
+                    <div className={styles.buttonGroup}>
+                      <Button
+                        onClick={handleExportDatabase}
+                        disabled={exporting}
+                        className={styles.exportButton}
+                      >
+                        {exporting ? 'Экспорт...' : '📤 Экспорт БД'}
+                      </Button>
+                      <div className={styles.importWrapper}>
+                        <input
+                          type="file"
+                          id="db-import"
+                          accept=".sql,.dump"
+                          onChange={handleImportDatabase}
+                          disabled={importing}
+                          className={styles.fileInput}
+                        />
+                        <Button
+                          onClick={() => document.getElementById('db-import')?.click()}
+                          disabled={importing}
+                          className={styles.importButton}
+                        >
+                          {importing ? 'Импорт...' : '📥 Импорт БД'}
+                        </Button>
+                      </div>
+                    </div>
+                    <p className={styles.importWarning}>
+                      ⚠️ Внимание: Импорт базы данных заменит все текущие данные. Рекомендуется создать резервную копию перед импортом.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ))}

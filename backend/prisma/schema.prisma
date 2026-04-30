@@ -219,17 +219,6 @@ model Slide {
   sliderId Int?
 }
 
-model Setting {
-  id          Int      @id @default(autoincrement())
-  key         String   @unique
-  value       String
-  type        String   @default("string")
-  description String?
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 model Redirect {
   id          Int      @id @default(autoincrement())
   sourceUrl   String   @unique
@@ -365,6 +354,17 @@ model ActivityLog {
 
   user   User? @relation(fields: [userId], references: [id])
   userId Int?
+}
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  category    String   @default("general")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Block {

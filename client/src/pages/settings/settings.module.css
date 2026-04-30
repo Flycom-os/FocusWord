@@ -317,3 +317,159 @@
     border-color: #3b82f6;
   }
 }
+
+/* Theme Switcher Styles */
+.themeSwitcher {
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.themeButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.themeButton:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.themeButton.active {
+  background: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Database Actions Styles */
+.databaseActions {
+  grid-column: 1 / -1;
+  padding: 24px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-top: 16px;
+}
+
+.databaseActions h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exportButton,
+.importButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exportButton {
+  background: #10b981;
+  color: white;
+}
+
+.exportButton:hover:not(:disabled) {
+  background: #059669;
+}
+
+.exportButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.importButton {
+  background: #3b82f6;
+  color: white;
+}
+
+.importButton:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.importButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.importWrapper {
+  position: relative;
+}
+
+.fileInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.importWarning {
+  margin: 16px 0 0 0;
+  padding: 12px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Dark theme overrides */
+.dark-theme .themeSwitcher {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+.dark-theme .themeButton {
+  color: #9ca3af;
+}
+
+.dark-theme .themeButton:hover {
+  background: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark-theme .themeButton.active {
+  background: #1f2937;
+  color: white;
+}
+
+.dark-theme .databaseActions {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.dark-theme .databaseActions h3 {
+  color: #e5e7eb;
+}
+
+.dark-theme .importWarning {
+  background: #451a03;
+  border-color: #92400e;
+  color: #fcd34d;
+}

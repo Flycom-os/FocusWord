@@ -1,22 +1,22 @@
-import { IsOptional, IsString, IsArray, IsEnum, IsInt, Min, Max } from "class-validator";
+import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from "class-validator";
 import { Type } from "class-transformer";
 import { ApiProperty } from '@nestjs/swagger';
 import { SearchQueryDto, SortOrder } from "../common/search-query.dto";
 
-export class SearchRolesDto{
+export class SearchSettingsDto {
   @ApiProperty({
-    description: 'Search term to filter results across relevant fields',
+    description: 'Search term to filter results',
     required: false,
-    example: 'admin',
+    example: 'site',
   })
   @IsOptional()
   @IsString()
   search?: string;
 
   @ApiProperty({
-    description: 'Field to sort the results by',
+    description: 'Field to sort results by',
     required: false,
-    example: 'createdAt',
+    example: 'key',
   })
   @IsOptional()
   @IsString()
@@ -26,11 +26,20 @@ export class SearchRolesDto{
     description: 'Sort order (asc or desc)',
     required: false,
     enum: SortOrder,
-    example: SortOrder.DESC,
+    example: SortOrder.ASC,
   })
   @IsOptional()
   @IsEnum(SortOrder)
   sortOrder?: SortOrder;
+
+  @ApiProperty({
+    description: 'Filter by category',
+    required: false,
+    example: 'general',
+  })
+  @IsOptional()
+  @IsString()
+  category?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',
@@ -56,15 +65,4 @@ export class SearchRolesDto{
   @Min(1)
   @Max(100)
   limit?: number;
-
-  @ApiProperty({ description: 'The name of the role', example: 'Admin', required: false })
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @ApiProperty({ description: 'The description of the role', example: 'Administrator role with full access', required: false })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
 }

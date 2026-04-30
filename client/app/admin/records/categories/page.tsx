@@ -4,35 +4,34 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/src/shared/ui/Input/ui-input';
 import Button from '@/src/shared/ui/Button/ui-button';
-import { recordsApi, RecordDto } from '@/src/shared/api/records';
+import { recordsApi, RecordDto, CategoryDto, CreateCategoryDto, UpdateCategoryDto } from '@/src/shared/api/records';
 import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
 import styles from './categories.module.css';
 
 export default function RecordCategoriesPage() {
   const router = useRouter();
-  const [records, setRecords] = useState<RecordDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<RecordDto | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryDto | null>(null);
   const [categoryForm, setCategoryForm] = useState({
     title: '',
     slug: '',
-    description: '',
-    status: 'draft' as 'draft' | 'published'
+    description: ''
   });
 
   useEffect(() => {
-    loadRecords();
+    loadCategories();
   }, [currentPage, search]);
 
-  const loadRecords = async () => {
+  const loadCategories = async () => {
     setLoading(true);
     try {
-      const response = await recordsApi.getAll(currentPage, 10, search);
-      setRecords(response.data);
+      const response = await recordsApi.getCategories(currentPage, 10, search);
+      setCategories(response.data);
       setTotalPages(Math.ceil(response.total / 10));
     } catch (error) {
       showToast('Ошибка при загрузке категорий', 'error');
@@ -45,45 +44,44 @@ export default function RecordCategoriesPage() {
     setCategoryForm({
       title: '',
       slug: '',
-      description: '',
-      status: 'draft'
+      description: ''
     });
     setEditingCategory(null);
     setShowCreateModal(true);
   };
 
-  const handleEditCategory = (record: RecordDto) => {
+  const handleEditCategory = (category: CategoryDto) => {
     setCategoryForm({
-      title: record.title,
-      slug: record.slug,
-      description: record.content || '',
-      status: record.status
+      title: category.name,
+      slug: category.slug,
+      description: category.description || ''
     });
-    setEditingCategory(record);
+    setEditingCategory(category);
     setShowCreateModal(true);
   };
 
   const handleSaveCategory = async () => {
     try {
+      const categoryData: CreateCategoryDto = {
+        name: categoryForm.title,
+        slug: categoryForm.slug,
+        description: categoryForm.description
+      };
+      
       if (editingCategory) {
-        await recordsApi.update(editingCategory.id.toString(), {
-          ...categoryForm,
-          content: categoryForm.description,
-          contentBlocks: [{ type: 'paragraph', data: { text: categoryForm.description } }]
+        await recordsApi.updateCategory(editingCategory.id.toString(), {
+          ...categoryData,
+          id: editingCategory.id
         });
         showToast('Категория обновлена', 'success');
       } else {
-        await recordsApi.create({
-          ...categoryForm,
-          content: categoryForm.description,
-          contentBlocks: [{ type: 'paragraph', data: { text: categoryForm.description } }]
-        });
+        await recordsApi.createCategory(categoryData);
         showToast('Категория создана', 'success');
       }
       
       setShowCreateModal(false);
       setEditingCategory(null);
-      loadRecords();
+      loadCategories();
     } catch (error) {
       showToast('Ошибка при сохранении категории', 'error');
     }
@@ -95,44 +93,11 @@ export default function RecordCategoriesPage() {
     }
     
     try {
-      await recordsApi.delete(id);
+      await recordsApi.deleteCategory(id);
       showToast('Категория удалена', 'success');
-      loadRecords();
+      loadCategories();
     } catch (error) {
       showToast('Ошибка при удалении категории', 'error');
-    }
-  };
-
-  const handleStatusChange = async (id: string, status: 'draft' | 'published') => {
-    try {
-      await recordsApi.changeStatus(id, status);
-      showToast(`Статус изменен на ${status === 'published' ? 'опубликована' : 'черновик'}`, 'success');
-      loadRecords();
-    } catch (error) {
-      showToast('Ошибка при изменении статуса', 'error');
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const baseClass = styles.statusBadge;
-    switch (status) {
-      case 'published':
-        return `${baseClass} ${styles.published}`;
-      case 'draft':
-        return `${baseClass} ${styles.draft}`;
-      default:
-        return baseClass;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'published':
-        return 'Опубликована';
-      case 'draft':
-        return 'Черновик';
-      default:
-        return status;
     }
   };
 
@@ -163,7 +128,7 @@ export default function RecordCategoriesPage() {
       <div className={styles.content}>
         {loading ? (
           <div className={styles.loading}>Загрузка...</div>
-        ) : records.length === 0 ? (
+        ) : categories.length === 0 ? (
           <div className={styles.empty}>
             <h3>Нет категорий</h3>
             <p>Создайте первую категорию для записей</p>
@@ -173,51 +138,39 @@ export default function RecordCategoriesPage() {
           </div>
         ) : (
           <div className={styles.grid}>
-            {records.map(record => (
-              <div key={record.id} className={styles.card}>
+            {categories.map(category => (
+              <div key={category.id} className={styles.card}>
                 <div className={styles.cardHeader}>
-                  <h3>{record.title}</h3>
-                  <span className={getStatusBadge(record.status)}>
-                    {getStatusText(record.status)}
-                  </span>
+                  <h3>{category.name}</h3>
                 </div>
                 
                 <div className={styles.cardContent}>
-                  <p className={styles.slug}>/{record.slug}</p>
+                  <p className={styles.slug}>/{category.slug}</p>
                   <p className={styles.description}>
-                    {record.content || 'Нет описания'}
+                    {category.description || 'Нет описания'}
                   </p>
                 </div>
 
                 <div className={styles.cardMeta}>
                   <span className={styles.date}>
-                    Создано: {new Date(record.createdAt).toLocaleDateString('ru-RU')}
+                    Создано: {new Date(category.createdAt).toLocaleDateString('ru-RU')}
                   </span>
-                  {record.updatedAt !== record.createdAt && (
+                  {category.updatedAt !== category.createdAt && (
                     <span className={styles.date}>
-                      Обновлено: {new Date(record.updatedAt).toLocaleDateString('ru-RU')}
+                      Обновлено: {new Date(category.updatedAt).toLocaleDateString('ru-RU')}
                     </span>
                   )}
                 </div>
 
                 <div className={styles.cardActions}>
                   <Button
-                    onClick={() => handleEditCategory(record)}
+                    onClick={() => handleEditCategory(category)}
                     className={styles.editButton}
                   >
                     ✏️ Редактировать
                   </Button>
                   <Button
-                    onClick={() => handleStatusChange(
-                      record.id.toString(), 
-                      record.status === 'published' ? 'draft' : 'published'
-                    )}
-                    className={styles.statusButton}
-                  >
-                    {record.status === 'published' ? '📝 В черновик' : '📤 Опубликовать'}
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteCategory(record.id.toString())}
+                    onClick={() => handleDeleteCategory(category.id.toString())}
                     className={styles.deleteButton}
                   >
                     🗑️ Удалить
@@ -298,21 +251,7 @@ export default function RecordCategoriesPage() {
                 />
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Статус</label>
-                <select
-                  value={categoryForm.status}
-                  onChange={(e) => setCategoryForm(prev => ({ 
-                    ...prev, 
-                    status: e.target.value as 'draft' | 'published' 
-                  }))}
-                  className={styles.select}
-                >
-                  <option value="draft">Черновик</option>
-                  <option value="published">Опубликована</option>
-                </select>
-              </div>
-            </div>
+                          </div>
 
             <div className={styles.modalActions}>
               <Button

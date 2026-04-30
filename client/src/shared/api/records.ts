@@ -1,3 +1,46 @@
+export interface CategoryDto {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  parentCategory?: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+  childCategories?: {
+    id: number;
+    name: string;
+    slug: string;
+  }[];
+  posts?: {
+    id: number;
+    title: string;
+    slug: string;
+    status: string;
+  }[];
+}
+
+export interface CreateCategoryDto {
+  name: string;
+  slug: string;
+  description?: string;
+  parentCategoryId?: number;
+}
+
+export interface UpdateCategoryDto extends CreateCategoryDto {
+  id: number;
+}
+
+export interface PaginatedCategoriesResponse {
+  data: CategoryDto[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface RecordDto {
   id: number;
   title: string;
@@ -41,7 +84,6 @@ export interface PaginatedRecordsResponse {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 // Временно используем pages endpoint для записей
-// TODO: Создать отдельный /api/records endpoint на бэкенде
 
 export const recordsApi = {
   // Получить все записи с пагинацией
@@ -52,7 +94,7 @@ export const recordsApi = {
       ...(search && { search })
     });
     
-    const response = await fetch(`${API_URL}/api/pages?${params}`);
+    const response = await fetch(`${API_URL}/api/records?${params}`);
     if (!response.ok) {
       throw new Error('Failed to fetch records');
     }
@@ -61,7 +103,7 @@ export const recordsApi = {
 
   // Получить запись по ID
   getById: async (id: string): Promise<RecordDto> => {
-    const response = await fetch(`${API_URL}/api/pages/${id}`);
+    const response = await fetch(`${API_URL}/api/records/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch record');
     }
@@ -70,7 +112,7 @@ export const recordsApi = {
 
   // Создать новую запись
   create: async (data: CreateRecordDto): Promise<RecordDto> => {
-    const response = await fetch(`${API_URL}/api/pages`, {
+    const response = await fetch(`${API_URL}/api/records`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,7 +128,7 @@ export const recordsApi = {
 
   // Обновить запись
   update: async (id: string, data: UpdateRecordDto): Promise<RecordDto> => {
-    const response = await fetch(`${API_URL}/api/pages/${id}`, {
+    const response = await fetch(`${API_URL}/api/records/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +144,7 @@ export const recordsApi = {
 
   // Удалить запись
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/api/pages/${id}`, {
+    const response = await fetch(`${API_URL}/api/records/${id}`, {
       method: 'DELETE',
     });
     
@@ -113,14 +155,14 @@ export const recordsApi = {
 
   // === КАТЕГОРИИИ ЗАПИСЕЙ ===
   // Получить все категории записей
-  getCategories: async (page = 1, limit = 10, search = ''): Promise<any> => {
+  getCategories: async (page = 1, limit = 10, search = ''): Promise<PaginatedCategoriesResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
       ...(search && { search })
     });
     
-    const response = await fetch(`${API_URL}/api/records/categories?${params}`);
+    const response = await fetch(`${API_URL}/api/categories?${params}`);
     if (!response.ok) {
       throw new Error('Failed to fetch record categories');
     }
@@ -128,8 +170,8 @@ export const recordsApi = {
   },
 
   // Создать категорию записи
-  createCategory: async (data: any): Promise<any> => {
-    const response = await fetch(`${API_URL}/api/records/categories`, {
+  createCategory: async (data: CreateCategoryDto): Promise<CategoryDto> => {
+    const response = await fetch(`${API_URL}/api/categories`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,8 +186,8 @@ export const recordsApi = {
   },
 
   // Обновить категорию записи
-  updateCategory: async (id: string, data: any): Promise<any> => {
-    const response = await fetch(`${API_URL}/api/records/categories/${id}`, {
+  updateCategory: async (id: string, data: UpdateCategoryDto): Promise<CategoryDto> => {
+    const response = await fetch(`${API_URL}/api/categories/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -161,7 +203,7 @@ export const recordsApi = {
 
   // Удалить категорию записи
   deleteCategory: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/api/records/categories/${id}`, {
+    const response = await fetch(`${API_URL}/api/categories/${id}`, {
       method: 'DELETE',
     });
     
@@ -172,20 +214,20 @@ export const recordsApi = {
 
 
   // Изменить статус записи
-changeStatus: async (id: string, status: 'draft' | 'published'): Promise<RecordDto> => {
-  const response = await fetch(`${API_URL}/api/pages/${id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ status }),
-  });
+  changeStatus: async (id: string, status: 'draft' | 'published'): Promise<RecordDto> => {
+    const response = await fetch(`${API_URL}/api/records/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to change record status');
-  }
-  return response.json();
-},};
+    if (!response.ok) {
+      throw new Error('Failed to change record status');
+    }
+    return response.json();
+  },};
 
 
 // Экспортируем функции для совместимости со старым кодом
