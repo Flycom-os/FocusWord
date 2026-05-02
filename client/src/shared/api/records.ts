@@ -51,10 +51,11 @@ export interface RecordDto {
   template: string;
   seoTitle?: string;
   seoDescription?: string;
-  metaKeywords?: string;
+  metaKeywords?: string[];
   featuredSliderId?: number;
   createdAt: string;
   updatedAt: string;
+  categories?: CategoryDto[];
 }
 
 export interface CreateRecordDto {
@@ -66,8 +67,9 @@ export interface CreateRecordDto {
   template: string;
   seoTitle?: string;
   seoDescription?: string;
-  metaKeywords?: string;
+  metaKeywords?: string[];
   featuredSliderId?: number;
+  categoryIds?: number[];
 }
 
 export interface UpdateRecordDto extends CreateRecordDto {
@@ -82,6 +84,9 @@ export interface PaginatedRecordsResponse {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
+
+const authHeaders = (token: string | null): Record<string, string> =>
+  token ? { Authorization: `Bearer ${token}` } : {};
 
 // Временно используем pages endpoint для записей
 
@@ -111,12 +116,13 @@ export const recordsApi = {
   },
 
   // Создать новую запись
-  create: async (data: CreateRecordDto): Promise<RecordDto> => {
+  create: async (token: string | null, data: CreateRecordDto): Promise<RecordDto> => {
     const response = await fetch(`${API_URL}/api/records`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
+        ...authHeaders(token),
+      } as HeadersInit,
       body: JSON.stringify(data),
     });
     
@@ -127,12 +133,13 @@ export const recordsApi = {
   },
 
   // Обновить запись
-  update: async (id: string, data: UpdateRecordDto): Promise<RecordDto> => {
+  update: async (token: string | null, id: string, data: UpdateRecordDto): Promise<RecordDto> => {
     const response = await fetch(`${API_URL}/api/records/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-      },
+        ...authHeaders(token),
+      } as HeadersInit,
       body: JSON.stringify(data),
     });
     
@@ -143,9 +150,10 @@ export const recordsApi = {
   },
 
   // Удалить запись
-  delete: async (id: string): Promise<void> => {
+  delete: async (token: string | null, id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/api/records/${id}`, {
       method: 'DELETE',
+      headers: authHeaders(token) as HeadersInit,
     });
     
     if (!response.ok) {
@@ -214,12 +222,13 @@ export const recordsApi = {
 
 
   // Изменить статус записи
-  changeStatus: async (id: string, status: 'draft' | 'published'): Promise<RecordDto> => {
+  changeStatus: async (token: string | null, id: string, status: 'draft' | 'published'): Promise<RecordDto> => {
     const response = await fetch(`${API_URL}/api/records/${id}/status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-      },
+        ...authHeaders(token),
+      } as HeadersInit,
       body: JSON.stringify({ status }),
     });
 

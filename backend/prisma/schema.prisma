@@ -26,6 +26,7 @@ model User {
 
   posts        Post[]
   pages        Page[]
+  records      Record[]
   mediaFiles   MediaFile[]
   comments     Comment[]
   activityLogs ActivityLog[]
@@ -66,7 +67,8 @@ model MediaFile {
   height       Int?
 
   featuredImageOfPosts Post[]  @relation("FeaturedImageOfPost")
-  featuredImageOfPages Page[]  @relation("FeaturedImageOfPage")
+  featuredImageOfPages Page[] @relation("FeaturedImageOfPage")
+  featuredImageOfRecords Record[] @relation("FeaturedImageOfRecord")
   slideImage           Slide[]
 }
 
@@ -141,6 +143,38 @@ model Post {
   structuredData   StructuredData[] @relation("PostStructuredData")
 }
 
+model Record {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  status      String    @default("draft")
+  template    String    @default("default")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  categories Category[] @relation("RecordCategories")
+
+  featuredImage   MediaFile? @relation("FeaturedImageOfRecord", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
+
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+
+  featuredSlider   Slider? @relation("FeaturedSliderOfRecord", fields: [featuredSliderId], references: [id])
+  featuredSliderId Int?
+
+  contentBlocks Json? @default("[]")
+
+  analyticsEntries AnalyticsEntry[] @relation("RecordAnalytics")
+  structuredData   StructuredData[] @relation("RecordStructuredData")
+}
+
 model Category {
   id          Int      @id @default(autoincrement())
   name        String   @unique
@@ -150,6 +184,7 @@ model Category {
   updatedAt   DateTime @updatedAt
 
   posts Post[] @relation("PostCategories")
+  records Record[] @relation("RecordCategories")
 
   parentCategory   Category?  @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
   parentCategoryId Int?
@@ -201,6 +236,7 @@ model Slider {
   
   // Страницы, которые используют этот слайдер как основной
   featuredInPages Page[] @relation("FeaturedSliderOfPage")
+  featuredInRecords Record[] @relation("FeaturedSliderOfRecord")
 }
 
 model Slide {
@@ -306,6 +342,8 @@ model AnalyticsEntry {
   pageId Int?
   post   Post? @relation("PostAnalytics", fields: [postId], references: [id])
   postId Int?
+  record Record? @relation("RecordAnalytics", fields: [recordId], references: [id])
+  recordId Int?
 
   referrers ReferrerDetail[]
 }
@@ -341,6 +379,8 @@ model StructuredData {
   pageId Int?
   post   Post? @relation("PostStructuredData", fields: [postId], references: [id])
   postId Int?
+  record Record? @relation("RecordStructuredData", fields: [recordId], references: [id])
+  recordId Int?
 }
 
 model ActivityLog {

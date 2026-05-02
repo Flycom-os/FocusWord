@@ -1,0 +1,387 @@
+/* Page Styles - Beautiful Layout for Dynamic Pages */
+
+.pageContainer {
+  max-width: 896px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  font-size: 36px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.pageSlider {
+  margin-bottom: 48px;
+}
+
+.pageImage {
+  margin-bottom: 32px;
+}
+
+.pageImage img {
+  width: 100%;
+  height: 384px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.pageContent {
+  margin-bottom: 48px;
+  line-height: 1.8;
+  font-size: 18px;
+  color: #374151;
+}
+
+.pageContent h1,
+.pageContent h2,
+.pageContent h3,
+.pageContent h4,
+.pageContent h5,
+.pageContent h6 {
+  color: #111827;
+  font-weight: 600;
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+.pageContent p {
+  margin-bottom: 16px;
+}
+
+.pageContent ul,
+.pageContent ol {
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+.pageContent li {
+  margin-bottom: 8px;
+}
+
+.pageContent a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.pageContent a:hover {
+  color: #1d4ed8;
+}
+
+/* Meta Information Block */
+.metaInfo {
+  background: linear-gradient(to right, #eff6ff, #e0e7ff);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid #dbeafe;
+}
+
+.metaInfoTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.metaInfoIcon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #2563eb;
+}
+
+.metaInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  font-size: 14px;
+}
+
+.metaInfoItem {
+  display: flex;
+  align-items: center;
+  color: #374151;
+}
+
+.metaInfoLabel {
+  font-weight: 500;
+}
+
+.metaInfoValue {
+  margin-left: 8px;
+}
+
+.statusBadge {
+  padding: 2px 8px;
+  background-color: #dcfce7;
+  color: #166534;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statusBadge.published {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.statusBadge.draft {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* SEO Information Block */
+.seoInfo {
+  background: linear-gradient(to right, #f0fdf4, #dcfce7);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #bbf7d0;
+}
+
+.seoInfoTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.seoInfoIcon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #16a34a;
+}
+
+.seoInfoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seoInfoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.seoInfoLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.seoInfoValue {
+  margin-top: 4px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  color: #1f2937;
+}
+
+/* Navigation */
+.pageNavigation {
+  text-align: center;
+  margin-top: 48px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(to right, #2563eb, #4f46e5);
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  background: linear-gradient(to right, #1d4ed8, #4338ca);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+.backButton:active {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 404 Page Styles */
+.errorPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.errorContainer {
+  text-align: center;
+  max-width: 448px;
+}
+
+.errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: #fef2f2;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.errorIcon svg {
+  width: 40px;
+  height: 40px;
+  color: #dc2626;
+}
+
+.errorTitle {
+  font-size: 60px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.errorSubtitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.errorDescription {
+  color: #6b7280;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.errorActions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.errorSecondaryLinks {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.errorLinks {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.errorLink {
+  padding: 8px 16px;
+  color: #2563eb;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.errorLink:hover {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+/* Loading State */
+.loadingPage {
+  text-align: center;
+  padding: 48px 16px;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 24px 12px;
+  }
+  
+  .pageTitle {
+    font-size: 28px;
+  }
+  
+  .pageImage img {
+    height: 256px;
+  }
+  
+  .metaInfoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .errorLinks {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .errorContainer {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageContainer {
+    padding: 16px 8px;
+  }
+  
+  .pageTitle {
+    font-size: 24px;
+  }
+  
+  .pageImage img {
+    height: 192px;
+  }
+  
+  .backButton {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .errorTitle {
+    font-size: 48px;
+  }
+  
+  .errorSubtitle {
+    font-size: 20px;
+  }
+}

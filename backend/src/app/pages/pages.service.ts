@@ -309,16 +309,22 @@ export class PagesService {
   }
 
   async findOneBySlug(slug: string): Promise<any | null> {
+    console.log(`[PagesService] findOneBySlug called with slug: "${slug}"`);
+    
     const cacheKey = `page_slug_${slug}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPage = await this.redisClient.get(cacheKey);
 
     if (cachedPage) {
       this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
-      return JSON.parse(cachedPage);
+      const parsed = JSON.parse(cachedPage);
+      console.log(`[PagesService] Returning cached page:`, { id: parsed.id, slug: parsed.slug, title: parsed.title });
+      return parsed;
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    console.log(`[PagesService] Querying database for slug: "${slug}"`);
+    
     const page = await this.prisma.page.findUnique({
       where: { slug },
       include: {
@@ -352,6 +358,8 @@ export class PagesService {
         },
       },
     });
+
+    console.log(`[PagesService] Database query result:`, page ? { id: page.id, slug: page.slug, title: page.title, status: page.status } : 'null');
 
     if (page) {
       this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);

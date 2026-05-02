@@ -40,17 +40,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const checkTokenExpiration = useCallback((storedAuth: StoredAuth) => {
-    const now = Date.now();
-    if (now >= storedAuth.expiresAt) {
-      // Токен истек, очищаем и редиректим
-      clear();
-      router.push('/signin');
-      return false;
-    }
-    return true;
-  }, [router]);
-
   const clear = useCallback(() => {
     setUser(null);
     setAccessToken(null);
@@ -58,6 +47,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       window.localStorage.removeItem(STORAGE_KEY);
     }
   }, []);
+
+  const checkTokenExpiration = useCallback((storedAuth: StoredAuth) => {
+    const now = Date.now();
+    if (now >= storedAuth.expiresAt) {
+      // Токен истек, очищаем
+      clear();
+      return false;
+    }
+    return true;
+  }, [clear]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,9 +66,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Auth: Raw storage data:', raw);
       
       if (!raw) {
-        console.log('Auth: No auth data found, redirecting to signin');
+        console.log('Auth: No auth data found, staying on current page');
         setIsLoading(false);
-        router.push('/signin');
         return;
       }
       
@@ -78,10 +76,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Проверяем наличие полей времени
       if (!parsed.createdAt || !parsed.expiresAt) {
-        console.log('Auth: Old format data, clearing and redirecting');
-        // Старый формат данных, очищаем и редиректим
+        console.log('Auth: Old format data, clearing');
+        // Старый формат данных, очищаем
         clear();
-        router.push('/signin');
         return;
       }
       
@@ -97,7 +94,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error('Auth: Error parsing auth data:', error);
       clear();
-      router.push('/signin');
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +111,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           checkTokenExpiration(parsed);
         } catch {
           clear();
-          router.push('/signin');
         }
       }
     }, 60000); // Проверяем каждую минуту

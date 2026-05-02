@@ -16,7 +16,7 @@ export class RecordsService {
     } : {};
 
     const [data, total] = await Promise.all([
-      this.prisma.page.findMany({
+      this.prisma.record.findMany({
         where,
         skip,
         take: limit,
@@ -26,10 +26,13 @@ export class RecordsService {
             select: { id: true, email: true, firstName: true, lastName: true }
           },
           featuredImage: true,
-          featuredSlider: true
+          featuredSlider: true,
+          categories: {
+            select: { id: true, name: true, slug: true }
+          }
         }
       }),
-      this.prisma.page.count({ where })
+      this.prisma.record.count({ where })
     ]);
 
     return {
@@ -41,43 +44,99 @@ export class RecordsService {
   }
 
   async findById(id: number) {
-    return this.prisma.page.findUnique({
+    return this.prisma.record.findUnique({
       where: { id },
       include: {
         author: {
           select: { id: true, email: true, firstName: true, lastName: true }
         },
         featuredImage: true,
-        featuredSlider: true
+        featuredSlider: true,
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       }
     });
   }
 
   async create(createRecordDto: any) {
-    return this.prisma.page.create({
-      data: {
-        ...createRecordDto,
+    try {
+      console.log('Creating record with DTO:', createRecordDto);
+
+      const { categoryIds, ...recordData } = createRecordDto;
+
+      const data = {
+        ...recordData,
         publishedAt: createRecordDto.status === 'published' ? new Date() : null
-      },
-      include: {
-        author: {
-          select: { id: true, email: true, firstName: true, lastName: true }
-        },
-        featuredImage: true,
-        featuredSlider: true
+      };
+
+      // Ensure content is not empty
+      if (!data.content || data.content.trim() === '') {
+        data.content = ' '; // Empty content with space
       }
-    });
+
+      // Ensure contentBlocks is valid JSON
+      if (data.contentBlocks && typeof data.contentBlocks === 'string') {
+        try {
+          JSON.parse(data.contentBlocks);
+        } catch (e) {
+          data.contentBlocks = '[]';
+        }
+      } else if (!data.contentBlocks) {
+        data.contentBlocks = '[]';
+      }
+
+      // Connect categories to the record
+      if (categoryIds && categoryIds.length > 0) {
+        data.categories = {
+          connect: categoryIds.map((id: number) => ({ id }))
+        };
+      }
+
+      const result = await this.prisma.record.create({
+        data,
+        include: {
+          author: {
+            select: { id: true, email: true, firstName: true, lastName: true }
+          },
+          featuredImage: true,
+          featuredSlider: true,
+          categories: {
+            select: { id: true, name: true, slug: true }
+          }
+        }
+      });
+
+      console.log('Record created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Error creating record:', error);
+      throw error;
+    }
   }
 
   async update(id: number, updateRecordDto: any) {
+    const { categoryIds, ...recordData } = updateRecordDto;
+
     const data = {
-      ...updateRecordDto,
-      publishedAt: updateRecordDto.status === 'published' && !updateRecordDto.publishedAt 
-        ? new Date() 
+      ...recordData,
+      publishedAt: updateRecordDto.status === 'published' && !updateRecordDto.publishedAt
+        ? new Date()
         : updateRecordDto.publishedAt
     };
 
-    return this.prisma.page.update({
+    // Handle categories update
+    if (categoryIds && categoryIds.length > 0) {
+      data.categories = {
+        set: categoryIds.map((id: number) => ({ id }))
+      };
+    } else {
+      data.categories = {
+        set: []
+      };
+    }
+
+    return this.prisma.record.update({
       where: { id },
       data,
       include: {
@@ -85,13 +144,16 @@ export class RecordsService {
           select: { id: true, email: true, firstName: true, lastName: true }
         },
         featuredImage: true,
-        featuredSlider: true
+        featuredSlider: true,
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       }
     });
   }
 
   async delete(id: number) {
-    return this.prisma.page.delete({
+    return this.prisma.record.delete({
       where: { id }
     });
   }
@@ -102,7 +164,7 @@ export class RecordsService {
       publishedAt: status === 'published' ? new Date() : null
     };
 
-    return this.prisma.page.update({
+    return this.prisma.record.update({
       where: { id },
       data,
       include: {
@@ -110,7 +172,10 @@ export class RecordsService {
           select: { id: true, email: true, firstName: true, lastName: true }
         },
         featuredImage: true,
-        featuredSlider: true
+        featuredSlider: true,
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       }
     });
   }

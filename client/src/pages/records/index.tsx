@@ -9,15 +9,13 @@ import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/records/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import {
-  fetchPages,
-  createPage,
-  updatePage,
-  deletePage,
-  publishPage,
-  unpublishPage,
-  PageDto,
-  PagesQuery,
-} from "@/src/shared/api/pages";
+  fetchRecords,
+  createRecord,
+  updateRecord,
+  deleteRecord,
+  changeStatus,
+  RecordDto,
+} from "@/src/shared/api/records";
 import { fetchMediaFiles, MediaFileDto, MediaFilesQuery } from "@/src/shared/api/mediafiles";
 import {
   Pagination,
@@ -36,9 +34,10 @@ import {
 } from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
 
-const defaultQuery: PagesQuery = {
+const defaultQuery = {
   page: 1,
   limit: 20,
+  search: '',
 };
 
 const defaultMediaQuery: MediaFilesQuery = {
@@ -51,12 +50,12 @@ const defaultMediaQuery: MediaFilesQuery = {
 
 const RecordsPage = () => {
   const { accessToken } = useAuth();
-  const [query, setQuery] = useState<PagesQuery>(defaultQuery);
-  const [records, setRecords] = useState<PageDto[]>([]);
+  const [query, setQuery] = useState(defaultQuery);
+  const [records, setRecords] = useState<RecordDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<PageDto | null>(null);
+  const [editingRecord, setEditingRecord] = useState<RecordDto | null>(null);
   const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
   const [mediaTotal, setMediaTotal] = useState(0);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
@@ -85,8 +84,8 @@ const RecordsPage = () => {
       console.log('Records: Loading records with token');
       setIsLoading(true);
       try {
-        const res = await fetchPages(accessToken, query);
-        setRecords(res);
+        const res = await fetchRecords(query.page, query.limit, query.search || '');
+        setRecords(res.data || []);
       } catch (error: any) {
         console.error('Records: Error loading records:', error);
         const message = error?.response?.data?.message || "Не удалось загрузить записи";
@@ -140,13 +139,13 @@ const RecordsPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (record: PageDto) => {
+  const handleEdit = (record: RecordDto) => {
     setEditingRecord(record);
     setTitle(record.title);
     setSlug(record.slug);
     setContent(record.content);
     setStatus(record.status);
-    setSelectedImageId(record.featuredImageId || null);
+    setSelectedImageId(record.featuredSliderId || null);
     setSeoTitle(record.seoTitle || "");
     setSeoDescription(record.seoDescription || "");
     setIsModalOpen(true);
@@ -159,23 +158,26 @@ const RecordsPage = () => {
     }
     try {
       if (editingRecord) {
-        await updatePage(accessToken, editingRecord.id, {
+        await updateRecord(accessToken, editingRecord.id.toString(), {
+          id: editingRecord.id,
           title,
           slug,
           content,
-          status,
-          featuredImageId: selectedImageId || undefined,
+          status: status as 'draft' | 'published',
+          template: editingRecord.template || 'default',
+          featuredSliderId: selectedImageId || undefined,
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
         });
         showToast("Запись обновлена", "success");
       } else {
-        await createPage(accessToken, {
+        await createRecord(accessToken, {
           title,
           slug,
           content,
-          status,
-          featuredImageId: selectedImageId || undefined,
+          status: status as 'draft' | 'published',
+          template: 'default',
+          featuredSliderId: selectedImageId || undefined,
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
         });
@@ -192,7 +194,7 @@ const RecordsPage = () => {
   const handleDelete = async (id: number) => {
     if (!confirm("Вы уверены, что хотите удалить эту запись?")) return;
     try {
-      await deletePage(accessToken, id);
+      await deleteRecord(accessToken, id.toString());
       showToast("Запись удалена", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
@@ -203,7 +205,7 @@ const RecordsPage = () => {
 
   const handlePublish = async (id: number) => {
     try {
-      await publishPage(accessToken, id);
+      await changeStatus(accessToken, id.toString(), 'published');
       showToast("Запись опубликована", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
@@ -214,7 +216,7 @@ const RecordsPage = () => {
 
   const handleUnpublish = async (id: number) => {
     try {
-      await unpublishPage(accessToken, id);
+      await changeStatus(accessToken, id.toString(), 'draft');
       showToast("Запись снята с публикации", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
@@ -256,7 +258,7 @@ const RecordsPage = () => {
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
-        <PermissionGate resource="pages" level={2}>
+        <PermissionGate resource="records" level={2}>
           <UiButton theme="primary" onClick={handleCreate}>
             Добавить запись
           </UiButton>
@@ -296,19 +298,19 @@ const RecordsPage = () => {
                   Редактировать
                 </UiButton>
                 {record.status === 'published' ? (
-                  <PermissionGate resource="pages" level={2}>
+                  <PermissionGate resource="records" level={2}>
                     <UiButton theme="secondary" onClick={() => handleUnpublish(record.id)}>
                       Снять с публикации
                     </UiButton>
                   </PermissionGate>
                 ) : (
-                  <PermissionGate resource="pages" level={2}>
+                  <PermissionGate resource="records" level={2}>
                     <UiButton theme="primary" onClick={() => handlePublish(record.id)}>
                       Опубликовать
                     </UiButton>
                   </PermissionGate>
                 )}
-                <PermissionGate resource="pages" level={2}>
+                <PermissionGate resource="records" level={2}>
                   <UiButton theme="warning" onClick={() => handleDelete(record.id)}>
                     Удалить
                   </UiButton>
@@ -328,7 +330,7 @@ const RecordsPage = () => {
         />
       </div>
 
-      <PermissionGate resource="pages" level={2}>
+      <PermissionGate resource="records" level={2}>
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -363,7 +365,7 @@ const RecordsPage = () => {
                   { value: 'pending', label: 'Ожидает' },
                 ]}
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                onChange={(value) => setStatus(value)}
               />
             </div>
             <div className={styles.formField}>
@@ -386,12 +388,9 @@ const RecordsPage = () => {
                       if (selectedMedia) {
                         return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
                       }
-                      if (editingRecord?.featuredImage) {
-                        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                        const imageUrl = editingRecord.featuredImage.filepath.startsWith('http')
-                          ? editingRecord.featuredImage.filepath
-                          : `${API_URL}/uploads/${editingRecord.featuredImage.filepath}`;
-                        return <img src={imageUrl} alt={editingRecord.featuredImage.filename} />;
+                      if (editingRecord?.featuredSliderId) {
+                        // Handle featured slider if needed
+                        return null;
                       }
                       return null;
                     })()}

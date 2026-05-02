@@ -4,25 +4,36 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/src/shared/ui/Input/ui-input';
 import Button from '@/src/shared/ui/Button/ui-button';
-import RichEditor from '@/src/features/Editor/RichEditor';
-import { fetchRecord, updateRecord } from '@/src/shared/api/records';
+import DescriptionFieldWrapper from '../DescriptionFieldWrapper';
+import { fetchRecord, updateRecord, createRecord } from '@/src/shared/api/records';
 import { fetchSliders } from '@/src/shared/api/sliders';
 import { SliderDto } from '@/src/shared/api/sliders';
+import { fetchCategories } from '@/src/shared/api/records';
+import { CategoryDto } from '@/src/shared/api/records';
 import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
+import { useAuth } from '@/src/app/providers/auth-provider';
 import { OutputData } from '@editorjs/editorjs';
+import { MediaPickerModal } from '@/src/features/Media/ui/MediaPickerModal';
+import { Notifications, UiButton } from '@/src/shared/ui';
 import styles from './edit.module.css';
+
+type EditorForm = {
+  title: string;
+  slug: string;
+  status: string;
+  template: string;
+  seoTitle: string;
+  seoDescription: string;
+  metaKeywords: string;
+  featuredSliderId?: number | null;
+  categoryIds: number[];
+};
 
 export default function EditRecordPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { accessToken } = useAuth();
   const [record, setRecord] = useState<any>(null);
-  const [sliders, setSliders] = useState<SliderDto[]>([]);
-  const [selectedSlider, setSelectedSlider] = useState<SliderDto | null>(null);
-  const [editorData, setEditorData] = useState<OutputData>({ blocks: [] });
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewContent, setPreviewContent] = useState('');
-
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<EditorForm>({
     title: '',
     slug: '',
     status: 'draft',
@@ -30,13 +41,42 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
     seoTitle: '',
     seoDescription: '',
     metaKeywords: '',
-    featuredSliderId: null as number | null,
+    featuredSliderId: null,
+    categoryIds: [],
   });
+  const [editorData, setEditorData] = useState<OutputData>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [sliders, setSliders] = useState<SliderDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaPickerCallback, setMediaPickerCallback] = useState<{ onSelect: (media: any) => void } | null>(null);
+  const [selectedSlider, setSelectedSlider] = useState<SliderDto | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewContent, setPreviewContent] = useState('');
 
   useEffect(() => {
     loadRecord();
     loadSliders();
+    loadCategories();
+    setupMediaPicker();
   }, [params.id]);
+
+  useEffect(() => {
+    const handleOpenMediaPicker = (event: CustomEvent) => {
+      setMediaPickerCallback({ onSelect: event.detail.onSelect });
+      setIsMediaPickerOpen(true);
+    };
+
+    window.addEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
+
+    return () => {
+      window.removeEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
+    };
+  }, []);
+
+  const setupMediaPicker = () => {
+    // This will be called after sliders are loaded
+  };
 
   const loadRecord = async () => {
     try {
@@ -50,8 +90,9 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
         template: data.template || 'default',
         seoTitle: data.seoTitle || '',
         seoDescription: data.seoDescription || '',
-        metaKeywords: data.metaKeywords || '',
+        metaKeywords: Array.isArray(data.metaKeywords) ? data.metaKeywords.join(', ') : (data.metaKeywords || ''),
         featuredSliderId: data.featuredSliderId || null,
+        categoryIds: data.categories?.map((cat: CategoryDto) => cat.id) || [],
       });
 
       // Загружаем контент в редактор
@@ -79,40 +120,81 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
   };
 
   const loadSliders = async () => {
+    if (!accessToken) return;
     try {
-      const data = await fetchSliders();
-      setSliders(data);
+      const res = await fetchSliders(accessToken, { page: 1, limit: 100 });
+      setSliders(res.data);
     } catch (error) {
       console.error('Error loading sliders:', error);
     }
   };
 
+  const loadCategories = async () => {
+    if (!accessToken) return;
+    try {
+      const res = await fetchCategories(1, 100, '');
+      setCategories(res.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  // Общая функция конвертации блоков в Markdown
+  const convertBlocksToMarkdown = (blocks: any[]): string => {
+    if (!blocks || !Array.isArray(blocks)) return '';
+    
+    return blocks.map(block => {
+      switch (block.type) {
+        case 'paragraph':
+          return block.data?.text || '';
+        case 'header':
+          const level = block.data?.level || 1;
+          const headerText = block.data?.text || '';
+          return `${'#'.repeat(level)} ${headerText}`;
+        case 'list':
+          if (Array.isArray(block.data?.items)) {
+            const items = block.data.items.filter((item: string) => item.trim());
+            if (block.data?.style === 'ordered') {
+              return items.map((item: string, index: number) => `${index + 1}. ${item}`).join('\n');
+            } else {
+              return items.map((item: string) => `- ${item}`).join('\n');
+            }
+          }
+          return '';
+        case 'media':
+          return `📷 Медиа: ${block.data?.filename || 'Без имени'}`;
+        case 'slider':
+          return `🎠 Слайдер: ${block.data?.name || 'Без названия'}`;
+        default:
+          return '';
+      }
+    }).filter(text => text.trim()).join('\n\n');
+  };
+
   const handleSliderChange = (sliderId: string) => {
     const slider = sliders.find(s => s.id === parseInt(sliderId));
     setSelectedSlider(slider || null);
-    setForm(prev => ({ ...prev, featuredSliderId: slider ? slider.id : null }));
   };
 
   const handleMediaSelect = () => {
+    // Открываем медиа пикер через кастомное событие
     window.dispatchEvent(new CustomEvent('open-media-picker', {
       detail: {
         onSelect: (media: any) => {
+          // Добавляем медиа блок в JSON
           const mediaBlock = {
             id: Date.now().toString(),
             type: 'media',
             data: {
               filename: media.filename,
-              url: media.url,
-              caption: media.caption || ''
+              url: media.filepath,
+              caption: media.altText || ''
             }
           };
           
-          const currentData = editorData || { blocks: [] };
-          const newData = {
-            ...currentData,
-            blocks: [...currentData.blocks, mediaBlock]
-          };
-          setEditorData(newData);
+          const currentBlocks = editorData?.blocks || [];
+          const newBlocks = [...currentBlocks, mediaBlock];
+          setEditorData({ blocks: newBlocks });
         }
       }
     }));
@@ -277,28 +359,35 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
   };
 
   const handleSave = async () => {
-    setLoading(true);
+    if (!accessToken) return;
+    if (!form.title.trim() || !form.slug.trim()) {
+      showToast('Название и slug обязательны', 'error');
+      return;
+    }
+    setIsSaving(true);
+    
     try {
       const recordData = {
+        id: parseInt(params.id),
         title: form.title.trim(),
         slug: form.slug.trim(),
-        status: form.status,
+        status: form.status as 'draft' | 'published',
         template: form.template,
         seoTitle: form.seoTitle || undefined,
         seoDescription: form.seoDescription || undefined,
-        metaKeywords: form.metaKeywords,
-        featuredSliderId: form.featuredSliderId,
-        contentBlocks: editorData.blocks,
-        content: JSON.stringify({ blocks: editorData.blocks })
+        metaKeywords: form.metaKeywords ? form.metaKeywords.split(',').map(k => k.trim()).filter(k => k.length > 0) : [],
+        featuredSliderId: form.featuredSliderId || undefined,
+        categoryIds: form.categoryIds,
+        content: editorData ? JSON.stringify(editorData.blocks) : '',
       };
 
-      await updateRecord(params.id, recordData);
+      await updateRecord(accessToken, params.id, recordData);
       showToast('Запись обновлена', 'success');
       router.push('/admin/records');
-    } catch (error) {
-      showToast('Ошибка при сохранении', 'error');
+    } catch (error: any) {
+      showToast(error?.response?.data?.message || 'Ошибка сохранения', 'error');
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -307,162 +396,244 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.container}>
+      <Notifications />
+      <MediaPickerModal
+        open={isMediaPickerOpen}
+        onClose={() => setIsMediaPickerOpen(false)}
+        onSelect={(media) => {
+          if (mediaPickerCallback) {
+            mediaPickerCallback.onSelect(media);
+          }
+          setIsMediaPickerOpen(false);
+        }}
+        zIndex={2001}
+      />
+
       <div className={styles.header}>
-        <h1>Редактирование записи</h1>
-        <p>Измените содержимое и настройки записи</p>
+        <div className={styles.breadcrumb}>
+          <button onClick={() => router.push('/admin/records')} className={styles.backButton}>
+            ← Назад к записям
+          </button>
+          <h1>Редактировать запись</h1>
+        </div>
+        <div className={styles.actions}>
+          <UiButton theme="secondary" onClick={handlePreview}>
+            Предпросмотр
+          </UiButton>
+          <UiButton theme="secondary" onClick={() => router.push('/admin/records')}>
+            Отмена
+          </UiButton>
+          <UiButton theme="primary" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Сохранение...' : 'Сохранить'}
+          </UiButton>
+        </div>
       </div>
 
       <div className={styles.content}>
-        <div className={styles.mainCol}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Заголовок</label>
-            <Input 
-              value={form.title} 
+        <div className={styles.grid}>
+          <div className={styles.mainCol}>
+            <Input
+              className={styles.input}
+              value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Введите заголовок записи"
+              placeholder="Название записи"
             />
+            
+            <div className={styles.editorWrapper}>
+              <DescriptionFieldWrapper
+                value={editorData ? JSON.stringify(editorData.blocks) : ''}
+                onChange={(value) => {
+                  try {
+                    const blocks = value ? JSON.parse(value) : [];
+                    setEditorData({ blocks });
+                  } catch (e) {
+                    // Если не JSON, создаем параграф
+                    setEditorData({ 
+                      blocks: [{
+                        id: Date.now().toString(),
+                        type: 'paragraph',
+                        data: { text: value }
+                      }]
+                    });
+                  }
+                }}
+                placeholder="Начните писать контент записи здесь..."
+                id="record-content"
+                label="Контент записи"
+                onMediaSelect={handleMediaSelect}
+                onSliderSelect={handleSliderSelect}
+                convertJsonToMarkdown={(jsonValue) => convertBlocksToMarkdown(JSON.parse(jsonValue || '[]'))}
+              />
+            </div>
           </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Slug</label>
-            <Input 
-              value={form.slug} 
-              onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))} 
-              placeholder="url-slug"
-            />
-          </div>
+          <div className={styles.sideCol}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Slug</label>
+              <Input 
+                value={form.slug} 
+                onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))} 
+              />
+            </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Статус</label>
-            <select 
-              value={form.status} 
-              onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
-              className={styles.select}
-            >
-              <option value="draft">Черновик</option>
-              <option value="published">Опубликована</option>
-            </select>
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Статус</label>
+              <select
+                className={styles.select}
+                value={form.status}
+                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
+              >
+                <option value="draft">Черновик</option>
+                <option value="published">Опубликовано</option>
+              </select>
+            </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Шаблон</label>
-            <select 
-              value={form.template} 
-              onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))}
-              className={styles.select}
-            >
-              <option value="default">По умолчанию</option>
-              <option value="blog">Блог</option>
-              <option value="news">Новости</option>
-            </select>
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Шаблон</label>
+              <Input 
+                value={form.template} 
+                onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))} 
+              />
+            </div>
 
-          <div className={styles.editorWrapper}>
-            <RichEditor
-              holder="editorjs-container"
-              data={editorData}
-              onChange={setEditorData}
-              placeholder="Начните писать содержимое записи здесь..."
-              onMediaSelect={handleMediaSelect}
-              onSliderSelect={handleSliderSelect}
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>SEO заголовок</label>
+              <Input 
+                value={form.seoTitle} 
+                onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))} 
+              />
+            </div>
 
-          <div className={styles.actions}>
-            <Button
-              onClick={handlePreview}
-              className={styles.previewButton}
-            >
-              👁️ Предпросмотр
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className={styles.saveButton}
-            >
-              {loading ? 'Сохранение...' : 'Сохранить изменения'}
-            </Button>
-          </div>
-        </div>
+            <div className={styles.formGroup}>
+              <DescriptionFieldWrapper
+                value={form.seoDescription}
+                onChange={(value) => setForm((prev) => ({ ...prev, seoDescription: value }))}
+                placeholder="Введите SEO описание в Markdown формате..."
+                id="seo-description"
+              />
+            </div>
 
-        <div className={styles.sideCol}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>SEO Заголовок</label>
-            <Input 
-              value={form.seoTitle} 
-              onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))}
-              placeholder="SEO заголовок"
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Ключевые слова (через запятую)</label>
+              <Input 
+                value={form.metaKeywords} 
+                onChange={(event) => setForm((prev) => ({ ...prev, metaKeywords: event.target.value }))} 
+              />
+            </div>
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>SEO Описание</label>
-            <textarea
-              value={form.seoDescription}
-              onChange={(event) => setForm((prev) => ({ ...prev, seoDescription: event.target.value }))}
-              placeholder="SEO описание"
-              className={styles.textarea}
-              rows={3}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Meta Keywords</label>
-            <Input 
-              value={form.metaKeywords} 
-              onChange={(event) => setForm((prev) => ({ ...prev, metaKeywords: event.target.value }))}
-              placeholder="ключевые, слова"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Избранный слайдер</label>
-            <select 
-              value={form.featuredSliderId?.toString() || ''} 
-              onChange={(event) => handleSliderChange(event.target.value)}
-              className={styles.select}
-            >
-              <option value="">Нет слайдера</option>
-              {sliders.map(slider => (
-                <option key={slider.id} value={slider.id.toString()}>
-                  {slider.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedSlider && (
-            <div className={styles.previewSlider}>
-              <h4>Предпросмотр слайдера</h4>
-              <p><strong>{selectedSlider.name}</strong></p>
-              <p>{selectedSlider.description}</p>
-              <div className={styles.sliderPreview}>
-                <div className={styles.slideItem}>Слайд 1</div>
-                <div className={styles.slideItem}>Слайд 2</div>
-                <div className={styles.slideItem}>Слайд 3</div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Категории</label>
+              <div className={styles.categoriesContainer}>
+                {categories.map((category) => (
+                  <label key={category.id} className={styles.categoryCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={form.categoryIds.includes(category.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm((prev) => ({
+                            ...prev,
+                            categoryIds: [...prev.categoryIds, category.id]
+                          }));
+                        } else {
+                          setForm((prev) => ({
+                            ...prev,
+                            categoryIds: prev.categoryIds.filter(id => id !== category.id)
+                          }));
+                        }
+                      }}
+                    />
+                    <span>{category.name}</span>
+                  </label>
+                ))}
               </div>
             </div>
-          )}
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Основной слайдер</label>
+              <select
+                className={styles.select}
+                value={form.featuredSliderId?.toString() || ''}
+                onChange={(e) => {
+                  setForm((prev) => ({ 
+                    ...prev, 
+                    featuredSliderId: e.target.value ? parseInt(e.target.value) : undefined
+                  }));
+                  handleSliderChange(e.target.value);
+                }}
+              >
+                <option value="">Без слайдера</option>
+                {sliders.map((slider) => (
+                  <option key={slider.id} value={slider.id.toString()}>
+                    {slider.name}
+                  </option>
+                ))}
+              </select>
+              
+              {selectedSlider && (
+                <div className={styles.sliderPreview}>
+                  <h4>Предпросмотр слайдера: {selectedSlider.name}</h4>
+                  <div className={styles.sliderInfo}>
+                    <p><strong>Slug:</strong> /{selectedSlider.slug}</p>
+                    <p><strong>Описание:</strong> {selectedSlider.description || 'Нет описания'}</p>
+                    <p><strong>Создан:</strong> {new Date(selectedSlider.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className={styles.sliderPlaceholder}>
+                    <div className={styles.sliderAnimation}>
+                      <div className={styles.slide}>Слайд 1</div>
+                      <div className={styles.slide}>Слайд 2</div>
+                      <div className={styles.slide}>Слайд 3</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Preview Modal */}
       {showPreview && (
-        <div className={styles.previewModal}>
-          <div className={styles.previewModalContent}>
-            <div className={styles.previewModalHeader}>
+        <div className={styles.previewOverlay}>
+          <div className={styles.previewModal}>
+            <div className={styles.previewHeader}>
               <h3>Предпросмотр записи</h3>
               <button 
-                onClick={() => setShowPreview(false)}
                 className={styles.closeButton}
+                onClick={() => setShowPreview(false)}
               >
-                ✕
+                ×
               </button>
             </div>
-            <div 
-              className={styles.previewModalBody}
-              dangerouslySetInnerHTML={{ __html: previewContent }}
-            />
+            <div className={styles.previewContent}>
+              <h1>{form.title}</h1>
+              <div className={styles.previewMeta}>
+                <span>Slug: /{form.slug}</span>
+                <span>Статус: {form.status === 'published' ? 'Опубликовано' : 'Черновик'}</span>
+              </div>
+              <div 
+                className={styles.previewBody}
+                dangerouslySetInnerHTML={{ __html: previewContent }}
+              />
+              {selectedSlider && (
+                <div className={styles.previewSlider}>
+                  <h4>Основной слайдер: {selectedSlider.name}</h4>
+                  <div className={styles.sliderPlaceholder}>
+                    <div className={styles.sliderAnimation}>
+                      <div className={styles.slide}>Слайд 1</div>
+                      <div className={styles.slide}>Слайд 2</div>
+                      <div className={styles.slide}>Слайд 3</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className={styles.previewActions}>
+              <UiButton theme="secondary" onClick={() => setShowPreview(false)}>
+                Закрыть
+              </UiButton>
+            </div>
           </div>
         </div>
       )}

@@ -14,24 +14,26 @@ const Header: React.FC<HeaderProps> = ({
   onUserMenuClick,
 }) => {
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
-        <button 
-          className={styles.backButton}
-          onClick={onBackClick}
-        >
-          <ChevronLeft size={20} />
-          <span>Назад</span>
-        </button>
-        
-        <div className={styles.userSection}>
-          <div className={styles.userName}>{userName}</div>
+    <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
+      <div className="max-w-[1024px] mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
           <button 
-            className={styles.dropdownButton}
-            onClick={onUserMenuClick}
+            className="flex items-center gap-2 text-gray-700 hover:text-black transition-colors duration-200 font-medium text-sm group"
+            onClick={onBackClick}
           >
-            {/*<ChevronDown size={16} />*/}
+            <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+            <span>Назад</span>
           </button>
+          
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-medium text-gray-900">{userName}</div>
+            <button 
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors duration-200"
+              onClick={onUserMenuClick}
+            >
+              {/*<ChevronDown size={16} />*/}
+            </button>
+          </div>
         </div>
       </div>
     </header>

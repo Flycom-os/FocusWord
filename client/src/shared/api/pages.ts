@@ -89,6 +89,11 @@ export const fetchPageBySlug = async (token: string | null, slug: string): Promi
   return data;
 };
 
+export const fetchPublicPageBySlug = async (slug: string): Promise<PageDto> => {
+  const { data } = await axios.get<PageDto>(`${API_URL}/public/pages/slug/${slug}`);
+  return data;
+};
+
 export const createPage = async (
   token: string | null,
   payload: {

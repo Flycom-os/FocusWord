@@ -36,7 +36,6 @@ export default function AdminDashboard() {
       setLoading(true);
       
       // Загружаем статистику
-      // @ts-ignore
       const [
         pagesResponse,
         slidersResponse,
@@ -45,18 +44,32 @@ export default function AdminDashboard() {
         feedbackResponse,
         categoriesResponse
       ] = await Promise.all([
-        fetchPages(accessToken, { page: 1, limit: 1 }),
+        fetchPages(accessToken, { page: 1, limit: 100 }),
         fetchSliders(accessToken, { page: 1, limit: 1 }),
-        fetchRecords(accessToken, { page: 1, limit: 1 }),
+        fetchRecords(1, 1, ''),
         fetchWidgets(accessToken, { page: 1, limit: 1 }),
         fetchFeedback(accessToken, { page: 1, limit: 5 }),
         fetchProductCategories(accessToken, 1, 1, '')
       ]);
 
-      // @ts-ignore
+      // For pages, we need to check if there are more pages beyond the first 100
+      let pagesCount = Array.isArray(pagesResponse) ? pagesResponse.length : 0;
+      if (pagesResponse.length === 100) {
+        // There might be more pages, try to get the total count
+        try {
+          const secondPage = await fetchPages(accessToken, { page: 2, limit: 100 });
+          pagesCount += Array.isArray(secondPage) ? secondPage.length : 0;
+          // If second page is also full, there might be even more, but for dashboard we'll stop here
+          if (secondPage.length === 100) {
+            pagesCount = 200; // At least 200 pages
+          }
+        } catch (error) {
+          // If second page fails, we'll just use the first page count
+        }
+      }
+
       setStats({
-        //@ts-nocheck
-        pages: pagesResponse.total || 0,
+        pages: pagesCount,
         sliders: slidersResponse.total || 0,
         records: recordsResponse.total || 0,
         widgets: widgetsResponse.total || 0,

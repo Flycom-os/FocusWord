@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Конфигурация маршрутов напрямую в middleware
+// Конфигурация защищенных маршрутов (только admin)
 const protectedRoutes: Record<string, { resource?: string; minLevel?: number }> = {
+  '/admin': { resource: 'admin', minLevel: 0 },
   '/admin/analytics': { resource: 'media-files', minLevel: 0 },
   '/admin/products': { resource: 'media-files', minLevel: 0 },
   '/admin/product-categories': { resource: 'media-files', minLevel: 0 },
@@ -24,18 +25,12 @@ const protectedRoutes: Record<string, { resource?: string; minLevel?: number }> 
   '/admin/seo': { resource: 'media-files', minLevel: 0 },
 };
 
-// Публичные маршруты
-const publicRoutes = [
-  '/',
-  '/admin/login',
-  '/signin',
-  '/admin/profile',
-  '/admin/settings',
-  '/admin-panel/settings',
-  '/admin/access-denied',
-];
-
 function getRouteConfig(pathname: string) {
+  // Проверяем только admin пути
+  if (!pathname.startsWith('/admin')) {
+    return null;
+  }
+  
   // Ищем точное совпадение
   if (protectedRoutes[pathname]) {
     return protectedRoutes[pathname];
@@ -48,11 +43,7 @@ function getRouteConfig(pathname: string) {
     }
   }
   
-  return null;
-}
-
-function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some(route => pathname === route || pathname.startsWith(route));
+  return { resource: 'admin', minLevel: 0 }; // Базовая защита для всех admin путей
 }
 
 // Простая функция декодирования JWT (без верификации подписи)
@@ -127,46 +118,26 @@ async function checkPermissions(request: NextRequest, resource: string, minLevel
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Принудительный лог - должен всегда появляться
-  console.error('🔥 MIDDLEWARE CALLED FOR:', pathname);
-  console.log('=== MIDDLEWARE DEBUG ===');
-  console.log('Checking path:', pathname);
-  console.log('Method:', request.method);
-  console.log('Headers:', Object.fromEntries(request.headers.entries()));
-  console.log('Cookies:', Object.fromEntries(request.cookies.getAll().map(c => [c.name, c.value])));
+  console.log('Middleware checking:', pathname);
 
-  // Пропускаем статические файлы и API маршруты
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.startsWith('/static') ||
-    pathname.includes('.')
-  ) {
+  // Если это не admin путь - пропускаем сразу
+  if (!pathname.startsWith('/admin')) {
+    console.log('Non-admin path, allowing access:', pathname);
     return NextResponse.next();
   }
 
-  // Проверяем, является ли маршрут публичным
-  const isPublic = isPublicRoute(pathname);
-  console.log('Is public route:', isPublic);
-  if (isPublic) {
-    console.log('Public route, allowing access:', pathname);
+  // Для signin страницы просто пропускаем
+  if (pathname === '/signin') {
     return NextResponse.next();
   }
 
   // Получаем конфигурацию маршрута
   const routeConfig = getRouteConfig(pathname);
   
-  console.log('Route config result:', routeConfig);
-  
-  if (!routeConfig) {
-    console.log('No route config found, allowing access:', pathname);
-    return NextResponse.next();
-  }
-
   console.log('Route config found:', routeConfig);
 
   // Проверяем права доступа
-  if (routeConfig.resource && routeConfig.minLevel !== undefined) {
+  if (routeConfig && routeConfig.resource && routeConfig.minLevel !== undefined) {
     const hasPermission = await checkPermissions(request, routeConfig.resource, routeConfig.minLevel);
     
     console.log('Permission check result:', hasPermission);
@@ -196,6 +167,5 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico|signin).*)',
   ],
 };
