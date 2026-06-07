@@ -18,6 +18,7 @@ import {
 import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
 import styles from "./create.module.css";
 import DescriptionFieldWrapper from "./DescriptionFieldWrapper";
+import AiGeneratorButton from "../../components/AiGenerator/AiGeneratorButton";
 
 type EditorForm = {
   title: string;
@@ -42,6 +43,19 @@ const defaultForm: EditorForm = {
   featuredSliderId: null,
   categoryIds: [],
 };
+
+const recordSystemPrompt = `You are an expert copywriter. Your task is to generate a well-structured and engaging record content based on the user's prompt. The output should be in Markdown format.
+
+Follow these rules:
+1.  Start with a compelling headline (H1).
+2.  Write an introduction that grabs the reader's attention.
+3.  Use subheadings (H2, H3) to structure the content.
+4.  Use lists (ordered or unordered) to present information clearly.
+5.  Use bold and italic for emphasis.
+6.  End with a concluding paragraph that summarizes the key points.
+7.  Do not include any other text or explanations, only the Markdown record content.`;
+
+const seoSystemPrompt = `You are an expert SEO copywriter. Your task is to generate a concise and compelling meta description for a web page based on the user's prompt. The output should be a single paragraph of text, between 140 and 160 characters. Do not use any Markdown or other formatting.`;
 
 export default function CreateRecordPage() {
   const router = useRouter();
@@ -288,6 +302,19 @@ export default function CreateRecordPage() {
             />
 
             <div className={styles.editorWrapper}>
+              <div style={{ marginBottom: '10px' }}>
+                <AiGeneratorButton
+                  systemPrompt={recordSystemPrompt}
+                  onGenerated={(content) => {
+                    setEditorData({
+                      blocks: markdownToBlocks(
+                        content,
+                        (editorData?.blocks as RecordBlock[]) || [],
+                      ),
+                    });
+                  }}
+                />
+              </div>
               <DescriptionFieldWrapper
                 value={
                   editorData?.blocks ? blocksToMarkdown(editorData.blocks as RecordBlock[]) : ""
@@ -346,6 +373,14 @@ export default function CreateRecordPage() {
 
             <div className={styles.formGroup}>
               <label className={styles.label}>SEO описание</label>
+              <div style={{ marginBottom: '10px' }}>
+                <AiGeneratorButton
+                  systemPrompt={seoSystemPrompt}
+                  onGenerated={(content) => {
+                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                  }}
+                />
+              </div>
               <textarea
                 className={styles.textarea}
                 value={form.seoDescription}

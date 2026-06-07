@@ -92,14 +92,21 @@ const authHeaders = (token: string | null): Record<string, string> =>
 
 export const recordsApi = {
   // Получить все записи с пагинацией
-  getAll: async (page = 1, limit = 10, search = ""): Promise<PaginatedRecordsResponse> => {
+  getAll: async (
+    token: string | null,
+    page = 1,
+    limit = 10,
+    search = "",
+  ): Promise<PaginatedRecordsResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
       ...(search && { search }),
     });
 
-    const response = await fetch(`${API_URL}/api/records?${params}`);
+    const response = await fetch(`${API_URL}/api/records?${params}`, {
+      headers: authHeaders(token) as HeadersInit,
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch records");
     }
@@ -107,8 +114,10 @@ export const recordsApi = {
   },
 
   // Получить запись по ID
-  getById: async (id: string): Promise<RecordDto> => {
-    const response = await fetch(`${API_URL}/api/records/${id}`);
+  getById: async (token: string | null, id: string): Promise<RecordDto> => {
+    const response = await fetch(`${API_URL}/api/records/${id}`, {
+      headers: authHeaders(token) as HeadersInit,
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch record");
     }

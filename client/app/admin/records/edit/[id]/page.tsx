@@ -85,7 +85,7 @@ export default function EditRecordPage({ params }: { params: { id: string } }) {
       if (!accessToken || !recordId) return;
       setIsLoading(true);
       try {
-        const record = await fetchRecord(recordId);
+        const record = await fetchRecord(accessToken, recordId);
         setForm({
           title: record.title || "",
           slug: record.slug || "",

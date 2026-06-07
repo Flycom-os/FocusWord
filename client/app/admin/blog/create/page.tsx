@@ -27,6 +27,7 @@ import { fetchPaymentMethods, PaymentMethodDto } from "@/src/shared/api/payments
 
 import styles from "./create.module.css";
 import DescriptionFieldWrapper from "./DescriptionFieldWrapper";
+import AiGeneratorButton from "../../components/AiGenerator/AiGeneratorButton";
 
 type EditorForm = {
   title: string;
@@ -55,6 +56,19 @@ const defaultForm: EditorForm = {
   enableFeedback: true,
   paymentMethodId: null,
 };
+
+const blogSystemPrompt = `You are an expert copywriter. Your task is to generate a well-structured and engaging blog post based on the user's prompt. The output should be in Markdown format.
+
+Follow these rules:
+1.  Start with a compelling headline (H1).
+2.  Write an introduction that grabs the reader's attention.
+3.  Use subheadings (H2, H3) to structure the content.
+4.  Use lists (ordered or unordered) to present information clearly.
+5.  Use bold and italic for emphasis.
+6.  End with a concluding paragraph that summarizes the key points.
+7.  Do not include any other text or explanations, only the Markdown blog post.`;
+
+const seoSystemPrompt = `You are an expert SEO copywriter. Your task is to generate a concise and compelling meta description for a web page based on the user's prompt. The output should be a single paragraph of text, between 140 and 160 characters. Do not use any Markdown or other formatting.`;
 
 const CreateBlogPostPage = () => {
   const router = useRouter();
@@ -403,6 +417,19 @@ const CreateBlogPostPage = () => {
             />
 
             <div className={styles.editorWrapper}>
+              <div style={{ marginBottom: '10px' }}>
+                <AiGeneratorButton
+                  systemPrompt={blogSystemPrompt}
+                  onGenerated={(content) => {
+                    setEditorData({
+                      blocks: markdownToBlocks(
+                        content,
+                        (editorData?.blocks as BlogPostBlock[]) || [],
+                      ),
+                    });
+                  }}
+                />
+              </div>
               <DescriptionFieldWrapper
                 value={editorData?.blocks ? blocksToMarkdown(editorData.blocks as BlogPostBlock[]) : ""}
                 onChange={(markdown) => {
@@ -489,6 +516,14 @@ const CreateBlogPostPage = () => {
             </div>
 
             <div className={styles.formGroup}>
+              <div style={{ marginBottom: '10px' }}>
+                <AiGeneratorButton
+                  systemPrompt={seoSystemPrompt}
+                  onGenerated={(content) => {
+                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                  }}
+                />
+              </div>
               <DescriptionFieldWrapper
                 value={form.seoDescription}
                 onChange={(value) => setForm((prev) => ({ ...prev, seoDescription: value }))}
