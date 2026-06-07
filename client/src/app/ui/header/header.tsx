@@ -1,11 +1,12 @@
-'use client'
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './ui-site-header.module.css';
-import { ChevronLeft, ChevronDown, Settings, LogOut, User } from 'lucide-react';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { useRouter } from 'next/navigation';
-import { UiButton } from '@/src/shared/ui';
-import Profile from '@/src/pages/profile';
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { useRouter } from "next/navigation";
+import { UiButton } from "@/src/shared/ui";
+import Profile from "@/src/pages/profile";
+import styles from "./ui-site-header.module.css";
 
 interface HeaderProps {
   onBackClick?: () => void;
@@ -19,12 +20,14 @@ const Header: React.FC<HeaderProps> = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : "Guest";
-  
+  const userName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Guest";
+
   // Формируем полный URL для аватара
-  const avatarUrl = user?.avatarUrl ? 
-    (user.avatarUrl.startsWith('http') ? user.avatarUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331'}${user.avatarUrl}`) 
-    : '';
+  const avatarUrl = user?.avatarUrl
+    ? user.avatarUrl.startsWith("http")
+      ? user.avatarUrl
+      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331"}${user.avatarUrl}`
+    : "";
 
   const handleSettingsClick = () => {
     router.push("/admin/settings");
@@ -53,20 +56,16 @@ const Header: React.FC<HeaderProps> = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <UiButton
-          theme="primary"
-          onClick={() => router.back()}
-          className={styles.backButton}
-        >
+        <UiButton theme="primary" onClick={() => router.back()} className={styles.backButton}>
           <ChevronLeft size={20} />
           <span>Back</span>
         </UiButton>
@@ -93,32 +92,23 @@ const Header: React.FC<HeaderProps> = () => {
               </div>
               <div className={styles.userInfo}>
                 <div className={styles.dropdownUserName}>{userName}</div>
-                <div className={styles.userRole}>{user?.role?.name || 'User'}</div>
+                <div className={styles.userRole}>{user?.role?.name || "User"}</div>
               </div>
             </div>
-            
-            <div className={styles.dropdownDivider}></div>
 
-            <button
-              className={styles.dropdownItem}
-              onClick={handleUsersClick}
-            >
+            <div className={styles.dropdownDivider} />
+
+            <button className={styles.dropdownItem} onClick={handleUsersClick}>
               <User size={16} />
               <span>Profile</span>
             </button>
 
-            <button
-              className={styles.dropdownItem}
-              onClick={handleSettingsClick}
-            >
+            <button className={styles.dropdownItem} onClick={handleSettingsClick}>
               <Settings size={16} />
               <span>Settings</span>
             </button>
 
-            <button
-              className={styles.dropdownItem}
-              onClick={handleLogoutClick}
-            >
+            <button className={styles.dropdownItem} onClick={handleLogoutClick}>
               <LogOut size={16} />
               <span>Logout</span>
             </button>

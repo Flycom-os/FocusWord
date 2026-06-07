@@ -1,89 +1,134 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Param, 
-  Body, 
-  Query,
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
   Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
   HttpStatus,
-  HttpException
+  Query,
+  Req,
+  Put,
+  NotFoundException,
 } from '@nestjs/common';
 import { RecordsService } from './records.service';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { JwtAuthGuard } from '../../jwt-auth.guard';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { CreateRecordDto } from '../dto/records/create-record.dto';
+import { CreateRecordDraftDto } from '../dto/records/create-record-draft.dto';
+import { RecordAiCompleteDto } from '../dto/records/record-ai-complete.dto';
+import { RecordFilterDto } from '../dto/records/record-filter.dto';
+import { UpdateRecordDto } from '../dto/records/update-record.dto';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { HasPermission } from '../../common/decorators/has-permission.decorator';
+import { RequestWithUser } from '../../common/interfaces/request-with-user.interface';
 
+@ApiBearerAuth()
+@ApiTags('records')
 @Controller('api/records')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class RecordsController {
-  constructor(
-    private readonly recordsService: RecordsService,
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly recordsService: RecordsService) {}
+
+  @Post()
+  @HasPermission('records:2')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new record' })
+  @ApiCreatedResponse({ description: 'The record has been successfully created.' })
+  async create(@Body() createRecordDto: CreateRecordDto, @Req() req: RequestWithUser) {
+    createRecordDto.authorId = req.user.userId;
+    return this.recordsService.create(createRecordDto);
+  }
+
+  @Post('draft')
+  @HasPermission('records:2')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a record draft with defaults' })
+  @ApiCreatedResponse({ description: 'The record draft has been successfully created.' })
+  async createDraft(@Body() createRecordDraftDto: CreateRecordDraftDto, @Req() req: RequestWithUser) {
+    createRecordDraftDto.authorId = req.user.userId;
+    return this.recordsService.createDraft(createRecordDraftDto);
+  }
+
+  @Post('ai/complete')
+  @HasPermission('records:1')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Generate record content via AI helper' })
+  @ApiOkResponse({ description: 'AI-generated content result.' })
+  completeWithAi(@Body() dto: RecordAiCompleteDto) {
+    return this.recordsService.completeWithAi(dto.prompt, dto.content);
+  }
 
   @Get()
-  async getAllRecords(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('search') search?: string
-  ) {
-    try {
-      return await this.recordsService.findAll(page, limit, search);
-    } catch (error) {
-      throw new HttpException('Failed to fetch records', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @HasPermission('records:0')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Retrieve a list of records with optional filtering' })
+  @ApiOkResponse({ description: 'A list of records.' })
+  findAll(@Query() filterDto: RecordFilterDto) {
+    return this.recordsService.findAll(filterDto);
   }
 
   @Get(':id')
-  async getRecordById(@Param('id') id: string) {
-    try {
-      const record = await this.recordsService.findById(parseInt(id));
-      if (!record) {
-        throw new HttpException('Record not found', HttpStatus.NOT_FOUND);
-      }
-      return record;
-    } catch (error) {
-      throw new HttpException('Failed to fetch record', HttpStatus.INTERNAL_SERVER_ERROR);
+  @HasPermission('records:0')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Retrieve a single record by ID' })
+  @ApiOkResponse({ description: 'The requested record.' })
+  async findOne(@Param('id') id: string) {
+    const record = await this.recordsService.findById(+id);
+    if (!record) {
+      throw new NotFoundException('Record not found');
     }
+    return record;
   }
 
-  @Post()
-  async createRecord(@Body() createRecordDto: any) {
-    try {
-      return await this.recordsService.create(createRecordDto);
-    } catch (error) {
-      throw new HttpException('Failed to create record', HttpStatus.INTERNAL_SERVER_ERROR);
+  @Get('slug/:slug')
+  @HasPermission('records:0')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Retrieve a single record by slug' })
+  @ApiOkResponse({ description: 'The requested record.' })
+  async findOneBySlug(@Param('slug') slug: string) {
+    const record = await this.recordsService.findOneBySlug(slug);
+    if (!record) {
+      throw new NotFoundException('Record not found');
     }
+    return record;
   }
 
   @Put(':id')
-  async updateRecord(@Param('id') id: string, @Body() updateRecordDto: any) {
-    try {
-      return await this.recordsService.update(parseInt(id), updateRecordDto);
-    } catch (error) {
-      throw new HttpException('Failed to update record', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @HasPermission('records:1')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update an existing record' })
+  @ApiOkResponse({ description: 'The record has been successfully updated.' })
+  update(@Param('id') id: string, @Body() updateRecordDto: UpdateRecordDto) {
+    return this.recordsService.update(+id, updateRecordDto);
   }
 
   @Delete(':id')
-  async deleteRecord(@Param('id') id: string) {
-    try {
-      await this.recordsService.delete(parseInt(id));
-      return { message: 'Record deleted successfully' };
-    } catch (error) {
-      throw new HttpException('Failed to delete record', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @HasPermission('records:2')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a record' })
+  @ApiOkResponse({ description: 'The record has been successfully deleted.' })
+  async remove(@Param('id') id: string) {
+    await this.recordsService.delete(+id);
+    return { message: 'Record deleted successfully' };
   }
 
   @Patch(':id/status')
-  async changeStatus(
-    @Param('id') id: string,
-    @Body('status') status: 'draft' | 'published'
-  ) {
-    try {
-      return await this.recordsService.changeStatus(parseInt(id), status);
-    } catch (error) {
-      throw new HttpException('Failed to change record status', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @HasPermission('records:2')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change record status' })
+  @ApiOkResponse({ description: 'The status of the record has been successfully changed.' })
+  changeStatus(@Param('id') id: string, @Body('status') status: 'draft' | 'published') {
+    return this.recordsService.changeStatus(+id, status);
   }
 }

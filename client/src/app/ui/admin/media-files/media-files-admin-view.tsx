@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import { useAuth } from '@/src/app/providers/auth-provider';
+import { useEffect, useState, useMemo } from "react";
+import { useAuth } from "@/src/app/providers/auth-provider";
 import {
   fetchMediaFiles,
   deleteMediaFile,
   uploadMediaFile,
   MediaFileDto,
   MediaFilesQuery,
-} from '@/src/shared/api/mediafiles';
-import { showToast, Notifications, UiButton } from '@/src/shared/ui';
-import { useDebounce } from '@/src/shared/hooks/use-debounce';
+} from "@/src/shared/api/mediafiles";
+import { showToast, Notifications, UiButton } from "@/src/shared/ui";
+import { useDebounce } from "@/src/shared/hooks/use-debounce";
 
 const MediaFilesPage = () => {
   const { accessToken } = useAuth();
   const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
-    search: '',
+    search: "",
     isImage: false,
     isVideo: false,
     isAudio: false,
@@ -46,35 +46,35 @@ const MediaFilesPage = () => {
 
   const loadMedia = async () => {
     setIsLoading(true);
-    console.log('loadMedia called with query:', query);
+    console.log("loadMedia called with query:", query);
     try {
       const res = await fetchMediaFiles(accessToken, query);
       setMediaFiles(res.data);
-      // It's a good practice to also update total pages for pagination controls
+      // It's a good practice to also update total pagesd for pagination controls
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Failed to load media files';
-      console.error('Error loading media files:', error);
-      showToast({ type: 'error', message });
+      const message = error?.response?.data?.message || "Failed to load media files";
+      console.error("Error loading media files:", error);
+      showToast(message, "error");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('useEffect triggered for media files. Current query:', query);
+    console.log("useEffect triggered for media files. Current query:", query);
     loadMedia();
   }, [query, accessToken]);
 
   const handleFilterChange = (name: keyof typeof filters, value: any) => {
     setFilters((prev) => {
       const newFilters = { ...prev, [name]: value };
-      if (name === 'isImage' && value) {
+      if (name === "isImage" && value) {
         newFilters.isVideo = false;
         newFilters.isAudio = false;
-      } else if (name === 'isVideo' && value) {
+      } else if (name === "isVideo" && value) {
         newFilters.isImage = false;
         newFilters.isAudio = false;
-      } else if (name === 'isAudio' && value) {
+      } else if (name === "isAudio" && value) {
         newFilters.isImage = false;
         newFilters.isVideo = false;
       }
@@ -84,7 +84,7 @@ const MediaFilesPage = () => {
 
   const clearFilters = () => {
     setFilters({
-      search: '',
+      search: "",
       isImage: false,
       isVideo: false,
       isAudio: false,
@@ -92,14 +92,14 @@ const MediaFilesPage = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+    if (!confirm("Are you sure you want to delete this file?")) return;
     try {
       await deleteMediaFile(accessToken, id);
-      showToast({ type: 'success', message: 'File deleted successfully' });
+      showToast("File deleted successfully", "success");
       loadMedia(); // Refresh list
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Failed to delete file';
-      showToast({ type: 'error', message });
+      const message = error?.response?.data?.message || "Failed to delete file";
+      showToast(message, "error");
     }
   };
 
@@ -109,16 +109,16 @@ const MediaFilesPage = () => {
 
     try {
       await uploadMediaFile(accessToken, file, {});
-      showToast({ type: 'success', message: 'File uploaded successfully' });
+      showToast("File uploaded successfully", "success");
       loadMedia(); // Refresh list
     } catch (error: any) {
-      const message = error?.response?.data?.message || 'Failed to upload file';
-      showToast({ type: 'error', message });
+      const message = error?.response?.data?.message || "Failed to upload file";
+      showToast(message, "error");
     }
   };
-  
+
   const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
+    if (item.filepath && item.filepath.startsWith("http")) {
       return item.filepath;
     }
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
@@ -126,41 +126,41 @@ const MediaFilesPage = () => {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: "24px" }}>
       <Notifications />
       <h1>Media Files</h1>
-      <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "16px" }}>
         <input
           type="text"
           placeholder="Search by filename..."
           value={filters.search}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-          style={{ padding: '8px', width: '300px' }}
+          onChange={(e) => handleFilterChange("search", e.target.value)}
+          style={{ padding: "8px", width: "300px" }}
         />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <input
             type="checkbox"
             id="isImage"
             checked={filters.isImage}
-            onChange={(e) => handleFilterChange('isImage', e.target.checked)}
+            onChange={(e) => handleFilterChange("isImage", e.target.checked)}
           />
           <label htmlFor="isImage">Images only</label>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <input
             type="checkbox"
             id="isVideo"
             checked={filters.isVideo}
-            onChange={(e) => handleFilterChange('isVideo', e.target.checked)}
+            onChange={(e) => handleFilterChange("isVideo", e.target.checked)}
           />
           <label htmlFor="isVideo">Videos only</label>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <input
             type="checkbox"
             id="isAudio"
             checked={filters.isAudio}
-            onChange={(e) => handleFilterChange('isAudio', e.target.checked)}
+            onChange={(e) => handleFilterChange("isAudio", e.target.checked)}
           />
           <label htmlFor="isAudio">Audio only</label>
         </div>
@@ -170,20 +170,33 @@ const MediaFilesPage = () => {
         <UiButton theme="primary">
           <label htmlFor="upload-button">Upload File</label>
         </UiButton>
-        <input id="upload-button" type="file" onChange={handleUpload} style={{ display: 'none' }} />
+        <input id="upload-button" type="file" onChange={handleUpload} style={{ display: "none" }} />
       </div>
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+            gap: "16px",
+          }}
+        >
           {mediaFiles.map((file) => (
-            <div key={file.id} style={{ border: '1px solid #ccc', padding: '8px', borderRadius: '4px' }}>
+            <div
+              key={file.id}
+              style={{ border: "1px solid #ccc", padding: "8px", borderRadius: "4px" }}
+            >
               {file.isImage ? (
-                <img src={getFileUrl(file)} alt={file.altText || ''} style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
+                <img
+                  src={getFileUrl(file)}
+                  alt={file.altText || ""}
+                  style={{ width: "100%", height: "auto", objectFit: "cover" }}
+                />
               ) : (
-                <div style={{ padding: '16px', textAlign: 'center' }}>{file.mimetype}</div>
+                <div style={{ padding: "16px", textAlign: "center" }}>{file.mimetype}</div>
               )}
-              <p style={{ wordBreak: 'break-all', fontSize: '14px' }}>{file.filename}</p>
+              <p style={{ wordBreak: "break-all", fontSize: "14px" }}>{file.filename}</p>
               <UiButton theme="warning" onClick={() => handleDelete(file.id)}>
                 Delete
               </UiButton>

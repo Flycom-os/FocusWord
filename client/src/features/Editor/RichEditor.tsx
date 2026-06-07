@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { OutputData } from '@editorjs/editorjs';
-import Editor from './ui/Editor';
+import { useState, useEffect } from "react";
+import { OutputData } from "@editorjs/editorjs";
+import Editor from "./ui/Editor";
 
 interface RichEditorProps {
   holder: string;
@@ -13,13 +13,13 @@ interface RichEditorProps {
   onSliderSelect?: () => void;
 }
 
-const RichEditor: React.FC<RichEditorProps> = ({ 
-  holder, 
-  data, 
-  onChange, 
+const RichEditor: React.FC<RichEditorProps> = ({
+  holder,
+  data,
+  onChange,
   placeholder,
   onMediaSelect,
-  onSliderSelect 
+  onSliderSelect,
 }) => {
   const [editorData, setEditorData] = useState<OutputData>(data || { blocks: [] });
 
@@ -60,11 +60,7 @@ const RichEditor: React.FC<RichEditorProps> = ({
           )}
         </div>
       ) : null}
-      <Editor
-        data={editorData}
-        onChange={handleChange}
-        holder={holder}
-      />
+      <Editor data={editorData} onChange={handleChange} holder={holder} />
     </div>
   );
 };

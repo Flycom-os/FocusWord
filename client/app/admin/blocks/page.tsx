@@ -1,12 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { fetchBlocks, createBlock, updateBlock, deleteBlock } from '@/src/shared/api/blocks';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './blocks.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { fetchBlocks, createBlock, updateBlock, deleteBlock } from "@/src/shared/api/blocks";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./blocks.module.css";
 
 export default function BlocksPage() {
   const router = useRouter();
@@ -14,7 +22,7 @@ export default function BlocksPage() {
   const [blocks, setBlocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadData();
@@ -26,37 +34,43 @@ export default function BlocksPage() {
       const response = await fetchBlocks(accessToken, {
         page: pagination.page,
         limit: pagination.limit,
-        search
+        search,
       });
       setBlocks(response.data);
-      setPagination(prev => ({ ...prev, total: response.total }));
+      setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast('Ошибка при загрузке блоков', 'error');
+      showToast("Ошибка при загрузке блоков", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Вы уверены что хотите удалить этот блок?')) {
+    if (confirm("Вы уверены что хотите удалить этот блок?")) {
       try {
         await deleteBlock(accessToken, id);
-        showToast('Блок удален', 'success');
+        showToast("Блок удален", "success");
         loadData();
       } catch (error) {
-        showToast('Ошибка при удалении блока', 'error');
+        showToast("Ошибка при удалении блока", "error");
       }
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'text': return '📝';
-      case 'image': return '🖼️';
-      case 'video': return '🎥';
-      case 'slider': return '🎠';
-      case 'form': return '📋';
-      default: return '📦';
+      case "text":
+        return "📝";
+      case "image":
+        return "🖼️";
+      case "video":
+        return "🎥";
+      case "slider":
+        return "🎠";
+      case "form":
+        return "📋";
+      default:
+        return "📦";
     }
   };
 
@@ -110,8 +124,10 @@ export default function BlocksPage() {
                 </TableCell>
                 <TableCell>{block.slug}</TableCell>
                 <TableCell>
-                  <span className={`${styles.status} ${block.isActive ? styles.active : styles.inactive}`}>
-                    {block.isActive ? 'Активен' : 'Неактивен'}
+                  <span
+                    className={`${styles.status} ${block.isActive ? styles.active : styles.inactive}`}
+                  >
+                    {block.isActive ? "Активен" : "Неактивен"}
                   </span>
                 </TableCell>
                 <TableCell>{new Date(block.createdAt).toLocaleDateString()}</TableCell>
@@ -119,10 +135,7 @@ export default function BlocksPage() {
                   <div className={styles.actions}>
                     <button className={styles.editButton}>✏️</button>
                     <button className={styles.cloneButton}>📋</button>
-                    <button
-                      onClick={() => handleDelete(block.id)}
-                      className={styles.deleteButton}
-                    >
+                    <button onClick={() => handleDelete(block.id)} className={styles.deleteButton}>
                       🗑️
                     </button>
                   </div>
@@ -139,7 +152,7 @@ export default function BlocksPage() {
             page={pagination.page}
             total={pagination.total}
             perPage={pagination.limit}
-            onChange={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           />
         </div>
       )}

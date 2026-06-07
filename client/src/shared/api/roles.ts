@@ -19,8 +19,7 @@ export interface RolesQuery {
   sortOrder?: "asc" | "desc";
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export interface PaginatedRolesResponse {
   roles: RoleDto[];
@@ -83,4 +82,3 @@ export const deleteRole = async (token: string | null, id: number): Promise<void
     headers: authHeaders(token),
   });
 };
-

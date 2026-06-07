@@ -1,31 +1,33 @@
 /**
  * @page Profile
  */
-'use client';
 
-import { useState, useEffect } from 'react';
-import { fetchUser, updateCurrentUser, UserDto } from '@/src/shared/api/users';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { showToast, UiButton } from '@/src/shared/ui';
-import { User, Mail, Phone, Calendar, Shield, Camera, Edit3, Save, X } from 'lucide-react';
-import styles from './index.module.css';
+"use client";
+
+import { useState, useEffect } from "react";
+import { fetchUser, updateCurrentUser, UserDto } from "@/src/shared/api/users";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { showToast, UiButton } from "@/src/shared/ui";
+import { User, Mail, Phone, Calendar, Shield, Camera, Edit3, Save, X } from "lucide-react";
+import styles from "./index.module.css";
 
 const ProfilePage = () => {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, updateUser } = useAuth();
   const [userData, setUserData] = useState<UserDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    username: '',
-    email: '',
-    phone: '',
-    avatarUrl: ''
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    phone: "",
+    avatarUrl: "",
+    themeMode: "light",
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
 
   useEffect(() => {
     if (user?.id && accessToken) {
@@ -40,22 +42,25 @@ const ProfilePage = () => {
       setUserData(data);
 
       // Build full URL for avatar
-      const avatarUrl = data.avatarUrl ?
-        (data.avatarUrl.startsWith('http') ? data.avatarUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331'}${data.avatarUrl}`)
-        : '';
+      const avatarUrl = data.avatarUrl
+        ? data.avatarUrl.startsWith("http")
+          ? data.avatarUrl
+          : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331"}${data.avatarUrl}`
+        : "";
 
       setFormData({
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
-        username: data.username || '',
-        email: data.email || '',
-        phone: '',
-        avatarUrl: avatarUrl
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        username: data.username || "",
+        email: data.email || "",
+        themeMode: data.themeMode || "light",
+        phone: "",
+        avatarUrl,
       });
       setAvatarPreview(avatarUrl);
     } catch (error) {
-      showToast('Error loading profile data', 'error');
-      console.error('Error loading user data:', error);
+      showToast("Error loading profile data", "error");
+      console.error("Error loading user data:", error);
     } finally {
       setLoading(false);
     }
@@ -70,17 +75,20 @@ const ProfilePage = () => {
     setAvatarFile(null);
     if (userData) {
       // Build full URL for avatar
-      const avatarUrl = userData.avatarUrl ?
-        (userData.avatarUrl.startsWith('http') ? userData.avatarUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331'}${userData.avatarUrl}`)
-        : '';
+      const avatarUrl = userData.avatarUrl
+        ? userData.avatarUrl.startsWith("http")
+          ? userData.avatarUrl
+          : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331"}${userData.avatarUrl}`
+        : "";
 
       setFormData({
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
-        username: userData.username || '',
-        email: userData.email || '',
-        phone: '',
-        avatarUrl: avatarUrl
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        username: userData.username || "",
+        email: userData.email || "",
+        themeMode: userData.themeMode || "light",
+        phone: "",
+        avatarUrl,
       });
       setAvatarPreview(avatarUrl);
     }
@@ -88,23 +96,29 @@ const ProfilePage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // File validation
-      if (!file.type.startsWith('image/')) {
-        showToast('Please select an image', 'error');
+      if (!file.type.startsWith("image/")) {
+        showToast("Please select an image", "error");
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) { // 5MB
-        showToast('File size must not exceed 5MB', 'error');
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB
+        showToast("File size must not exceed 5MB", "error");
         return;
       }
 
@@ -128,7 +142,8 @@ const ProfilePage = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         username: formData.username,
-        email: formData.email
+        email: formData.email,
+        themeMode: formData.themeMode,
       };
 
       // Add avatar file if present
@@ -139,24 +154,27 @@ const ProfilePage = () => {
 
       const updatedUser = await updateCurrentUser(accessToken, updateData);
       setUserData(updatedUser);
+      if (updateUser) updateUser(updatedUser as any);
       setEditing(false);
       setAvatarFile(null);
 
       // Update avatar preview with new URL
-      const newAvatarUrl = updatedUser.avatarUrl ?
-        (updatedUser.avatarUrl.startsWith('http') ? updatedUser.avatarUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331'}${updatedUser.avatarUrl}`)
-        : '';
+      const newAvatarUrl = updatedUser.avatarUrl
+        ? updatedUser.avatarUrl.startsWith("http")
+          ? updatedUser.avatarUrl
+          : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331"}${updatedUser.avatarUrl}`
+        : "";
       setAvatarPreview(newAvatarUrl);
-      setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
+      setFormData((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
 
       if (avatarFile) {
-        showToast('Avatar updated successfully!', 'success');
+        showToast("Avatar updated successfully!", "success");
       } else {
-        showToast('Profile updated successfully!', 'success');
+        showToast("Profile updated successfully!", "success");
       }
     } catch (error) {
-      showToast('Error updating profile', 'error');
-      console.error('Error updating profile:', error);
+      showToast("Error updating profile", "error");
+      console.error("Error updating profile:", error);
     } finally {
       setLoading(false);
       setAvatarUploading(false);
@@ -166,7 +184,7 @@ const ProfilePage = () => {
   if (loading && !userData) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner}></div>
+        <div className={styles.spinner} />
       </div>
     );
   }
@@ -200,8 +218,10 @@ const ProfilePage = () => {
                 </div>
               )}
               {editing && (
-                <label className={`${styles.avatarUpload} ${avatarUploading ? styles.loading : ''}`}>
-                  {avatarUploading ? '' : <Camera size={20} />}
+                <label
+                  className={`${styles.avatarUpload} ${avatarUploading ? styles.loading : ""}`}
+                >
+                  {avatarUploading ? "" : <Camera size={20} />}
                   <input
                     type="file"
                     accept="image/*"
@@ -216,9 +236,7 @@ const ProfilePage = () => {
               <h3 className={styles.userName}>
                 {userData?.firstName} {userData?.lastName}
               </h3>
-              <p className={styles.userRole}>
-                {userData?.role?.name || 'User'}
-              </p>
+              <p className={styles.userRole}>{userData?.role?.name || "User"}</p>
             </div>
           </div>
         </div>
@@ -293,6 +311,24 @@ const ProfilePage = () => {
                 placeholder="Enter email"
               />
             </div>
+
+            {/* Theme */}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                <Shield size={16} />
+                Theme
+              </label>
+              <select
+                name="themeMode"
+                value={formData.themeMode}
+                onChange={handleSelectChange}
+                disabled={!editing}
+                className={styles.input}
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
           </div>
 
           {/* Additional Info */}
@@ -302,7 +338,9 @@ const ProfilePage = () => {
               <div>
                 <p className={styles.infoLabel}>Registration Date</p>
                 <p className={styles.infoValue}>
-                  {userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US') : '—'}
+                  {userData?.createdAt
+                    ? new Date(userData.createdAt).toLocaleDateString("en-US")
+                    : "—"}
                 </p>
               </div>
             </div>
@@ -310,7 +348,7 @@ const ProfilePage = () => {
               <Shield size={16} />
               <div>
                 <p className={styles.infoLabel}>Role</p>
-                <p className={styles.infoValue}>{userData?.role?.name || 'User'}</p>
+                <p className={styles.infoValue}>{userData?.role?.name || "User"}</p>
               </div>
             </div>
           </div>
@@ -335,7 +373,7 @@ const ProfilePage = () => {
               className={styles.saveButton}
             >
               <Save size={16} />
-              {avatarUploading ? 'Uploading avatar...' : loading ? 'Saving...' : 'Save'}
+              {avatarUploading ? "Uploading avatar..." : loading ? "Saving..." : "Save"}
             </UiButton>
           </div>
         )}

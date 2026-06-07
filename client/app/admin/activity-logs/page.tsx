@@ -1,12 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { fetchActivityLogs, fetchActivityStats } from '@/src/shared/api/activity-logs';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './activity-logs.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { fetchActivityLogs, fetchActivityStats } from "@/src/shared/api/activity-logs";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./activity-logs.module.css";
 
 export default function ActivityLogsPage() {
   const router = useRouter();
@@ -15,12 +23,14 @@ export default function ActivityLogsPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'logs' | 'stats'>('logs');
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<"logs" | "stats">("logs");
 
   useEffect(() => {
-    loadData();
-  }, [pagination.page, search]);
+    if (accessToken) {
+      loadData();
+    }
+  }, [pagination.page, search, accessToken]);
 
   const loadData = async () => {
     try {
@@ -29,15 +39,15 @@ export default function ActivityLogsPage() {
         fetchActivityLogs(accessToken, {
           page: pagination.page,
           limit: pagination.limit,
-          search
+          search,
         }),
-        fetchActivityStats(accessToken)
+        fetchActivityStats(accessToken),
       ]);
       setLogs(logsData.data);
       setStats(statsData);
-      setPagination(prev => ({ ...prev, total: logsData.total }));
+      setPagination((prev) => ({ ...prev, total: logsData.total }));
     } catch (error) {
-      showToast('Ошибка при загрузке логов активности', 'error');
+      showToast("Ошибка при загрузке логов активности", "error");
     } finally {
       setLoading(false);
     }
@@ -45,12 +55,18 @@ export default function ActivityLogsPage() {
 
   const getActionIcon = (action: string) => {
     switch (action.toLowerCase()) {
-      case 'create': return '➕';
-      case 'update': return '✏️';
-      case 'delete': return '🗑️';
-      case 'login': return '🔐';
-      case 'logout': return '🚪';
-      default: return '📝';
+      case "create":
+        return "➕";
+      case "update":
+        return "✏️";
+      case "delete":
+        return "🗑️";
+      case "login":
+        return "🔐";
+      case "logout":
+        return "🚪";
+      default:
+        return "📝";
     }
   };
 
@@ -63,14 +79,14 @@ export default function ActivityLogsPage() {
 
       <div className={styles.tabs}>
         <button
-          onClick={() => setActiveTab('logs')}
-          className={`${styles.tab} ${activeTab === 'logs' ? styles.active : ''}`}
+          onClick={() => setActiveTab("logs")}
+          className={`${styles.tab} ${activeTab === "logs" ? styles.active : ""}`}
         >
           Логи
         </button>
         <button
-          onClick={() => setActiveTab('stats')}
-          className={`${styles.tab} ${activeTab === 'stats' ? styles.active : ''}`}
+          onClick={() => setActiveTab("stats")}
+          className={`${styles.tab} ${activeTab === "stats" ? styles.active : ""}`}
         >
           Статистика
         </button>
@@ -80,7 +96,7 @@ export default function ActivityLogsPage() {
         <div className={styles.loading}>Загрузка...</div>
       ) : (
         <>
-          {activeTab === 'logs' && (
+          {activeTab === "logs" && (
             <div className={styles.content}>
               <div className={styles.toolbar}>
                 <input
@@ -112,10 +128,10 @@ export default function ActivityLogsPage() {
                           {log.action}
                         </div>
                       </TableCell>
-                      <TableCell>{log.entityType || '-'}</TableCell>
-                      <TableCell>{log.entityId || '-'}</TableCell>
-                      <TableCell>{log.userId || '-'}</TableCell>
-                      <TableCell>{log.ipAddress || '-'}</TableCell>
+                      <TableCell>{log.entityType || "-"}</TableCell>
+                      <TableCell>{log.entityId || "-"}</TableCell>
+                      <TableCell>{log.userId || "-"}</TableCell>
+                      <TableCell>{log.ipAddress || "-"}</TableCell>
                       <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
@@ -124,7 +140,7 @@ export default function ActivityLogsPage() {
             </div>
           )}
 
-          {activeTab === 'stats' && stats && (
+          {activeTab === "stats" && stats && (
             <div className={styles.stats}>
               <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
@@ -132,7 +148,9 @@ export default function ActivityLogsPage() {
                   <div className={styles.statLabel}>Всего действий</div>
                 </div>
                 <div className={styles.statCard}>
-                  <div className={styles.statNumber}>{Object.keys(stats.actionsByType || {}).length}</div>
+                  <div className={styles.statNumber}>
+                    {Object.keys(stats.actionsByType || {}).length}
+                  </div>
                   <div className={styles.statLabel}>Типов действий</div>
                 </div>
                 <div className={styles.statCard}>
@@ -162,13 +180,13 @@ export default function ActivityLogsPage() {
         </>
       )}
 
-      {activeTab === 'logs' && pagination.total > pagination.limit && (
+      {activeTab === "logs" && pagination.total > pagination.limit && (
         <div className={styles.pagination}>
           <Pagination
             page={pagination.page}
             total={pagination.total}
             perPage={pagination.limit}
-            onChange={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           />
         </div>
       )}

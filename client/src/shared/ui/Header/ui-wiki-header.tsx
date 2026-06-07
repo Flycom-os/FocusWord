@@ -1,8 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styles from './ui-wiki-header.module.css';
-import { ChevronLeft, Book, Search, Menu, User, Settings, LogOut, Home, FileText, HelpCircle } from 'lucide-react';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { useRouter } from 'next/router';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  ChevronLeft,
+  Book,
+  Search,
+  Menu,
+  User,
+  Settings,
+  LogOut,
+  Home,
+  FileText,
+  HelpCircle,
+} from "lucide-react";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { useRouter } from "next/router";
+import styles from "./ui-wiki-header.module.css";
 
 interface WikiHeaderProps {
   onBackClick?: () => void;
@@ -13,7 +24,7 @@ interface WikiHeaderProps {
 
 const WikiHeader: React.FC<WikiHeaderProps> = ({
   onBackClick,
-  title = 'Knowledge Base',
+  title = "Knowledge Base",
   showSearch = true,
   onSearchChange,
 }) => {
@@ -21,15 +32,17 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : "Guest";
-  
+  const userName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Guest";
+
   // Формируем полный URL для аватара
-  const avatarUrl = user?.avatarUrl ? 
-    (user.avatarUrl.startsWith('http') ? user.avatarUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331'}${user.avatarUrl}`) 
-    : '';
+  const avatarUrl = user?.avatarUrl
+    ? user.avatarUrl.startsWith("http")
+      ? user.avatarUrl
+      : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331"}${user.avatarUrl}`
+    : "";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,8 +51,8 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +64,7 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
   };
 
   const handleHomeClick = () => {
-    router.push('/wiki');
+    router.push("/wiki");
     setIsMobileMenuOpen(false);
   };
 
@@ -60,28 +73,28 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
   };
 
   const handleArticlesClick = () => {
-    router.push('/wiki/articles');
+    router.push("/wiki/articles");
     setIsMobileMenuOpen(false);
   };
 
   const handleHelpClick = () => {
-    router.push('/wiki/help');
+    router.push("/wiki/help");
     setIsMobileMenuOpen(false);
   };
 
   const handleProfileClick = () => {
-    router.push('/admin/profile');
+    router.push("/admin/profile");
     setIsDropdownOpen(false);
   };
 
   const handleSettingsClick = () => {
-    router.push('/admin/settings');
+    router.push("/admin/settings");
     setIsDropdownOpen(false);
   };
 
   const handleLogoutClick = () => {
     logout();
-    router.push('/signin');
+    router.push("/signin");
     setIsDropdownOpen(false);
   };
 
@@ -98,14 +111,11 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
       <div className={styles.container}>
         {/* Left Section */}
         <div className={styles.leftSection}>
-          <button 
-            className={styles.backButton}
-            onClick={onBackClick}
-          >
+          <button className={styles.backButton} onClick={onBackClick}>
             <ChevronLeft size={20} />
             <span>Back</span>
           </button>
-          
+
           <div className={styles.titleSection}>
             <div className={styles.logo}>
               <Book size={24} />
@@ -136,10 +146,7 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
         {/* Right Section */}
         <div className={styles.rightSection}>
           {/* Mobile Menu Toggle */}
-          <button 
-            className={styles.mobileMenuToggle}
-            onClick={toggleMobileMenu}
-          >
+          <button className={styles.mobileMenuToggle} onClick={toggleMobileMenu}>
             <Menu size={20} />
           </button>
 
@@ -154,7 +161,7 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
             </div>
             <div className={styles.userInfo}>
               <div className={styles.userName}>{userName}</div>
-              <div className={styles.userRole}>{user?.role?.name || 'User'}</div>
+              <div className={styles.userRole}>{user?.role?.name || "User"}</div>
             </div>
           </div>
 
@@ -172,34 +179,25 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
                   </div>
                   <div className={styles.userInfo}>
                     <div className={styles.dropdownUserName}>{userName}</div>
-                    <div className={styles.userRole}>{user?.role?.name || 'User'}</div>
+                    <div className={styles.userRole}>{user?.role?.name || "User"}</div>
                   </div>
                 </div>
-                
-                <div className={styles.dropdownDivider}></div>
-                
-                <button
-                  className={styles.dropdownItem}
-                  onClick={handleProfileClick}
-                >
+
+                <div className={styles.dropdownDivider} />
+
+                <button className={styles.dropdownItem} onClick={handleProfileClick}>
                   <User size={16} />
                   <span>Profile</span>
                 </button>
-                
-                <button
-                  className={styles.dropdownItem}
-                  onClick={handleSettingsClick}
-                >
+
+                <button className={styles.dropdownItem} onClick={handleSettingsClick}>
                   <Settings size={16} />
                   <span>Settings</span>
                 </button>
-                
-                <div className={styles.dropdownDivider}></div>
-                
-                <button
-                  className={styles.dropdownItem}
-                  onClick={handleLogoutClick}
-                >
+
+                <div className={styles.dropdownDivider} />
+
+                <button className={styles.dropdownItem} onClick={handleLogoutClick}>
                   <LogOut size={16} />
                   <span>Logout</span>
                 </button>
@@ -218,18 +216,18 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
               <ChevronLeft size={20} />
             </button>
           </div>
-          
+
           <nav className={styles.mobileNav}>
             <button className={styles.mobileNavItem} onClick={handleHomeClick}>
               <Home size={18} />
               <span>Home</span>
             </button>
-            
+
             <button className={styles.mobileNavItem} onClick={handleArticlesClick}>
               <FileText size={18} />
               <span>Articles</span>
             </button>
-            
+
             <button className={styles.mobileNavItem} onClick={handleHelpClick}>
               <HelpCircle size={18} />
               <span>Help</span>

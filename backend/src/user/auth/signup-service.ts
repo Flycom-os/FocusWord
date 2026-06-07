@@ -30,9 +30,19 @@ export class AuthService {
             name: 'Admin',
             // Comprehensive Admin permissions (level 2 for various resources)
             permissions: [
-              'users:2', 'roles:2', 'news:2', 'comments:2', 'history:2',
-              'process:2', 'ballons:2', 'tectechnical_gasses:2',
-              // Add other resources as needed with appropriate level
+              'users:2',
+              'roles:2',
+              'news:2',
+              'comments:2',
+              'history:2',
+              'process:2',
+              'ballons:2',
+              'tectechnical_gasses:2',
+              'media-files:2',
+              'pages:2',
+              'sliders:2',
+              'records:2',
+              'record-categories:2',
             ],
           },
         });

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { fetchWidgets } from '@/src/shared/api/widgets';
-import { fetchFeedback } from '@/src/shared/api/feedback';
-import { fetchProductCategories } from '@/src/shared/api/products';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { Button } from '@/src/shared/ui/Button/ui-button';
-import styles from './admin.module.css';
-import { fetchPages } from '@/src/shared/api/pages';
-import { fetchSliders } from '@/src/shared/api/sliders';
-import { fetchRecords } from '@/src/shared/api/records';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { fetchWidgets } from "@/src/shared/api/widgets";
+import { fetchFeedback } from "@/src/shared/api/feedback";
+import { fetchProductCategories } from "@/src/shared/api/products";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { Button } from "@/src/shared/ui/Button/ui-button";
+import { fetchPages } from "@/src/shared/api/pages";
+import { fetchSliders } from "@/src/shared/api/sliders";
+import { fetchRecords } from "@/src/shared/api/records";
+import styles from "./admin.module.css";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -22,19 +22,21 @@ export default function AdminDashboard() {
     records: 0,
     widgets: 0,
     feedback: 0,
-    categories: 0
+    categories: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (accessToken) {
+      loadDashboardData();
+    }
+  }, [accessToken]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Загружаем статистику
       const [
         pagesResponse,
@@ -42,26 +44,26 @@ export default function AdminDashboard() {
         recordsResponse,
         widgetsResponse,
         feedbackResponse,
-        categoriesResponse
+        categoriesResponse,
       ] = await Promise.all([
         fetchPages(accessToken, { page: 1, limit: 100 }),
         fetchSliders(accessToken, { page: 1, limit: 1 }),
-        fetchRecords(1, 1, ''),
+        fetchRecords(1, 1, ""),
         fetchWidgets(accessToken, { page: 1, limit: 1 }),
         fetchFeedback(accessToken, { page: 1, limit: 5 }),
-        fetchProductCategories(accessToken, 1, 1, '')
+        fetchProductCategories(accessToken, 1, 1, ""),
       ]);
 
-      // For pages, we need to check if there are more pages beyond the first 100
+      // For pagesd, we need to check if there are more pagesd beyond the first 100
       let pagesCount = Array.isArray(pagesResponse) ? pagesResponse.length : 0;
       if (pagesResponse.length === 100) {
-        // There might be more pages, try to get the total count
+        // There might be more pagesd, try to get the total count
         try {
           const secondPage = await fetchPages(accessToken, { page: 2, limit: 100 });
           pagesCount += Array.isArray(secondPage) ? secondPage.length : 0;
           // If second page is also full, there might be even more, but for dashboard we'll stop here
           if (secondPage.length === 100) {
-            pagesCount = 200; // At least 200 pages
+            pagesCount = 200; // At least 200 pagesd
           }
         } catch (error) {
           // If second page fails, we'll just use the first page count
@@ -74,23 +76,25 @@ export default function AdminDashboard() {
         records: recordsResponse.total || 0,
         widgets: widgetsResponse.total || 0,
         feedback: feedbackResponse.total || 0,
-        categories: categoriesResponse.total || 0
+        categories: categoriesResponse.total || 0,
       });
 
       // Формируем недавнюю активность
       const activity = [
         ...feedbackResponse.data.map((item: any) => ({
-          type: 'feedback',
+          type: "feedback",
           title: `Новый отзыв от ${item.name}`,
-          description: item.message.substring(0, 100) + '...',
+          description: `${item.message.substring(0, 100)}...`,
           time: item.createdAt,
-          status: item.status
-        }))
-      ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 10);
+          status: item.status,
+        })),
+      ]
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 10);
 
       setRecentActivity(activity);
     } catch (error) {
-      showToast('Ошибка при загрузке данных дашборда', 'error');
+      showToast("Ошибка при загрузке данных дашборда", "error");
     } finally {
       setLoading(false);
     }
@@ -98,64 +102,69 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: 'Создать страницу',
-      description: 'Добавить новую страницу на сайт',
-      icon: '📄',
-      action: () => router.push('/admin/pages/create')
+      title: "Создать страницу",
+      description: "Добавить новую страницу на сайт",
+      icon: "📄",
+      action: () => router.push("/admin/pages/create"),
     },
     {
-      title: 'Создать запись',
-      description: 'Добавить новую запись в блог',
-      icon: '📝',
-      action: () => router.push('/admin/records/create')
+      title: "Создать запись",
+      description: "Добавить новую запись в блог",
+      icon: "📝",
+      action: () => router.push("/admin/records/create"),
     },
     {
-      title: 'Создать виджет',
-      description: 'Добавить новый виджет на сайт',
-      icon: '🎯',
-      action: () => router.push('/admin/widgets')
+      title: "Создать виджет",
+      description: "Добавить новый виджет на сайт",
+      icon: "🎯",
+      action: () => router.push("/admin/widgets"),
     },
     {
-      title: 'Создать слайдер',
-      description: 'Добавить новый слайдер',
-      icon: '🎠',
-      action: () => router.push('/admin/sliders')
-    }
+      title: "Создать слайдер",
+      description: "Добавить новый слайдер",
+      icon: "🎠",
+      action: () => router.push("/admin/sliders"),
+    },
   ];
 
   const navigationItems = [
     {
-      title: 'Контент',
+      title: "Контент",
       items: [
-        { title: 'Страницы', count: stats.pages, icon: '📄', url: '/admin/pages' },
-        { title: 'Записи', count: stats.records, icon: '📝', url: '/admin/records' },
-        { title: 'Виджеты', count: stats.widgets, icon: '🎯', url: '/admin/widgets' },
-        { title: 'Слайдеры', count: stats.sliders, icon: '🎠', url: '/admin/sliders' }
-      ]
+        { title: "Страницы", count: stats.pages, icon: "📄", url: "/admin/pages" },
+        { title: "Записи", count: stats.records, icon: "📝", url: "/admin/records" },
+        { title: "Виджеты", count: stats.widgets, icon: "🎯", url: "/admin/widgets" },
+        { title: "Слайдеры", count: stats.sliders, icon: "🎠", url: "/admin/sliders" },
+      ],
     },
     {
-      title: 'Управление',
+      title: "Управление",
       items: [
-        { title: 'Пользователи', count: null, icon: '👥', url: '/admin/users' },
-        { title: 'Роли', count: null, icon: '🔐', url: '/admin/roles' },
-        { title: 'Категории', count: stats.categories, icon: '📁', url: '/admin/product-categories' },
-        { title: 'Отзывы', count: stats.feedback, icon: '💬', url: '/admin/feedback' }
-      ]
+        { title: "Пользователи", count: null, icon: "👥", url: "/admin/users" },
+        { title: "Роли", count: null, icon: "🔐", url: "/admin/roles" },
+        {
+          title: "Категории",
+          count: stats.categories,
+          icon: "📁",
+          url: "/admin/product-categories",
+        },
+        { title: "Отзывы", count: stats.feedback, icon: "💬", url: "/admin/feedback" },
+      ],
     },
     {
-      title: 'Настройки',
+      title: "Настройки",
       items: [
-        { title: 'Общие настройки', count: null, icon: '⚙️', url: '/admin/settings' },
-        { title: 'SEO', count: null, icon: '🔍', url: '/admin/seo' },
-        { title: 'Медиафайлы', count: null, icon: '🖼️', url: '/admin/media-files' }
-      ]
-    }
+        { title: "Общие настройки", count: null, icon: "⚙️", url: "/admin/settings" },
+        { title: "SEO", count: null, icon: "🔍", url: "/admin/seo" },
+        { title: "Медиафайлы", count: null, icon: "🖼️", url: "/admin/media-files" },
+      ],
+    },
   ];
 
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner}></div>
+        <div className={styles.spinner} />
         <p>Загрузка дашборда...</p>
       </div>
     );
@@ -188,11 +197,7 @@ export default function AdminDashboard() {
         <h2>Быстрые действия</h2>
         <div className={styles.actionGrid}>
           {quickActions.map((action, index) => (
-            <button
-              key={index}
-              onClick={action.action}
-              className={styles.actionCard}
-            >
+            <button key={index} onClick={action.action} className={styles.actionCard}>
               <div className={styles.actionIcon}>{action.icon}</div>
               <h3>{action.title}</h3>
               <p>{action.description}</p>
@@ -217,9 +222,7 @@ export default function AdminDashboard() {
                     >
                       <span className={styles.navIcon}>{item.icon}</span>
                       <span className={styles.navTitle}>{item.title}</span>
-                      {item.count !== null && (
-                        <span className={styles.navCount}>{item.count}</span>
-                      )}
+                      {item.count !== null && <span className={styles.navCount}>{item.count}</span>}
                     </button>
                   ))}
                 </div>
@@ -239,7 +242,7 @@ export default function AdminDashboard() {
               recentActivity.map((activity, index) => (
                 <div key={index} className={styles.activityItem}>
                   <div className={styles.activityIcon}>
-                    {activity.type === 'feedback' ? '💬' : '📝'}
+                    {activity.type === "feedback" ? "💬" : "📝"}
                   </div>
                   <div className={styles.activityContent}>
                     <h4>{activity.title}</h4>
@@ -250,8 +253,11 @@ export default function AdminDashboard() {
                       </span>
                       {activity.status && (
                         <span className={`${styles.activityStatus} ${styles[activity.status]}`}>
-                          {activity.status === 'pending' ? 'В ожидании' : 
-                           activity.status === 'approved' ? 'Одобрен' : 'Отклонен'}
+                          {activity.status === "pending"
+                            ? "В ожидании"
+                            : activity.status === "approved"
+                              ? "Одобрен"
+                              : "Отклонен"}
                         </span>
                       )}
                     </div>
@@ -267,12 +273,8 @@ export default function AdminDashboard() {
         <div className={styles.footerContent}>
           <p>FocusWord Admin Panel v1.0</p>
           <div className={styles.footerLinks}>
-            <button onClick={() => router.push('/admin/settings')}>
-              ⚙️ Настройки
-            </button>
-            <button onClick={() => window.open('/', '_blank')}>
-              🌐 Сайт
-            </button>
+            <button onClick={() => router.push("/admin/settings")}>⚙️ Настройки</button>
+            <button onClick={() => window.open("/", "_blank")}>🌐 Сайт</button>
           </div>
         </div>
       </div>

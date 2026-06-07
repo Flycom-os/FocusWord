@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
-import Pagination from './ui-pagination';
+import type { Meta, StoryObj } from "@storybook/react";
+import React, { useState } from "react";
+import Pagination from "./ui-pagination";
 
 const meta: Meta<typeof Pagination> = {
-  title: 'ui/Pagination',
+  title: "ui/Pagination",
   component: Pagination,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -13,7 +13,7 @@ type Story = StoryObj<typeof Pagination>;
 
 export const Demo: Story = {
   render: () => {
-    function DemoComp() {
+    const DemoComp = () => {
       const [p, setP] = useState(1);
       return (
         <div>
@@ -21,7 +21,7 @@ export const Demo: Story = {
           <div style={{ marginTop: 12 }}>Current page: {p}</div>
         </div>
       );
-    }
+    };
     return <DemoComp />;
   },
 };

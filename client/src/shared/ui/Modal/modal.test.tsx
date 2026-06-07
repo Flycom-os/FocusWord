@@ -1,13 +1,13 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Modal from './ui-modal';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import Modal from "./ui-modal";
 
-test('does not render when closed', () => {
+test("does not render when closed", () => {
   const { container } = render(<Modal open={false} onClose={() => {}} title="T" />);
   expect(container).toBeEmptyDOMElement();
 });
 
-test('renders when open with title', () => {
-  render(<Modal open={true} onClose={() => {}} title="T" />);
-  expect(screen.getByText('T')).toBeInTheDocument();
+test("renders when open with title", () => {
+  render(<Modal open onClose={() => {}} title="T" />);
+  expect(screen.getByText("T")).toBeInTheDocument();
 });

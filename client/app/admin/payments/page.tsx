@@ -1,14 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Input from '@/src/shared/ui/Input/ui-input';
-import Button from '@/src/shared/ui/Button/ui-button';
-import { fetchPaymentGateways, fetchPaymentMethods, createPaymentGateway, updatePaymentGateway, deletePaymentGateway, togglePaymentGateway } from '@/src/shared/api/payments';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Modal, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './payments.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/src/shared/ui/Input/ui-input";
+import Button from "@/src/shared/ui/Button/ui-button";
+import {
+  fetchPaymentGateways,
+  fetchPaymentMethods,
+  createPaymentGateway,
+  updatePaymentGateway,
+  deletePaymentGateway,
+  togglePaymentGateway,
+} from "@/src/shared/api/payments";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Modal,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./payments.module.css";
 
 export default function PaymentsPage() {
   const router = useRouter();
@@ -16,33 +32,35 @@ export default function PaymentsPage() {
   const [gateways, setGateways] = useState<any[]>([]);
   const [methods, setMethods] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'gateways' | 'methods'>('gateways');
+  const [activeTab, setActiveTab] = useState<"gateways" | "methods">("gateways");
   const [showModal, setShowModal] = useState(false);
   const [editingGateway, setEditingGateway] = useState<any>(null);
   const [form, setForm] = useState({
-    name: '',
-    slug: '',
-    description: '',
+    name: "",
+    slug: "",
+    description: "",
     isEnabled: false,
-    settings: '',
-    displayOrder: 0
+    settings: "",
+    displayOrder: 0,
   });
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (accessToken) {
+      loadData();
+    }
+  }, [accessToken]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [gatewaysData, methodsData] = await Promise.all([
         fetchPaymentGateways(accessToken),
-        fetchPaymentMethods(accessToken)
+        fetchPaymentMethods(accessToken),
       ]);
       setGateways(gatewaysData);
       setMethods(methodsData);
     } catch (error) {
-      showToast('Ошибка при загрузке платежных данных', 'error');
+      showToast("Ошибка при загрузке платежных данных", "error");
     } finally {
       setLoading(false);
     }
@@ -51,12 +69,12 @@ export default function PaymentsPage() {
   const handleCreateGateway = () => {
     setEditingGateway(null);
     setForm({
-      name: '',
-      slug: '',
-      description: '',
+      name: "",
+      slug: "",
+      description: "",
       isEnabled: false,
-      settings: '',
-      displayOrder: 0
+      settings: "",
+      displayOrder: 0,
     });
     setShowModal(true);
   };
@@ -66,10 +84,10 @@ export default function PaymentsPage() {
     setForm({
       name: gateway.name,
       slug: gateway.slug,
-      description: gateway.description || '',
+      description: gateway.description || "",
       isEnabled: gateway.isEnabled,
       settings: JSON.stringify(gateway.settings || {}, null, 2),
-      displayOrder: gateway.displayOrder
+      displayOrder: gateway.displayOrder,
     });
     setShowModal(true);
   };
@@ -78,31 +96,31 @@ export default function PaymentsPage() {
     try {
       const gatewayData = {
         ...form,
-        settings: form.settings ? JSON.parse(form.settings) : {}
+        settings: form.settings ? JSON.parse(form.settings) : {},
       };
 
       if (editingGateway) {
         await updatePaymentGateway(accessToken, editingGateway.id, gatewayData);
-        showToast('Платежный шлюз обновлен', 'success');
+        showToast("Платежный шлюз обновлен", "success");
       } else {
         await createPaymentGateway(accessToken, gatewayData);
-        showToast('Платежный шлюз создан', 'success');
+        showToast("Платежный шлюз создан", "success");
       }
       setShowModal(false);
       loadData();
     } catch (error) {
-      showToast('Ошибка при сохранении платежного шлюза', 'error');
+      showToast("Ошибка при сохранении платежного шлюза", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Вы уверены что хотите удалить этот платежный шлюз?')) {
+    if (confirm("Вы уверены что хотите удалить этот платежный шлюз?")) {
       try {
         await deletePaymentGateway(accessToken, id);
-        showToast('Платежный шлюз удален', 'success');
+        showToast("Платежный шлюз удален", "success");
         loadData();
       } catch (error) {
-        showToast('Ошибка при удалении платежного шлюза', 'error');
+        showToast("Ошибка при удалении платежного шлюза", "error");
       }
     }
   };
@@ -110,19 +128,23 @@ export default function PaymentsPage() {
   const handleToggle = async (id: number, isEnabled: boolean) => {
     try {
       await togglePaymentGateway(accessToken, id, isEnabled);
-      showToast(`Платежный шлюз ${isEnabled ? 'включен' : 'выключен'}`, 'success');
+      showToast(`Платежный шлюз ${isEnabled ? "включен" : "выключен"}`, "success");
       loadData();
     } catch (error) {
-      showToast('Ошибка при изменении статуса', 'error');
+      showToast("Ошибка при изменении статуса", "error");
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'card': return '💳';
-      case 'bank': return '🏦';
-      case 'crypto': return '₿';
-      default: return '💰';
+      case "card":
+        return "💳";
+      case "bank":
+        return "🏦";
+      case "crypto":
+        return "₿";
+      default:
+        return "💰";
     }
   };
 
@@ -135,14 +157,14 @@ export default function PaymentsPage() {
 
       <div className={styles.tabs}>
         <button
-          onClick={() => setActiveTab('gateways')}
-          className={`${styles.tab} ${activeTab === 'gateways' ? styles.active : ''}`}
+          onClick={() => setActiveTab("gateways")}
+          className={`${styles.tab} ${activeTab === "gateways" ? styles.active : ""}`}
         >
           Платежные шлюзы
         </button>
         <button
-          onClick={() => setActiveTab('methods')}
-          className={`${styles.tab} ${activeTab === 'methods' ? styles.active : ''}`}
+          onClick={() => setActiveTab("methods")}
+          className={`${styles.tab} ${activeTab === "methods" ? styles.active : ""}`}
         >
           Платежные методы
         </button>
@@ -152,7 +174,7 @@ export default function PaymentsPage() {
         <div className={styles.loading}>Загрузка...</div>
       ) : (
         <>
-          {activeTab === 'gateways' && (
+          {activeTab === "gateways" && (
             <div className={styles.content}>
               <div className={styles.toolbar}>
                 <Button onClick={handleCreateGateway} className={styles.createButton}>
@@ -183,8 +205,10 @@ export default function PaymentsPage() {
                       </TableCell>
                       <TableCell>{gateway.slug}</TableCell>
                       <TableCell>
-                        <span className={`${styles.status} ${gateway.isEnabled ? styles.enabled : styles.disabled}`}>
-                          {gateway.isEnabled ? 'Активен' : 'Неактивен'}
+                        <span
+                          className={`${styles.status} ${gateway.isEnabled ? styles.enabled : styles.disabled}`}
+                        >
+                          {gateway.isEnabled ? "Активен" : "Неактивен"}
                         </span>
                       </TableCell>
                       <TableCell>{gateway.displayOrder}</TableCell>
@@ -200,7 +224,7 @@ export default function PaymentsPage() {
                             onClick={() => handleToggle(gateway.id, !gateway.isEnabled)}
                             className={`${styles.toggleButton} ${gateway.isEnabled ? styles.disable : styles.enable}`}
                           >
-                            {gateway.isEnabled ? '🔴' : '🟢'}
+                            {gateway.isEnabled ? "🔴" : "🟢"}
                           </Button>
                           <Button
                             onClick={() => handleDelete(gateway.id)}
@@ -217,7 +241,7 @@ export default function PaymentsPage() {
             </div>
           )}
 
-          {activeTab === 'methods' && (
+          {activeTab === "methods" && (
             <div className={styles.content}>
               <Table>
                 <TableHeader>
@@ -248,11 +272,13 @@ export default function PaymentsPage() {
                         <span className={styles.type}>{method.type}</span>
                       </TableCell>
                       <TableCell>
-                        <span className={`${styles.status} ${method.isEnabled ? styles.enabled : styles.disabled}`}>
-                          {method.isEnabled ? 'Активен' : 'Неактивен'}
+                        <span
+                          className={`${styles.status} ${method.isEnabled ? styles.enabled : styles.disabled}`}
+                        >
+                          {method.isEnabled ? "Активен" : "Неактивен"}
                         </span>
                       </TableCell>
-                      <TableCell>{method.paymentGatewayId || '-'}</TableCell>
+                      <TableCell>{method.paymentGatewayId || "-"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -265,14 +291,14 @@ export default function PaymentsPage() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editingGateway ? 'Редактировать шлюз' : 'Создать шлюз'}
+        title={editingGateway ? "Редактировать шлюз" : "Создать шлюз"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
             <label>Название</label>
             <Input
               value={form.name}
-              onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Введите название шлюза"
             />
           </div>
@@ -281,7 +307,7 @@ export default function PaymentsPage() {
             <label>Slug</label>
             <Input
               value={form.slug}
-              onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
               placeholder="payment-gateway-slug"
             />
           </div>
@@ -290,7 +316,7 @@ export default function PaymentsPage() {
             <label>Описание</label>
             <textarea
               value={form.description}
-              onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Описание платежного шлюза"
               className={styles.textarea}
               rows={3}
@@ -302,7 +328,9 @@ export default function PaymentsPage() {
             <Input
               type="number"
               value={form.displayOrder}
-              onChange={(e) => setForm(prev => ({ ...prev, displayOrder: parseInt(e.target.value) || 0 }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, displayOrder: parseInt(e.target.value) || 0 }))
+              }
               placeholder="0"
             />
           </div>
@@ -311,7 +339,7 @@ export default function PaymentsPage() {
             <label>Настройки (JSON)</label>
             <textarea
               value={form.settings}
-              onChange={(e) => setForm(prev => ({ ...prev, settings: e.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, settings: e.target.value }))}
               placeholder='{"apiKey": "...", "secretKey": "..."}'
               className={styles.textarea}
               rows={6}
@@ -323,7 +351,7 @@ export default function PaymentsPage() {
               <input
                 type="checkbox"
                 checked={form.isEnabled}
-                onChange={(e) => setForm(prev => ({ ...prev, isEnabled: e.target.checked }))}
+                onChange={(e) => setForm((prev) => ({ ...prev, isEnabled: e.target.checked }))}
               />
               Активен
             </label>
@@ -331,12 +359,9 @@ export default function PaymentsPage() {
 
           <div className={styles.modalActions}>
             <Button onClick={handleSave} className={styles.saveButton}>
-              {editingGateway ? 'Сохранить' : 'Создать'}
+              {editingGateway ? "Сохранить" : "Создать"}
             </Button>
-            <Button
-              onClick={() => setShowModal(false)}
-              className={styles.cancelButton}
-            >
+            <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
               Отмена
             </Button>
           </div>

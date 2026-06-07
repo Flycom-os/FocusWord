@@ -1,19 +1,14 @@
-'use client';
+"use client";
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { UseFormReturn } from 'react-hook-form';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-} from './form';
-import { useTheme } from './use-Theme';
-import MarkdownRenderer from './MarkdownRenderer';
-import { cn } from './utils';
+import React from "react";
+import dynamic from "next/dynamic";
+import { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem, FormLabel, FormControl } from "./form";
+import { useTheme } from "./use-Theme";
+import MarkdownRenderer from "./MarkdownRenderer";
+import { cn } from "./utils";
 
-const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 type Props = {
   form: UseFormReturn<any>;
@@ -25,13 +20,13 @@ type Props = {
 };
 
 const DescriptionField: React.FC<Props> = ({
-                                             form,
-                                             name,
-                                             isReadOnly = false,
-                                             placeholder,
-                                             label,
-                                             id,
-                                           }) => {
+  form,
+  name,
+  isReadOnly = false,
+  placeholder,
+  label,
+  id,
+}) => {
   const { theme } = useTheme();
 
   return (
@@ -40,14 +35,14 @@ const DescriptionField: React.FC<Props> = ({
       name={name}
       render={({ field }) => (
         <FormItem className="w-full flex flex-col sm:flex-row">
-          <FormLabel>{label ?? 'Description'}</FormLabel>
+          <FormLabel>{label ?? "Description"}</FormLabel>
           <FormControl>
             <div
-              data-color-mode={theme === 'dark' ? 'dark' : 'light'}
+              data-color-mode={theme === "dark" ? "dark" : "light"}
               className={cn(
-                'md-field rounded-md overflow-hidden border',
+                "md-field rounded-md overflow-hidden border",
                 isReadOnly &&
-                'border-disable-bg-border text-disable-typo dark:text-disable-bg-border bg-[#00203312] dark:bg-disable-bg'
+                  "border-disable-bg-border text-disable-typo dark:text-disable-bg-border bg-[#00203312] dark:bg-disable-bg",
               )}
             >
               <style
@@ -99,25 +94,24 @@ const DescriptionField: React.FC<Props> = ({
 
               {isReadOnly ? (
                 <MarkdownRenderer
-                  content={field.value || ''}
+                  content={field.value || ""}
                   className="p-4 prose dark:prose-invert max-w-none text-[14px] font-mono list-disc list-inside"
                 />
               ) : (
                 <MDEditor
-                  value={field.value || ''}
-                  onChange={(val) => field.onChange(val ?? '')}
+                  value={field.value || ""}
+                  onChange={(val) => field.onChange(val ?? "")}
                   height={200}
                   maxHeight={400}
                   className="!w-full dark:bg-zinc-900 font-normal font-montserrat "
                   textareaProps={{
                     id,
-                    placeholder:
-                      placeholder ?? 'Enter description in Markdown...',
+                    placeholder: placeholder ?? "Enter description in Markdown...",
                     style: {
                       height: 200,
-                      width: '100%',
+                      width: "100%",
                       maxHeight: 400,
-                      listStyleType: 'disc',
+                      listStyleType: "disc",
                     },
                   }}
                 />

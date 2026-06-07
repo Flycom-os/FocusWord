@@ -2,7 +2,6 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import Header from "@/src/widgets/header/index";
 
-
 // 💡 Мокаем next/link
 // Storybook не работает с next/link без Next.js, поэтому мы временно подменим
 jest.mock("next/link", () => {

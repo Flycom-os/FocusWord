@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * @page Users
@@ -57,7 +57,7 @@ const UsersPage = () => {
     items: users,
     getItemId: (user) => user.id,
     onSelectionChange: (selectedIds) => {
-      console.log('Selected users:', selectedIds);
+      console.log("Selected users:", selectedIds);
     },
   });
 
@@ -170,13 +170,13 @@ const UsersPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type={"third"} />
+      <BlockManagement type="third" />
 
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
@@ -199,7 +199,7 @@ const UsersPage = () => {
         <TableHeader>
           <TableRow>
             <SelectableTableHead
-              selectable={true}
+              selectable
               onSelectAll={tableSelection.selectAll}
               isAllSelected={tableSelection.isAllSelected()}
               isPartiallySelected={tableSelection.isPartiallySelected()}
@@ -218,15 +218,15 @@ const UsersPage = () => {
               selected={tableSelection.isSelected(user.id)}
               focused={tableSelection.focusedIndex === index}
               onSelect={(e) => tableSelection.handleRowClick(user.id, e)}
-              checkboxColumn={true}
+              checkboxColumn
             >
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 {user.firstName || user.lastName
-                  ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                  : user.username || '-'}
+                  ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+                  : user.username || "-"}
               </TableCell>
-              <TableCell>{user.role?.name || '-'}</TableCell>
+              <TableCell>{user.role?.name || "-"}</TableCell>
               <TableCell>{formatDate(user.createdAt)}</TableCell>
               <TableCell className={styles.actionsColumn}>
                 <PermissionGate resource="users" level={1}>
@@ -315,10 +315,10 @@ const UsersPage = () => {
               <Select
                 className={styles.input}
                 options={[
-                  { value: '', label: 'Без роли' },
+                  { value: "", label: "Без роли" },
                   ...roles.map((role) => ({ value: role.id.toString(), label: role.name })),
                 ]}
-                value={roleId?.toString() || ''}
+                value={roleId?.toString() || ""}
                 onChange={(value) => setRoleId(value ? parseInt(value) : null)}
               />
             </div>

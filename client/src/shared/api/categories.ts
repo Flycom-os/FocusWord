@@ -45,16 +45,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 export const categoriesApi = {
   // Получить все категории с пагинацией
-  getAll: async (page = 1, limit = 10, search = ''): Promise<PaginatedCategoriesResponse> => {
+  getAll: async (page = 1, limit = 10, search = ""): Promise<PaginatedCategoriesResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
-      ...(search && { search })
+      ...(search && { search }),
     });
-    
+
     const response = await fetch(`${API_URL}/api/categories?${params}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch categories');
+      throw new Error("Failed to fetch categories");
     }
     return response.json();
   },
@@ -63,7 +63,7 @@ export const categoriesApi = {
   getById: async (id: string): Promise<CategoryDto> => {
     const response = await fetch(`${API_URL}/api/categories/${id}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch category');
+      throw new Error("Failed to fetch category");
     }
     return response.json();
   },
@@ -71,15 +71,15 @@ export const categoriesApi = {
   // Создать новую категорию
   create: async (data: CreateCategoryDto): Promise<CategoryDto> => {
     const response = await fetch(`${API_URL}/api/categories`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to create category');
+      throw new Error("Failed to create category");
     }
     return response.json();
   },
@@ -87,15 +87,15 @@ export const categoriesApi = {
   // Обновить категорию
   update: async (id: string, data: UpdateCategoryDto): Promise<CategoryDto> => {
     const response = await fetch(`${API_URL}/api/categories/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to update category');
+      throw new Error("Failed to update category");
     }
     return response.json();
   },
@@ -103,11 +103,11 @@ export const categoriesApi = {
   // Удалить категорию
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/api/categories/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to delete category');
+      throw new Error("Failed to delete category");
     }
   },
 };

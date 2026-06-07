@@ -1,0 +1,153 @@
+.root {
+  padding: 24px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.search {
+  max-width: 380px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.paginationWrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.actions {
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 8px;
+}
+
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.modalContent {
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+}
+
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input {
+  width: 100%;
+}
+
+.formatToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.formatToolbar button {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.editor {
+  min-height: 420px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  overflow-y: auto;
+  outline: none;
+}
+
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.textarea {
+  min-height: 90px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.modalActions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.previewModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 12px;
+}
+
+.previewHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.previewSubtitle {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.previewSliderWrapper {
+  width: 100%;
+}
+
+.previewBody {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px;
+  min-height: 220px;
+}
+
+.previewLoader,
+.previewEmpty {
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  color: #374151;
+}

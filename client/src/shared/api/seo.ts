@@ -18,7 +18,7 @@ export const seoApi = {
   getSettings: async (): Promise<SEOSettings> => {
     const response = await fetch(`${API_URL}/api/seo/settings`);
     if (!response.ok) {
-      throw new Error('Failed to fetch SEO settings');
+      throw new Error("Failed to fetch SEO settings");
     }
     return response.json();
   },
@@ -26,15 +26,15 @@ export const seoApi = {
   // Сохранить SEO настройки
   saveSettings: async (settings: SEOSettings): Promise<void> => {
     const response = await fetch(`${API_URL}/api/seo/settings`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(settings),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to save SEO settings');
+      throw new Error("Failed to save SEO settings");
     }
   },
 
@@ -42,7 +42,7 @@ export const seoApi = {
   generateRobotsTxt: async (): Promise<string> => {
     const response = await fetch(`${API_URL}/api/seo/robots.txt`);
     if (!response.ok) {
-      throw new Error('Failed to generate robots.txt');
+      throw new Error("Failed to generate robots.txt");
     }
     return response.text();
   },
@@ -51,13 +51,15 @@ export const seoApi = {
   generateSitemap: async (): Promise<string> => {
     const response = await fetch(`${API_URL}/api/seo/sitemap.xml`);
     if (!response.ok) {
-      throw new Error('Failed to generate sitemap');
+      throw new Error("Failed to generate sitemap");
     }
     return response.text();
   },
 
   // Получить мета-теги для страницы
-  getPageMeta: async (slug: string): Promise<{
+  getPageMeta: async (
+    slug: string,
+  ): Promise<{
     title: string;
     description: string;
     keywords: string;
@@ -65,7 +67,7 @@ export const seoApi = {
   }> => {
     const response = await fetch(`${API_URL}/api/seo/page-meta/${slug}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch page meta');
+      throw new Error("Failed to fetch page meta");
     }
     return response.json();
   },

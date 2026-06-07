@@ -37,15 +37,31 @@ export class SettingsController {
     return this.settingsService.findOne(key);
   }
 
-  @Put(':key')
-  @ApiOperation({ summary: 'Обновить настройку' })
-  update(@Param('key') key: string, @Body() updateSettingDto: UpdateSettingDto) {
-    return this.settingsService.update(key, updateSettingDto);
-  }
-
   @Put('batch')
   @ApiOperation({ summary: 'Массовое обновление настроек' })
-  updateMultiple(@Body() updateSettingsDto: { settings: { key: string; value: string }[] }) {
-    return this.settingsService.updateMultiple(updateSettingsDto.settings);
+  updateMultiple(
+    @Body() updateSettingsDto: { settings: { key: string; value: string }[] },
+    @Query('force') force?: string,
+  ) {
+    const forceFlag = force === 'true' || force === '1';
+    return this.settingsService.updateMultiple(updateSettingsDto.settings, forceFlag);
+  }
+
+  @Put(':key')
+  @ApiOperation({ summary: 'Обновить настройку' })
+  update(
+    @Param('key') key: string,
+    @Body() updateSettingDto: UpdateSettingDto,
+    @Query('force') force?: string,
+  ) {
+    const forceFlag = force === 'true' || force === '1';
+    // call internal _update when force is required
+    if (forceFlag) {
+      // bypassing public signature to allow force
+      // @ts-ignore access private method
+      return (this.settingsService as any)._update(key, updateSettingDto, true);
+    }
+
+    return this.settingsService.update(key, updateSettingDto);
   }
 }

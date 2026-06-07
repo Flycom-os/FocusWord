@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, Logger, OnModuleInit, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateSettingDto } from "../../dto/settings/create-setting.dto";
 import { UpdateSettingDto } from "../../dto/settings/update-setting.dto";
@@ -8,13 +8,56 @@ import IORedis from 'ioredis';
 import { REDIS_CLIENT } from "../../redis/redis.module";
 
 @Injectable()
-export class SettingsService {
+export class SettingsService implements OnModuleInit {
   private readonly logger = new Logger(SettingsService.name);
 
   constructor(
     private prisma: PrismaService,
     @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
   ) {}
+
+  // Keys that are considered protected defaults and require explicit force to overwrite
+  private readonly PROTECTED_DEFAULT_KEYS = [
+    'theme_mode',
+    'theme',
+    'site_name',
+    'site_description',
+    'site_url',
+    'maintenance_mode',
+    'auto_backup',
+    'backup_frequency',
+    'max_backups',
+  ];
+
+  async onModuleInit() {
+    const defaults = [
+      { key: 'theme_mode', value: 'light', type: 'string', category: 'appearance', description: 'Режим темы (light/dark)' },
+      { key: 'theme', value: 'default', type: 'string', category: 'appearance', description: 'Цветовая тема' },
+      { key: 'site_name', value: 'FocusWord', type: 'string', category: 'general', description: 'Название сайта' },
+      { key: 'site_description', value: '', type: 'string', category: 'general', description: 'Описание сайта' },
+      { key: 'site_url', value: 'https://focusword.com', type: 'string', category: 'general', description: 'URL сайта' },
+      { key: 'maintenance_mode', value: 'false', type: 'boolean', category: 'general', description: 'Режим обслуживания' },
+      { key: 'auto_backup', value: 'true', type: 'boolean', category: 'database', description: 'Автоматическое резервное копирование' },
+      { key: 'backup_frequency', value: 'daily', type: 'string', category: 'database', description: 'Частота копирования' },
+      { key: 'max_backups', value: '7', type: 'number', category: 'database', description: 'Максимальное число копий' }
+    ];
+
+    for (const item of defaults) {
+      try {
+        const existing = await this.prisma.setting.findUnique({
+          where: { key: item.key }
+        });
+        if (!existing) {
+          await this.prisma.setting.create({
+            data: item
+          });
+          this.logger.log(`Seeded default setting: ${item.key} = ${item.value}`);
+        }
+      } catch (err) {
+        this.logger.error(`Error seeding default setting ${item.key}:`, err);
+      }
+    }
+  }
 
   async create(createSettingDto: CreateSettingDto) {
     const setting = await this.prisma.setting.create({
@@ -132,6 +175,18 @@ export class SettingsService {
   }
 
   async update(key: string, updateSettingDto: UpdateSettingDto) {
+    // legacy signature: update(key, dto) — keep compatibility but allow callers
+    // to pass force via a separate parameter from the controller. If a
+    // caller wants to force update, it should call the service with the
+    // third arg `force = true` (controller routes expose `?force=true`).
+    return this._update(key, updateSettingDto, false);
+  }
+
+  private async _update(key: string, updateSettingDto: UpdateSettingDto, force = false) {
+    if (this.PROTECTED_DEFAULT_KEYS.includes(key) && !force) {
+      throw new ForbiddenException(`Setting "${key}" is protected. Use ?force=true to override.`);
+    }
+
     const setting = await this.prisma.setting.update({
       where: { key },
       data: updateSettingDto,
@@ -149,7 +204,17 @@ export class SettingsService {
     return setting;
   }
 
-  async updateMultiple(settings: { key: string; value: string }[]) {
+  async updateMultiple(settings: { key: string; value: string }[], force = false) {
+    const blocked = settings
+      .map(s => s.key)
+      .filter(k => this.PROTECTED_DEFAULT_KEYS.includes(k));
+
+    if (blocked.length > 0 && !force) {
+      throw new ForbiddenException(
+        `The following settings are protected and cannot be updated without force: ${blocked.join(', ')}`,
+      );
+    }
+
     const updatePromises = settings.map(({ key, value }) =>
       this.prisma.setting.upsert({
         where: { key },

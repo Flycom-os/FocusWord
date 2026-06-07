@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { useTheme } from './use-Theme';
+import React from "react";
+import dynamic from "next/dynamic";
+import { useTheme } from "./use-Theme";
 
-const MarkdownPreview = dynamic(() => import('@uiw/react-markdown-preview'), {
+const MarkdownPreview = dynamic(() => import("@uiw/react-markdown-preview"), {
   ssr: false,
 });
 
@@ -17,15 +17,12 @@ type MarkdownRendererProps = {
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   fontSize,
-  className = '',
+  className = "",
 }) => {
   const { theme } = useTheme();
 
   return (
-    <div
-      data-color-mode={theme === 'dark' ? 'dark' : 'light'}
-      className={className}
-    >
+    <div data-color-mode={theme === "dark" ? "dark" : "light"} className={className}>
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -66,7 +63,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
 						.markdown-renderer .wmde-markdown.wmde-markdown-color {
 							font-family: Montserrat, sans-serif !important;
-							font-size: ${fontSize ? (typeof fontSize === 'number' ? `${fontSize}px` : fontSize) : '16px'} !important;
+							font-size: ${fontSize ? (typeof fontSize === "number" ? `${fontSize}px` : fontSize) : "16px"} !important;
 						}
 
 						.markdown-renderer ul,
@@ -94,10 +91,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         }}
       />
       <div className="markdown-renderer">
-        <MarkdownPreview
-          source={content}
-          style={{ background: 'transparent' }}
-        />
+        <MarkdownPreview source={content} style={{ background: "transparent" }} />
       </div>
     </div>
   );

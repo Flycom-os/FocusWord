@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/app/providers/auth-provider';
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/app/providers/auth-provider";
 
 interface WithAuthProps {
   resource?: string;
@@ -13,14 +13,9 @@ interface WithAuthProps {
 
 const withAuth = <P extends object>(
   Component: React.ComponentType<P>,
-  options: WithAuthProps = {}
+  options: WithAuthProps = {},
 ) => {
-  const {
-    resource,
-    minLevel = 0,
-    requireAny = false,
-    redirectTo = '/admin/settings'
-  } = options;
+  const { resource, minLevel = 0, requireAny = false, redirectTo = "/admin/settings" } = options;
 
   return function WithAuthComponent(props: P) {
     const { hasPermission, user, isLoading } = useAuth();
@@ -30,13 +25,13 @@ const withAuth = <P extends object>(
       if (isLoading) return;
 
       if (!user) {
-        router.push('/signin');
+        router.push("/signin");
         return;
       }
 
       if (resource) {
         const hasAccess = hasPermission(resource, minLevel);
-        
+
         if (!hasAccess) {
           router.push(redirectTo);
         }
@@ -46,7 +41,7 @@ const withAuth = <P extends object>(
     if (isLoading) {
       return (
         <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900" />
         </div>
       );
     }

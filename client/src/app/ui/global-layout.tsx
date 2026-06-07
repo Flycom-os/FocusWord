@@ -14,10 +14,8 @@ const RootLayout = ({
 }>) => {
   return (
     <html lang="ru">
-      <head>
-      </head>
+      <head />
       <body>
-
         <App>{children}</App>
       </body>
     </html>

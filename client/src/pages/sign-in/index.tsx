@@ -1,7 +1,8 @@
 /**
  * @page SignIn/Registration
  */
-'use client';
+
+"use client";
 
 import { FormEvent, useState } from "react";
 import Input from "@/src/shared/ui/Input/ui-input";
@@ -10,8 +11,8 @@ import { ToastType } from "@/src/shared/ui/Notifications/ui-notifications";
 import styles from "@/src/pages/sign-in/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { useRouter } from "next/navigation";
-import Image from 'next/image';
-import logo from "@/src/public/logo.svg"
+import Image from "next/image";
+import logo from "@/src/public/logo.svg";
 
 type Mode = "login" | "register";
 
@@ -64,7 +65,8 @@ const SignIn = () => {
       let errorType: ToastType = "error";
 
       if (error?.response?.status === 401) {
-        errorMessage = "Invalid email/phone or password. Please check your credentials and try again.";
+        errorMessage =
+          "Invalid email/phone or password. Please check your credentials and try again.";
       } else if (error?.response?.status === 403) {
         errorMessage = "Access denied. You do not have sufficient permissions to log in.";
       } else if (error?.response?.status === 404) {
@@ -110,7 +112,7 @@ const SignIn = () => {
       <div className={styles.wrapper}>
         <div className={styles.card}>
           <div className={styles.logo}>
-            <Image src={logo} width={150} alt={'Focus Word'} />
+            <Image src={logo} width={150} alt="Focus Word" />
           </div>
 
           <div className={styles.tabs}>
@@ -187,11 +189,11 @@ const SignIn = () => {
                 <div className={styles.formField}>
                   <UiButton
                     theme="primary"
-                    className={`${styles.submit} ${loading ? styles.loading : ''}`}
+                    className={`${styles.submit} ${loading ? styles.loading : ""}`}
                     disabled={loading}
                     type="submit"
                   >
-                    {loading ? '' : (mode === "login" ? "Sign In" : "Create Account")}
+                    {loading ? "" : mode === "login" ? "Sign In" : "Create Account"}
                   </UiButton>
                 </div>
               </>

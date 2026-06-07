@@ -85,9 +85,21 @@ export class PagesService {
       featuredImage: createPageDto.featuredImageId ? { connect: { id: createPageDto.featuredImageId } } : undefined,
       featuredSlider: createPageDto.featuredSliderId ? { connect: { id: createPageDto.featuredSliderId } } : undefined,
       parentPage: createPageDto.parentPageId ? { connect: { id: createPageDto.parentPageId } } : undefined,
+      categories: createPageDto.categoryIds && createPageDto.categoryIds.length > 0
+        ? { connect: createPageDto.categoryIds.map((id: number) => ({ id })) }
+        : undefined,
+      enableFeedback: createPageDto.enableFeedback ?? true,
+      paymentMethod: createPageDto.paymentMethodId ? { connect: { id: createPageDto.paymentMethodId } } : undefined,
     };
 
-    const newPage = await this.prisma.page.create({ data });
+    const newPage = await this.prisma.page.create({
+      data,
+      include: {
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
+    });
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
     if (keys.length > 0) {
@@ -247,6 +259,9 @@ export class PagesService {
             filepath: true,
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       },
     });
 
@@ -291,12 +306,17 @@ export class PagesService {
             slug: true,
             description: true,
             slides: {
+              orderBy: { sortOrder: 'asc' },
               include: {
                 image: true,
               },
             },
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        },
+        paymentMethod: true
       },
     });
 
@@ -306,6 +326,30 @@ export class PagesService {
     }
 
     return page;
+  }
+
+  async findPublished(search?: string): Promise<any[]> {
+    const where: Prisma.PageWhereInput = { status: 'published' };
+    if (search?.trim()) {
+      where.OR = [
+        { title: { contains: search.trim(), mode: 'insensitive' } },
+        { slug: { contains: search.trim(), mode: 'insensitive' } },
+      ];
+    }
+    return this.prisma.page.findMany({
+      where,
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        publishedAt: true,
+        updatedAt: true,
+        seoTitle: true,
+        seoDescription: true,
+      },
+    });
   }
 
   async findOneBySlug(slug: string): Promise<any | null> {
@@ -350,12 +394,17 @@ export class PagesService {
             slug: true,
             description: true,
             slides: {
+              orderBy: { sortOrder: 'asc' },
               include: {
                 image: true,
               },
             },
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        },
+        paymentMethod: true
       },
     });
 
@@ -375,7 +424,7 @@ export class PagesService {
       throw new NotFoundException(`Page with ID ${id} not found.`);
     }
 
-    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, ...rest } = updatePageDto;
+    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, categoryIds, ...rest } = updatePageDto;
 
     const data: Prisma.PageUpdateInput = {
       ...rest,
@@ -383,6 +432,11 @@ export class PagesService {
       ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
       ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
       ...(contentBlocks !== undefined && { contentBlocks: contentBlocks === null ? Prisma.DbNull : (contentBlocks as InputJsonValue) }),
+      ...(categoryIds !== undefined && {
+        categories: categoryIds
+          ? { set: categoryIds.map((cId: number) => ({ id: cId })) }
+          : undefined
+      }),
       updatedAt: new Date(),
     };
 
@@ -392,6 +446,9 @@ export class PagesService {
       include: {
         featuredSlider: true,
         featuredImage: true,
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       },
     });
 

@@ -1,12 +1,12 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
-import Modal from './ui-modal';
-import Button from '@/src/shared/ui/Button/ui-button';
+import type { Meta, StoryObj } from "@storybook/react";
+import React, { useState } from "react";
+import Button from "@/src/shared/ui/Button/ui-button";
+import Modal from "./ui-modal";
 
 const meta: Meta<typeof Modal> = {
-  title: 'ui/Modal',
+  title: "ui/Modal",
   component: Modal,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -21,7 +21,7 @@ export const Example: Story = {
           <Button onClick={() => setOpen(true)}>Open modal</Button>
           <Modal open={open} onClose={() => setOpen(false)} title="Demo modal">
             <p>This is a demo modal content. Use for dialogs and confirmation UIs.</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
               <Button theme="secondary" onClick={() => setOpen(false)}>
                 Cancel
               </Button>

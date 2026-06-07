@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { ThemeProvider } from "@/src/app/providers/theme-provider";
 import { ReactNode } from "react";
@@ -7,7 +7,12 @@ import { AdminLayout } from "@/src/app/ui/admin-layout";
 
 const App = ({ children }: { children: ReactNode }) => {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem={false}
+      disableTransitionOnChange
+    >
       <AuthProvider>
         <AdminLayout>{children}</AdminLayout>
       </AuthProvider>

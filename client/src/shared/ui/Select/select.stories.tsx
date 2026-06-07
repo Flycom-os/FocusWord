@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import Select from './ui-select';
+import type { Meta, StoryObj } from "@storybook/react";
+import Select from "./ui-select";
 
 const meta: Meta<typeof Select> = {
-  title: 'ui/Select',
+  title: "ui/Select",
   component: Select,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -12,22 +12,22 @@ type Story = StoryObj<typeof Select>;
 
 export const Basic: Story = {
   args: {
-    label: 'Choose one',
+    label: "Choose one",
     options: [
-      { value: 'a', label: 'Choice A' },
-      { value: 'b', label: 'Choice B' },
-      { value: 'c', label: 'Choice C' },
+      { value: "a", label: "Choice A" },
+      { value: "b", label: "Choice B" },
+      { value: "c", label: "Choice C" },
     ],
   },
 };
 
 export const Secondary: Story = {
   args: {
-    label: 'Select (secondary)',
-    theme: 'secondary',
+    label: "Select (secondary)",
+    theme: "secondary",
     options: [
-      { value: '1', label: 'One' },
-      { value: '2', label: 'Two' },
+      { value: "1", label: "One" },
+      { value: "2", label: "Two" },
     ],
   },
 };

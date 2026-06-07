@@ -3,7 +3,8 @@ import classNames from "@/src/shared/lib/classnames/classnames";
 import { LegacyRef } from "react";
 import styles from "./ui-table.module.css";
 
-interface PropsSelectableTableHead extends Omit<React.ThHTMLAttributes<HTMLTableCellElement>, 'onSelectAll'> {
+interface PropsSelectableTableHead
+  extends Omit<React.ThHTMLAttributes<HTMLTableCellElement>, "onSelectAll"> {
   theme?: string;
   className?: string;
   selectable?: boolean;
@@ -14,15 +15,15 @@ interface PropsSelectableTableHead extends Omit<React.ThHTMLAttributes<HTMLTable
 
 const SelectableTableHead = React.forwardRef(
   (
-    { 
-      className = "", 
-      theme = "", 
+    {
+      className = "",
+      theme = "",
       selectable = true,
       onSelectAll,
       isAllSelected = false,
       isPartiallySelected = false,
       children,
-      ...props 
+      ...props
     }: PropsSelectableTableHead,
     ref: LegacyRef<HTMLTableCellElement>,
   ) => {
@@ -38,19 +39,14 @@ const SelectableTableHead = React.forwardRef(
 
     const headClassName = classNames(
       styles.table_head,
-      { 
+      {
         [styles[theme]]: !!styles[theme],
-      }, 
-      [className]
+      },
+      [className],
     );
 
     return (
-      <th
-        ref={ref}
-        className={headClassName}
-        onClick={handleClick}
-        {...props}
-      >
+      <th ref={ref} className={headClassName} onClick={handleClick} {...props}>
         {selectable && (
           <div className={styles.checkboxCell}>
             <input

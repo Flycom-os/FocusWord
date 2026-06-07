@@ -11,7 +11,6 @@ describe("BlockManagement component", () => {
 
     // Проверяем, что отображаются кнопки для 'primary'
     expect(screen.getByText("Выбранно: 2")).toBeInTheDocument();
-
   });
 
   it("renders secondary type correctly", () => {
@@ -48,11 +47,7 @@ describe("BlockManagement component", () => {
   it("calls the 'close' button action", () => {
     const handleClose = jest.fn();
 
-
-    render(
-      <BlockManagement type="primary">
-      </BlockManagement>
-    );
+    render(<BlockManagement type="primary" />);
 
     // Кликаем по кнопке закрытия
     // screen.getByRole("button", { name: "close" }).click();
@@ -66,6 +61,8 @@ describe("BlockManagement component", () => {
 
     // Проверяем наличие иконок ChevronDown и Plus
     expect(screen.getByRole("button", { name: "Файл" }).querySelector("svg")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Добавить" }).querySelector("svg")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Добавить" }).querySelector("svg"),
+    ).toBeInTheDocument();
   });
 });

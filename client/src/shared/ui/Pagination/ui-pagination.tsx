@@ -1,12 +1,12 @@
-import React from 'react';
-import styles from './ui-pagination.module.css';
+import React from "react";
+import styles from "./ui-pagination.module.css";
 
 export interface PaginationProps {
   page: number;
   total: number;
   perPage?: number;
   onChange: (page: number) => void;
-  theme?: 'primary' | 'secondary';
+  theme?: "primary" | "secondary";
 }
 
 const range = (start: number, end: number) => {
@@ -15,7 +15,13 @@ const range = (start: number, end: number) => {
   return out;
 };
 
-const Pagination = ({ page, total, perPage = 10, onChange, theme = 'primary' }: PaginationProps) => {
+const Pagination = ({
+  page,
+  total,
+  perPage = 10,
+  onChange,
+  theme = "primary",
+}: PaginationProps) => {
   const totalPages = Math.max(1, Math.ceil(total / perPage));
 
   const start = Math.max(1, page - 2);
@@ -23,7 +29,11 @@ const Pagination = ({ page, total, perPage = 10, onChange, theme = 'primary' }: 
   const pages = range(start, end);
 
   return (
-    <div className={`${styles.pagination} ${styles[theme]}`} role="navigation" aria-label="pagination">
+    <div
+      className={`${styles.pagination} ${styles[theme]}`}
+      role="navigation"
+      aria-label="pagination"
+    >
       <button
         className={styles.btn}
         onClick={() => onChange(Math.max(1, page - 1))}
@@ -34,7 +44,7 @@ const Pagination = ({ page, total, perPage = 10, onChange, theme = 'primary' }: 
       </button>
 
       {start > 1 && (
-        <button className={styles.btn} onClick={() => onChange(1)} aria-label={`Page 1`}>
+        <button className={styles.btn} onClick={() => onChange(1)} aria-label="Page 1">
           1
         </button>
       )}
@@ -44,9 +54,9 @@ const Pagination = ({ page, total, perPage = 10, onChange, theme = 'primary' }: 
       {pages.map((p) => (
         <button
           key={p}
-          className={`${styles.btn} ${p === page ? styles.active : ''}`}
+          className={`${styles.btn} ${p === page ? styles.active : ""}`}
           onClick={() => onChange(p)}
-          aria-current={p === page ? 'page' : undefined}
+          aria-current={p === page ? "page" : undefined}
         >
           {p}
         </button>
@@ -55,7 +65,11 @@ const Pagination = ({ page, total, perPage = 10, onChange, theme = 'primary' }: 
       {end < totalPages - 1 && <span className={styles.ellipsis}>…</span>}
 
       {end < totalPages && (
-        <button className={styles.btn} onClick={() => onChange(totalPages)} aria-label={`Page ${totalPages}`}>
+        <button
+          className={styles.btn}
+          onClick={() => onChange(totalPages)}
+          aria-label={`Page ${totalPages}`}
+        >
           {totalPages}
         </button>
       )}

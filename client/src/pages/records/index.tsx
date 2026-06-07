@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * @page Records
@@ -37,7 +37,7 @@ import Input from "@/src/shared/ui/Input/ui-input";
 const defaultQuery = {
   page: 1,
   limit: 20,
-  search: '',
+  search: "",
 };
 
 const defaultMediaQuery: MediaFilesQuery = {
@@ -72,22 +72,22 @@ const RecordsPage = () => {
 
   useEffect(() => {
     const load = async () => {
-      console.log('Records: useEffect triggered');
-      console.log('Records: accessToken available:', !!accessToken);
-      console.log('Records: accessToken length:', accessToken?.length || 0);
-      
+      console.log("Records: useEffect triggered");
+      console.log("Records: accessToken available:", !!accessToken);
+      console.log("Records: accessToken length:", accessToken?.length || 0);
+
       if (!accessToken) {
-        console.log('Records: No token available, skipping API call');
+        console.log("Records: No token available, skipping API call");
         return;
       }
-      
-      console.log('Records: Loading records with token');
+
+      console.log("Records: Loading records with token");
       setIsLoading(true);
       try {
-        const res = await fetchRecords(query.page, query.limit, query.search || '');
+        const res = await fetchRecords(query.page, query.limit, query.search || "");
         setRecords(res.data || []);
       } catch (error: any) {
-        console.error('Records: Error loading records:', error);
+        console.error("Records: Error loading records:", error);
         const message = error?.response?.data?.message || "Не удалось загрузить записи";
         showToast(message, "error");
       } finally {
@@ -163,8 +163,8 @@ const RecordsPage = () => {
           title,
           slug,
           content,
-          status: status as 'draft' | 'published',
-          template: editingRecord.template || 'default',
+          status: status as "draft" | "published",
+          template: editingRecord.template || "default",
           featuredSliderId: selectedImageId || undefined,
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
@@ -175,8 +175,8 @@ const RecordsPage = () => {
           title,
           slug,
           content,
-          status: status as 'draft' | 'published',
-          template: 'default',
+          status: status as "draft" | "published",
+          template: "default",
           featuredSliderId: selectedImageId || undefined,
           seoTitle: seoTitle || undefined,
           seoDescription: seoDescription || undefined,
@@ -205,7 +205,7 @@ const RecordsPage = () => {
 
   const handlePublish = async (id: number) => {
     try {
-      await changeStatus(accessToken, id.toString(), 'published');
+      await changeStatus(accessToken, id.toString(), "published");
       showToast("Запись опубликована", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
@@ -216,7 +216,7 @@ const RecordsPage = () => {
 
   const handleUnpublish = async (id: number) => {
     try {
-      await changeStatus(accessToken, id.toString(), 'draft');
+      await changeStatus(accessToken, id.toString(), "draft");
       showToast("Запись снята с публикации", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
@@ -226,7 +226,7 @@ const RecordsPage = () => {
   };
 
   const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
+    if (item.filepath && item.filepath.startsWith("http")) {
       return item.filepath;
     }
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
@@ -235,7 +235,7 @@ const RecordsPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   const totalPages = useMemo(() => {
@@ -246,7 +246,7 @@ const RecordsPage = () => {
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type={"third"} />
+      <BlockManagement type="third" />
 
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
@@ -279,17 +279,18 @@ const RecordsPage = () => {
           {records.map((record) => (
             <TableRow key={record.id}>
               <TableCell>
-                <button
-                  className={styles.recordName}
-                  onClick={() => handleEdit(record)}
-                >
+                <button className={styles.recordName} onClick={() => handleEdit(record)}>
                   {record.title}
                 </button>
               </TableCell>
               <TableCell>{record.slug}</TableCell>
               <TableCell>
                 <span className={`${styles.status} ${styles[`status${record.status}`]}`}>
-                  {record.status === 'published' ? 'Опубликовано' : record.status === 'draft' ? 'Черновик' : record.status}
+                  {record.status === "published"
+                    ? "Опубликовано"
+                    : record.status === "draft"
+                      ? "Черновик"
+                      : record.status}
                 </span>
               </TableCell>
               <TableCell>{formatDate(record.createdAt)}</TableCell>
@@ -297,7 +298,7 @@ const RecordsPage = () => {
                 <UiButton theme="secondary" onClick={() => handleEdit(record)}>
                   Редактировать
                 </UiButton>
-                {record.status === 'published' ? (
+                {record.status === "published" ? (
                   <PermissionGate resource="records" level={2}>
                     <UiButton theme="secondary" onClick={() => handleUnpublish(record.id)}>
                       Снять с публикации
@@ -360,9 +361,9 @@ const RecordsPage = () => {
               <Select
                 className={styles.input}
                 options={[
-                  { value: 'draft', label: 'Черновик' },
-                  { value: 'published', label: 'Опубликовано' },
-                  { value: 'pending', label: 'Ожидает' },
+                  { value: "draft", label: "Черновик" },
+                  { value: "published", label: "Опубликовано" },
+                  { value: "pending", label: "Ожидает" },
                 ]}
                 value={status}
                 onChange={(value) => setStatus(value)}
@@ -386,7 +387,9 @@ const RecordsPage = () => {
                     {(() => {
                       const selectedMedia = mediaFiles.find((m) => m.id === selectedImageId);
                       if (selectedMedia) {
-                        return <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />;
+                        return (
+                          <img src={getFileUrl(selectedMedia)} alt={selectedMedia.altText || ""} />
+                        );
                       }
                       if (editingRecord?.featuredSliderId) {
                         // Handle featured slider if needed

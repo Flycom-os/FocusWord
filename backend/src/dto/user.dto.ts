@@ -28,6 +28,11 @@ export class UpdateUserDto {
   @IsString()
   @ApiProperty({example:'/uploads/avatar.jpg', description:'URL to user avatar'})
   avatarUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({example:'light', description:'User theme preference: light or dark', required: false})
+  themeMode?: string;
 }
 
 export class SearchUsersDto {

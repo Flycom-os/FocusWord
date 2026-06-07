@@ -5,13 +5,21 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 export interface CommentDto {
   id: number;
   content: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
   authorName?: string | null;
   authorEmail?: string | null;
   authorId?: number | null;
+  author?: {
+    id: number;
+    email: string;
+    username?: string | null;
+    avatarUrl?: string | null;
+  } | null;
   postId?: number | null;
+  blogPostId?: number | null;
+  articleId?: number | null;
   parentCommentId?: number | null;
 }
 
@@ -21,12 +29,14 @@ export interface CreateCommentDto {
   authorEmail?: string;
   authorId?: number;
   postId?: number;
+  blogPostId?: number;
+  articleId?: number;
   parentCommentId?: number;
 }
 
 export interface UpdateCommentDto {
   content?: string;
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: "pending" | "approved" | "rejected";
 }
 
 export interface PaginatedCommentsResponse {
@@ -40,29 +50,38 @@ export interface CommentsQuery {
   page?: number;
   limit?: number;
   search?: string;
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: "pending" | "approved" | "rejected";
   postId?: number;
+  blogPostId?: number;
+  articleId?: number;
   authorId?: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const commentsApi = {
   // Получить все комментарии с пагинацией
-  getAll: async (token: string | null, params: CommentsQuery = {}): Promise<PaginatedCommentsResponse> => {
+  getAll: async (
+    token: string | null,
+    params: CommentsQuery = {},
+  ): Promise<PaginatedCommentsResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
       ...(params.search && { search: params.search }),
       ...(params.status && { status: params.status }),
       ...(params.postId && { postId: params.postId.toString() }),
-      ...(params.authorId && { authorId: params.authorId.toString() })
+      ...(params.blogPostId && { blogPostId: params.blogPostId.toString() }),
+      ...(params.articleId && { articleId: params.articleId.toString() }),
+      ...(params.authorId && { authorId: params.authorId.toString() }),
     });
-    
-    const { data } = await axios.get<PaginatedCommentsResponse>(`${API_URL}/comments?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedCommentsResponse>(
+      `${API_URL}/comments?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -96,10 +115,18 @@ export const commentsApi = {
   },
 
   // Изменить статус комментария
-  changeStatus: async (token: string | null, id: number, status: 'pending' | 'approved' | 'rejected'): Promise<CommentDto> => {
-    const { data } = await axios.patch<CommentDto>(`${API_URL}/comments/${id}/status`, { status }, {
-      headers: authHeaders(token),
-    });
+  changeStatus: async (
+    token: string | null,
+    id: number,
+    status: "pending" | "approved" | "rejected",
+  ): Promise<CommentDto> => {
+    const { data } = await axios.patch<CommentDto>(
+      `${API_URL}/comments/${id}/status`,
+      { status },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 };

@@ -3,7 +3,8 @@ import classNames from "@/src/shared/lib/classnames/classnames";
 import { LegacyRef } from "react";
 import styles from "./ui-table.module.css";
 
-interface PropsSelectableTableRow extends Omit<React.HTMLAttributes<HTMLTableRowElement>, 'onSelect'> {
+interface PropsSelectableTableRow
+  extends Omit<React.HTMLAttributes<HTMLTableRowElement>, "onSelect"> {
   theme?: string;
   className?: string;
   selected?: boolean;
@@ -15,16 +16,16 @@ interface PropsSelectableTableRow extends Omit<React.HTMLAttributes<HTMLTableRow
 
 const SelectableTableRow = React.forwardRef(
   (
-    { 
-      className = "", 
-      theme = "", 
+    {
+      className = "",
+      theme = "",
       selected = false,
       focused = false,
       selectable = true,
       onSelect,
       checkboxColumn = true,
       children,
-      ...props 
+      ...props
     }: PropsSelectableTableRow,
     ref: LegacyRef<HTMLTableRowElement>,
   ) => {
@@ -39,13 +40,13 @@ const SelectableTableRow = React.forwardRef(
 
     const rowClassName = classNames(
       styles.table_row,
-      { 
+      {
         [styles[theme]]: !!styles[theme],
         [styles.selected]: selected,
         [styles.focused]: focused,
         [styles.selectable]: selectable,
-      }, 
-      [className]
+      },
+      [className],
     );
 
     return (

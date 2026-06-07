@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * @page Roles
@@ -120,7 +120,7 @@ const RolesPage = () => {
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось сохранить роль";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -132,7 +132,7 @@ const RolesPage = () => {
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось удалить роль";
-      showToast({ type: "error", message });
+      showToast(message, "error");
     }
   };
 
@@ -149,13 +149,13 @@ const RolesPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type={"third"} />
+      <BlockManagement type="third" />
 
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
@@ -188,7 +188,7 @@ const RolesPage = () => {
           {roles.map((role) => (
             <TableRow key={role.id}>
               <TableCell>{role.name}</TableCell>
-              <TableCell>{role.description || '-'}</TableCell>
+              <TableCell>{role.description || "-"}</TableCell>
               <TableCell>
                 <div className={styles.permissionsList}>
                   {role.permissions.length > 0
@@ -197,7 +197,7 @@ const RolesPage = () => {
                           {perm}
                         </span>
                       ))
-                    : '-'}
+                    : "-"}
                   {role.permissions.length > 3 && (
                     <span className={styles.morePermissions}>+{role.permissions.length - 3}</span>
                   )}
@@ -223,9 +223,10 @@ const RolesPage = () => {
 
       <div className={styles.footer}>
         <Pagination
-          currentPage={query.page || 1}
-          totalPages={Math.ceil(rolesTotal / (query.limit || 20))}
-          onPageChange={handlePageChange}
+          page={query.page || 1}
+          total={rolesTotal}
+          perPage={query.limit || 20}
+          onChange={handlePageChange}
         />
       </div>
 
@@ -263,7 +264,7 @@ const RolesPage = () => {
                   onChange={(e) => setPermissionInput(e.target.value)}
                   placeholder="например: users:2, pages:1"
                   onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddPermission();
                     }
@@ -303,4 +304,3 @@ const RolesPage = () => {
 };
 
 export default RolesPage;
-

@@ -59,7 +59,10 @@ const authHeaders = (token: string | null) =>
       }
     : {};
 
-export const fetchSliders = async (token: string | null, params: SliderQuery): Promise<PaginatedSlidersResponse> => {
+export const fetchSliders = async (
+  token: string | null,
+  params: SliderQuery,
+): Promise<PaginatedSlidersResponse> => {
   const { data } = await axios.get<PaginatedSlidersResponse>(`${API_URL}/sliders`, {
     params,
     headers: authHeaders(token),
@@ -88,17 +91,26 @@ export const fetchSlides = async (
   sliderId: number,
   params: SliderQuery,
 ): Promise<PaginatedSlidesResponse> => {
-  const { data } = await axios.get<PaginatedSlidesResponse>(`${API_URL}/sliders/${sliderId}/slides`, {
-    params,
-    headers: authHeaders(token),
-  });
+  const { data } = await axios.get<PaginatedSlidesResponse>(
+    `${API_URL}/sliders/${sliderId}/slides`,
+    {
+      params,
+      headers: authHeaders(token),
+    },
+  );
   return data;
 };
 
 export const createSlide = async (
   token: string | null,
   sliderId: number,
-  payload: { title?: string; description?: string; linkUrl?: string; sortOrder?: number; imageId?: number },
+  payload: {
+    title?: string;
+    description?: string;
+    linkUrl?: string;
+    sortOrder?: number;
+    imageId?: number;
+  },
 ): Promise<SlideDto> => {
   const { data } = await axios.post<SlideDto>(`${API_URL}/sliders/${sliderId}/slides`, payload, {
     headers: authHeaders(token),
@@ -106,7 +118,11 @@ export const createSlide = async (
   return data;
 };
 
-export const deleteSlide = async (token: string | null, sliderId: number, slideId: number): Promise<void> => {
+export const deleteSlide = async (
+  token: string | null,
+  sliderId: number,
+  slideId: number,
+): Promise<void> => {
   await axios.delete(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, {
     headers: authHeaders(token),
   });
@@ -130,23 +146,45 @@ export const getSlider = async (token: string | null, id: number): Promise<Slide
   return data;
 };
 
+export const getPublicSlider = async (id: number): Promise<SliderDetailsDto> => {
+  const { data } = await axios.get<SliderDetailsDto>(`${API_URL}/public/sliders/${id}`);
+  return data;
+};
+
+export const getPublicSliderBySlug = async (slug: string): Promise<SliderDetailsDto> => {
+  const { data } = await axios.get<SliderDetailsDto>(`${API_URL}/public/sliders/slug/${slug}`);
+  return data;
+};
+
 export const updateSlide = async (
   token: string | null,
   sliderId: number,
   slideId: number,
-  payload: Partial<{ title?: string; description?: string; linkUrl?: string; sortOrder?: number; imageId?: number }>,
+  payload: Partial<{
+    title?: string;
+    description?: string;
+    linkUrl?: string;
+    sortOrder?: number;
+    imageId?: number;
+  }>,
 ): Promise<SlideDto> => {
-  const { data } = await axios.patch<SlideDto>(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, payload, {
-    headers: authHeaders(token),
-  });
+  const { data } = await axios.patch<SlideDto>(
+    `${API_URL}/sliders/${sliderId}/slides/${slideId}`,
+    payload,
+    {
+      headers: authHeaders(token),
+    },
+  );
   return data;
 };
 
-export const getSlide = async (token: string | null, sliderId: number, slideId: number): Promise<SlideDto> => {
+export const getSlide = async (
+  token: string | null,
+  sliderId: number,
+  slideId: number,
+): Promise<SlideDto> => {
   const { data } = await axios.get<SlideDto>(`${API_URL}/sliders/${sliderId}/slides/${slideId}`, {
     headers: authHeaders(token),
   });
   return data;
 };
-
-

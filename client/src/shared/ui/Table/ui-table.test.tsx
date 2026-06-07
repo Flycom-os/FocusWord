@@ -36,7 +36,7 @@ describe("Table component", () => {
             <TableCell colSpan={3}>Всего: 1 запись</TableCell>
           </TableRow>
         </TableFooter>
-      </Table>
+      </Table>,
     );
 
     // Проверяем, что заголовок таблицы отображается
@@ -64,7 +64,7 @@ describe("Table component", () => {
             <TableCell className="custom-cell">Контент</TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+      </Table>,
     );
 
     expect(container.querySelector(".custom-table")).toBeInTheDocument();

@@ -38,8 +38,7 @@ export interface PaginatedUsersResponse {
   totalPages: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const fetchUsers = async (token: string | null, params: UsersQuery): Promise<UserDto[]> => {
   const { data } = await axios.get<PaginatedUsersResponse>(`${API_URL}/user/all`, {
@@ -92,15 +91,15 @@ export const updateUser = async (
   }>,
 ): Promise<UserDto> => {
   const formData = new FormData();
-  
+
   // Добавляем файл, если он есть
   if (payload.face) {
-    formData.append('face', payload.face);
+    formData.append("face", payload.face);
   }
-  
+
   // Добавляем остальные поля
   Object.keys(payload).forEach((key) => {
-    if (key !== 'face') {
+    if (key !== "face") {
       const value = payload[key as keyof typeof payload];
       if (value !== undefined && value !== null) {
         formData.append(key, value.toString());
@@ -130,15 +129,15 @@ export const updateCurrentUser = async (
   }>,
 ): Promise<UserDto> => {
   const formData = new FormData();
-  
+
   // Добавляем файл, если он есть
   if (payload.face) {
-    formData.append('face', payload.face);
+    formData.append("face", payload.face);
   }
-  
+
   // Добавляем остальные поля
   Object.keys(payload).forEach((key) => {
-    if (key !== 'face') {
+    if (key !== "face") {
       const value = payload[key as keyof typeof payload];
       if (value !== undefined && value !== null) {
         formData.append(key, value.toString());
@@ -160,4 +159,3 @@ export const deleteUser = async (token: string | null, id: number): Promise<void
     headers: authHeaders(token),
   });
 };
-

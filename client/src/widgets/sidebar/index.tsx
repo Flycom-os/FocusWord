@@ -1,4 +1,5 @@
-'use client'
+"use client";
+
 import React, { useState } from "react";
 import {
   Home,
@@ -9,7 +10,8 @@ import {
   ChevronRight,
   Image as ImageIcon,
   Archive,
-  ArchiveRestore, Server,
+  ArchiveRestore,
+  Server,
   Presentation,
   Shield,
   BarChart3,
@@ -24,15 +26,16 @@ import {
   Hash,
   Target,
   Search,
-  PenTool, User,
-} from 'lucide-react';
-import styles from "./index.module.css";
+  PenTool,
+  User,
+} from "lucide-react";
 import Button from "@/src/shared/ui/Button/ui-button";
-import logo from "@/src/public/logo.svg"
-import logosmall from "@/src/public/small-log.svg"
-import Image from "next/image"
+import logo from "@/src/public/logo.svg";
+import logosmall from "@/src/public/small-log.svg";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/src/app/providers/auth-provider";
+import styles from "./index.module.css";
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -44,28 +47,143 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: <Home size={24} />, label: "Home", url: "/admin/" },
-  { icon: <BarChart3 size={24} />, label: "Analytics", url: "/admin/analytics",resource: "media-filess", minLevel: 0 },
-  { icon: <Package size={24} />, label: "Products", url: "/admin/products",resource: "media-filess", minLevel: 0 },
-  { icon: <FolderOpen size={24} />, label: "Categories", url: "/admin/product-categories",resource: "media-filess", minLevel: 0 },
-  { icon: <MessageSquare size={24} />, label: "Feedback", url: "/admin/feedback",resource: "media-filess", minLevel: 0 },
-  { icon: <ImageIcon size={24} />, label: "Media files", url: "/admin/media-files", resource: "media-files", minLevel: 0 },
-  { icon: <Presentation size={24} />, label: "Sliders", url: "/admin/sliders", resource: "sliders", minLevel: 0 },
-  { icon: <Archive size={24} />, label: "Records", url: "/admin/records",resource: "records", minLevel: 0 },
-  { icon: <Server size={24} />, label: "Category", url: "/admin/records/categories",resource: "record-categories", minLevel: 0 },
-  { icon: <FileText size={24} />, label: "Pages", url: "/admin/pages", resource: "pages", minLevel: 0 },
-  { icon: <PenTool size={24} />, label: "Posts", url: "/admin/posts",resource: "media-filess", minLevel: 0 },
-  { icon: <Users size={24} />, label: "Users", url: "/admin/users", resource: "users", minLevel: 0 },
-  { icon: <Shield size={24} />, label: "Roles", url: "/admin/roles", resource: "roles", minLevel: 0 },
-  { icon: <User size={24} />, label: "Profile", url: "/admin/profile"},
-  { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings"},
-  { icon: <CreditCard size={24} />, label: "Payments", url: "/admin/payments",resource: "media-filess", minLevel: 0 },
-  { icon: <Activity size={24} />, label: "Activity Logs", url: "/admin/activity-logs",resource: "media-filess", minLevel: 0 },
-  { icon: <Code size={24} />, label: "Structured Data", url: "/admin/structured-data",resource: "media-filess", minLevel: 0 },
-  { icon: <Box size={24} />, label: "Blocks", url: "/admin/blocks",resource: "media-filess", minLevel: 0 },
-  { icon: <MessageSquare size={24} />, label: "Comments", url: "/admin/comments",resource: "media-filess", minLevel: 0 },
-  { icon: <Hash size={24} />, label: "Tags", url: "/admin/tags",resource: "media-filess", minLevel: 0 },
-  { icon: <Target size={24} />, label: "Widgets", url: "/admin/widgets",resource: "media-filess", minLevel: 0 },
-  { icon: <Search size={24} />, label: "SEO", url: "/admin/seo",resource: "media-filess", minLevel: 0 },
+  {
+    icon: <BarChart3 size={24} />,
+    label: "Analytics",
+    url: "/admin/analytics",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Package size={24} />,
+    label: "Products",
+    url: "/admin/products",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <FolderOpen size={24} />,
+    label: "Categories",
+    url: "/admin/product-categories",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <MessageSquare size={24} />,
+    label: "Feedback",
+    url: "/admin/feedback",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  { icon: <ImageIcon size={24} />, label: "Media files", url: "/admin/media-files" },
+  {
+    icon: <Presentation size={24} />,
+    label: "Sliders",
+    url: "/admin/sliders",
+    resource: "sliders",
+    minLevel: 0,
+  },
+  {
+    icon: <Archive size={24} />,
+    label: "Records",
+    url: "/admin/records",
+    resource: "records",
+    minLevel: 0,
+  },
+  {
+    icon: <Server size={24} />,
+    label: "Category",
+    url: "/admin/records/categories",
+    resource: "record-categories",
+    minLevel: 0,
+  },
+  {
+    icon: <FileText size={24} />,
+    label: "Pages",
+    url: "/admin/pages",
+    resource: "pages",
+    minLevel: 0,
+  },
+  {
+    icon: <LayoutIcon size={24} />,
+    label: "Articles",
+    url: "/admin/articles",
+    resource: "articles",
+    minLevel: 0,
+  },
+  { icon: <PenTool size={24} />, label: "Blog", url: "/admin/blog", resource: "blog", minLevel: 0 },
+  {
+    icon: <Users size={24} />,
+    label: "Users",
+    url: "/admin/users",
+    resource: "users",
+    minLevel: 0,
+  },
+  {
+    icon: <Shield size={24} />,
+    label: "Roles",
+    url: "/admin/roles",
+    resource: "roles",
+    minLevel: 0,
+  },
+  { icon: <User size={24} />, label: "Profile", url: "/admin/profile" },
+  { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings" },
+  {
+    icon: <CreditCard size={24} />,
+    label: "Payments",
+    url: "/admin/payments",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Activity size={24} />,
+    label: "Activity Logs",
+    url: "/admin/activity-logs",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Code size={24} />,
+    label: "Structured Data",
+    url: "/admin/structured-data",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Box size={24} />,
+    label: "Blocks",
+    url: "/admin/blocks",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <MessageSquare size={24} />,
+    label: "Comments",
+    url: "/admin/comments",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Hash size={24} />,
+    label: "Tags",
+    url: "/admin/tags",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Target size={24} />,
+    label: "Widgets",
+    url: "/admin/widgets",
+    resource: "media-files",
+    minLevel: 0,
+  },
+  {
+    icon: <Search size={24} />,
+    label: "SEO",
+    url: "/admin/seo",
+    resource: "media-files",
+    minLevel: 0,
+  },
 ];
 
 const Sidebar = () => {
@@ -73,7 +191,9 @@ const Sidebar = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [hoveredLogout, setHoveredLogout] = useState(false);
   const [hoveredToggle, setHoveredToggle] = useState(false);
-  const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number } | null>(null);
+  const [popoverPosition, setPopoverPosition] = useState<{ top: number; left: number } | null>(
+    null,
+  );
   const router = useRouter();
   const pathname = usePathname();
   const { hasPermission, logout } = useAuth();
@@ -85,7 +205,9 @@ const Sidebar = () => {
     }
     // Для Settings проверяем наличие хотя бы одного из разрешений
     if (item.label === "Settings") {
-      return hasPermission("pages", 0) || hasPermission("sliders", 0) || hasPermission("settings", 0);
+      return (
+        hasPermission("pages", 0) || hasPermission("sliders", 0) || hasPermission("settings", 0)
+      );
     }
     return true;
   });
@@ -103,11 +225,11 @@ const Sidebar = () => {
   const calculatePopoverPosition = (event: React.MouseEvent) => {
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
-    
+
     // Позиция справа от иконки с небольшим отступом
     const left = rect.right + 8;
     const top = rect.top + rect.height / 2;
-    
+
     setPopoverPosition({ left, top });
   };
 
@@ -118,7 +240,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <aside 
+      <aside
         className={collapsed ? styles.sidebarCollapsed : styles.sidebar}
         onMouseLeave={() => {
           if (collapsed) {
@@ -131,7 +253,11 @@ const Sidebar = () => {
       >
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
-            {collapsed ? <Image width={40} height={40} alt={'FW'} src={logosmall} /> : <Image width={200} height={40} alt={'FW'} src={logo} />}
+            {collapsed ? (
+              <Image width={40} height={40} alt="FW" src={logosmall} />
+            ) : (
+              <Image width={200} height={40} alt="FW" src={logo} />
+            )}
           </div>
         </div>
         <nav className={styles.navContainer}>
@@ -141,10 +267,12 @@ const Sidebar = () => {
               return (
                 <li
                   key={item.label}
-                  className={`${styles.menuItem} ${collapsed ? styles.menuItemCollapsed : ''} ${active ? styles.menuItemActive : ''}`}
+                  className={`${styles.menuItem} ${collapsed ? styles.menuItemCollapsed : ""} ${active ? styles.menuItemActive : ""}`}
                   onClick={() => item.url && router.push(item.url)}
-                  style={{ cursor: item.url ? 'pointer' : 'default' }}
-                  onMouseEnter={(e) => collapsed && (setHoveredItem(item.label), calculatePopoverPosition(e))}
+                  style={{ cursor: item.url ? "pointer" : "default" }}
+                  onMouseEnter={(e) =>
+                    collapsed && (setHoveredItem(item.label), calculatePopoverPosition(e))
+                  }
                   onMouseLeave={() => collapsed && setHoveredItem(null)}
                 >
                   {collapsed ? (
@@ -153,9 +281,15 @@ const Sidebar = () => {
                     </div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column" }}>
-                      <div style={{ display: 'flex' }}>
+                      <div style={{ display: "flex" }}>
                         <span className={styles.icon}>{item.icon}</span>
-                        <span className={collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent}>{item.label}</span>
+                        <span
+                          className={
+                            collapsed ? styles.sidebarContentCollapsed : styles.sidebarContent
+                          }
+                        >
+                          {item.label}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -164,26 +298,30 @@ const Sidebar = () => {
             })}
           </ul>
         </nav>
-        <li 
-          className={styles.menuItem + ' ' + (collapsed ? styles.menuItemCollapsed : '')} 
-          onClick={() => setCollapsed(v => !v)} 
-          style={{ cursor: 'pointer' }}
+        <li
+          className={`${styles.menuItem} ${collapsed ? styles.menuItemCollapsed : ""}`}
+          onClick={() => setCollapsed((v) => !v)}
+          style={{ cursor: "pointer" }}
           onMouseEnter={(e) => collapsed && (setHoveredToggle(true), calculatePopoverPosition(e))}
           onMouseLeave={() => collapsed && setHoveredToggle(false)}
         >
           {collapsed ? (
             <div className={styles.iconContainer}>
-              <span className={styles.icon}><ChevronRight size={20} /></span>
+              <span className={styles.icon}>
+                <ChevronRight size={20} />
+              </span>
             </div>
           ) : (
             <>
-              <span className={styles.icon}><ChevronLeft size={20} /></span>
+              <span className={styles.icon}>
+                <ChevronLeft size={20} />
+              </span>
               <span className={styles.sidebarContent}>Hide</span>
             </>
           )}
         </li>
       </aside>
-      
+
       {/* Global popover rendering */}
       {collapsed && popoverPosition && (
         <div
@@ -191,12 +329,12 @@ const Sidebar = () => {
           style={{
             left: `${popoverPosition.left}px`,
             top: `${popoverPosition.top}px`,
-            transform: 'translateY(-50%)'
+            transform: "translateY(-50%)",
           }}
         >
           {hoveredItem && hoveredItem}
-          {hoveredLogout && 'Logout'}
-          {hoveredToggle && 'Expand Sidebar'}
+          {hoveredLogout && "Logout"}
+          {hoveredToggle && "Expand Sidebar"}
         </div>
       )}
     </>

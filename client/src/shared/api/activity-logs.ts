@@ -51,12 +51,14 @@ export interface ActivityStats {
   recentActions: ActivityLogDto[];
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const activityLogsApi = {
   // Получить все логи активности
-  getAll: async (token: string | null, params: ActivityLogsQuery = {}): Promise<PaginatedActivityLogsResponse> => {
+  getAll: async (
+    token: string | null,
+    params: ActivityLogsQuery = {},
+  ): Promise<PaginatedActivityLogsResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
@@ -65,12 +67,15 @@ export const activityLogsApi = {
       ...(params.entityType && { entityType: params.entityType }),
       ...(params.userId && { userId: params.userId.toString() }),
       ...(params.startDate && { startDate: params.startDate }),
-      ...(params.endDate && { endDate: params.endDate })
+      ...(params.endDate && { endDate: params.endDate }),
     });
-    
-    const { data } = await axios.get<PaginatedActivityLogsResponse>(`${API_URL}/activity-logs?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedActivityLogsResponse>(
+      `${API_URL}/activity-logs?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -96,24 +101,36 @@ export const activityLogsApi = {
   },
 
   // Получить статистику активности
-  getStats: async (token: string | null, params: { startDate?: string; endDate?: string } = {}): Promise<ActivityStats> => {
+  getStats: async (
+    token: string | null,
+    params: { startDate?: string; endDate?: string } = {},
+  ): Promise<ActivityStats> => {
     const queryParams = new URLSearchParams({
       ...(params.startDate && { startDate: params.startDate }),
-      ...(params.endDate && { endDate: params.endDate })
+      ...(params.endDate && { endDate: params.endDate }),
     });
-    
-    const { data } = await axios.get<ActivityStats>(`${API_URL}/activity-logs/stats?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<ActivityStats>(
+      `${API_URL}/activity-logs/stats?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
   // Очистить старые логи
-  cleanup: async (token: string | null, olderThanDays: number): Promise<{ deletedCount: number }> => {
-    const { data } = await axios.delete<{ deletedCount: number }>(`${API_URL}/activity-logs/cleanup`, {
-      headers: authHeaders(token),
-      params: { olderThanDays }
-    });
+  cleanup: async (
+    token: string | null,
+    olderThanDays: number,
+  ): Promise<{ deletedCount: number }> => {
+    const { data } = await axios.delete<{ deletedCount: number }>(
+      `${API_URL}/activity-logs/cleanup`,
+      {
+        headers: authHeaders(token),
+        params: { olderThanDays },
+      },
+    );
     return data;
   },
 

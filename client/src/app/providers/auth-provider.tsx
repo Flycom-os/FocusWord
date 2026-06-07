@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import { AuthUser, PermissionString } from "@/src/shared/types/auth";
-import { loginRequest, LoginPayload, registerRequest, RegisterPayload } from "@/src/shared/api/auth";
+import {
+  loginRequest,
+  LoginPayload,
+  registerRequest,
+  RegisterPayload,
+} from "@/src/shared/api/auth";
+import { clearAuthCookie, setAuthCookie } from "@/src/shared/auth/auth-cookie";
 import { useRouter } from "next/navigation";
 
 interface AuthContextValue {
@@ -13,6 +20,7 @@ interface AuthContextValue {
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
   hasPermission: (resource: string, minLevel: number) => boolean;
+  updateUser?: (user: AuthUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -39,60 +47,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { setTheme } = useTheme();
 
   const clear = useCallback(() => {
     setUser(null);
     setAccessToken(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY);
+      clearAuthCookie();
     }
   }, []);
 
-  const checkTokenExpiration = useCallback((storedAuth: StoredAuth) => {
-    const now = Date.now();
-    if (now >= storedAuth.expiresAt) {
-      // Токен истек, очищаем
-      clear();
-      return false;
-    }
-    return true;
-  }, [clear]);
+  const checkTokenExpiration = useCallback(
+    (storedAuth: StoredAuth) => {
+      const now = Date.now();
+      if (now >= storedAuth.expiresAt) {
+        // Токен истек, очищаем
+        clear();
+        return false;
+      }
+      return true;
+    },
+    [clear],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
-      console.log('Auth: Raw storage data:', raw);
-      
+      console.log("Auth: Raw storage data:", raw);
+
       if (!raw) {
-        console.log('Auth: No auth data found, staying on current page');
+        console.log("Auth: No auth data found, staying on current page");
         setIsLoading(false);
         return;
       }
-      
+
       const parsed: StoredAuth = JSON.parse(raw);
-      console.log('Auth: Parsed data:', parsed);
-      
+      console.log("Auth: Parsed data:", parsed);
+
       // Проверяем наличие полей времени
       if (!parsed.createdAt || !parsed.expiresAt) {
-        console.log('Auth: Old format data, clearing');
+        console.log("Auth: Old format data, clearing");
         // Старый формат данных, очищаем
         clear();
         return;
       }
-      
+
       // Проверяем время жизни токена
       if (!checkTokenExpiration(parsed)) {
-        console.log('Auth: Token expired, clearing and redirecting');
+        console.log("Auth: Token expired, clearing and redirecting");
         return;
       }
-      
-      console.log('Auth: Setting user and token');
+
+      console.log("Auth: Setting user and token");
       setUser(parsed.user);
+      try {
+        setTheme(parsed.user?.themeMode || "light");
+      } catch {}
       setAccessToken(parsed.accessToken);
+      setAuthCookie(parsed.accessToken);
     } catch (error) {
-      console.error('Auth: Error parsing auth data:', error);
+      console.error("Auth: Error parsing auth data:", error);
       clear();
     } finally {
       setIsLoading(false);
@@ -120,19 +137,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const persist = useCallback((nextUser: AuthUser, token: string) => {
     const now = Date.now();
-    const toStore: StoredAuth = { 
-      user: nextUser, 
+    const toStore: StoredAuth = {
+      user: nextUser,
       accessToken: token,
       createdAt: now,
-      expiresAt: now + TOKEN_LIFETIME
+      expiresAt: now + TOKEN_LIFETIME,
     };
-    
+
     setUser(nextUser);
+    try {
+      setTheme(nextUser?.themeMode || "light");
+    } catch {}
     setAccessToken(token);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+      setAuthCookie(token);
     }
   }, []);
+
+  const updateUser = useCallback((nextUser: AuthUser) => {
+    setUser(nextUser);
+    try {
+      setTheme(nextUser?.themeMode || "light");
+    } catch {}
+    if (typeof window !== "undefined") {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed: StoredAuth = JSON.parse(raw);
+          parsed.user = nextUser;
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        } catch (e) {}
+      }
+    }
+  }, [setTheme]);
 
   const login = useCallback(
     async (payload: LoginPayload) => {
@@ -152,7 +190,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = useCallback(() => {
     clear();
-    router.push('/signin');
+    router.push("/signin");
   }, [clear, router]);
 
   const hasPermission = useCallback(
@@ -175,8 +213,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       register,
       logout,
       hasPermission,
+      updateUser,
     }),
-    [user, accessToken, isLoading, login, register, logout, hasPermission],
+    [user, accessToken, isLoading, login, register, logout, hasPermission, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -189,5 +228,3 @@ export const useAuth = (): AuthContextValue => {
   }
   return ctx;
 };
-
-

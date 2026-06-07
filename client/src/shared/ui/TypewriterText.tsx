@@ -22,10 +22,18 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, duration = 500, c
   }, [text, duration]);
 
   return (
-    <span className={className} style={{ display: "inline-block", maxWidth: "100%", overflow: "hidden", whiteSpace: "nowrap" }}>
+    <span
+      className={className}
+      style={{
+        display: "inline-block",
+        maxWidth: "100%",
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+      }}
+    >
       {displayed}
     </span>
   );
 };
 
-export default TypewriterText; 
+export default TypewriterText;

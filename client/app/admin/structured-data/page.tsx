@@ -1,12 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { fetchStructuredData, createStructuredData, updateStructuredData, deleteStructuredData } from '@/src/shared/api/structured-data';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './structured-data.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  fetchStructuredData,
+  createStructuredData,
+  updateStructuredData,
+  deleteStructuredData,
+} from "@/src/shared/api/structured-data";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./structured-data.module.css";
 
 export default function StructuredDataPage() {
   const router = useRouter();
@@ -14,7 +27,7 @@ export default function StructuredDataPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadData();
@@ -26,25 +39,25 @@ export default function StructuredDataPage() {
       const response = await fetchStructuredData(accessToken, {
         page: pagination.page,
         limit: pagination.limit,
-        search
+        search,
       });
       setData(response.data);
-      setPagination(prev => ({ ...prev, total: response.total }));
+      setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast('Ошибка при загрузке структурированных данных', 'error');
+      showToast("Ошибка при загрузке структурированных данных", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Вы уверены что хотите удалить эти данные?')) {
+    if (confirm("Вы уверены что хотите удалить эти данные?")) {
       try {
         await deleteStructuredData(accessToken, id);
-        showToast('Данные удалены', 'success');
+        showToast("Данные удалены", "success");
         loadData();
       } catch (error) {
-        showToast('Ошибка при удалении данных', 'error');
+        showToast("Ошибка при удалении данных", "error");
       }
     }
   };
@@ -88,17 +101,16 @@ export default function StructuredDataPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className={`${styles.status} ${item.isActive ? styles.active : styles.inactive}`}>
-                    {item.isActive ? 'Активен' : 'Неактивен'}
+                  <span
+                    className={`${styles.status} ${item.isActive ? styles.active : styles.inactive}`}
+                  >
+                    {item.isActive ? "Активен" : "Неактивен"}
                   </span>
                 </TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <div className={styles.actions}>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className={styles.deleteButton}
-                    >
+                    <button onClick={() => handleDelete(item.id)} className={styles.deleteButton}>
                       🗑️
                     </button>
                   </div>
@@ -115,7 +127,7 @@ export default function StructuredDataPage() {
             page={pagination.page}
             total={pagination.total}
             perPage={pagination.limit}
-            onChange={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           />
         </div>
       )}
