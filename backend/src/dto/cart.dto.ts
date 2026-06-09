@@ -29,7 +29,7 @@ export class UpdateCartItemDto {
 }
 
 export class CreateOrderDto {
-  @ApiProperty({example: 'ул. Пушкина, д. 1', description: 'delivery address'})
+  @ApiProperty({example: 'Pushkina st., 1', description: 'delivery address'})
   @IsString()
   address: string;
 
@@ -54,7 +54,7 @@ export class UpdateOrderDto {
   @IsString()
   status?: string;
 
-  @ApiProperty({example: 'ул. Пушкина, д. 1', description: 'delivery address', required: false})
+  @ApiProperty({example: 'Pushkina st., 1', description: 'delivery address', required: false})
   @IsOptional()
   @IsString()
   address?: string;

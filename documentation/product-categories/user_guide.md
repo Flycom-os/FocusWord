@@ -1,61 +1,61 @@
-# Руководство пользователя: Категории продуктов
+# User Guide: Product Categories
 
-## 1. Введение
+## 1. Introduction
 
-Раздел "Категории продуктов" предназначен для организации ваших товаров в иерархическую структуру. Правильная категоризация помогает покупателям легче находить нужные товары на сайте, а вам — эффективнее управлять ассортиментом.
+The "Product Categories" section is designed to organize your products into a hierarchical structure. Proper categorization helps customers find the products they need more easily on the site, and it helps you manage your inventory more effectively.
 
-Этот раздел позволяет просматривать существующую структуру категорий, включая вложенные подкатегории, и видеть, сколько продуктов находится в каждой из них.
+This section allows you to view the existing category structure, including nested subcategories, and see how many products are in each of them.
 
-## 2. Обзор интерфейса
+## 2. Interface Overview
 
-Основной экран раздела состоит из следующих элементов:
+The main screen of the section consists of the following elements:
 
-*   **Заголовок**: "Product Categories".
-*   **Сводные карточки**: Показывают общую статистику по категориям.
-*   **Таблица категорий**: Отображает иерархический список всех категорий.
+*   **Header**: "Product Categories".
+*   **Summary Cards**: Show general statistics on categories.
+*   **Category Table**: Displays a hierarchical list of all categories.
 
-### 2.1. Сводные карточки
+### 2.1. Summary Cards
 
-В верхней части страницы расположены три карточки со статистикой:
+At the top of the page are three cards with statistics:
 
-*   **Total Categories**: Общее количество всех категорий.
-*   **Parent Categories**: Количество категорий верхнего уровня (которые не вложены в другие).
-*   **Subcategories**: Общее количество вложенных категорий (подкатегорий).
+*   **Total Categories**: The total number of all categories.
+*   **Parent Categories**: The number of top-level categories (which are not nested in others).
+*   **Subcategories**: The total number of nested categories (subcategories).
 
-### 2.2. Таблица категорий
+### 2.2. Category Table
 
-Таблица представляет собой древовидный список, в котором отображаются все категории.
+The table is a tree-like list that displays all categories.
 
-*   **Category Name**: Название категории. Иконки папок (`Folder` и `FolderOpen`) показывают, есть ли у категории вложенные подкатегории и раскрыт ли список.
-*   **Description**: Краткое описание категории.
-*   **Products**: Количество товаров, находящихся непосредственно в этой категории.
-*   **Status**: Текущий статус категории (например, "Active").
-*   **Actions**: Кнопки для выполнения действий с категорией.
+*   **Category Name**: The name of the category. Folder icons (`Folder` and `FolderOpen`) indicate whether a category has nested subcategories and whether the list is expanded.
+*   **Description**: a brief description of the category.
+*   **Products**: The number of products directly in this category.
+*   **Status**: The current status of the category (e.g., "Active").
+*   **Actions**: Buttons to perform actions on a category.
 
-## 3. Просмотр иерархии категорий
+## 3. Viewing the Category Hierarchy
 
-Вы можете легко просматривать структуру категорий:
+You can easily view the category structure:
 
-1.  Категории с вложенными подкатегориями отмечены иконкой папки.
-2.  Нажмите на иконку папки или на кнопку рядом с названием категории, чтобы **раскрыть** или **скрыть** список ее дочерних подкатегорий.
-3.  Отступы в таблице визуально показывают уровень вложенности каждой категории.
+1.  Categories with nested subcategories are marked with a folder icon.
+2.  Click the folder icon or the button next to the category name to **expand** or **collapse** its list of child subcategories.
+3.  The indentation in the table visually shows the nesting level of each category.
 
-## 4. Удаление категории
+## 4. Deleting a Category
 
-Вы можете удалить существующую категорию.
+You can delete an existing category.
 
-**Внимание:** На данный момент система не предотвращает удаление категорий, в которых есть товары. Будьте осторожны, так как это может привести к тому, что некоторые товары останутся без категории.
+**Warning:** Currently, the system does not prevent the deletion of categories that contain products. Be careful, as this may result in some products being left without a category.
 
-1.  Найдите в таблице категорию, которую хотите удалить.
-2.  В столбце "Actions" нажмите на иконку с корзиной (**Trash2**).
-3.  Появится модальное окно с просьбой подтвердить удаление.
-4.  Для подтверждения нажмите кнопку **"Delete"**. Если вы передумали, нажмите **"Cancel"**.
+1.  Find the category you want to delete in the table.
+2.  In the "Actions" column, click the trash can icon (**Trash2**).
+3.  A modal window will appear asking you to confirm the deletion.
+4.  To confirm, click the **"Delete"** button. If you change your mind, click **"Cancel"**.
 
-## 5. Недоступная функциональность
+## 5. Unavailable Functionality
 
-На данный момент в пользовательском интерфейсе **не реализованы** следующие функции:
+Currently, the following features are **not implemented** in the user interface:
 
-*   **Добавление новой категории**: Кнопка "Add Category" присутствует на странице, но неактивна.
-*   **Редактирование существующей категории**: Кнопка "Edit" (иконка с карандашом) присутствует, но не выполняет никаких действий.
+*   **Adding a new category**: The "Add Category" button is present on the page, but it is inactive.
+*   **Editing an existing category**: The "Edit" button (pencil icon) is present but does not perform any action.
 
-Для добавления или изменения категорий необходимо обратиться к администратору или использовать другие инструменты, если они предусмотрены.
+To add or change categories, you must contact an administrator or use other tools if they are provided.

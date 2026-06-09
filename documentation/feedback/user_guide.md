@@ -1,55 +1,55 @@
-# Руководство пользователя: Раздел "Feedback"
+# User Guide: "Feedback" Section
 
-## 1. Введение
+## 1. Introduction
 
-Раздел "Feedback & Requests" — это ваша центральная точка для просмотра и управления обратной связью, полученной от пользователей. Здесь собираются все сообщения, вопросы, предложения и жалобы, отправленные через формы на вашем сайте. Этот инструмент помогает вам оставаться на связи с аудиторией и вовремя реагировать на их потребности.
+The "Feedback & Requests" section is your central hub for viewing and managing feedback received from users. All messages, questions, suggestions, and complaints sent through the forms on your site are collected here. This tool helps you stay in touch with your audience and respond to their needs in a timely manner.
 
-## 2. Обзор интерфейса
+## 2. Interface Overview
 
-Интерфейс представляет собой доску с карточками, где каждая карточка — это отдельное сообщение от пользователя.
+The interface is a board with cards, where each card is a separate message from a user.
 
-*   **Заголовок**: "Feedback & Requests".
-*   **Сводные карточки**: Статистика по статусам обращений.
-*   **Панель фильтров**: Инструменты для поиска и фильтрации сообщений.
-*   **Сетка обратной связи**: Отображение всех сообщений в виде карточек.
+*   **Header**: "Feedback & Requests".
+*   **Summary Cards**: Statistics on the status of feedback.
+*   **Filter Panel**: Tools for searching and filtering messages.
+*   **Feedback Grid**: Displays all messages as cards.
 
-### 2.1. Сводные карточки
+### 2.1. Summary Cards
 
-В верхней части страницы находятся карточки, показывающие количество сообщений в каждом статусе:
+At the top of the page are cards showing the number of messages in each status:
 
-*   **Total Feedback**: Общее количество всех полученных сообщений.
-*   **Open**: Сообщения, которые еще не были просмотрены или взяты в работу.
-*   **In Progress**: Сообщения, над которыми ведется работа.
-*   **Resolved**: Проблемы, по которым было найдено решение.
+*   **Total Feedback**: The total number of all received messages.
+*   **Open**: Messages that have not yet been viewed or are not being worked on.
+*   **In Progress**: Messages that are currently being worked on.
+*   **Resolved**: Issues for which a solution has been found.
 
-### 2.2. Фильтрация и поиск
+### 2.2. Filtering and Search
 
-Панель фильтров позволяет быстро найти нужные сообщения:
+The filter panel allows you to quickly find the messages you need:
 
-*   **Поле поиска**: Введите имя пользователя, его email или ключевые слова из сообщения, чтобы отфильтровать список.
-*   **Фильтр по статусу (All Status)**: Позволяет показать сообщения только с определенным статусом (например, "Open" или "Resolved").
-*   **Фильтр по типу (All Types)**: Фильтрация по типу обращения (жалоба, предложение, вопрос).
-*   **Фильтр по приоритету (All Priority)**: Фильтрация по степени важности сообщения (низкий, средний, высокий).
+*   **Search Field**: Enter a user's name, email, or keywords from the message to filter the list.
+*   **Filter by Status (All Status)**: Allows you to show messages with a specific status only (e.g., "Open" or "Resolved").
+*   **Filter by Type (All Types)**: Filter by the type of feedback (complaint, suggestion, question).
+*   **Filter by Priority (All Priority)**: Filter by the importance of the message (low, medium, high).
 
-**Примечание:** Эффективность фильтров по типу и приоритету зависит от того, собираются ли эти данные через ваши формы обратной связи. Если эти поля не предусмотрены, фильтры могут не давать результатов.
+**Note:** The effectiveness of the type and priority filters depends on whether this data is collected through your feedback forms. If these fields are not provided, the filters may not produce any results.
 
-## 3. Просмотр обратной связи
+## 3. Viewing Feedback
 
-Все сообщения отображаются в виде карточек. Каждая карточка содержит следующую информацию:
+All messages are displayed as cards. Each card contains the following information:
 
-*   **Заголовок**: Имя отправителя или тема сообщения.
-*   **Бейджи**: Метки, указывающие на тип, приоритет или рейтинг (если применимо).
-*   **Статус**: Текущий статус обращения (например, "open", "in progress").
-*   **Текст сообщения**: Полное содержание обращения от пользователя.
-*   **Информация об отправителе**: Имя и/или email пользователя.
-*   **Дата**: Дата получения сообщения.
+*   **Title**: The sender's name or the subject of the message.
+*   **Badges**: Labels indicating the type, priority, or rating (if applicable).
+*   **Status**: The current status of the feedback (e.g., "open", "in progress").
+*   **Message Text**: The full content of the user's message.
+*   **Sender Information**: The user's name and/or email.
+*   **Date**: The date the message was received.
 
-## 4. Ограничения функциональности
+## 4. Functionality Limitations
 
-На данный момент страница "Feedback & Requests" работает в режиме **"только для чтения"**. Это означает, что вы можете просматривать и фильтровать сообщения, но следующие действия **недоступны** из этого интерфейса:
+Currently, the "Feedback & Requests" page operates in **"read-only"** mode. This means you can view and filter messages, but the following actions are **not available** from this interface:
 
-*   **Создание нового сообщения**: Кнопка "New Feedback" неактивна.
-*   **Редактирование сообщения**: Нет возможности изменить статус, приоритет или другие данные сообщения.
-*   **Удаление сообщения**: На карточках отсутствуют кнопки для удаления.
+*   **Creating a new message**: The "New Feedback" button is inactive.
+*   **Editing a message**: It is not possible to change the status, priority, or other message data.
+*   **Deleting a message**: There are no delete buttons on the cards.
 
-Для изменения статуса или удаления обращений необходимо использовать другие инструменты, если они предусмотрены системой.
+To change the status or delete feedback, you must use other tools if they are provided by the system.

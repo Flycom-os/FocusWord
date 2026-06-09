@@ -53,7 +53,7 @@ const AnalyticsPage = () => {
       setRecentEntries(entriesData.data || []);
     } catch (error) {
       console.error(error);
-      showToast("Ошибка при загрузке аналитики", "error");
+      showToast("Error loading analytics", "error");
     } finally {
       setLoading(false);
     }
@@ -67,30 +67,30 @@ const AnalyticsPage = () => {
 
   const cards = [
     {
-      title: "Всего просмотров",
+      title: "Total Views",
       value: stats.totalViews.toLocaleString(),
-      change: "Всего визитов",
+      change: "Total visits",
       icon: <Activity size={24} />,
       color: "#3b82f6",
     },
     {
-      title: "Уникальные посетители",
+      title: "Unique Visitors",
       value: stats.uniqueViews.toLocaleString(),
-      change: "По кукам за 24ч",
+      change: "By cookies for 24h",
       icon: <Users size={24} />,
       color: "#10b981",
     },
     {
-      title: "Показатель отказов",
+      title: "Bounce Rate",
       value: `${stats.avgBounceRate}%`,
-      change: "Ушли сразу",
+      change: "Left immediately",
       icon: <TrendingUp size={24} />,
       color: "#ef4444",
     },
     {
-      title: "Время на сайте (среднее)",
-      value: `${Math.round(stats.avgTimeOnPage)} сек`,
-      change: "Вовлеченность",
+      title: "Time on Site (Average)",
+      value: `${Math.round(stats.avgTimeOnPage)} sec`,
+      change: "Engagement",
       icon: <TrendingUp size={24} />,
       color: "#f59e0b",
     },
@@ -100,8 +100,8 @@ const AnalyticsPage = () => {
     <div className={styles.analyticsContainer}>
       <div className={styles.header}>
         <div>
-          <h1>Аналитика посещаемости</h1>
-          <p>Реальные данные о популярности вашего контента</p>
+          <h1>Traffic Analytics</h1>
+          <p>Real data about the popularity of your content</p>
         </div>
         
         <div className={styles.filterSection}>
@@ -113,7 +113,7 @@ const AnalyticsPage = () => {
               onChange={(e) => setStartDate(e.target.value)}
               className={styles.dateInput}
             />
-            <span>по</span>
+            <span>to</span>
             <input
               type="date"
               value={endDate}
@@ -130,7 +130,7 @@ const AnalyticsPage = () => {
       {loading ? (
         <div className={styles.loading}>
           <div className={styles.spinner} />
-          <p>Загрузка данных...</p>
+          <p>Loading data...</p>
         </div>
       ) : (
         <>
@@ -156,9 +156,9 @@ const AnalyticsPage = () => {
 
           <div className={styles.chartsSection}>
             <div className={styles.chartCard}>
-              <h2>Популярные страницы</h2>
+              <h2>Popular Pages</h2>
               {stats.topPages.length === 0 ? (
-                <div className={styles.emptyState}>Нет данных о просмотрах</div>
+                <div className={styles.emptyState}>No view data</div>
               ) : (
                 <div className={styles.simpleChart}>
                   {stats.topPages.map((data, index) => {
@@ -168,7 +168,7 @@ const AnalyticsPage = () => {
                         <div
                           className={styles.bar}
                           style={{ height: `${(data.views / maxViews) * 80 + 20}%` }}
-                          title={`${data.title}: ${data.views} просмотров`}
+                          title={`${data.title}: ${data.views} views`}
                         />
                         <span className={styles.barLabel}>{data.title.substring(0, 10)}...</span>
                       </div>
@@ -179,16 +179,16 @@ const AnalyticsPage = () => {
             </div>
 
             <div className={styles.chartCard}>
-              <h2>Источники переходов (Referrers)</h2>
+              <h2>Referral Sources (Referrers)</h2>
               <div className={styles.activityList}>
                 {stats.topReferrers.length === 0 ? (
-                  <div className={styles.emptyState}>Прямые переходы или нет данных</div>
+                  <div className={styles.emptyState}>Direct traffic or no data</div>
                 ) : (
                   stats.topReferrers.map((ref, index) => (
                     <div key={index} className={styles.activityItem}>
                       <Activity size={16} />
-                      <span className={styles.refUrl}>{ref.url || "Прямой переход"}</span>
-                      <span className={styles.activityTime}>{ref.count} кликов</span>
+                      <span className={styles.refUrl}>{ref.url || "Direct traffic"}</span>
+                      <span className={styles.activityTime}>{ref.count} clicks</span>
                     </div>
                   ))
                 )}
@@ -197,19 +197,19 @@ const AnalyticsPage = () => {
           </div>
 
           <div className={styles.tableSection}>
-            <h2>Последние просмотры по датам</h2>
+            <h2>Recent Views by Date</h2>
             <div className={styles.table}>
               <div className={styles.tableHeader}>
-                <span>Дата</span>
-                <span>Страница / Пост</span>
-                <span>Просмотры</span>
-                <span>Уникальные</span>
+                <span>Date</span>
+                <span>Page / Post</span>
+                <span>Views</span>
+                <span>Unique</span>
               </div>
               {recentEntries.length === 0 ? (
-                <div className={styles.emptyRow}>Нет данных за выбранный период</div>
+                <div className={styles.emptyRow}>No data for the selected period</div>
               ) : (
                 recentEntries.map((entry, index) => {
-                  const title = entry.page?.title || entry.post?.title || entry.record?.title || entry.blogPost?.title || entry.article?.title || "Главная";
+                  const title = entry.page?.title || entry.post?.title || entry.record?.title || entry.blogPost?.title || entry.article?.title || "Home";
                   return (
                     <div key={index} className={styles.tableRow}>
                       <span>{new Date(entry.date).toLocaleDateString()}</span>

@@ -16,7 +16,7 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
-      showToast("Введите тему для генерации.", "error");
+      showToast("Enter a topic for generation.", "error");
       return;
     }
 
@@ -51,7 +51,7 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
 
     } catch (e: any) {
       console.error(e);
-      showToast(`Ошибка генерации: ${e.message}`, "error");
+      showToast(`Generation error: ${e.message}`, "error");
     } finally {
       setIsLoading(false);
     }
@@ -63,24 +63,24 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
         type="button"
         onClick={() => setIsOpen(true)}
         className={styles.aiButton}
-        title="Сгенерировать с помощью ИИ"
+        title="Generate with AI"
       >
-        ✨ Сгенерировать
+        ✨ Generate
       </button>
 
       {isOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
-            <h3 className={styles.modalTitle}>Генерация контента с помощью ИИ</h3>
+            <h3 className={styles.modalTitle}>AI Content Generation</h3>
             <p className={styles.modalDescription}>
-              Введите тему или ключевые слова, и нейросеть сгенерирует для вас текст.
-              Системный промпт уже настроен для получения качественной HTML-разметки.
+              Enter a topic or keywords, and the neural network will generate text for you.
+              The system prompt is already configured to get high-quality HTML markup.
             </p>
             <textarea
               className={styles.promptTextarea}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Например: 'Напиши статью о пользе чтения'"
+              placeholder="For example: 'Write an article about the benefits of reading'"
               rows={5}
             />
             <div className={styles.modalActions}>
@@ -89,14 +89,14 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
                 className={styles.cancelButton}
                 disabled={isLoading}
               >
-                Отмена
+                Cancel
               </button>
               <button
                 onClick={handleGenerate}
                 className={styles.generateButton}
                 disabled={isLoading}
               >
-                {isLoading ? "Генерация..." : "Сгенерировать"}
+                {isLoading ? "Generating..." : "Generate"}
               </button>
             </div>
           </div>

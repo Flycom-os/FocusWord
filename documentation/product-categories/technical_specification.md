@@ -1,12 +1,12 @@
-# Техническая спецификация: Категории продуктов
+# Technical Specification: Product Categories
 
-## 1. Обзор архитектуры
+## 1. Architecture Overview
 
-Модуль "Категории продуктов" следует стандартной архитектуре проекта, состоящей из бэкенда на Nest.js для управления данными и фронтенда на Next.js/React для их отображения в административной панели. Взаимодействие осуществляется через REST API.
+The "Product Categories" module follows the project's standard architecture, consisting of a Nest.js backend for data management and a Next.js/React frontend for displaying it in the admin panel. Interaction is carried out via a REST API.
 
-## 2. Модель данных (База данных)
+## 2. Data Model (Database)
 
-Модель `ProductCategory` определена в `backend/prisma/schema.prisma` и является ключевой для этого модуля.
+The `ProductCategory` model is defined in `backend/prisma/schema.prisma` and is key to this module.
 
 ```prisma
 model ProductCategory {
@@ -18,66 +18,66 @@ model ProductCategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Поля для реализации иерархии
+  // Fields for implementing hierarchy
   parentId    Int?
   parent      ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
   children    ProductCategory[] @relation("ProductCategoryHierarchy")
 
-  // Связь с продуктами
+  // Relation to products
   products    Product[] @relation("ProductToCategory")
 }
 ```
 
-*   **Иерархия**: Реализована через опциональное поле `parentId`, которое ссылается на `id` родительской категории в той же таблице. Это позволяет создавать неограниченный уровень вложенности.
-*   **Связи**: Помимо self-join для иерархии, модель связана с `Product`, что позволяет отслеживать, какие товары принадлежат к какой категории.
+*   **Hierarchy**: Implemented via the optional `parentId` field, which refers to the `id` of the parent category in the same table. This allows for an unlimited level of nesting.
+*   **Relations**: In addition to the self-join for the hierarchy, the model is linked to `Product`, which allows tracking which products belong to which category.
 
-## 3. Бэкенд (API)
+## 3. Backend (API)
 
-*   **Контроллер**: `backend/src/app/product-categories/product-categories.controller.ts`
-*   **Сервис**: `backend/src/app/product-categories/product-categories.service.ts`
-*   **Базовый путь**: `/product-categories`
+*   **Controller**: `backend/src/app/product-categories/product-categories.controller.ts`
+*   **Service**: `backend/src/app/product-categories/product-categories.service.ts`
+*   **Base Path**: `/product-categories`
 
-### 3.1. Эндпоинты
+### 3.1. Endpoints
 
-API предоставляет стандартный набор CRUD-операций:
+The API provides a standard set of CRUD operations:
 
-| Метод    | Путь   | Описание                  | Аутентификация | Тело запроса / Параметры                                                                     |
-| :------- | :----- | :------------------------ | :------------- | :------------------------------------------------------------------------------------------- |
-| `POST`   | `/`    | Создать категорию         | JWT            | `name`, `slug`, `description?`, `parentId?`, `status?`                                       |
-| `GET`    | `/`    | Получить все категории    | Нет            | Query: `page?`, `limit?`, `search?` (Возвращает **плоский список**)                           |
-| `GET`    | `/:id` | Получить категорию по ID  | Нет            | Param: `id`                                                                                  |
-| `PUT`    | `/:id` | Обновить категорию        | JWT            | Param: `id`, Body: `name?`, `slug?`, `description?`, `parentId?`, `status?`                   |
-| `DELETE` | `/:id` | Удалить категорию         | JWT            | Param: `id`                                                                                  |
+| Method    | Path   | Description               | Authentication | Request Body / Parameters                                                                  |
+| :-------- | :----- | :------------------------ | :------------- | :------------------------------------------------------------------------------------------- |
+| `POST`    | `/`    | Create a category         | JWT            | `name`, `slug`, `description?`, `parentId?`, `status?`                                       |
+| `GET`     | `/`    | Get all categories        | None           | Query: `page?`, `limit?`, `search?` (Returns a **flat list**)                               |
+| `GET`     | `/:id` | Get a category by ID      | None           | Param: `id`                                                                                  |
+| `PUT`     | `/:id` | Update a category         | JWT            | Param: `id`, Body: `name?`, `slug?`, `description?`, `parentId?`, `status?`                   |
+| `DELETE`  | `/:id` | Delete a category         | JWT            | Param: `id`                                                                                  |
 
-### 3.2. Логика Бэкенда и Потенциальные проблемы
+### 3.2. Backend Logic and Potential Issues
 
-*   **Кэширование**: Сервис `ProductCategoriesService` использует Redis для кэширования ответов `findAll` и `findOne` для повышения производительности. Кэш инвалидируется при операциях создания, обновления или удаления.
-*   **Обработка иерархии**: Бэкенд-сервис не выполняет специальной обработки иерархии. `findAll` возвращает плоский список категорий. Предполагается, что построение дерева происходит на стороне клиента.
-*   **Проблема каскадного удаления**: Метод `remove()` выполняет простое удаление записи из базы данных (`prisma.productCategory.delete`). В схеме Prisma не определены правила `onDelete` для дочерних категорий или связанных продуктов. Это означает, что:
-    *   Удаление родительской категории может привести к появлению "осиротевших" дочерних категорий (если БД не настроена на каскадное удаление на уровне внешних ключей).
-    *   Продукты, связанные с удаляемой категорией, не обрабатываются и могут остаться со ссылкой на несуществующую категорию.
-    **Рекомендация**: Добавить в сервис логику для обработки дочерних элементов и связанных продуктов при удалении.
+*   **Caching**: The `ProductCategoriesService` uses Redis to cache `findAll` and `findOne` responses for improved performance. The cache is invalidated on create, update, or delete operations.
+*   **Hierarchy Handling**: The backend service does not perform any special hierarchy processing. `findAll` returns a flat list of categories. It is assumed that the tree is built on the client side.
+*   **Cascading Delete Problem**: The `remove()` method performs a simple deletion of the record from the database (`prisma.productCategory.delete`). The Prisma schema does not define `onDelete` rules for child categories or related products. This means that:
+    *   Deleting a parent category can lead to "orphaned" child categories (if the DB is not configured for cascading deletes at the foreign key level).
+    *   Products associated with the deleted category are not processed and may be left with a reference to a non-existent category.
+    **Recommendation**: Add logic to the service to handle child elements and related products upon deletion.
 
-## 4. Фронтенд
+## 4. Frontend
 
-*   **Основной компонент**: `client/app/admin/product-categories/page.tsx`
+*   **Main Component**: `client/app/admin/product-categories/page.tsx`
 
-### 4.1. Структура компонента `ProductCategoriesPage`
+### 4.1. `ProductCategoriesPage` Component Structure
 
-*   Компонент является клиентским (`"use client"`).
-*   **Рендеринг дерева**: Основная логика отображения заключена в рекурсивной функции `renderCategory`. Она итерирует по категориям и их дочерним элементам (`category.children`), создавая иллюзию дерева в плоской HTML-таблице с помощью CSS-отступов.
-*   **Управление состоянием**:
-    *   `categories`: Хранит полный список категорий в виде дерева.
-    *   `expandedCategories`: `Set`, который содержит `id` раскрытых в данный момент категорий, что позволяет управлять сворачиванием/разворачиванием узлов дерева.
-*   **API-взаимодействие**:
-    *   Компонент использует `productsApi.getCategories()` для получения данных. Судя по коду, этот метод должен возвращать уже построенное дерево категорий, что расходится с реализацией `findAll` на бэкенде. Вероятно, `productsApi` содержит дополнительную логику для преобразования плоского списка в дерево или обращается к другому, не найденному эндпоинту.
-    *   Использование `@ts-ignore` указывает на возможные несоответствия типов между API-клиентом и ожидаемыми данными.
+*   The component is a client component (`"use client"`).
+*   **Tree Rendering**: The main display logic is encapsulated in the recursive `renderCategory` function. It iterates through categories and their children (`category.children`), creating the illusion of a tree in a flat HTML table using CSS indentation.
+*   **State Management**:
+    *   `categories`: Stores the full list of categories as a tree.
+    *   `expandedCategories`: A `Set` that contains the `id` of currently expanded categories, allowing for collapsing/expanding tree nodes.
+*   **API Interaction**:
+    *   The component uses `productsApi.getCategories()` to retrieve data. Based on the code, this method is expected to return an already constructed category tree, which is inconsistent with the `findAll` implementation on the backend. It is likely that `productsApi` contains additional logic to transform the flat list into a tree or calls another, undiscovered endpoint.
+    *   The use of `@ts-ignore` indicates possible type mismatches between the API client and the expected data.
 
-### 4.2. Неполная функциональность
+### 4.2. Incomplete Functionality
 
-В текущей реализации фронтенд-компонента отсутствует критически важный функционал:
+The current implementation of the frontend component is missing critical functionality:
 
-*   **Создание категории**: Кнопка "Add Category" не имеет обработчика `onClick`. Модальное окно и форма для создания не реализованы.
-*   **Редактирование категории**: Кнопка "Edit" в строке категории также не имеет обработчика.
+*   **Create Category**: The "Add Category" button does not have an `onClick` handler. The modal window and creation form are not implemented.
+*   **Edit Category**: The "Edit" button in the category row also has no handler.
 
-Таким образом, страница на данный момент является **read-only** с возможностью удаления. Для полноценной работы требуется реализация форм и модальных окон для создания и редактирования категорий, а также соответствующих вызовов API.
+Thus, the page is currently **read-only** with the ability to delete. For full functionality, implementation of forms and modal windows for creating and editing categories, as well as the corresponding API calls, is required.

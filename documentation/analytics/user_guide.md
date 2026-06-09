@@ -1,63 +1,63 @@
-# Руководство пользователя: Раздел "Аналитика"
+# User Guide: "Analytics" Section
 
-## 1. Введение
+## 1. Introduction
 
-Раздел "Аналитика посещаемости" — это ваш командный центр для мониторинга трафика на сайте. Он предоставляет наглядные и актуальные данные о том, как пользователи взаимодействуют с вашим контентом. Эта информация поможет вам понять, какие страницы и статьи наиболее популярны, откуда приходят посетители и насколько они вовлечены.
+The "Traffic Analytics" section is your command center for monitoring website traffic. It provides clear and up-to-date data on how users interact with your content. This information will help you understand which pages and articles are most popular, where visitors are coming from, and how engaged they are.
 
-## 2. Обзор интерфейса
+## 2. Interface Overview
 
-Страница аналитики состоит из четырех основных блоков:
+The analytics page consists of four main blocks:
 
-1.  **Фильтр по датам**: Позволяет выбрать период для анализа.
-2.  **Сводные карточки**: Отображают ключевые показатели эффективности (KPI) за выбранный период.
-3.  **Графики**: Визуализируют самые популярные страницы и источники переходов.
-4.  **Таблица последних просмотров**: Показывает детализированную статистику по дням и страницам.
+1.  **Date Filter**: Allows you to select a period for analysis.
+2.  **Summary Cards**: Display key performance indicators (KPIs) for the selected period.
+3.  **Charts**: Visualize the most popular pages and referral sources.
+4.  **Recent Views Table**: Shows detailed statistics by day and page.
 
-## 3. Фильтрация по дате
+## 3. Date Filtering
 
-По умолчанию на странице отображаются данные за последние 30 дней. Вы можете изменить этот период, чтобы проанализировать конкретные временные рамки.
+By default, the page displays data for the last 30 days. You can change this period to analyze specific time frames.
 
-1.  Найдите **панель фильтрации** в правом верхнем углу страницы.
-2.  Используйте два поля для выбора **начальной** и **конечной** даты периода.
-3.  После выбора дат данные на странице **автоматически обновятся**.
-4.  Вы также можете нажать кнопку с иконкой **обновления** (`RefreshCw`), чтобы принудительно перезагрузить данные для выбранного диапазона.
+1.  Find the **filter panel** in the upper right corner of the page.
+2.  Use the two fields to select the **start** and **end** dates of the period.
+3.  After selecting the dates, the data on the page will **automatically update**.
+4.  You can also click the **refresh** icon (`RefreshCw`) to force a reload of the data for the selected range.
 
-## 4. Сводные карточки
+## 4. Summary Cards
 
-Четыре карточки в верхней части экрана дают быстрый обзор наиболее важных метрик:
+The four cards at the top of the screen provide a quick overview of the most important metrics:
 
-*   **Всего просмотров**: Общее количество раз, когда страницы вашего сайта были просмотрены за выбранный период. Один пользователь может сгенерировать несколько просмотров.
-*   **Уникальные посетители**: Количество уникальных пользователей, посетивших ваш сайт. Система определяет уникальность по cookies в браузере в течение 24 часов.
-*   **Показатель отказов**: Процент посетителей, которые покинули сайт после просмотра только одной страницы. Высокий показатель может означать, что контент не оправдал ожиданий пользователя.
-*   **Время на сайте (среднее)**: Средняя продолжительность времени, которое посетители проводят на страницах вашего сайта. Этот показатель отражает уровень вовлеченности аудитории.
+*   **Total Views**: The total number of times the pages of your site were viewed during the selected period. A single user can generate multiple views.
+*   **Unique Visitors**: The number of unique users who have visited your site. The system determines uniqueness by browser cookies within a 24-hour period.
+*   **Bounce Rate**: The percentage of visitors who left the site after viewing only one page. A high rate may indicate that the content did not meet the user's expectations.
+*   **Average Time on Site**: The average amount of time visitors spend on your site's pages. This metric reflects the level of audience engagement.
 
-## 5. Графики и списки
+## 5. Charts and Lists
 
-Два блока под сводными карточками предоставляют более глубокий анализ контента и источников трафика.
+Two blocks below the summary cards provide a deeper analysis of content and traffic sources.
 
-### 5.1. Популярные страницы
+### 5.1. Popular Pages
 
-Этот блок в виде гистограммы показывает, какие страницы, статьи или записи блога являются самыми просматриваемыми.
+This bar chart shows which pages, articles, or blog posts are the most viewed.
 
-*   Каждый столбец представляет одну страницу.
-*   Высота столбца пропорциональна количеству просмотров.
-*   Наведите курсор на столбец, чтобы увидеть полное название страницы и точное число просмотров.
+*   Each bar represents a single page.
+*   The height of the bar is proportional to the number of views.
+*   Hover over a bar to see the full page title and the exact number of views.
 
-### 5.2. Источники переходов (Referrers)
+### 5.2. Referral Sources (Referrers)
 
-Здесь показано, с каких внешних сайтов пользователи переходят на ваш ресурс.
+This shows which external sites users are coming from to your resource.
 
-*   В списке перечислены URL-адреса источников.
-*   "Прямой переход" означает, что пользователь ввел адрес вашего сайта напрямую в браузере или перешел из закладок.
-*   Напротив каждого источника указано количество переходов (кликов) с него.
+*   The list contains the URLs of the sources.
+*   "Direct traffic" means that the user entered your site's address directly in the browser or came from a bookmark.
+*   Next to each source, the number of referrals (clicks) from it is indicated.
 
-## 6. Таблица "Последние просмотры по датам"
+## 6. "Recent Views by Date" Table
 
-В нижней части страницы находится таблица, которая детализирует ежедневную статистику просмотров для каждой страницы.
+At the bottom of the page is a table that details the daily statistics of views for each page.
 
-*   **Дата**: День, за который сгруппирована статистика.
-*   **Страница / Пост**: Название контента, который просматривали.
-*   **Просмотры**: Общее количество просмотров этой страницы за указанную дату.
-*   **Уникальные**: Количество уникальных просмотров этой страницы за указанную дату.
+*   **Date**: The day for which the statistics are grouped.
+*   **Page / Post**: The name of the content that was viewed.
+*   **Views**: The total number of views for that page on the specified date.
+*   **Unique**: The number of unique views for that page on the specified date.
 
-Эта таблица полезна для отслеживания всплесков популярности контента в конкретные дни, например, после публикации новой статьи или запуска рекламной кампании.
+This table is useful for tracking spikes in content popularity on specific days, for example, after publishing a new article or launching an advertising campaign.

@@ -22,9 +22,9 @@ export class PaymentsService implements OnModuleInit {
       if (!yoomoneyGateway) {
         yoomoneyGateway = await this.prisma.paymentGateway.create({
           data: {
-            name: 'ЮMoney (YooMoney)',
+            name: 'YooMoney',
             slug: 'yoomoney',
-            description: 'Популярный российский платежный сервис для приема оплаты картами и кошельками.',
+            description: 'Popular Russian payment service for accepting card and wallet payments.',
             isEnabled: true,
             displayOrder: 1,
             settings: {
@@ -45,9 +45,9 @@ export class PaymentsService implements OnModuleInit {
       if (!cardMethod) {
         await this.prisma.paymentMethod.create({
           data: {
-            name: 'Банковская карта',
+            name: 'Bank Card',
             slug: 'yoomoney-card',
-            description: 'Оплата дебетовой или кредитной картой через ЮMoney (Visa, Mastercard, МИР)',
+            description: 'Payment by debit or credit card via YooMoney (Visa, Mastercard, MIR)',
             isEnabled: true,
             type: 'card',
             paymentGatewayId: yoomoneyGateway.id,
@@ -64,9 +64,9 @@ export class PaymentsService implements OnModuleInit {
       if (!walletMethod) {
         await this.prisma.paymentMethod.create({
           data: {
-            name: 'ЮMoney кошелек',
+            name: 'YooMoney Wallet',
             slug: 'yoomoney-wallet',
-            description: 'Оплата из кошелька ЮMoney',
+            description: 'Payment from YooMoney wallet',
             isEnabled: true,
             type: 'other',
             paymentGatewayId: yoomoneyGateway.id,
@@ -209,12 +209,12 @@ export class PaymentsService implements OnModuleInit {
     });
 
     if (!gateway || !gateway.isEnabled) {
-      throw new BadRequestException('Платежный шлюз ЮMoney отключен или не существует.');
+      throw new BadRequestException('YooMoney payment gateway is disabled or does not exist.');
     }
 
     const { shopId } = (gateway.settings as any) || {};
     if (!shopId) {
-      throw new BadRequestException('Некорректная конфигурация шлюза ЮMoney.');
+      throw new BadRequestException('Incorrect YooMoney gateway configuration.');
     }
 
     // Build the mock checkout redirect URL pointing to the Next.js client yoomoney page

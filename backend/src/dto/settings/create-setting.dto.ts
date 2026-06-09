@@ -9,24 +9,24 @@ export enum SettingType {
 }
 
 export class CreateSettingDto {
-  @ApiProperty({ description: 'Ключ настройки', example: 'site_name' })
+  @ApiProperty({ description: 'Setting key', example: 'site_name' })
   @IsString()
   key: string;
 
-  @ApiProperty({ description: 'Значение настройки', example: 'FocusWord' })
+  @ApiProperty({ description: 'Setting value', example: 'FocusWord' })
   @IsString()
   value: string;
 
-  @ApiProperty({ description: 'Тип настройки', enum: SettingType, example: SettingType.STRING })
+  @ApiProperty({ description: 'Setting type', enum: SettingType, example: SettingType.STRING })
   @IsEnum(SettingType)
   type: SettingType;
 
-  @ApiProperty({ description: 'Описание настройки', example: 'Название сайта', required: false })
+  @ApiProperty({ description: 'Setting description', example: 'Site name', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Категория настройки', example: 'general', required: false })
+  @ApiProperty({ description: 'Setting category', example: 'general', required: false })
   @IsOptional()
   @IsString()
   category?: string;

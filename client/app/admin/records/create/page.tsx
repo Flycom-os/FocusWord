@@ -134,14 +134,14 @@ export default function CreateRecordPage() {
 
   const handleSliderSelect = () => {
     if (sliders.length === 0) {
-      showToast("Сначала создайте слайдеры", "error");
+      showToast("Create sliders first", "error");
       return;
     }
 
     const sliderHtml = `
       <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите слайдер</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a slider</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${sliders
               .map(
@@ -152,13 +152,13 @@ export default function CreateRecordPage() {
                    onclick="selectSlider(${JSON.stringify(slider).replace(/"/g, "&quot;")})">
                 <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${slider.name}</h4>
                 <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${slider.slug}</p>
-                <p style="margin: 0; font-size: 12px; color: #6b7280;">${slider.description || "Нет описания"}</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">${slider.description || "No description"}</p>
               </div>`,
               )
               .join("")}
           </div>
           <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-            <button onclick="closeSliderModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+            <button onclick="closeSliderModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
       </div>`;
@@ -195,7 +195,7 @@ export default function CreateRecordPage() {
 
   const handlePreview = () => {
     if (!editorData?.blocks?.length && !form.title.trim()) {
-      showToast("Заполните заголовок или контент для предпросмотра", "error");
+      showToast("Fill in the title or content to preview", "error");
       return;
     }
     setShowPreview(true);
@@ -218,7 +218,7 @@ export default function CreateRecordPage() {
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast("Заголовок и slug обязательны", "error");
+      showToast("Title and slug are required", "error");
       return;
     }
     setIsSaving(true);
@@ -247,10 +247,10 @@ export default function CreateRecordPage() {
       };
 
       await createRecord(accessToken, recordData);
-      showToast("Запись создана", "success");
+      showToast("Record created", "success");
       router.push("/admin/records");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Ошибка сохранения", "error");
+      showToast(error?.response?.data?.message || "Error saving", "error");
     } finally {
       setIsSaving(false);
     }
@@ -274,19 +274,19 @@ export default function CreateRecordPage() {
       <div className={styles.header}>
         <div className={styles.breadcrumb}>
           <button onClick={() => router.push("/admin/records")} className={styles.backButton}>
-            ← Назад к записям
+            ← Back to records
           </button>
-          <h1>Создать запись</h1>
+          <h1>Create Record</h1>
         </div>
         <div className={styles.actions}>
           <UiButton theme="secondary" onClick={handlePreview}>
-            Предпросмотр
+            Preview
           </UiButton>
           <UiButton theme="secondary" onClick={() => router.push("/admin/records")}>
-            Отмена
+            Cancel
           </UiButton>
           <UiButton theme="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Сохранение..." : "Создать"}
+            {isSaving ? "Saving..." : "Create"}
           </UiButton>
         </div>
       </div>
@@ -298,7 +298,7 @@ export default function CreateRecordPage() {
               className={styles.input}
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Название записи"
+              placeholder="Record title"
             />
 
             <div className={styles.editorWrapper}>
@@ -324,9 +324,9 @@ export default function CreateRecordPage() {
                     blocks: markdownToBlocks(markdown, (editorData?.blocks as RecordBlock[]) || []),
                   });
                 }}
-                placeholder="Начните писать контент записи здесь..."
+                placeholder="Start writing the record content here..."
                 id="record-content"
-                label="Контент записи"
+                label="Record Content"
                 onMediaSelect={handleMediaSelect}
                 onSliderSelect={handleSliderSelect}
               />
@@ -344,19 +344,19 @@ export default function CreateRecordPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Статус</label>
+              <label className={styles.label}>Status</label>
               <select
                 className={styles.select}
                 value={form.status}
                 onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
               >
-                <option value="draft">Черновик</option>
-                <option value="published">Опубликовано</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Шаблон</label>
+              <label className={styles.label}>Template</label>
               <Input
                 value={form.template}
                 onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))}
@@ -364,7 +364,7 @@ export default function CreateRecordPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO заголовок</label>
+              <label className={styles.label}>SEO Title</label>
               <Input
                 value={form.seoTitle}
                 onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))}
@@ -372,7 +372,7 @@ export default function CreateRecordPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO описание</label>
+              <label className={styles.label}>SEO Description</label>
               <div style={{ marginBottom: '10px' }}>
                 <AiGeneratorButton
                   systemPrompt={seoSystemPrompt}
@@ -387,13 +387,13 @@ export default function CreateRecordPage() {
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, seoDescription: event.target.value }))
                 }
-                placeholder="SEO Описание"
+                placeholder="SEO Description"
                 rows={3}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Ключевые слова (через запятую)</label>
+              <label className={styles.label}>Keywords (comma-separated)</label>
               <Input
                 value={form.metaKeywords}
                 onChange={(event) =>
@@ -403,7 +403,7 @@ export default function CreateRecordPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Категории</label>
+              <label className={styles.label}>Categories</label>
               <div className={styles.categoriesContainer}>
                 {categories.map((category) => (
                   <label key={category.id} className={styles.categoryCheckbox}>
@@ -431,7 +431,7 @@ export default function CreateRecordPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Основной слайдер</label>
+              <label className={styles.label}>Featured Slider</label>
               <select
                 className={styles.select}
                 value={form.featuredSliderId?.toString() || ""}
@@ -443,7 +443,7 @@ export default function CreateRecordPage() {
                   handleSliderChange(e.target.value);
                 }}
               >
-                <option value="">Без слайдера</option>
+                <option value="">No slider</option>
                 {sliders.map((slider) => (
                   <option key={slider.id} value={slider.id.toString()}>
                     {slider.name}
@@ -453,7 +453,7 @@ export default function CreateRecordPage() {
 
               {selectedSlider?.slides && selectedSlider.slides.length > 0 && (
                 <div className={styles.sliderPreview}>
-                  <h4>Слайдер: {selectedSlider.name}</h4>
+                  <h4>Slider: {selectedSlider.name}</h4>
                   <PageSlider slider={selectedSlider as any} autoPlay showArrows showDots />
                 </div>
               )}

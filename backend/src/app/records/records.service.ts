@@ -31,7 +31,8 @@ export class RecordsService {
     for (const filePath of candidates) {
       if (!existsSync(filePath)) continue;
       const content = readFileSync(filePath, 'utf8');
-      const lines = content.split(/\r?\n/);
+      const lines = content.split(/?
+/);
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
@@ -51,7 +52,7 @@ export class RecordsService {
     const normalized = (base || 'new-record')
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9а-яё\s-]/gi, '')
+      .replace(/[^a-z0-9\s-]/gi, '') // Removed Russian character range
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -119,7 +120,7 @@ export class RecordsService {
   }
 
   async createDraft(createRecordDraftDto: CreateRecordDraftDto): Promise<DbRecord> {
-    const title = createRecordDraftDto.title?.trim() || 'Новая запись';
+    const title = createRecordDraftDto.title?.trim() || 'New Record';
     const slug = await this.generateUniqueSlug(title);
 
     const draft = await this.prisma.record.create({
@@ -182,7 +183,11 @@ export class RecordsService {
           },
           {
             role: 'user',
-            content: `Instruction:\n${prompt}\n\nCurrent content:\n${content || ''}`,
+            content: `Instruction:
+${prompt}
+
+Current content:
+${content || ''}`,
           },
         ],
         temperature: 0.7,

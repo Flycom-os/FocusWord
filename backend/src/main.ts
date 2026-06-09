@@ -27,7 +27,7 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
-  // Статическая раздача файлов из backend/uploads
+  // Static file serving from backend/uploads
   app.useStaticAssets(join(process.cwd(), 'backend', 'uploads'), {
     prefix: '/backend/uploads',
   });

@@ -43,7 +43,7 @@ export class MailerService {
           }
         }
       } catch (e) {
-        // ignore — settings may not exist yet
+        // ignore - settings may not exist yet
       }
     } else {
       config = overrideConfig;

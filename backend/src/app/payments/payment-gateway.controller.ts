@@ -14,42 +14,42 @@ export class PaymentGatewayController {
 
   @Get()
   @HasPermission('payment:0')
-  @ApiOperation({ summary: 'Получить все платежные шлюзы' })
+  @ApiOperation({ summary: 'Get all payment gateways' })
   findAll() {
     return this.paymentsService.findAllGateways();
   }
 
   @Get(':id')
   @HasPermission('payment:0')
-  @ApiOperation({ summary: 'Получить платежный шлюз по ID' })
+  @ApiOperation({ summary: 'Get payment gateway by ID' })
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOneGateway(+id);
   }
 
   @Post()
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Создать платежный шлюз' })
+  @ApiOperation({ summary: 'Create payment gateway' })
   create(@Body() dto: any) {
     return this.paymentsService.createGateway(dto);
   }
 
   @Put(':id')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Обновить платежный шлюз' })
+  @ApiOperation({ summary: 'Update payment gateway' })
   update(@Param('id') id: string, @Body() dto: any) {
     return this.paymentsService.updateGateway(+id, dto);
   }
 
   @Delete(':id')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Удалить платежный шлюз' })
+  @ApiOperation({ summary: 'Delete payment gateway' })
   remove(@Param('id') id: string) {
     return this.paymentsService.deleteGateway(+id);
   }
 
   @Patch(':id/toggle')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Включить/выключить платежный шлюз' })
+  @ApiOperation({ summary: 'Toggle payment gateway status' })
   toggle(@Param('id') id: string, @Body('isEnabled') isEnabled: boolean) {
     return this.paymentsService.toggleGateway(+id, isEnabled);
   }

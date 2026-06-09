@@ -44,11 +44,11 @@ describe('Authenticate User Controller', () => {
       permission:1,
     });
 
-    expect(result).toEqual({ message: 'Регистрация успешна', user:{id:1}});
+    expect(result).toEqual({ message: 'Registration successful', user:{id:1}});
     expect(prisma.user.create).toHaveBeenCalled();
 
   });
-  it('❌ Должен выдать ошибку, если email уже занят', async () => {
+  it('❌ Should throw an error if email is already taken', async () => {
     prisma.user.findUnique = jest.fn().mockResolvedValue({ id: 1 });
 
     await expect(

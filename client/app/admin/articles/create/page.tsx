@@ -148,19 +148,19 @@ const CreateArticleArticle = () => {
     if (!accessToken) return;
     try {
       const res = await fetchSliders(accessToken, { page: 1, limit: 100 });
-      setSliders(res..data);
+      setSliders(res.data);
     } catch (error) {
       console.error("Error loading sliders:", error);
     }
   };
 
   const handleMediaSelect = () => {
-    // Открываем медиа пикер через кастомное событие
+    // Open media picker via custom event
     window.dispatchEvent(
       new CustomEvent("open-media-picker", {
         detail: {
           onSelect: (media: any) => {
-            // Добавляем медиа блок в JSON
+            // Add media block to JSON
             const mediaBlock: ArticleBlock = {
               id: Date.now().toString(),
               type: "media",
@@ -182,17 +182,17 @@ const CreateArticleArticle = () => {
   };
 
   const handleSliderSelect = () => {
-    // Создаем простой селектор слайдеров
+    // Create a simple slider selector
     if (sliders.length === 0) {
-      showToast("Сначала создайте слайдеры", "error");
+      showToast("Create sliders first", "error");
       return;
     }
 
-    // Создаем модальное окно для выбора слайдера
+    // Create a modal for slider selection
     const sliderHtml = `
       <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите слайдер</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a slider</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${sliders
               .map(
@@ -203,27 +203,27 @@ const CreateArticleArticle = () => {
                    onclick="selectSlider(${JSON.stringify(slider).replace(/"/g, "&quot;")})">
                 <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${slider.name}</h4>
                 <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${slider.slug}</p>
-                <p style="margin: 0; font-size: 12px; color: #6b7280;">${slider.description || "Нет описания"}</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">${slider.description || "No description"}</p>
               </div>
             `,
               )
               .join("")}
           </div>
           <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-            <button onclick="closeSliderModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+            <button onclick="closeSliderModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
       </div>
     `;
 
-    // Вставляем модальное окно в DOM
+    // Insert the modal into the DOM
     const modalDiv = document.createElement("div");
     modalDiv.innerHTML = sliderHtml;
     document.body.appendChild(modalDiv);
 
-    // Функции для модального окна
+    // Functions for the modal window
     (window as any).selectSlider = (slider: any) => {
-      // Добавляем слайдер блок в JSON
+      // Add slider block to JSON
       const sliderBlock: ArticleBlock = {
         id: Date.now().toString(),
         type: "slider",
@@ -251,14 +251,14 @@ const CreateArticleArticle = () => {
 
   const handleWidgetSelect = () => {
     if (widgets.length === 0) {
-      showToast("Сначала создайте виджеты (кроме Header и Footer)", "error");
+      showToast("First, create widgets (except for Header and Footer)", "error");
       return;
     }
 
     const widgetHtml = `
       <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите виджет</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a widget</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${widgets
               .map(
@@ -269,14 +269,14 @@ const CreateArticleArticle = () => {
                    onclick="selectWidget(${JSON.stringify(w).replace(/"/g, "&quot;")})">
                 <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${w.name}</h4>
                 <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${w.slug}</p>
-                <p style="margin: 0; font-size: 12px; color: #6b7280;">Тип: ${w.type}</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">Type: ${w.type}</p>
               </div>
             `,
               )
               .join("")}
           </div>
           <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-            <button onclick="closeWidgetModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+            <button onclick="closeWidgetModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
       </div>
@@ -311,7 +311,7 @@ const CreateArticleArticle = () => {
 
   const handlePreview = () => {
     if (!editorData?.blocks?.length && !form.title.trim()) {
-      showToast("Добавьте заголовок или контент для предпросмотра", "error");
+      showToast("Add a title or content to preview", "error");
       return;
     }
     setShowPreview(true);
@@ -335,7 +335,7 @@ const CreateArticleArticle = () => {
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast("Название и slug обязательны", "error");
+      showToast("Title and slug are required", "error");
       return;
     }
     setIsSaving(true);
@@ -369,10 +369,10 @@ const CreateArticleArticle = () => {
       };
 
       await createArticle(accessToken, articleData);
-      showToast("Статья создана", "success");
+      showToast("Article created", "success");
       router.push("/admin/articles");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Ошибка сохранения", "error");
+      showToast(error?.response?.data?.message || "Error saving", "error");
     } finally {
       setIsSaving(false);
     }
@@ -396,19 +396,19 @@ const CreateArticleArticle = () => {
       <div className={styles.header}>
         <div className={styles.breadcrumb}>
           <button onClick={() => router.push("/admin/articles")} className={styles.backButton}>
-            ← Назад к статьям
+            ← Back to articles
           </button>
-          <h1>Создать статью</h1>
+          <h1>Create Article</h1>
         </div>
         <div className={styles.actions}>
           <UiButton theme="secondary" onClick={handlePreview}>
-            Предпросмотр
+            Preview
           </UiButton>
           <UiButton theme="secondary" onClick={() => router.push("/admin/articles")}>
-            Отмена
+            Cancel
           </UiButton>
           <UiButton theme="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Сохранение..." : "Создать"}
+            {isSaving ? "Saving..." : "Create"}
           </UiButton>
         </div>
       </div>
@@ -420,7 +420,7 @@ const CreateArticleArticle = () => {
               className={styles.input}
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Название статьи"
+              placeholder="Article Title"
             />
 
             <div className={styles.editorWrapper}>
@@ -449,9 +449,9 @@ const CreateArticleArticle = () => {
                     ),
                   });
                 }}
-                placeholder="Начните писать контент статьи здесь..."
+                placeholder="Start writing your article content here..."
                 id="article-content"
-                label="Контент статьи"
+                label="Article Content"
                 onMediaSelect={handleMediaSelect}
                 onSliderSelect={handleSliderSelect}
                 onWidgetSelect={handleWidgetSelect}
@@ -469,19 +469,19 @@ const CreateArticleArticle = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Статус</label>
+              <label className={styles.label}>Status</label>
               <select
                 className={styles.select}
                 value={form.status}
                 onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
               >
-                <option value="draft">Черновик</option>
-                <option value="published">Опубликовано</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Шаблон</label>
+              <label className={styles.label}>Template</label>
               <Input
                 value={form.template}
                 onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))}
@@ -498,29 +498,29 @@ const CreateArticleArticle = () => {
                 style={{ cursor: "pointer", width: "16px", height: "16px" }}
               />
               <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
-                Включить обратную связь
+                Enable Feedback
               </label>
             </div>
 
             {/* Select paymentMethodId */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>Способ оплаты (привязать)</label>
+              <label className={styles.label}>Payment Method (link)</label>
               <select
                 className={styles.select}
                 value={form.paymentMethodId || ""}
                 onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
               >
-                <option value="">Без платежного метода</option>
+                <option value="">No payment method</option>
                 {paymentMethods.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name} ({m.slug})
                   </option>
                 ))}
-              select>
+              </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO заголовок</label>
+              <label className={styles.label}>SEO Title</label>
               <Input
                 value={form.seoTitle}
                 onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))}
@@ -539,13 +539,13 @@ const CreateArticleArticle = () => {
               <DescriptionFieldWrapper
                 value={form.seoDescription}
                 onChange={(value) => setForm((prev) => ({ ...prev, seoDescription: value }))}
-                placeholder="Введите SEO описание в Markdown формате..."
+                placeholder="Enter SEO description in Markdown format..."
                 id="seo-description"
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Ключевые слова (через запятую)</label>
+              <label className={styles.label}>Keywords (comma-separated)</label>
               <Input
                 value={form.metaKeywords}
                 onChange={(event) =>
@@ -555,7 +555,7 @@ const CreateArticleArticle = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Категории</label>
+              <label className={styles.label}>Categories</label>
               <div className={styles.categoriesContainer}>
                 {categories.map((category) => (
                   <label key={category.id} className={styles.categoryCheckbox}>
@@ -583,7 +583,7 @@ const CreateArticleArticle = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Основной слайдер</label>
+              <label className={styles.label}>Featured Slider</label>
               <select
                 className={styles.select}
                 value={form.featuredSliderId?.toString() || ""}
@@ -595,7 +595,7 @@ const CreateArticleArticle = () => {
                   handleSliderChange(e.target.value);
                 }}
               >
-                <option value="">Без слайдера</option>
+                <option value="">No slider</option>
                 {sliders.map((slider) => (
                   <option key={slider.id} value={slider.id.toString()}>
                     {slider.name}
@@ -605,7 +605,7 @@ const CreateArticleArticle = () => {
 
               {selectedSlider && selectedSlider.slides && selectedSlider.slides.length > 0 && (
                 <div className={styles.sliderPreview}>
-                  <h4>Слайдер: {selectedSlider.name}</h4>
+                  <h4>Slider: {selectedSlider.name}</h4>
                   <PageSlider slider={selectedSlider as any} autoPlay showArrows showDots />
                 </div>
               )}

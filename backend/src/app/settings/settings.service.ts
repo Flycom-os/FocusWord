@@ -31,15 +31,15 @@ export class SettingsService implements OnModuleInit {
 
   async onModuleInit() {
     const defaults = [
-      { key: 'theme_mode', value: 'light', type: 'string', category: 'appearance', description: 'Режим темы (light/dark)' },
-      { key: 'theme', value: 'default', type: 'string', category: 'appearance', description: 'Цветовая тема' },
-      { key: 'site_name', value: 'FocusWord', type: 'string', category: 'general', description: 'Название сайта' },
-      { key: 'site_description', value: '', type: 'string', category: 'general', description: 'Описание сайта' },
-      { key: 'site_url', value: 'https://focusword.com', type: 'string', category: 'general', description: 'URL сайта' },
-      { key: 'maintenance_mode', value: 'false', type: 'boolean', category: 'general', description: 'Режим обслуживания' },
-      { key: 'auto_backup', value: 'true', type: 'boolean', category: 'database', description: 'Автоматическое резервное копирование' },
-      { key: 'backup_frequency', value: 'daily', type: 'string', category: 'database', description: 'Частота копирования' },
-      { key: 'max_backups', value: '7', type: 'number', category: 'database', description: 'Максимальное число копий' }
+      { key: 'theme_mode', value: 'light', type: 'string', category: 'appearance', description: 'Theme mode (light/dark)' },
+      { key: 'theme', value: 'default', type: 'string', category: 'appearance', description: 'Color theme' },
+      { key: 'site_name', value: 'FocusWord', type: 'string', category: 'general', description: 'Site name' },
+      { key: 'site_description', value: '', type: 'string', category: 'general', description: 'Site description' },
+      { key: 'site_url', value: 'https://focusword.com', type: 'string', category: 'general', description: 'Site URL' },
+      { key: 'maintenance_mode', value: 'false', type: 'boolean', category: 'general', description: 'Maintenance mode' },
+      { key: 'auto_backup', value: 'true', type: 'boolean', category: 'database', description: 'Automatic backup' },
+      { key: 'backup_frequency', value: 'daily', type: 'string', category: 'database', description: 'Backup frequency' },
+      { key: 'max_backups', value: '7', type: 'number', category: 'database', description: 'Maximum number of backups' }
     ];
 
     for (const item of defaults) {

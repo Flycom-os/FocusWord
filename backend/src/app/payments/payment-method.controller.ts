@@ -14,42 +14,42 @@ export class PaymentMethodController {
 
   @Get()
   @HasPermission('payment:0')
-  @ApiOperation({ summary: 'Получить все платежные методы' })
+  @ApiOperation({ summary: 'Get all payment methods' })
   findAll() {
     return this.paymentsService.findAllMethods();
   }
 
   @Get(':id')
   @HasPermission('payment:0')
-  @ApiOperation({ summary: 'Получить платежный метод по ID' })
+  @ApiOperation({ summary: 'Get payment method by ID' })
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOneMethod(+id);
   }
 
   @Post()
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Создать платежный метод' })
+  @ApiOperation({ summary: 'Create payment method' })
   create(@Body() dto: any) {
     return this.paymentsService.createMethod(dto);
   }
 
   @Put(':id')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Обновить платежный метод' })
+  @ApiOperation({ summary: 'Update payment method' })
   update(@Param('id') id: string, @Body() dto: any) {
     return this.paymentsService.updateMethod(+id, dto);
   }
 
   @Delete(':id')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Удалить платежный метод' })
+  @ApiOperation({ summary: 'Delete payment method' })
   remove(@Param('id') id: string) {
     return this.paymentsService.deleteMethod(+id);
   }
 
   @Patch(':id/toggle')
   @HasPermission('payment:2')
-  @ApiOperation({ summary: 'Включить/выключить платежный метод' })
+  @ApiOperation({ summary: 'Toggle payment method status' })
   toggle(@Param('id') id: string, @Body('isEnabled') isEnabled: boolean) {
     return this.paymentsService.toggleMethod(+id, isEnabled);
   }

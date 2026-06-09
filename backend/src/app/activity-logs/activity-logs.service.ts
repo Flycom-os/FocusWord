@@ -177,7 +177,7 @@ export class ActivityLogsService {
       const u = users.find(x => x.id === g.userId);
       return {
         userId: g.userId!,
-        username: u?.username || u?.email || 'Пользователь',
+        username: u?.username || u?.email || 'User',
         count: g._count.id,
       };
     });

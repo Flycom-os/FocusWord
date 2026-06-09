@@ -63,7 +63,7 @@ export default function PostsPage() {
       setPosts(response.data);
       setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке постов", "error");
+      showToast("Error loading posts", "error");
     } finally {
       setLoading(false);
     }
@@ -113,26 +113,26 @@ export default function PostsPage() {
 
       if (editingPost) {
         await updatePost(accessToken, editingPost.id, postData);
-        showToast("Пост обновлен", "success");
+        showToast("Post updated", "success");
       } else {
         await createPost(accessToken, postData);
-        showToast("Пост создан", "success");
+        showToast("Post created", "success");
       }
       setShowModal(false);
       loadPosts();
     } catch (error) {
-      showToast("Ошибка при сохранении поста", "error");
+      showToast("Error saving post", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Вы уверены что хотите удалить этот пост?")) {
+    if (confirm("Are you sure you want to delete this post?")) {
       try {
         await deletePost(accessToken, id);
-        showToast("Пост удален", "success");
+        showToast("Post deleted", "success");
         loadPosts();
       } catch (error) {
-        showToast("Ошибка при удалении поста", "error");
+        showToast("Error deleting post", "error");
       }
     }
   };
@@ -140,20 +140,20 @@ export default function PostsPage() {
   const handlePublish = async (id: number) => {
     try {
       await publishPost(accessToken, id);
-      showToast("Пост опубликован", "success");
+      showToast("Post published", "success");
       loadPosts();
     } catch (error) {
-      showToast("Ошибка при публикации поста", "error");
+      showToast("Error publishing post", "error");
     }
   };
 
   const handleUnpublish = async (id: number) => {
     try {
       await unpublishPost(accessToken, id);
-      showToast("Пост снят с публикации", "success");
+      showToast("Post unpublished", "success");
       loadPosts();
     } catch (error) {
-      showToast("Ошибка при снятии с публикации", "error");
+      showToast("Error unpublishing post", "error");
     }
   };
 
@@ -171,9 +171,9 @@ export default function PostsPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case "published":
-        return "Опубликовано";
+        return "Published";
       case "draft":
-        return "Черновик";
+        return "Draft";
       default:
         return status;
     }
@@ -182,14 +182,14 @@ export default function PostsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Посты блога</h1>
-        <p>Управление постами и статьями</p>
+        <h1>Blog Posts</h1>
+        <p>Manage posts and articles</p>
       </div>
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
           <Input
-            placeholder="Поиск постов..."
+            placeholder="Search posts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.search}
@@ -199,28 +199,28 @@ export default function PostsPage() {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className={styles.select}
           >
-            <option value="all">Все статусы</option>
-            <option value="draft">Черновики</option>
-            <option value="published">Опубликовано</option>
+            <option value="all">All statuses</option>
+            <option value="draft">Drafts</option>
+            <option value="published">Published</option>
           </select>
         </div>
         <Button onClick={handleCreate} className={styles.createButton}>
-          ➕ Создать пост
+          ➕ Create Post
         </Button>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>Loading...</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Заголовок</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Дата создания</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date created</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -291,15 +291,15 @@ export default function PostsPage() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editingPost ? "Редактировать пост" : "Создать пост"}
+        title={editingPost ? "Edit Post" : "Create Post"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Заголовок</label>
+            <label>Title</label>
             <Input
               value={form.title}
               onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-              placeholder="Введите заголовок поста"
+              placeholder="Enter post title"
             />
           </div>
 
@@ -313,29 +313,29 @@ export default function PostsPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Краткое описание</label>
+            <label>Excerpt</label>
             <textarea
               value={form.excerpt}
               onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
-              placeholder="Краткое описание поста"
+              placeholder="Post excerpt"
               className={styles.textarea}
               rows={3}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Содержимое</label>
+            <label>Content</label>
             <textarea
               value={form.content}
               onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-              placeholder="Полное содержимое поста"
+              placeholder="Full post content"
               className={styles.textarea}
               rows={10}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Статус</label>
+            <label>Status</label>
             <select
               value={form.status}
               onChange={(e) =>
@@ -343,46 +343,46 @@ export default function PostsPage() {
               }
               className={styles.select}
             >
-              <option value="draft">Черновик</option>
-              <option value="published">Опубликовано</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
-            <label>SEO заголовок</label>
+            <label>SEO Title</label>
             <Input
               value={form.seoTitle}
               onChange={(e) => setForm((prev) => ({ ...prev, seoTitle: e.target.value }))}
-              placeholder="SEO заголовок"
+              placeholder="SEO Title"
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>SEO описание</label>
+            <label>SEO Description</label>
             <textarea
               value={form.seoDescription}
               onChange={(e) => setForm((prev) => ({ ...prev, seoDescription: e.target.value }))}
-              placeholder="SEO описание"
+              placeholder="SEO Description"
               className={styles.textarea}
               rows={2}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Ключевые слова</label>
+            <label>Keywords</label>
             <Input
               value={form.metaKeywords}
               onChange={(e) => setForm((prev) => ({ ...prev, metaKeywords: e.target.value }))}
-              placeholder="ключевые, слова, через, запятую"
+              placeholder="keywords, comma, separated"
             />
           </div>
 
           <div className={styles.modalActions}>
             <Button onClick={handleSave} className={styles.saveButton}>
-              {editingPost ? "Сохранить" : "Создать"}
+              {editingPost ? "Save" : "Create"}
             </Button>
             <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
-              Отмена
+              Cancel
             </Button>
           </div>
         </div>

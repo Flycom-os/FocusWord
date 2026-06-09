@@ -11,25 +11,25 @@ export class ProductsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Создать товар' })
+  @ApiOperation({ summary: 'Create product' })
   create(@Body() body: { name: string; slug: string; description?: string; price: number; categoryId?: number; status?: string }) {
     return this.service.create(body);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Получить все товары' })
+  @ApiOperation({ summary: 'Get all products' })
   findAll(@Query() query: { page?: number; limit?: number; search?: string; categoryId?: number }) {
     return this.service.findAll(query);
   }
 
   @Get('slug/:slug')
-  @ApiOperation({ summary: 'Получить товар по slug' })
+  @ApiOperation({ summary: 'Get product by slug' })
   findBySlug(@Param('slug') slug: string) {
     return this.service.findBySlug(slug);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Получить товар по ID' })
+  @ApiOperation({ summary: 'Get product by ID' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(Number(id));
   }
@@ -37,7 +37,7 @@ export class ProductsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновить товар' })
+  @ApiOperation({ summary: 'Update product' })
   update(
     @Param('id') id: string,
     @Body() body: { name?: string; slug?: string; description?: string; price?: number; categoryId?: number; status?: string }
@@ -48,14 +48,14 @@ export class ProductsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Удалить товар' })
+  @ApiOperation({ summary: 'Delete product' })
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));
   }
 
   // === REVIEWS ===
   @Post(':id/reviews')
-  @ApiOperation({ summary: 'Добавить отзыв к товару' })
+  @ApiOperation({ summary: 'Add review to product' })
   addReview(
     @Param('id') id: string,
     @Body() body: { name: string; email: string; message: string; rating: number }
@@ -64,7 +64,7 @@ export class ProductsController {
   }
 
   @Get(':id/reviews')
-  @ApiOperation({ summary: 'Получить отзывы товара по ID' })
+  @ApiOperation({ summary: 'Get product reviews by ID' })
   getReviews(@Param('id') id: string) {
     return this.service.getReviews(Number(id));
   }

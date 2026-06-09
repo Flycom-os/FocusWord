@@ -34,7 +34,7 @@ export class MediafilesController {
       storage: diskStorage({
         destination: './backend/uploads',
         filename: (req, file, cb) => {
-          // Генерируем уникальное имя для сохранения на диске
+          // Generate a unique name for saving to disk
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
@@ -50,13 +50,13 @@ export class MediafilesController {
     @Body() createMediafileDto: UploadMediaFileDto,
     @Req() req: RequestWithUser,
   ) {
-    // Формируем полный URL для доступа к файлу
+    // Formulate the full URL to access the file
     const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331';
     const fileUrl = `${API_URL}/backend/uploads/${file.filename}`;
     
     const newMediaFile = {
-      filename: file.originalname, // Сохраняем оригинальное имя файла
-      filepath: fileUrl, // Сохраняем полный URL
+      filename: file.originalname, // Save original file name
+      filepath: fileUrl, // Save full URL
       mimetype: file.mimetype,
       fileSize: file.size,
       altText: createMediafileDto.altText,

@@ -1,21 +1,21 @@
-# Техническая спецификация: Модуль "Analytics"
+# Technical Specification: "Analytics" Module
 
-## 1. Обзор архитектуры
+## 1. Architecture Overview
 
-Модуль "Аналитика" представляет собой систему сбора и визуализации данных о посещаемости сайта. Архитектура состоит из двух основных частей:
+The "Analytics" module is a system for collecting and visualizing data on website traffic. The architecture consists of two main parts:
 
-1.  **Бэкенд (Nest.js)**: Выполняет роль сборщика данных и агрегатора статистики. Он предоставляет API для записи событий (просмотров страниц) и получения обработанных данных.
-2.  **Фронтенд (Next.js/React)**: Реализует административный дашборд для визуализации аналитики. Дашборд запрашивает данные с бэкенда и представляет их в виде сводных карточек, графиков и таблиц.
+1.  **Backend (Nest.js)**: Acts as a data collector and statistics aggregator. It provides an API for recording events (page views) and retrieving processed data.
+2.  **Frontend (Next.js/React)**: Implements the administrative dashboard for visualizing analytics. The dashboard requests data from the backend and presents it in the form of summary cards, charts, and tables.
 
-В качестве базы данных используется **PostgreSQL** с **Prisma** в качестве ORM. Ролевая модель доступа (RBAC) на бэкенде защищает доступ к данным аналитики.
+**PostgreSQL** is used as the database with **Prisma** as the ORM. A Role-Based Access Control (RBAC) model on the backend protects access to analytics data.
 
-## 2. Модель данных (База данных)
+## 2. Data Model (Database)
 
-Модели данных определены в `backend/prisma/schema.prisma`.
+Data models are defined in `backend/prisma/schema.prisma`.
 
-### 2.1. Модель `AnalyticsEntry`
+### 2.1. `AnalyticsEntry` Model
 
-Это основная модель, которая хранит сгруппированные данные о просмотрах для конкретной единицы контента (страницы, поста и т.д.) за один день.
+This is the main model that stores grouped view data for a specific piece of content (page, post, etc.) for a single day.
 
 ```prisma
 model AnalyticsEntry {
@@ -26,7 +26,7 @@ model AnalyticsEntry {
   bounceRate    Float?
   avgTimeOnPage Int?
 
-  // Связи с различными типами контента
+  // Relationships with different content types
   pageId        Int?
   postId        Int?
   recordId      Int?
@@ -37,11 +37,11 @@ model AnalyticsEntry {
 }
 ```
 
-*   **Ключевая логика**: Система стремится поддерживать только **одну запись** на комбинацию `(date, content_id)`. При повторном просмотре того же контента в тот же день запись не создается, а инкрементируются счетчики `totalViews` и `uniqueViews` в существующей записи.
+*   **Key Logic**: The system aims to maintain only **one record** for a `(date, content_id)` combination. If the same content is viewed again on the same day, a new record is not created; instead, the `totalViews` and `uniqueViews` counters of the existing record are incremented.
 
-### 2.2. Модель `ReferrerDetail`
+### 2.2. `ReferrerDetail` Model
 
-Хранит информацию об источниках перехода для конкретной записи `AnalyticsEntry`.
+Stores information about referral sources for a specific `AnalyticsEntry` record.
 
 ```prisma
 model ReferrerDetail {
@@ -52,60 +52,60 @@ model ReferrerDetail {
 }
 ```
 
-## 3. Бэкенд (API)
+## 3. Backend (API)
 
-*   **Контроллер**: `backend/src/app/analytics/analytics.controller.ts`
-*   **Сервис**: `backend/src/app/analytics/analytics.service.ts`
-*   **Базовый путь**: `/analytics`
+*   **Controller**: `backend/src/app/analytics/analytics.controller.ts`
+*   **Service**: `backend/src/app/analytics/analytics.service.ts`
+*   **Base Path**: `/analytics`
 
-### 3.1. Ключевые эндпоинты
+### 3.1. Key Endpoints
 
-| Метод | Путь       | Описание                                  | Аутентификация / Права  | DTO / Параметры                                    |
-| :---- | :--------- | :---------------------------------------- | :---------------------- | :------------------------------------------------- |
-| `POST`| `/`        | Запись просмотра страницы (идемпотентная) | Нет                     | `CreateAnalyticsEntryDto`                          |
-| `GET` | `/stats`   | Получение агрегированной статистики       | JWT, `analytics:0`      | Query: `startDate?`, `endDate?`                    |
-| `GET` | `/`        | Получение списка записей с фильтрацией    | JWT, `analytics:0`      | `AnalyticsFilterDto`                               |
-| `POST`| `/:id/referrers`| Добавление источника перехода            | Нет                     | Param: `id`, Body: `referrerUrl`                   |
+| Method | Path       | Description                               | Authentication / Permissions | DTO / Parameters                                   |
+| :----- | :--------- | :---------------------------------------- | :--------------------------- | :------------------------------------------------- |
+| `POST` | `/`        | Record a page view (idempotent)           | None                         | `CreateAnalyticsEntryDto`                          |
+| `GET`  | `/stats`   | Get aggregated statistics                 | JWT, `analytics:0`           | Query: `startDate?`, `endDate?`                    |
+| `GET`  | `/`        | Get a list of entries with filtering      | JWT, `analytics:0`           | `AnalyticsFilterDto`                               |
+| `POST` | `/:id/referrers`| Add a referral source                 | None                         | Param: `id`, Body: `referrerUrl`                   |
 
-### 3.2. Логика Бэкенда
+### 3.2. Backend Logic
 
-#### `create` (идемпотентный трекинг)
-Метод `analyticsService.create()` реализует ключевую логику сбора данных. При получении запроса на трекинг он:
-1.  Определяет ключ уникальности: комбинацию `date` и идентификатора контента (`pageId`, `postId` и т.д.).
-2.  Ищет в базе данных существующую запись `AnalyticsEntry` по этому ключу.
-3.  **Если запись найдена**: Инкрементирует счетчики `totalViews` и `uniqueViews`.
-4.  **Если запись не найдена**: Создает новую запись `AnalyticsEntry` со счетчиками, равными 1.
+#### `create` (idempotent tracking)
+The `analyticsService.create()` method implements the core data collection logic. When it receives a tracking request, it:
+1.  Determines the uniqueness key: a combination of `date` and the content identifier (`pageId`, `postId`, etc.).
+2.  Searches the database for an existing `AnalyticsEntry` record with this key.
+3.  **If a record is found**: Increments the `totalViews` and `uniqueViews` counters.
+4.  **If a record is not found**: Creates a new `AnalyticsEntry` record with the counters set to 1.
 
-#### `getStats` (агрегация данных)
-Это самый ресурсоемкий метод, который формирует данные для дашборда:
-1.  Извлекает из БД все записи `AnalyticsEntry` за указанный период.
-2.  В коде приложения (а не в БД) итерирует по этим записям, чтобы вычислить:
-    *   Суммарные `totalViews` и `uniqueViews`.
-    *   Средние `avgBounceRate` и `avgTimeOnPage`.
-    *   Топ-10 страниц, группируя просмотры по `pageId`, `postId` и т.д.
-    *   Топ-10 источников, группируя данные из вложенных `ReferrerDetail`.
-3.  Возвращает единый объект со всей агрегированной статистикой.
+#### `getStats` (data aggregation)
+This is the most resource-intensive method that generates data for the dashboard:
+1.  Retrieves all `AnalyticsEntry` records for the specified period from the database.
+2.  In the application code (not in the database), it iterates over these records to calculate:
+    *   Total `totalViews` and `uniqueViews`.
+    *   Average `avgBounceRate` and `avgTimeOnPage`.
+    *   Top 10 pages, by grouping views by `pageId`, `postId`, etc.
+    *   Top 10 sources, by grouping data from nested `ReferrerDetail` records.
+3.  Returns a single object with all the aggregated statistics.
 
-## 4. Фронтенд
+## 4. Frontend
 
-*   **Основной компонент**: `client/app/admin/analytics/page.tsx`
-*   **API-клиенты**: `fetchAnalyticsStats`, `fetchAnalytics` (из `@/src/shared/api/analytics`).
+*   **Main Component**: `client/app/admin/analytics/page.tsx`
+*   **API Clients**: `fetchAnalyticsStats`, `fetchAnalytics` (from `@/src/shared/api/analytics`).
 
-### 4.1. Структура компонента `AnalyticsPage`
+### 4.1. `AnalyticsPage` Component Structure
 
-*   Компонент является клиентским (`"use client"`).
-*   **Состояние (State)**:
-    *   `stats`: Хранит агрегированные данные, полученные от эндпоинта `/stats`.
-    *   `recentEntries`: Хранит список последних записей, полученный от эндпоинта `/`.
-    *   `loading`: Управляет отображением прелоадера во время загрузки.
-    *   `startDate`, `endDate`: Состояние для полей фильтра дат.
+*   The component is a client component (`"use client"`).
+*   **State**:
+    *   `stats`: Stores aggregated data received from the `/stats` endpoint.
+    *   `recentEntries`: Stores a list of recent entries received from the `/` endpoint.
+    *   `loading`: Manages the display of the preloader during loading.
+    *   `startDate`, `endDate`: State for the date filter fields.
 
-### 4.2. Жизненный цикл данных
+### 4.2. Data Lifecycle
 
-1.  **Инициализация**: При монтировании компонента и при наличии `accessToken` хук `useEffect` запускает функцию `loadData`.
-2.  **Выборка данных**: `loadData` выполняет два запроса к API параллельно с помощью `Promise.all`:
-    *   `fetchAnalyticsStats(accessToken, { startDate, endDate })` -> запрашивает `/analytics/stats`.
-    *   `fetchAnalytics(accessToken, { limit: 10, startDate, endDate })` -> запрашивает `/analytics` для получения последних 10 записей.
-3.  **Обновление состояния**: Полученные данные записываются в `stats` и `recentEntries`, что вызывает перерисовку компонента.
-4.  **Фильтрация**: Изменение значений в полях `startDate` или `endDate` обновляет соответствующее состояние, что снова запускает `useEffect` и инициирует повторную выборку данных с новыми параметрами.
-5.  **Рендеринг**: Компонент рендерит данные из состояния `stats` в сводных карточках и графиках, а данные из `recentEntries` — в таблице.
+1.  **Initialization**: When the component mounts and an `accessToken` is present, the `useEffect` hook triggers the `loadData` function.
+2.  **Data Fetching**: `loadData` executes two API requests in parallel using `Promise.all`:
+    *   `fetchAnalyticsStats(accessToken, { startDate, endDate })` -> requests `/analytics/stats`.
+    *   `fetchAnalytics(accessToken, { limit: 10, startDate, endDate })` -> requests `/analytics` to get the last 10 entries.
+3.  **State Update**: The received data is written to `stats` and `recentEntries`, which causes the component to re-render.
+4.  **Filtering**: Changing the values in the `startDate` or `endDate` fields updates the corresponding state, which again triggers `useEffect` and initiates a re-fetch of the data with the new parameters.
+5.  **Rendering**: The component renders data from the `stats` state in summary cards and charts, and data from `recentEntries` in a table.

@@ -10,9 +10,9 @@
 // @Injectable()
 // export class HistoryService {
 //   constructor(private prisma:PrismaService) {}
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
 //
 //
@@ -34,9 +34,9 @@
 //     });
 //     return newGasBallon;
 //   }
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
 //
 //
@@ -55,9 +55,9 @@
 //     }})
 //     return updatedGasBallon;
 //   }
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
 //
 //
@@ -72,9 +72,9 @@
 //   */);
 //     return {total, data };
 //   }
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
-//   // ЗАКОММЕНТИРОВАНО - метод обращается к несуществующим таблицам Prisma
+//   // COMMENTED OUT - method refers to non-existent Prisma tables
 //   /*
 //
 //

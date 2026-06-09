@@ -40,7 +40,7 @@ export default function RecordCategoriesPage() {
       setCategories(response.data);
       setTotalPages(Math.ceil(response.total / 10));
     } catch (error) {
-      showToast("Ошибка при загрузке категорий", "error");
+      showToast("Error loading categories", "error");
     } finally {
       setLoading(false);
     }
@@ -79,39 +79,39 @@ export default function RecordCategoriesPage() {
           ...categoryData,
           id: editingCategory.id,
         });
-        showToast("Категория обновлена", "success");
+        showToast("Category updated", "success");
       } else {
         await recordsApi.createCategory(categoryData);
-        showToast("Категория создана", "success");
+        showToast("Category created", "success");
       }
 
       setShowCreateModal(false);
       setEditingCategory(null);
       loadCategories();
     } catch (error) {
-      showToast("Ошибка при сохранении категории", "error");
+      showToast("Error saving category", "error");
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm("Вы уверены, что хотите удалить эту категорию?")) {
+    if (!confirm("Are you sure you want to delete this category?")) {
       return;
     }
 
     try {
       await recordsApi.deleteCategory(id);
-      showToast("Категория удалена", "success");
+      showToast("Category deleted", "success");
       loadCategories();
     } catch (error) {
-      showToast("Ошибка при удалении категории", "error");
+      showToast("Error deleting category", "error");
     }
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Категории записей</h1>
-        <p>Управление категориями для записей</p>
+        <h1>Record Categories</h1>
+        <p>Manage categories for records</p>
       </div>
 
       <div className={styles.toolbar}>
@@ -119,23 +119,23 @@ export default function RecordCategoriesPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск категорий..."
+            placeholder="Search categories..."
             className={styles.searchInput}
           />
         </div>
         <Button onClick={handleCreateCategory} className={styles.createButton}>
-          ➕ Создать категорию
+          ➕ Create Category
         </Button>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>Loading...</div>
         ) : categories.length === 0 ? (
           <div className={styles.empty}>
-            <h3>Нет категорий</h3>
-            <p>Создайте первую категорию для записей</p>
-            <Button onClick={handleCreateCategory}>Создать категорию</Button>
+            <h3>No categories</h3>
+            <p>Create the first category for records</p>
+            <Button onClick={handleCreateCategory}>Create Category</Button>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -147,16 +147,16 @@ export default function RecordCategoriesPage() {
 
                 <div className={styles.cardContent}>
                   <p className={styles.slug}>/{category.slug}</p>
-                  <p className={styles.description}>{category.description || "Нет описания"}</p>
+                  <p className={styles.description}>{category.description || "No description"}</p>
                 </div>
 
                 <div className={styles.cardMeta}>
                   <span className={styles.date}>
-                    Создано: {new Date(category.createdAt).toLocaleDateString("ru-RU")}
+                    Created: {new Date(category.createdAt).toLocaleDateString("en-US")}
                   </span>
                   {category.updatedAt !== category.createdAt && (
                     <span className={styles.date}>
-                      Обновлено: {new Date(category.updatedAt).toLocaleDateString("ru-RU")}
+                      Updated: {new Date(category.updatedAt).toLocaleDateString("en-US")}
                     </span>
                   )}
                 </div>
@@ -166,13 +166,13 @@ export default function RecordCategoriesPage() {
                     onClick={() => handleEditCategory(category)}
                     className={styles.editButton}
                   >
-                    ✏️ Редактировать
+                    ✏️ Edit
                   </Button>
                   <Button
                     onClick={() => handleDeleteCategory(category.id.toString())}
                     className={styles.deleteButton}
                   >
-                    🗑️ Удалить
+                    🗑️ Delete
                   </Button>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export default function RecordCategoriesPage() {
         )}
       </div>
 
-      {/* Пагинация */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
           <Button
@@ -192,7 +192,7 @@ export default function RecordCategoriesPage() {
             ←
           </Button>
           <span className={styles.paginationInfo}>
-            Страница {currentPage} из {totalPages}
+            Page {currentPage} of {totalPages}
           </span>
           <Button
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
@@ -204,12 +204,12 @@ export default function RecordCategoriesPage() {
         </div>
       )}
 
-      {/* Модальное окно создания/редактирования */}
+      {/* Create/Edit Modal */}
       {showCreateModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
-              <h3>{editingCategory ? "Редактирование категории" : "Создание категории"}</h3>
+              <h3>{editingCategory ? "Edit Category" : "Create Category"}</h3>
               <button onClick={() => setShowCreateModal(false)} className={styles.closeButton}>
                 ✕
               </button>
@@ -217,11 +217,11 @@ export default function RecordCategoriesPage() {
 
             <div className={styles.modalBody}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Название категории</label>
+                <label className={styles.label}>Category Name</label>
                 <Input
                   value={categoryForm.title}
                   onChange={(e) => setCategoryForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="Введите название категории"
+                  placeholder="Enter category name"
                 />
               </div>
 
@@ -235,13 +235,13 @@ export default function RecordCategoriesPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Описание</label>
+                <label className={styles.label}>Description</label>
                 <textarea
                   value={categoryForm.description}
                   onChange={(e) =>
                     setCategoryForm((prev) => ({ ...prev, description: e.target.value }))
                   }
-                  placeholder="Описание категории"
+                  placeholder="Category description"
                   className={styles.textarea}
                   rows={4}
                 />
@@ -250,10 +250,10 @@ export default function RecordCategoriesPage() {
 
             <div className={styles.modalActions}>
               <Button onClick={() => setShowCreateModal(false)} className={styles.cancelButton}>
-                Отмена
+                Cancel
               </Button>
               <Button onClick={handleSaveCategory} className={styles.saveButton}>
-                {editingCategory ? "Сохранить изменения" : "Создать категорию"}
+                {editingCategory ? "Save Changes" : "Create Category"}
               </Button>
             </div>
           </div>

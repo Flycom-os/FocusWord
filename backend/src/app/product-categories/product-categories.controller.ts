@@ -11,19 +11,19 @@ export class ProductCategoriesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Создать категорию товара' })
+  @ApiOperation({ summary: 'Create a product category' })
   create(@Body() body: { name: string; slug: string; description?: string; parentId?: number; status?: string }) {
     return this.service.create(body);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Получить все категории товаров' })
+  @ApiOperation({ summary: 'Get all product categories' })
   findAll(@Query() query: { page?: number; limit?: number; search?: string }) {
     return this.service.findAll(query);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Получить категорию товара по ID' })
+  @ApiOperation({ summary: 'Get product category by ID' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(Number(id));
   }
@@ -31,7 +31,7 @@ export class ProductCategoriesController {
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Обновить категорию товара' })
+  @ApiOperation({ summary: 'Update product category' })
   update(
     @Param('id') id: string,
     @Body() body: { name?: string; slug?: string; description?: string; parentId?: number; status?: string }
@@ -42,7 +42,7 @@ export class ProductCategoriesController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Удалить категорию товара' })
+  @ApiOperation({ summary: 'Delete product category' })
   remove(@Param('id') id: string) {
     return this.service.remove(Number(id));
   }

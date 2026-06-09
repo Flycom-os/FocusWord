@@ -31,7 +31,7 @@ export class UserController {
 
   @Post('/')
   @Roles('users:2') // Full access (level 2) required for creating users
-  @ApiOperation({ summary: 'Создать нового пользователя (только для администраторов)' })
+  @ApiOperation({ summary: 'Create new user (admins only)' })
   @ApiBody({ type: CreateUserDto })
   async createUser(@Body() dto: CreateUserDto) {
     return this.userService.createUser(dto);
@@ -39,29 +39,29 @@ export class UserController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
-  @ApiOperation({ summary: 'Получить информацию о текущем пользователе' })
+  @ApiOperation({ summary: 'Get current user information' })
   getMe(@GetUserId() userId: number) {
     return this.userService.getUserInfo(userId);
   }
 
   @Get('all')
   @Roles('users:0') // Read access (level 0) required for viewing all users
-  @ApiOperation({ summary: 'Получить всех пользователей с поиском' })
+  @ApiOperation({ summary: 'Get all users with search' })
   getAllUsers(@Query() searchDto: SearchUsersDto) {
     return this.userService.getAllUsers(searchDto);
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
-  @ApiOperation({ summary: 'Обновить данные текущего пользователя' })
+  @ApiOperation({ summary: 'Update current user data' })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
     FileInterceptor("face", {
       storage: diskStorage({
-        destination: "./uploads", // Папка для сохранения изображений
+        destination: "./uploads", // Folder for saving images
         filename: (req, file, callback) => {
           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-          const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Генерируем уникальное имя файла
+          const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Generate unique file name
           callback(null, fileName);
         },
       }),
@@ -69,8 +69,8 @@ export class UserController {
   )
   async updateMe(
     @GetUserId() userId: number,
-    @UploadedFile() file: Express.Multer.File, // Тип для файла
-    @Body() dto: UpdateUserDto // DTO для данных
+    @UploadedFile() file: Express.Multer.File, // File type
+    @Body() dto: UpdateUserDto // DTO for data
   ) {
     let updatedDto = { ...dto };
     
@@ -84,21 +84,21 @@ export class UserController {
 
   @Delete('me')
   @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
-  @ApiOperation({ summary: 'Удалить текущего пользователя' })
+  @ApiOperation({ summary: 'Delete current user' })
   deleteMe(@GetUserId() userId: number) {
     return this.userService.deleteUser(userId);
   }
 
   @Get(':id')
   @Roles('users:0') // Read access (level 0) required for viewing a user by ID
-  @ApiOperation({ summary: 'Получить пользователя по ID' })
+  @ApiOperation({ summary: 'Get user by ID' })
   getUserById(@Param('id') id: string) {
     return this.userService.getUserInfo(parseInt(id));
   }
 
   @Patch(':id')
   @Roles('users:1') // Read/Update access (level 1) required for updating users
-  @ApiOperation({ summary: 'Обновить пользователя по ID' })
+  @ApiOperation({ summary: 'Update user by ID' })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
     FileInterceptor("face", {
@@ -129,7 +129,7 @@ export class UserController {
 
   @Delete(':id')
   @Roles('users:2') // Full access (level 2) required for deleting users
-  @ApiOperation({ summary: 'Удалить пользователя по ID (требует user:delete разрешение)' })
+  @ApiOperation({ summary: 'Delete user by ID (requires user:delete permission)' })
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(parseInt(id));
   }

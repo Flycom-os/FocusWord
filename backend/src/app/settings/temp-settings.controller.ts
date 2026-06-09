@@ -9,9 +9,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 export class TempSettingsController {
   
   @Get()
-  @ApiOperation({ summary: 'Получить все настройки (временная реализация)' })
+  @ApiOperation({ summary: 'Get all settings (temporary implementation)' })
   findAll() {
-    // Временная реализация с базовыми настройками
+    // Temporary implementation with basic settings
     return [
       { id: 1, key: 'theme_mode', value: 'light', type: 'string', category: 'appearance', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
       { id: 2, key: 'theme', value: 'default', type: 'string', category: 'appearance', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -26,10 +26,10 @@ export class TempSettingsController {
   }
 
   @Put('batch')
-  @ApiOperation({ summary: 'Массовое обновление настроек (временная реализация)' })
+  @ApiOperation({ summary: 'Batch update settings (temporary implementation)' })
   updateMultiple(@Body() updateSettingsDto: { settings: { key: string; value: string }[] }) {
-    // Временная реализация - просто возвращаем успех
+    // Temporary implementation - simply return success
     console.log('Received settings update:', updateSettingsDto.settings);
-    return { message: 'Настройки успешно обновлены', updated: updateSettingsDto.settings.length };
+    return { message: 'Settings successfully updated', updated: updateSettingsDto.settings.length };
   }
 }

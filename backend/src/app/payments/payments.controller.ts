@@ -10,7 +10,7 @@ export class PaymentsController {
 
   @Public()
   @Post('yoomoney/create')
-  @ApiOperation({ summary: 'Создать платежную сессию ЮMoney' })
+  @ApiOperation({ summary: 'Create YooMoney payment session' })
   async createYooMoneyPayment(
     @Body() dto: { amount: number; description: string; email: string; name?: string }
   ) {

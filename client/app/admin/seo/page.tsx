@@ -71,12 +71,12 @@ export default function SEOPage() {
       );
 
       if (response.ok) {
-        showToast("SEO настройки сохранены", "success");
+        showToast("SEO settings saved", "success");
       } else {
-        showToast("Ошибка при сохранении", "error");
+        showToast("Error saving", "error");
       }
     } catch (error) {
-      showToast("Ошибка при сохранении", "error");
+      showToast("Error saving", "error");
     } finally {
       setLoading(false);
     }
@@ -100,37 +100,37 @@ export default function SEOPage() {
   const renderGeneralTab = () => (
     <div className={styles.tabContent}>
       <div className={styles.formGroup}>
-        <label className={styles.label}>Название сайта</label>
+        <label className={styles.label}>Site Title</label>
         <Input
           value={seoSettings.siteTitle}
           onChange={(e) => setSeoSettings((prev) => ({ ...prev, siteTitle: e.target.value }))}
-          placeholder="Название вашего сайта"
+          placeholder="Your site title"
           maxLength={60}
         />
-        <small className={styles.hint}>Рекомендуется 60 символов</small>
+        <small className={styles.hint}>Recommended 60 characters</small>
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Описание сайта</label>
+        <label className={styles.label}>Site Description</label>
         <textarea
           className={styles.textarea}
           value={seoSettings.siteDescription}
           onChange={(e) => setSeoSettings((prev) => ({ ...prev, siteDescription: e.target.value }))}
-          placeholder="Описание вашего сайта для поисковых систем"
+          placeholder="Your site description for search engines"
           maxLength={160}
           rows={3}
         />
-        <small className={styles.hint}>Рекомендуется 160 символов</small>
+        <small className={styles.hint}>Recommended 160 characters</small>
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Ключевые слова</label>
+        <label className={styles.label}>Keywords</label>
         <Input
           value={seoSettings.siteKeywords}
           onChange={(e) => setSeoSettings((prev) => ({ ...prev, siteKeywords: e.target.value }))}
-          placeholder="ключевое1, ключевое2, ключевое3"
+          placeholder="keyword1, keyword2, keyword3"
         />
-        <small className={styles.hint}>Через запятую</small>
+        <small className={styles.hint}>Comma-separated</small>
       </div>
 
       <div className={styles.formGroup}>
@@ -147,7 +147,7 @@ export default function SEOPage() {
             onClick={() => handleImageSelect("favicon")}
             className={styles.mediaButton}
           >
-            📷 Выбрать
+            📷 Select
           </Button>
         </div>
         {seoSettings.favicon && (
@@ -162,12 +162,12 @@ export default function SEOPage() {
   const renderSocialTab = () => (
     <div className={styles.tabContent}>
       <div className={styles.formGroup}>
-        <label className={styles.label}>OG Image (для соцсетей)</label>
+        <label className={styles.label}>OG Image (for social media)</label>
         <div className={styles.mediaInput}>
           <Input
             value={seoSettings.ogImage}
             onChange={(e) => setSeoSettings((prev) => ({ ...prev, ogImage: e.target.value }))}
-            placeholder="URL изображения для соцсетей"
+            placeholder="URL of the image for social media"
             readOnly
           />
           <Button
@@ -175,7 +175,7 @@ export default function SEOPage() {
             onClick={() => handleImageSelect("ogImage")}
             className={styles.mediaButton}
           >
-            📷 Выбрать
+            📷 Select
           </Button>
         </div>
         {seoSettings.ogImage && (
@@ -214,13 +214,13 @@ export default function SEOPage() {
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Яндекс Метрика ID</label>
+        <label className={styles.label}>Yandex Metrica ID</label>
         <Input
           value={seoSettings.yandexMetrica}
           onChange={(e) => setSeoSettings((prev) => ({ ...prev, yandexMetrica: e.target.value }))}
           placeholder="XXXXXXXXXXXXXXX"
         />
-        <small className={styles.hint}>Яндекс Метрика счетчик</small>
+        <small className={styles.hint}>Yandex Metrica counter</small>
       </div>
     </div>
   );
@@ -236,7 +236,7 @@ export default function SEOPage() {
           placeholder="User-agent: *&#10;Allow: /&#10;Sitemap: https://yoursite.com/sitemap.xml"
           rows={8}
         />
-        <small className={styles.hint}>Файл инструкций для поисковых роботов</small>
+        <small className={styles.hint}>Instructions file for search engine robots</small>
       </div>
 
       <div className={styles.formGroup}>
@@ -248,7 +248,7 @@ export default function SEOPage() {
           placeholder='<?xml version="1.0" encoding="UTF-8"?>&#10;<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">&#10;  <url>&#10;    <loc>https://yoursite.com</loc>&#10;    <lastmod>2024-01-01</lastmod>&#10;    <priority>1.0</priority>&#10;  </url>&#10;</urlset>'
           rows={10}
         />
-        <small className={styles.hint}>XML карта сайта для поисковых систем</small>
+        <small className={styles.hint}>XML sitemap for search engines</small>
       </div>
     </div>
   );
@@ -256,8 +256,8 @@ export default function SEOPage() {
   return (
     <div className={styles.seoPage}>
       <div className={styles.header}>
-        <h1>SEO Настройки</h1>
-        <p>Управление SEO параметрами сайта</p>
+        <h1>SEO Settings</h1>
+        <p>Manage SEO parameters of the site</p>
       </div>
 
       <div className={styles.tabs}>
@@ -265,25 +265,25 @@ export default function SEOPage() {
           className={`${styles.tab} ${activeTab === "general" ? styles.active : ""}`}
           onClick={() => setActiveTab("general")}
         >
-          🌐 Общие
+          🌐 General
         </button>
         <button
           className={`${styles.tab} ${activeTab === "social" ? styles.active : ""}`}
           onClick={() => setActiveTab("social")}
         >
-          📱 Соцсети
+          📱 Social
         </button>
         <button
           className={`${styles.tab} ${activeTab === "analytics" ? styles.active : ""}`}
           onClick={() => setActiveTab("analytics")}
         >
-          📊 Аналитика
+          📊 Analytics
         </button>
         <button
           className={`${styles.tab} ${activeTab === "technical" ? styles.active : ""}`}
           onClick={() => setActiveTab("technical")}
         >
-          ⚙️ Техническое
+          ⚙️ Technical
         </button>
       </div>
 
@@ -295,7 +295,7 @@ export default function SEOPage() {
 
         <div className={styles.actions}>
           <Button onClick={handleSave} disabled={loading} className={styles.saveButton}>
-            {loading ? "Сохранение..." : "Сохранить настройки"}
+            {loading ? "Saving..." : "Save Settings"}
           </Button>
         </div>
       </div>

@@ -71,8 +71,5 @@ const HomePage = () => {
     </div>
   );
 };
-// TODO: fix page, wiki, get pagesd
-// TODO: fix admin: mediafiles, sliders, pagesd, records, category records, roles, users
-// TODO: roles: fix in server initialization, dix in front access, fix methods, and add roles in admin
 
 export default HomePage;

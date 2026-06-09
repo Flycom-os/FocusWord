@@ -32,7 +32,8 @@ export class PagesService {
     for (const filePath of candidates) {
       if (!existsSync(filePath)) continue;
       const content = readFileSync(filePath, 'utf8');
-      const lines = content.split(/\r?\n/);
+      const lines = content.split(/?
+/);
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
@@ -52,7 +53,7 @@ export class PagesService {
     const normalized = (base || 'new-page')
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9а-яё\s-]/gi, '')
+      .replace(/[^a-z0-9\s-]/gi, '') // Removed Russian character range
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -109,7 +110,7 @@ export class PagesService {
   }
 
   async createDraft(createPageDraftDto: CreatePageDraftDto): Promise<Page> {
-    const title = createPageDraftDto.title?.trim() || 'Новая запись';
+    const title = createPageDraftDto.title?.trim() || 'New Page';
     const slug = await this.generateUniqueSlug(title);
 
     const draft = await this.prisma.page.create({
@@ -165,7 +166,11 @@ export class PagesService {
           },
           {
             role: 'user',
-            content: `Instruction:\n${prompt}\n\nCurrent content:\n${content || ''}`,
+            content: `Instruction:
+${prompt}
+
+Current content:
+${content || ''}`,
           },
         ],
         temperature: 0.7,

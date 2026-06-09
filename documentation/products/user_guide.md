@@ -1,81 +1,81 @@
-# Руководство пользователя: Управление продуктами
+# User Guide: Product Management
 
-## 1. Введение
+## 1. Introduction
 
-Раздел "Продукты" является центральным компонентом административной панели для управления каталогом товаров вашего интернет-магазина. Здесь вы можете создавать, просматривать, обновлять и удалять товары, а также организовывать их по категориям. Этот инструмент предоставляет все необходимые функции для эффективного управления товарной номенклатурой.
+The "Products" section is the central component of the admin panel for managing your online store's product catalog. Here you can create, view, update, and delete products, as well as organize them by category. This tool provides all the necessary functions for effective product nomenclature management.
 
-Интерфейс раздела интуитивно понятен и разработан для того, чтобы минимизировать время, затрачиваемое на управление товарами, и позволить вам сосредоточиться на развитии бизнеса.
+The section's interface is intuitive and designed to minimize the time spent on product management, allowing you to focus on business development.
 
-## 2. Обзор интерфейса
+## 2. Interface Overview
 
-Основной экран раздела "Продукты" состоит из нескольких ключевых элементов:
+The main screen of the "Products" section consists of several key elements:
 
-*   **Заголовок и кнопка "Add Product"**: В верхней части страницы отображается заголовок "Products" и кнопка для добавления нового товара.
-*   **Панель фильтров и поиска**: Позволяет быстро находить нужные товары по названию или артикулу (SKU).
-*   **Таблица продуктов**: Основная часть экрана, где отображается список всех товаров с ключевой информацией.
-*   **Модальные окна**: Всплывающие окна для создания, редактирования и подтверждения удаления товаров.
+*   **Header and "Add Product" Button**: At the top of the page, the "Products" header is displayed along with a button to add a new product.
+*   **Filter and Search Panel**: Allows you to quickly find the products you need by name or SKU.
+*   **Product Table**: The main part of the screen, where a list of all products with key information is displayed.
+*   **Modal Windows**: Pop-up windows for creating, editing, and confirming the deletion of products.
 
-### 2.1. Таблица продуктов
+### 2.1. Product Table
 
-В таблице продуктов представлена следующая информация о каждом товаре:
+The product table provides the following information about each product:
 
-*   **Name**: Название товара и его основное изображение.
-*   **SKU**: Уникальный идентификатор товара (артикул).
-*   **Price**: Цена товара.
-*   **Stock**: Количество товара в наличии.
-*   **Status**: Текущий статус товара (например, "active" - активен, "draft" - черновик).
-*   **Category**: Категория, к которой принадлежит товар.
-*   **Actions**: Кнопки для выполнения действий с товаром (редактирование и удаление).
+*   **Name**: The name of the product and its main image.
+*   **SKU**: The unique identifier of the product (stock-keeping unit).
+*   **Price**: The price of the product.
+*   **Stock**: The quantity of the product in stock.
+*   **Status**: The current status of the product (e.g., "active", "draft").
+*   **Category**: The category to which the product belongs.
+*   **Actions**: Buttons for performing actions with the product (editing and deleting).
 
-## 3. Поиск и фильтрация
+## 3. Search and Filtering
 
-Для быстрого поиска нужного товара используйте поле "Search products...".
+To quickly find the product you need, use the "Search products..." field.
 
-1.  Начните вводить название или артикул (SKU) товара в поле поиска.
-2.  Список товаров в таблице будет автоматически отфильтрован в реальном времени, отображая только те товары, которые соответствуют вашему запросу.
+1.  Start typing the name or SKU of the product in the search field.
+2.  The list of products in the table will be automatically filtered in real time, displaying only the products that match your query.
 
-## 4. Добавление нового продукта
+## 4. Adding a New Product
 
-Чтобы добавить новый товар в каталог, выполните следующие шаги:
+To add a new product to the catalog, follow these steps:
 
-1.  Нажмите на кнопку **"Add Product"** в правом верхнем углу экрана.
-2.  Откроется модальное окно "Create Product" с формой для ввода данных о новом товаре.
+1.  Click the **"Add Product"** button in the upper right corner of the screen.
+2.  The "Create Product" modal window will open with a form for entering information about the new product.
 
-### 4.1. Поля формы
+### 4.1. Form Fields
 
-Заполните следующие поля:
+Fill in the following fields:
 
-*   **Name**: Введите полное название товара. Это название будет отображаться для покупателей.
-*   **SKU**: Укажите уникальный артикул (Stock Keeping Unit). Он используется для отслеживания товара в системе.
-*   **Price**: Установите цену товара.
-*   **Category**: Выберите категорию для товара из предложенного древовидного списка. Вы можете выбрать одну из существующих категорий или не выбирать ни одной, оставив товар без категории.
-*   **Images (comma-separated URLs)**: Вставьте ссылки на изображения товара, разделенные запятыми. Первое изображение будет использоваться как основное.
-*   **Description**: Добавьте подробное описание товара. Здесь можно указать его характеристики, преимущества и другую важную для покупателя информацию.
-*   **Status**: Выберите статус товара. "active" означает, что товар будет виден на сайте, "draft" скроет его от покупателей.
+*   **Name**: Enter the full name of the product. This name will be displayed to customers.
+*   **SKU**: Specify the unique stock keeping unit. It is used to track the product in the system.
+*   **Price**: Set the price of the product.
+*   **Category**: Select a category for the product from the proposed tree list. You can choose one of the existing categories or none at all, leaving the product without a category.
+*   **Images (comma-separated URLs)**: Paste links to product images, separated by commas. The first image will be used as the main one.
+*   **Description**: Add a detailed description of the product. Here you can specify its characteristics, advantages, and other information important to the buyer.
+*   **Status**: Select the status of the product. "active" means that the product will be visible on the site, "draft" will hide it from customers.
 
-### 4.2. Сохранение
+### 4.2. Saving
 
-После заполнения всех необходимых полей нажмите кнопку **"Save"**. Модальное окно закроется, и новый товар появится в общей таблице. Если вы передумали, нажмите **"Cancel"**.
+After filling in all the required fields, click the **"Save"** button. The modal window will close, and the new product will appear in the general table. If you change your mind, click **"Cancel"**.
 
-## 5. Редактирование продукта
+## 5. Editing a Product
 
-Вы можете изменить данные любого существующего товара.
+You can change the data of any existing product.
 
-1.  Найдите в таблице товар, который хотите отредактировать.
-2.  В столбце "Actions" нажмите на иконку с карандашом (**Edit**).
-3.  Откроется модальное окно "Edit Product", в котором будут загружены текущие данные о товаре.
-4.  Внесите необходимые изменения в любые поля формы (см. раздел 4.1).
-5.  Нажмите кнопку **"Save"**, чтобы сохранить изменения.
+1.  Find the product you want to edit in the table.
+2.  In the "Actions" column, click the pencil icon (**Edit**).
+3.  The "Edit Product" modal window will open, in which the current data about the product will be loaded.
+4.  Make the necessary changes to any of the form fields (see section 4.1).
+5.  Click the **"Save"** button to save the changes.
 
-## 6. Удаление продукта
+## 6. Deleting a Product
 
-Если товар больше не нужен, его можно удалить из каталога.
+If a product is no longer needed, it can be removed from the catalog.
 
-**Внимание:** Это действие необратимо. Удаленный товар будет также удален из всех связанных с ним записей.
+**Warning:** This action is irreversible. The deleted product will also be removed from all related records.
 
-1.  Найдите в таблице товар, который хотите удалить.
-2.  В столбце "Actions" нажмите на иконку с корзиной (**Trash2**).
-3.  Появится модальное окно с просьбой подтвердить удаление.
-4.  Для подтверждения нажмите кнопку **"Delete"**. Если вы передумали, нажмите **"Cancel"**.
+1.  Find the product you want to delete in the table.
+2.  In the "Actions" column, click the trash can icon (**Trash2**).
+3.  A modal window will appear asking you to confirm the deletion.
+4.  To confirm, click the **"Delete"** button. If you change your mind, click **"Cancel"**.
 
-После подтверждения товар будет безвозвратно удален из системы, и страница автоматически обновится, чтобы отразить изменения.
+After confirmation, the product will be permanently deleted from the system, and the page will automatically update to reflect the changes.

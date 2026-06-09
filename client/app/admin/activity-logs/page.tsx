@@ -47,7 +47,7 @@ export default function ActivityLogsPage() {
       setStats(statsData);
       setPagination((prev) => ({ ...prev, total: logsData.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке логов активности", "error");
+      showToast("Error loading activity logs", "error");
     } finally {
       setLoading(false);
     }
@@ -73,8 +73,8 @@ export default function ActivityLogsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Логи активности</h1>
-        <p>История действий пользователей</p>
+        <h1>Activity Logs</h1>
+        <p>History of user actions</p>
       </div>
 
       <div className={styles.tabs}>
@@ -82,18 +82,18 @@ export default function ActivityLogsPage() {
           onClick={() => setActiveTab("logs")}
           className={`${styles.tab} ${activeTab === "logs" ? styles.active : ""}`}
         >
-          Логи
+          Logs
         </button>
         <button
           onClick={() => setActiveTab("stats")}
           className={`${styles.tab} ${activeTab === "stats" ? styles.active : ""}`}
         >
-          Статистика
+          Statistics
         </button>
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}>Loading...</div>
       ) : (
         <>
           {activeTab === "logs" && (
@@ -101,7 +101,7 @@ export default function ActivityLogsPage() {
               <div className={styles.toolbar}>
                 <input
                   type="text"
-                  placeholder="Поиск действий..."
+                  placeholder="Search actions..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className={styles.search}
@@ -111,12 +111,12 @@ export default function ActivityLogsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Действие</TableHead>
-                    <TableHead>Сущность</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Entity</TableHead>
                     <TableHead>ID</TableHead>
-                    <TableHead>Пользователь</TableHead>
-                    <TableHead>IP адрес</TableHead>
-                    <TableHead>Дата</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>IP Address</TableHead>
+                    <TableHead>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -145,22 +145,22 @@ export default function ActivityLogsPage() {
               <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
                   <div className={styles.statNumber}>{stats.totalActions}</div>
-                  <div className={styles.statLabel}>Всего действий</div>
+                  <div className={styles.statLabel}>Total Actions</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statNumber}>
                     {Object.keys(stats.actionsByType || {}).length}
                   </div>
-                  <div className={styles.statLabel}>Типов действий</div>
+                  <div className={styles.statLabel}>Action Types</div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statNumber}>{stats.actionsByUser?.length || 0}</div>
-                  <div className={styles.statLabel}>Активных пользователей</div>
+                  <div className={styles.statLabel}>Active Users</div>
                 </div>
               </div>
 
               <div className={styles.recentActions}>
-                <h3>Последние действия</h3>
+                <h3>Recent Actions</h3>
                 <div className={styles.actionList}>
                   {stats.recentActions?.slice(0, 10).map((action: any, index: number) => (
                     <div key={index} className={styles.actionItem}>

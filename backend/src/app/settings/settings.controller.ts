@@ -14,31 +14,31 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Создать новую настройку' })
+  @ApiOperation({ summary: 'Create new setting' })
   create(@Body() createSettingDto: CreateSettingDto) {
     return this.settingsService.create(createSettingDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Получить все настройки' })
+  @ApiOperation({ summary: 'Get all settings' })
   findAll(@Query() searchDto: SearchSettingsDto) {
     return this.settingsService.findAll(searchDto);
   }
 
   @Get('category/:category')
-  @ApiOperation({ summary: 'Получить настройки по категории' })
+  @ApiOperation({ summary: 'Get settings by category' })
   findByCategory(@Param('category') category: string) {
     return this.settingsService.findByCategory(category);
   }
 
   @Get(':key')
-  @ApiOperation({ summary: 'Получить настройку по ключу' })
+  @ApiOperation({ summary: 'Get setting by key' })
   findOne(@Param('key') key: string) {
     return this.settingsService.findOne(key);
   }
 
   @Put('batch')
-  @ApiOperation({ summary: 'Массовое обновление настроек' })
+  @ApiOperation({ summary: 'Batch update settings' })
   updateMultiple(
     @Body() updateSettingsDto: { settings: { key: string; value: string }[] },
     @Query('force') force?: string,
@@ -48,7 +48,7 @@ export class SettingsController {
   }
 
   @Put(':key')
-  @ApiOperation({ summary: 'Обновить настройку' })
+  @ApiOperation({ summary: 'Update setting' })
   update(
     @Param('key') key: string,
     @Body() updateSettingDto: UpdateSettingDto,

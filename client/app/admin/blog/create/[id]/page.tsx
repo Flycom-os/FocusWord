@@ -147,7 +147,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
           }
         }
       } catch {
-        showToast("Не удалось загрузить запись блога", "error");
+        showToast("Failed to load blog post", "error");
         router.push("/admin/blog");
       } finally {
         setIsLoading(false);
@@ -200,14 +200,14 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
 
   const handleSliderSelect = () => {
     if (sliders.length === 0) {
-      showToast("Сначала создайте слайдеры", "error");
+      showToast("Create sliders first", "error");
       return;
     }
 
     const sliderHtml = `
       <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите слайдер</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a slider</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${sliders
               .map(
@@ -221,7 +221,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
               .join("")}
           </div>
           <div style="margin-top: 20px; text-align: right;">
-            <button onclick="closeSliderModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+            <button onclick="closeSliderModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
       </div>`;
@@ -256,14 +256,14 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
 
   const handleWidgetSelect = () => {
     if (widgets.length === 0) {
-      showToast("Сначала создайте виджеты (кроме Header и Footer)", "error");
+      showToast("First, create widgets (except for Header and Footer)", "error");
       return;
     }
 
     const widgetHtml = `
       <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите виджет</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a widget</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
             ${widgets
               .map(
@@ -272,13 +272,13 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
                    onclick="selectWidgetEdit(${JSON.stringify(w).replace(/"/g, "&quot;")})">
                 <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${w.name}</h4>
                 <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${w.slug}</p>
-                <p style="margin: 0; font-size: 12px; color: #6b7280;">Тип: ${w.type}</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">Type: ${w.type}</p>
               </div>`,
               )
               .join("")}
           </div>
           <div style="margin-top: 20px; text-align: right;">
-            <button onclick="closeWidgetModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+            <button onclick="closeWidgetModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
       </div>`;
@@ -310,7 +310,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
 
   const handlePreview = () => {
     if (!editorData?.blocks?.length && !form.title.trim()) {
-      showToast("Заполните заголовок или контент для предпросмотра", "error");
+      showToast("Fill in the title or content to preview", "error");
       return;
     }
     setShowPreview(true);
@@ -333,7 +333,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
   const handleSave = async () => {
     if (!accessToken || !blogPostId) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast("Заголовок и slug обязательны", "error");
+      showToast("Title and slug are required", "error");
       return;
     }
     setIsSaving(true);
@@ -362,10 +362,10 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
         })),
         content: blocks.length ? serializeBlogPostBlocks(blocks) : "",
       });
-      showToast("Запись блога сохранена", "success");
+      showToast("Blog post saved", "success");
       router.push("/admin/blog");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Ошибка сохранения", "error");
+      showToast(error?.response?.data?.message || "Error saving", "error");
     } finally {
       setIsSaving(false);
     }
@@ -374,7 +374,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}>Loading...</div>
       </div>
     );
   }
@@ -399,19 +399,19 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             onClick={() => router.push("/admin/blog")}
             className={styles.backButton}
           >
-            ← Назад к блогу
+            ← Back to blog
           </button>
-          <h1>Редактировать запись блога</h1>
+          <h1>Edit Blog Post</h1>
         </div>
         <div className={styles.actions}>
           <UiButton theme="secondary" onClick={handlePreview}>
-            Предпросмотр
+            Preview
           </UiButton>
           <UiButton theme="secondary" onClick={() => router.push("/admin/blog")}>
-            Отмена
+            Cancel
           </UiButton>
           <UiButton theme="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? "Сохранение..." : "Сохранить"}
+            {isSaving ? "Saving..." : "Save"}
           </UiButton>
         </div>
       </div>
@@ -423,7 +423,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
               className={styles.input}
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Название записи блога"
+              placeholder="Blog post title"
             />
 
             <div className={styles.editorWrapper}>
@@ -434,9 +434,9 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
                     blocks: markdownToBlocks(markdown, (editorData?.blocks as BlogPostBlock[]) || []),
                   });
                 }}
-                placeholder="Начните писать контент записи блога здесь..."
+                placeholder="Start writing your blog post content here..."
                 id="blog-content"
-                label="Контент записи"
+                label="Post Content"
                 onMediaSelect={handleMediaSelect}
                 onSliderSelect={handleSliderSelect}
                 onWidgetSelect={handleWidgetSelect}
@@ -454,19 +454,19 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Статус</label>
+              <label className={styles.label}>Status</label>
               <select
                 className={styles.select}
                 value={form.status}
                 onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
               >
-                <option value="draft">Черновик</option>
-                <option value="published">Опубликовано</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Шаблон</label>
+              <label className={styles.label}>Template</label>
               <Input
                 value={form.template}
                 onChange={(e) => setForm((prev) => ({ ...prev, template: e.target.value }))}
@@ -483,19 +483,19 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
                 style={{ cursor: "pointer", width: "16px", height: "16px" }}
               />
               <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
-                Включить обратную связь
+                Enable Feedback
               </label>
             </div>
 
             {/* Select paymentMethodId */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>Способ оплаты (привязать)</label>
+              <label className={styles.label}>Payment Method (link)</label>
               <select
                 className={styles.select}
                 value={form.paymentMethodId || ""}
                 onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
               >
-                <option value="">Без платежного метода</option>
+                <option value="">No payment method</option>
                 {paymentMethods.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name} ({m.slug})
@@ -505,7 +505,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO заголовок</label>
+              <label className={styles.label}>SEO Title</label>
               <Input
                 value={form.seoTitle}
                 onChange={(e) => setForm((prev) => ({ ...prev, seoTitle: e.target.value }))}
@@ -513,7 +513,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO описание</label>
+              <label className={styles.label}>SEO Description</label>
               <textarea
                 className={styles.textarea}
                 value={form.seoDescription}
@@ -523,7 +523,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Ключевые слова (через запятую)</label>
+              <label className={styles.label}>Keywords (comma-separated)</label>
               <Input
                 value={form.metaKeywords}
                 onChange={(e) => setForm((prev) => ({ ...prev, metaKeywords: e.target.value }))}
@@ -531,7 +531,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Категории</label>
+              <label className={styles.label}>Categories</label>
               <div className={styles.categoriesContainer}>
                 {categories.map((category) => (
                   <label key={category.id} className={styles.categoryCheckbox}>
@@ -559,7 +559,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Основной слайдер</label>
+              <label className={styles.label}>Featured Slider</label>
               <select
                 className={styles.select}
                 value={form.featuredSliderId?.toString() || ""}
@@ -571,7 +571,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
                   handleSliderChange(e.target.value);
                 }}
               >
-                <option value="">Без слайдера</option>
+                <option value="">No slider</option>
                 {sliders.map((slider) => (
                   <option key={slider.id} value={slider.id.toString()}>
                     {slider.name}
@@ -581,7 +581,7 @@ const EditBlogPostPage = ({ params }: { params: { id: string } }) => {
 
               {selectedSlider?.slides && selectedSlider.slides.length > 0 && (
                 <div className={styles.sliderPreview}>
-                  <h4>Слайдер: {selectedSlider.name}</h4>
+                  <h4>Slider: {selectedSlider.name}</h4>
                   <PageSlider slider={selectedSlider as any} autoPlay showArrows showDots />
                 </div>
               )}

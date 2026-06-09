@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
-      // Загружаем статистику
+      // Load statistics
       const [
         pagesResponse,
         slidersResponse,
@@ -79,11 +79,11 @@ export default function AdminDashboard() {
         categories: categoriesResponse.total || 0,
       });
 
-      // Формируем недавнюю активность
+      // Generate recent activity
       const activity = [
         ...feedbackResponse.data.map((item: any) => ({
           type: "feedback",
-          title: `Новый отзыв от ${item.name}`,
+          title: `New feedback from ${item.name}`,
           description: `${item.message.substring(0, 100)}...`,
           time: item.createdAt,
           status: item.status,
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
 
       setRecentActivity(activity);
     } catch (error) {
-      showToast("Ошибка при загрузке данных дашборда", "error");
+      showToast("Error loading dashboard data", "error");
     } finally {
       setLoading(false);
     }
@@ -102,26 +102,26 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: "Создать страницу",
-      description: "Добавить новую страницу на сайт",
+      title: "Create Page",
+      description: "Add a new page to the site",
       icon: "📄",
       action: () => router.push("/admin/pages/create"),
     },
     {
-      title: "Создать запись",
-      description: "Добавить новую запись в блог",
+      title: "Create Post",
+      description: "Add a new post to the blog",
       icon: "📝",
       action: () => router.push("/admin/records/create"),
     },
     {
-      title: "Создать виджет",
-      description: "Добавить новый виджет на сайт",
+      title: "Create Widget",
+      description: "Add a new widget to the site",
       icon: "🎯",
       action: () => router.push("/admin/widgets"),
     },
     {
-      title: "Создать слайдер",
-      description: "Добавить новый слайдер",
+      title: "Create Slider",
+      description: "Add a new slider",
       icon: "🎠",
       action: () => router.push("/admin/sliders"),
     },
@@ -129,34 +129,34 @@ export default function AdminDashboard() {
 
   const navigationItems = [
     {
-      title: "Контент",
+      title: "Content",
       items: [
-        { title: "Страницы", count: stats.pages, icon: "📄", url: "/admin/pages" },
-        { title: "Записи", count: stats.records, icon: "📝", url: "/admin/records" },
-        { title: "Виджеты", count: stats.widgets, icon: "🎯", url: "/admin/widgets" },
-        { title: "Слайдеры", count: stats.sliders, icon: "🎠", url: "/admin/sliders" },
+        { title: "Pages", count: stats.pages, icon: "📄", url: "/admin/pages" },
+        { title: "Posts", count: stats.records, icon: "📝", url: "/admin/records" },
+        { title: "Widgets", count: stats.widgets, icon: "🎯", url: "/admin/widgets" },
+        { title: "Sliders", count: stats.sliders, icon: "🎠", url: "/admin/sliders" },
       ],
     },
     {
-      title: "Управление",
+      title: "Management",
       items: [
-        { title: "Пользователи", count: null, icon: "👥", url: "/admin/users" },
-        { title: "Роли", count: null, icon: "🔐", url: "/admin/roles" },
+        { title: "Users", count: null, icon: "👥", url: "/admin/users" },
+        { title: "Roles", count: null, icon: "🔐", url: "/admin/roles" },
         {
-          title: "Категории",
+          title: "Categories",
           count: stats.categories,
           icon: "📁",
           url: "/admin/product-categories",
         },
-        { title: "Отзывы", count: stats.feedback, icon: "💬", url: "/admin/feedback" },
+        { title: "Reviews", count: stats.feedback, icon: "💬", url: "/admin/feedback" },
       ],
     },
     {
-      title: "Настройки",
+      title: "Settings",
       items: [
-        { title: "Общие настройки", count: null, icon: "⚙️", url: "/admin/settings" },
+        { title: "General Settings", count: null, icon: "⚙️", url: "/admin/settings" },
         { title: "SEO", count: null, icon: "🔍", url: "/admin/seo" },
-        { title: "Медиафайлы", count: null, icon: "🖼️", url: "/admin/media-files" },
+        { title: "Media Files", count: null, icon: "🖼️", url: "/admin/media-files" },
       ],
     },
   ];
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner} />
-        <p>Загрузка дашборда...</p>
+        <p>Loading dashboard...</p>
       </div>
     );
   }
@@ -174,27 +174,27 @@ export default function AdminDashboard() {
     <div className={styles.dashboard}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h1>Панель управления</h1>
-          <p>Добро пожаловать в FocusWord Admin Panel</p>
+          <h1>Dashboard</h1>
+          <p>Welcome to FocusWord Admin Panel</p>
         </div>
         <div className={styles.headerStats}>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.pages + stats.records}</div>
-            <div className={styles.statLabel}>Контент</div>
+            <div className={styles.statLabel}>Content</div>
           </div>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.widgets}</div>
-            <div className={styles.statLabel}>Виджеты</div>
+            <div className={styles.statLabel}>Widgets</div>
           </div>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.feedback}</div>
-            <div className={styles.statLabel}>Отзывы</div>
+            <div className={styles.statLabel}>Reviews</div>
           </div>
         </div>
       </div>
 
       <div className={styles.quickActions}>
-        <h2>Быстрые действия</h2>
+        <h2>Quick Actions</h2>
         <div className={styles.actionGrid}>
           {quickActions.map((action, index) => (
             <button key={index} onClick={action.action} className={styles.actionCard}>
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
 
       <div className={styles.mainContent}>
         <div className={styles.navigation}>
-          <h2>Навигация</h2>
+          <h2>Navigation</h2>
           <div className={styles.navGrid}>
             {navigationItems.map((section, index) => (
               <div key={index} className={styles.navSection}>
@@ -232,11 +232,11 @@ export default function AdminDashboard() {
         </div>
 
         <div className={styles.recentActivity}>
-          <h2>Последняя активность</h2>
+          <h2>Recent Activity</h2>
           <div className={styles.activityList}>
             {recentActivity.length === 0 ? (
               <div className={styles.noActivity}>
-                <p>Нет недавней активности</p>
+                <p>No recent activity</p>
               </div>
             ) : (
               recentActivity.map((activity, index) => (
@@ -254,10 +254,10 @@ export default function AdminDashboard() {
                       {activity.status && (
                         <span className={`${styles.activityStatus} ${styles[activity.status]}`}>
                           {activity.status === "pending"
-                            ? "В ожидании"
+                            ? "Pending"
                             : activity.status === "approved"
-                              ? "Одобрен"
-                              : "Отклонен"}
+                              ? "Approved"
+                              : "Rejected"}
                         </span>
                       )}
                     </div>
@@ -273,8 +273,8 @@ export default function AdminDashboard() {
         <div className={styles.footerContent}>
           <p>FocusWord Admin Panel v1.0</p>
           <div className={styles.footerLinks}>
-            <button onClick={() => router.push("/admin/settings")}>⚙️ Настройки</button>
-            <button onClick={() => window.open("/", "_blank")}>🌐 Сайт</button>
+            <button onClick={() => router.push("/admin/settings")}>⚙️ Settings</button>
+            <button onClick={() => window.open("/", "_blank")}>🌐 Site</button>
           </div>
         </div>
       </div>

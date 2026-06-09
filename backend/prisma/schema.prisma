@@ -69,8 +69,8 @@ model MediaFile {
   width        Int?
   height       Int?
 
-  featuredImageOfPosts Post[]  @relation("FeaturedImageOfPost")
-  featuredImageOfPages Page[] @relation("FeaturedImageOfPage")
+  featuredImageOfPosts BlogPost[] @relation("FeaturedImageOfBlogPost")
+  featuredImageOfPages Page[]     @relation("FeaturedImageOfPage")
   featuredImageOfRecords Record[] @relation("FeaturedImageOfRecord")
   featuredImageOfBlogPosts BlogPost[] @relation("FeaturedImageOfBlogPost")
   featuredImageOfArticles  Article[]  @relation("FeaturedImageOfArticle")
@@ -102,15 +102,15 @@ model Page {
   seoTitle       String?
   seoDescription String?
   metaKeywords   String[]   @default([])
-  
-  // Content blocks - слайдеры, медиа и другой контент
+
+  // Content blocks - sliders, media, and other content
   featuredSlider   Slider? @relation("FeaturedSliderOfPage", fields: [featuredSliderId], references: [id])
   featuredSliderId Int?
-  
-  // JSON массив с метаданными о вставленных контент блоках
-  // Структура: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
+
+  // JSON array with metadata about inserted content blocks
+  // Structure: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
   contentBlocks Json? @default("[]")
-  
+
   menuItems      MenuItem[] @relation("MenuItemPage")
 
   analyticsEntries AnalyticsEntry[] @relation("PageAnalytics")
@@ -192,11 +192,11 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts Post[] @relation("PostCategories")
-  records Record[] @relation("RecordCategories")
+  posts     Post[]     @relation("PostCategories")
+  records   Record[]   @relation("RecordCategories")
   blogPosts BlogPost[] @relation("BlogPostCategories")
-  articles Article[] @relation("ArticleCategories")
-  pages Page[] @relation("PageCategories")
+  articles  Article[]  @relation("ArticleCategories")
+  pages     Page[]     @relation("PageCategories")
 
   parentCategory   Category?  @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
   parentCategoryId Int?
@@ -251,8 +251,8 @@ model Slider {
   updatedAt   DateTime @updatedAt
 
   slides Slide[]
-  
-  // Страницы, которые используют этот слайдер как основной
+
+  // Pages that use this slider as featured
   featuredInPages Page[] @relation("FeaturedSliderOfPage")
   featuredInRecords Record[] @relation("FeaturedSliderOfRecord")
   featuredInBlogPosts BlogPost[] @relation("FeaturedSliderOfBlogPost")
@@ -349,9 +349,9 @@ model PaymentMethod {
   gateway          PaymentGateway? @relation(fields: [paymentGatewayId], references: [id])
   paymentGatewayId Int?
 
-  pages            Page[]          @relation("PagePaymentMethod")
-  blogPosts        BlogPost[]      @relation("BlogPostPaymentMethod")
-  articles         Article[]       @relation("ArticlePaymentMethod")
+  pages     Page[]     @relation("PagePaymentMethod")
+  blogPosts BlogPost[] @relation("BlogPostPaymentMethod")
+  articles  Article[]  @relation("ArticlePaymentMethod")
 }
 
 model AnalyticsEntry {
@@ -362,15 +362,15 @@ model AnalyticsEntry {
   bounceRate    Float?
   avgTimeOnPage Int?
 
-  page   Page? @relation("PageAnalytics", fields: [pageId], references: [id])
-  pageId Int?
-  post   Post? @relation("PostAnalytics", fields: [postId], references: [id])
-  postId Int?
-  record Record? @relation("RecordAnalytics", fields: [recordId], references: [id])
+  page    Page?     @relation("PageAnalytics", fields: [pageId], references: [id])
+  pageId  Int?
+  post    Post?     @relation("PostAnalytics", fields: [postId], references: [id])
+  postId  Int?
+  record  Record?   @relation("RecordAnalytics", fields: [recordId], references: [id])
   recordId Int?
   blogPost BlogPost? @relation("BlogPostAnalytics", fields: [blogPostId], references: [id])
   blogPostId Int?
-  article Article? @relation("ArticleAnalytics", fields: [articleId], references: [id])
+  article Article?  @relation("ArticleAnalytics", fields: [articleId], references: [id])
   articleId Int?
 
   referrers ReferrerDetail[]
@@ -403,11 +403,11 @@ model StructuredData {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  page   Page? @relation("PageStructuredData", fields: [pageId], references: [id])
-  pageId Int?
-  post   Post? @relation("PostStructuredData", fields: [postId], references: [id])
-  postId Int?
-  record Record? @relation("RecordStructuredData", fields: [recordId], references: [id])
+  page    Page?     @relation("PageStructuredData", fields: [pageId], references: [id])
+  pageId  Int?
+  post    Post?     @relation("PostStructuredData", fields: [postId], references: [id])
+  postId  Int?
+  record  Record?   @relation("RecordStructuredData", fields: [recordId], references: [id])
   recordId Int?
 }
 
@@ -499,7 +499,7 @@ model Article {
   contentBlocks Json? @default("[]")
   comments      Comment[]
   categories    Category[] @relation("ArticleCategories")
-  analyticsEntries AnalyticsEntry[] @relation("ArticleAnalytics")
+  analyticsEntries AnalyticsEntry[] @relation("ArticleAnalytics", fields: [articleId], references: [id])
   paymentMethod   PaymentMethod? @relation("ArticlePaymentMethod", fields: [paymentMethodId], references: [id])
   paymentMethodId Int?
   enableFeedback  Boolean        @default(true)

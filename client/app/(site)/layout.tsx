@@ -20,28 +20,28 @@ export default function SiteLayout({
       </div>
       <nav className="flex gap-6 items-center">
         <a href="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-          Главная
+          Home
         </a>
         <a href="/blog" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">
-          Блог
+          Blog
         </a>
         <a
           href="/articles"
           className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
         >
-          Статьи
+          Articles
         </a>
         <a
           href="/records"
           className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
         >
-          Записи
+          Records
         </a>
         <a
           href="/admin"
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all font-medium text-sm"
         >
-          Панель управления
+          Dashboard
         </a>
       </nav>
     </header>
@@ -52,14 +52,14 @@ export default function SiteLayout({
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
           <span className="font-semibold text-gray-700">FocusWord</span> &copy;{" "}
-          {new Date().getFullYear()} — Все права защищены.
+          {new Date().getFullYear()} — All rights reserved.
         </div>
         <div className="flex gap-6">
           <a href="#" className="hover:text-gray-800 transition-colors">
-            Политика конфиденциальности
+            Privacy Policy
           </a>
           <a href="#" className="hover:text-gray-800 transition-colors">
-            Условия использования
+            Terms of Use
           </a>
         </div>
       </div>

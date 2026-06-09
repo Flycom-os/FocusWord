@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateArticleDraftDto {
-  @ApiProperty({ description: 'Draft title', required: false, default: 'Новая статья' })
+  @ApiProperty({ description: 'Draft title', required: false, default: 'New Article' })
   @IsString() @IsOptional()
   title?: string;
 

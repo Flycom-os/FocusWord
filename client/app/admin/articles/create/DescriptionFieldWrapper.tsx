@@ -27,7 +27,7 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
   onChange,
   isReadOnly = false,
   placeholder,
-  label = "SEO описание",
+  label = "SEO Description",
   id,
   className,
   onMediaSelect,
@@ -37,7 +37,7 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
 }) => {
   const { theme } = useTheme();
 
-  // Используем переданную функцию конвертации или стандартную
+  // Use the passed conversion function or the default one
   const defaultConvertToMarkdown = (jsonValue: string): string => {
     if (!jsonValue) return "";
 
@@ -72,11 +72,11 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
               }
               return "";
             case "media":
-              return `📷 Медиа: ${block.data?.filename || "Без имени"}`;
+              return `📷 Media: ${block.data?.filename || "No name"}`;
             case "slider":
-              return `🎠 Слайдер: ${block.data?.name || "Без названия"}`;
+              return `🎠 Slider: ${block.data?.name || "No name"}`;
             case "widget":
-              return `🧩 Виджет: ${block.data?.name || block.data?.slug || "Без названия"}`;
+              return `🧩 Widget: ${block.data?.name || block.data?.slug || "No name"}`;
             default:
               return "";
           }
@@ -84,7 +84,7 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
         .filter((text) => text.trim())
         .join("\n\n");
     } catch (e) {
-      // Если не JSON, возвращаем как есть
+      // If not JSON, return as is
       return jsonValue;
     }
   };
@@ -102,9 +102,9 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
                 type="button"
                 onClick={onMediaSelect}
                 className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Добавить медиафайл"
+                title="Add media file"
               >
-                📷 Медиа
+                📷 Media
               </button>
             )}
             {onSliderSelect && (
@@ -112,9 +112,9 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
                 type="button"
                 onClick={onSliderSelect}
                 className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Добавить слайдер"
+                title="Add slider"
               >
-                🎠 Слайдер
+                🎠 Slider
               </button>
             )}
             {onWidgetSelect && (
@@ -122,9 +122,9 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
                 type="button"
                 onClick={onWidgetSelect}
                 className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Добавить виджет"
+                title="Add widget"
               >
-                🧩 Виджет
+                🧩 Widget
               </button>
             )}
           </div>

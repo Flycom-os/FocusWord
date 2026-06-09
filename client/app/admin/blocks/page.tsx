@@ -39,20 +39,20 @@ export default function BlocksPage() {
       setBlocks(response.data);
       setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке блоков", "error");
+      showToast("Error loading blocks", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Вы уверены что хотите удалить этот блок?")) {
+    if (confirm("Are you sure you want to delete this block?")) {
       try {
         await deleteBlock(accessToken, id);
-        showToast("Блок удален", "success");
+        showToast("Block deleted", "success");
         loadData();
       } catch (error) {
-        showToast("Ошибка при удалении блока", "error");
+        showToast("Error deleting block", "error");
       }
     }
   };
@@ -77,14 +77,14 @@ export default function BlocksPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Блоки контента</h1>
-        <p>Переиспользуемые компоненты</p>
+        <h1>Content Blocks</h1>
+        <p>Reusable components</p>
       </div>
 
       <div className={styles.toolbar}>
         <input
           type="text"
-          placeholder="Поиск блоков..."
+          placeholder="Search blocks..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.search}
@@ -92,17 +92,17 @@ export default function BlocksPage() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}>Loading...</div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Название</TableHead>
-              <TableHead>Тип</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Slug</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Дата создания</TableHead>
-              <TableHead>Действия</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date created</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -127,7 +127,7 @@ export default function BlocksPage() {
                   <span
                     className={`${styles.status} ${block.isActive ? styles.active : styles.inactive}`}
                   >
-                    {block.isActive ? "Активен" : "Неактивен"}
+                    {block.isActive ? "Active" : "Inactive"}
                   </span>
                 </TableCell>
                 <TableCell>{new Date(block.createdAt).toLocaleDateString()}</TableCell>

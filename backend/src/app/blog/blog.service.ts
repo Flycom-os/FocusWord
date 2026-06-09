@@ -31,7 +31,8 @@ export class BlogService {
     for (const filePath of candidates) {
       if (!existsSync(filePath)) continue;
       const content = readFileSync(filePath, 'utf8');
-      const lines = content.split(/\r?\n/);
+      const lines = content.split(/?
+/);
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
@@ -94,7 +95,7 @@ export class BlogService {
   }
 
   async createDraft(dto: CreateBlogPostDraftDto): Promise<BlogPost> {
-    const title = dto.title?.trim() || 'Новая запись блога';
+    const title = dto.title?.trim() || 'New Blog Post';
     const slug = await this.generateUniqueSlug(title);
     const draft = await this.prisma.blogPost.create({
       data: { title, slug, content: dto.content || '', status: 'draft', template: 'default', authorId: dto.authorId },
@@ -121,7 +122,11 @@ export class BlogService {
         model,
         messages: [
           { role: 'system', content: 'You are an assistant that edits blog post content. Return only the final HTML body fragment.' },
-          { role: 'user', content: `Instruction:\n${prompt}\n\nCurrent content:\n${content || ''}` },
+          { role: 'user', content: `Instruction:
+${prompt}
+
+Current content:
+${content || ''}` },
         ],
         temperature: 0.7,
       }),
