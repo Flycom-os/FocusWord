@@ -143,20 +143,6 @@ const menuItems: MenuItem[] = [
     minLevel: 0,
   },
   {
-    icon: <Code size={24} />,
-    label: "Structured Data",
-    url: "/admin/structured-data",
-    resource: "media-files",
-    minLevel: 0,
-  },
-  {
-    icon: <Box size={24} />,
-    label: "Blocks",
-    url: "/admin/blocks",
-    resource: "media-files",
-    minLevel: 0,
-  },
-  {
     icon: <MessageSquare size={24} />,
     label: "Comments",
     url: "/admin/comments",
@@ -185,7 +171,6 @@ const menuItems: MenuItem[] = [
     minLevel: 0,
   },
 ];
-//TODO:remove surplus parts
 //TODO:check docker
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
