@@ -11,6 +11,10 @@ import { Button } from "@/src/shared/ui/Button/ui-button";
 import { fetchPages } from "@/src/shared/api/pages";
 import { fetchSliders } from "@/src/shared/api/sliders";
 import { fetchRecords } from "@/src/shared/api/records";
+import { fetchUsersResponse } from "@/src/shared/api/users";
+import { fetchRolesResponse } from "@/src/shared/api/roles";
+import { fetchBlog } from "@/src/shared/api/blog";
+import { fetchArticles } from "@/src/shared/api/articles";
 import styles from "./admin.module.css";
 
 export default function AdminDashboard() {
@@ -23,6 +27,10 @@ export default function AdminDashboard() {
     widgets: 0,
     feedback: 0,
     categories: 0,
+    users: 0,
+    roles: 0,
+    blog: 0,
+    articles: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +53,10 @@ export default function AdminDashboard() {
         widgetsResponse,
         feedbackResponse,
         categoriesResponse,
+        usersResponse,
+        rolesResponse,
+        blogResponse,
+        articlesResponse,
       ] = await Promise.all([
         fetchPages(accessToken, { page: 1, limit: 100 }),
         fetchSliders(accessToken, { page: 1, limit: 1 }),
@@ -52,6 +64,10 @@ export default function AdminDashboard() {
         fetchWidgets(accessToken, { page: 1, limit: 1 }),
         fetchFeedback(accessToken, { page: 1, limit: 5 }),
         fetchProductCategories(accessToken, 1, 1, ""),
+        fetchUsersResponse(accessToken, { page: 1, limit: 1 }),
+        fetchRolesResponse(accessToken, { page: 1, limit: 1 }),
+        fetchBlog(accessToken, { page: 1, limit: 1000 }),
+        fetchArticles(accessToken, { page: 1, limit: 1000 }),
       ]);
 
       // For pagesd, we need to check if there are more pagesd beyond the first 100
@@ -77,6 +93,10 @@ export default function AdminDashboard() {
         widgets: widgetsResponse.total || 0,
         feedback: feedbackResponse.total || 0,
         categories: categoriesResponse.total || 0,
+        users: usersResponse?.total || 0,
+        roles: rolesResponse?.total || 0,
+        blog: Array.isArray(blogResponse) ? blogResponse.length : 0,
+        articles: Array.isArray(articlesResponse) ? articlesResponse.length : 0,
       });
 
       // Generate recent activity
@@ -132,6 +152,8 @@ export default function AdminDashboard() {
       title: "Content",
       items: [
         { title: "Pages", count: stats.pages, icon: "📄", url: "/admin/pages" },
+        { title: "Blog", count: stats.blog, icon: "📰", url: "/admin/blog" },
+        { title: "Articles", count: stats.articles, icon: "📚", url: "/admin/articles" },
         { title: "Posts", count: stats.records, icon: "📝", url: "/admin/records" },
         { title: "Widgets", count: stats.widgets, icon: "🎯", url: "/admin/widgets" },
         { title: "Sliders", count: stats.sliders, icon: "🎠", url: "/admin/sliders" },
@@ -140,8 +162,8 @@ export default function AdminDashboard() {
     {
       title: "Management",
       items: [
-        { title: "Users", count: null, icon: "👥", url: "/admin/users" },
-        { title: "Roles", count: null, icon: "🔐", url: "/admin/roles" },
+        { title: "Users", count: stats.users, icon: "👥", url: "/admin/users" },
+        { title: "Roles", count: stats.roles, icon: "🔐", url: "/admin/roles" },
         {
           title: "Categories",
           count: stats.categories,
@@ -154,9 +176,9 @@ export default function AdminDashboard() {
     {
       title: "Settings",
       items: [
-        { title: "General Settings", count: null, icon: "⚙️", url: "/admin/settings" },
-        { title: "SEO", count: null, icon: "🔍", url: "/admin/seo" },
-        { title: "Media Files", count: null, icon: "🖼️", url: "/admin/media-files" },
+        { title: "General Settings", count: undefined, icon: "⚙️", url: "/admin/settings" },
+        { title: "SEO", count: undefined, icon: "🔍", url: "/admin/seo" },
+        { title: "Media Files", count: undefined, icon: "🖼️", url: "/admin/media-files" },
       ],
     },
   ];

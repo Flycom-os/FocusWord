@@ -186,10 +186,7 @@ const menuItems: MenuItem[] = [
   },
 ];
 //TODO:remove surplus parts
-//TODO: hosts
 //TODO:check docker
-// TODO:refact readmes
-// TODO:refact home, analytics
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);

@@ -171,7 +171,7 @@
 
 .tableHeader {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr;
   padding: 12px;
   background: #f9fafb;
   border-radius: 8px;
@@ -181,7 +181,7 @@
 
 .tableRow {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr;
   padding: 12px;
   border-radius: 8px;
   color: #6b7280;

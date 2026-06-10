@@ -1,6 +1,6 @@
 {
   "name": "FocusWord-Frontend",
-  "version": "0.1.0",
+  "version": "2.1.0",
   "private": true,
   "husky": {
     "hooks": {
@@ -42,6 +42,8 @@
     "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^3.6.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.363.0",
     "next": "^14.2.26",
     "next-themes": "^0.3.0",
@@ -54,6 +56,7 @@
     "storybook": "^8.0.2",
     "tailwind-merge": "^3.5.0",
     "vite-tsconfig-paths": "^5.1.4",
+    "xlsx": "^0.18.5",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },

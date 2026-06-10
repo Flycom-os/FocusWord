@@ -41,6 +41,11 @@ export interface PaginatedUsersResponse {
 const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const fetchUsers = async (token: string | null, params: UsersQuery): Promise<UserDto[]> => {
+  const data = await fetchUsersResponse(token, params);
+  return data.users || [];
+};
+
+export const fetchUsersResponse = async (token: string | null, params: UsersQuery): Promise<PaginatedUsersResponse> => {
   const { data } = await axios.get<PaginatedUsersResponse>(`${API_URL}/user/all`, {
     params: {
       ...params,
@@ -50,7 +55,7 @@ export const fetchUsers = async (token: string | null, params: UsersQuery): Prom
     },
     headers: authHeaders(token),
   });
-  return data.users || [];
+  return data;
 };
 
 export const fetchUser = async (token: string | null, id: number): Promise<UserDto> => {

@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { BarChart3, TrendingUp, Users, ShoppingCart, DollarSign, Activity, Calendar, RefreshCw } from "lucide-react";
+import { BarChart3, TrendingUp, Users, ShoppingCart, DollarSign, Activity, Calendar, RefreshCw, Download } from "lucide-react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { fetchAnalyticsStats, fetchAnalytics } from "@/src/shared/api/analytics";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import styles from "./analytics.module.css";
 
 interface StatsData {
@@ -33,7 +36,7 @@ const AnalyticsPage = () => {
     topPages: [],
     topReferrers: [],
   });
-  const [recentEntries, setRecentEntries] = useState<any[]>([]);
+  const [allEntries, setAllEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Date filter
@@ -42,15 +45,19 @@ const AnalyticsPage = () => {
   const [startDate, setStartDate] = useState(thirtyDaysAgo);
   const [endDate, setEndDate] = useState(today);
 
+  // Active Tab
+  const [activeTab, setActiveTab] = useState<'all' | 'pages' | 'articles' | 'records' | 'blog'>('all');
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [statsData, entriesData] = await Promise.all([
-        fetchAnalyticsStats(accessToken, { startDate, endDate }),
-        fetchAnalytics(accessToken, { limit: 10, startDate, endDate }),
-      ]);
+      const statsData = await fetchAnalyticsStats(accessToken, { startDate, endDate });
+      
+      // Fetch all to allow proper export and filtering, limit 10000 to get 'absolutely all values'
+      const entriesData = await fetchAnalytics(accessToken, { limit: 10000, startDate, endDate });
+      
       setStats(statsData);
-      setRecentEntries(entriesData.data || []);
+      setAllEntries(entriesData.data || []);
     } catch (error) {
       console.error(error);
       showToast("Error loading analytics", "error");
@@ -76,7 +83,7 @@ const AnalyticsPage = () => {
     {
       title: "Unique Visitors",
       value: stats.uniqueViews.toLocaleString(),
-      change: "By cookies for 24h",
+      change: "By cookies",
       icon: <Users size={24} />,
       color: "#10b981",
     },
@@ -95,6 +102,57 @@ const AnalyticsPage = () => {
       color: "#f59e0b",
     },
   ];
+
+  // Filtering based on active tab
+  const getFilteredEntries = () => {
+    if (activeTab === 'all') return allEntries;
+    if (activeTab === 'pages') return allEntries.filter(e => e.pageId);
+    if (activeTab === 'articles') return allEntries.filter(e => e.articleId);
+    if (activeTab === 'records') return allEntries.filter(e => e.postId); // assuming postId is used for records/posts
+    if (activeTab === 'blog') return allEntries.filter(e => e.blogPostId);
+    return allEntries;
+  };
+
+  const filteredEntries = getFilteredEntries();
+
+  const exportExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(filteredEntries.map(e => ({
+      Date: new Date(e.date).toLocaleDateString(),
+      Title: e.page?.title || e.post?.title || e.record?.title || e.blogPost?.title || e.article?.title || "Home",
+      TotalViews: e.totalViews,
+      UniqueViews: e.uniqueViews,
+      BounceRate: e.bounceRate || 0,
+      AvgTimeOnPage: e.avgTimeOnPage || 0,
+      Type: e.pageId ? 'Page' : e.articleId ? 'Article' : e.postId ? 'Record' : e.blogPostId ? 'Blog' : 'General'
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Analytics");
+    XLSX.writeFile(wb, `analytics_${activeTab}_${startDate}_to_${endDate}.xlsx`);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text(`Analytics (${activeTab}) - ${startDate} to ${endDate}`, 14, 15);
+    
+    const tableColumn = ["Date", "Title", "Type", "Views", "Unique", "Bounce (%)", "Time (s)"];
+    const tableRows = filteredEntries.map(e => [
+      new Date(e.date).toLocaleDateString(),
+      e.page?.title || e.post?.title || e.record?.title || e.blogPost?.title || e.article?.title || "Home",
+      e.pageId ? 'Page' : e.articleId ? 'Article' : e.postId ? 'Record' : e.blogPostId ? 'Blog' : 'General',
+      e.totalViews,
+      e.uniqueViews,
+      e.bounceRate || 0,
+      e.avgTimeOnPage || 0
+    ]);
+
+    (doc as any).autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+    
+    doc.save(`analytics_${activeTab}_${startDate}_to_${endDate}.pdf`);
+  };
 
   return (
     <div className={styles.analyticsContainer}>
@@ -197,25 +255,50 @@ const AnalyticsPage = () => {
           </div>
 
           <div className={styles.tableSection}>
-            <h2>Recent Views by Date</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => setActiveTab('all')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'all' ? '#3b82f6' : '#fff', color: activeTab === 'all' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>All</button>
+                <button onClick={() => setActiveTab('pages')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'pages' ? '#3b82f6' : '#fff', color: activeTab === 'pages' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Pages</button>
+                <button onClick={() => setActiveTab('articles')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'articles' ? '#3b82f6' : '#fff', color: activeTab === 'articles' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Articles</button>
+                <button onClick={() => setActiveTab('records')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'records' ? '#3b82f6' : '#fff', color: activeTab === 'records' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Records</button>
+                <button onClick={() => setActiveTab('blog')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'blog' ? '#3b82f6' : '#fff', color: activeTab === 'blog' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Blog</button>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={exportExcel} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#10b981', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>
+                  <Download size={16} /> Excel
+                </button>
+                <button onClick={exportPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>
+                  <Download size={16} /> PDF
+                </button>
+              </div>
+            </div>
+            
             <div className={styles.table}>
               <div className={styles.tableHeader}>
                 <span>Date</span>
-                <span>Page / Post</span>
+                <span>Title</span>
+                <span>Type</span>
                 <span>Views</span>
                 <span>Unique</span>
+                <span>Bounce</span>
+                <span>Time (s)</span>
               </div>
-              {recentEntries.length === 0 ? (
-                <div className={styles.emptyRow}>No data for the selected period</div>
+              {filteredEntries.length === 0 ? (
+                <div className={styles.emptyRow}>No data for the selected period in this category</div>
               ) : (
-                recentEntries.map((entry, index) => {
+                filteredEntries.map((entry, index) => {
                   const title = entry.page?.title || entry.post?.title || entry.record?.title || entry.blogPost?.title || entry.article?.title || "Home";
+                  const type = entry.pageId ? 'Page' : entry.articleId ? 'Article' : entry.postId ? 'Record' : entry.blogPostId ? 'Blog' : 'General';
                   return (
                     <div key={index} className={styles.tableRow}>
                       <span>{new Date(entry.date).toLocaleDateString()}</span>
                       <span>{title}</span>
+                      <span>{type}</span>
                       <span>{entry.totalViews}</span>
                       <span>{entry.uniqueViews}</span>
+                      <span>{entry.bounceRate || 0}%</span>
+                      <span>{entry.avgTimeOnPage || 0}</span>
                     </div>
                   );
                 })

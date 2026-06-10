@@ -30,6 +30,11 @@ export interface PaginatedRolesResponse {
 }
 
 export const fetchRoles = async (token: string | null, params: RolesQuery): Promise<RoleDto[]> => {
+  const data = await fetchRolesResponse(token, params);
+  return data.roles || [];
+};
+
+export const fetchRolesResponse = async (token: string | null, params: RolesQuery): Promise<PaginatedRolesResponse> => {
   const { data } = await axios.get<PaginatedRolesResponse>(`${API_URL}/roles`, {
     params: {
       ...params,
@@ -38,7 +43,7 @@ export const fetchRoles = async (token: string | null, params: RolesQuery): Prom
     },
     headers: authHeaders(token),
   });
-  return data.roles || [];
+  return data;
 };
 
 export const fetchRole = async (token: string | null, id: number): Promise<RoleDto> => {

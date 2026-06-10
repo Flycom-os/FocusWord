@@ -17,8 +17,8 @@ async function bootstrap() {
     },});
   const config = new DocumentBuilder()
     .setTitle('API documentation')
-    .setDescription('API requests for FocusWord 2.0')
-    .setVersion('2.0')
+    .setDescription('API requests for FocusWord 2.1')
+    .setVersion('2.1')
     .addTag('Auth')
     .addBearerAuth()
     .build();

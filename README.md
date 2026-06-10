@@ -4,20 +4,25 @@
 [![CI](https://github.com/Flycom-os/FocusWord/actions/workflows/ci.yml/badge.svg)](https://github.com/Flycom-os/FocusWord/actions/workflows/ci.yml)
 
 ![img.png](img.png)
-FocusWord is a modern, open-source content management system (CMS) based on Next.js 14, React 18, and TypeScript. The project is inspired by the flexibility of WordPress, but focuses on ease of development using modern tools and practices.
 
-We welcome contributors—if you'd like to help (with fixes, new features, or bug reports), you're welcome! Below is a brief guide to getting started, the architecture, and how to contribute.
+FocusWord is a modern, open-source content management system (CMS) built with Next.js 14, React 18, and TypeScript. Inspired by the flexibility of WordPress, FocusWord is designed from the ground up to offer an exceptional developer experience using a modern, scalable technology stack.
+
+Whether you're building a simple blog, a corporate website, or a complex dynamic application, FocusWord provides a robust API, dynamic analytics, built-in email support, and an intuitive dashboard to manage your content effectively.
+
+We welcome contributors! If you'd like to help with bug fixes, new features, or documentation, you are more than welcome. Below is a brief guide to getting started, the architecture, and how to contribute.
+
 ![img_1.png](img_1.png)
 ![img_2.png](img_2.png)
 ![img_3.png](img_3.png)
 
 ## Key Features
 
-- Frontend: Next.js 14 (App Router), React 18, TypeScript
-- Backend: NestJS + Sequelize (REST API), JWT authentication
-- Docker manifests for local development
-- Validation: Zod / class-validator (frontend and backend)
-- State and Cache Management: React Query (optional)
+- **Frontend:** Next.js 14 (App Router), React 18, TypeScript, robust UI components
+- **Backend:** NestJS, Prisma ORM, PostgreSQL (REST API), JWT authentication
+- **Analytics:** Granular tracking (Pages, Articles, Records, Blog) with Excel/PDF export
+- **Dynamic Dashboard:** Real-time metrics and dynamic data presentation without hardcoding
+- **Docker Ready:** Built-in Docker compose configuration for seamless local development
+- **Validation:** Zod / class-validator ensuring data integrity across frontend and backend
 
 ## Quick Start (Local)
 
@@ -31,67 +36,72 @@ cd FocusWord
 2. Run the backend and frontend via Docker Compose (recommended):
 
 ```bash
-cd FocusWord_backend_by_TypeWord
+cd backend
 docker-compose up --build
 ```
 
-3. For frontend development (Next.js) separately:
+3. To run the frontend (Next.js) locally without Docker:
 
 ```bash
-cd FocusWord_client_by_TypeWord
+cd client
 npm install
 npm run dev
 ```
 
-4. Scripts and settings are described in the corresponding `package.json` in the subprojects.
+4. To run the backend (NestJS) locally without Docker:
 
-> Environment variables are stored in `.env` / `.env.local` (see `FocusWord_backend_by_TypeWord/.env.example` if present).
+```bash
+cd backend
+npm install
+npm run start:dev
+```
 
-## Architecture (briefly)
+> **Note:** Environment variables are required. Copy the `.env.example` file to `.env` in both the `/backend` and `/client` directories and adjust the values (e.g., SMTP credentials for mailer, database URLs, etc.).
 
-- `FocusWord_backend_by_TypeWord` folder — NestJS application (API, models, migrations).
-- `FocusWord_client_by_TypeWord` folder — Next.js application (admin and public parts).
-- Docker-compose files for local development and the production profile.
+## Architecture Overview
+
+- **`/backend`** folder — The NestJS application. It handles REST APIs, JWT authentication, email services, and database operations using Prisma.
+- **`/client`** folder — The Next.js application. It contains the public-facing pages and the comprehensive admin dashboard.
+- **`/documentation`** folder — Extended project documentation and wikis.
 
 ## Contributing
 
-We welcome contributors—any contribution is helpful:
+We value all contributions—whether it's code, documentation, or design:
 
-- Open an issue for bugs and suggestions.
-- Fork the project, creating a branch such as `feature/your-feature` or `fix/issue-xxx`.
-- Submit a PR to the `developer` branch (or specify the branch in the PR description).
-- Follow the existing coding style; the project uses TypeScript and linters—run `npm run lint` before submitting a PR.
+- **Issues:** Open an issue for bug reports or feature requests.
+- **Branching:** Fork the repository and create a branch (e.g., `feature/your-feature` or `fix/issue-xxx`).
+- **Pull Requests:** Submit PRs to the `developer` branch.
+- **Standards:** The project uses TypeScript and linters. Please run `npm run lint` and ensure there are no build errors before submitting.
 
-A simple workflow template:
+Simple contribution workflow:
 
 ```bash
 git checkout -b feature/awesome-change
-# code
-git commit -am "feat: add ..."
+# make your changes
+git commit -am "feat: add awesome feature"
 git push origin feature/awesome-change
-# create PR
+# create a Pull Request on GitHub
 ```
 
-## Notes for JetBrains users (IDEA, WebStorm, Rider)
+## IDE Setup (JetBrains, VS Code)
 
-If you use JetBrains IDEs, here are some notes to help you get started quickly:
+If you are using an IDE like WebStorm, IntelliJ IDEA, or VS Code, follow these tips:
 
-- Open the project root folder (`FocusWord`) as a project in the IDE.
-- Install plugins: `Node.js`, `ESLint`, `Prettier`, and optionally `Docker`/`Docker Compose`.
-- Set up Run/Debug configuration:
-- For the frontend, use `npm run dev` in `FocusWord_client_by_TypeWord`.
-- For the backend, use `npm run start:dev` or Docker-compose.
-- Specify `.env` files in the environment configuration (Run Config) or add them to `.env.local` for Next.js.
-- If you need to work with a database, connect to the Docker container (or local database) using Database tools in the IDE.
+- Open the root `FocusWord` folder as the main project directory.
+- Ensure plugins for `Node.js`, `TypeScript`, `ESLint`, and `Prettier` are installed.
+- Configure Run/Debug profiles:
+  - Frontend: `npm run dev` in the `/client` directory.
+  - Backend: `npm run start:dev` in the `/backend` directory.
+- Properly configure `.env` files in both directories so the IDE can resolve environment variables.
 
-## API and Contract
+## API Structure
 
-The backend provides a REST API (in the `FocusWord_backend_by_TypeWord/src/files` folder — controllers and DTOs for working with files). Example routes:
+The backend provides a structured REST API configured with Swagger. Key endpoints include domains such as users, roles, analytics, articles, and blog posts:
 
-- `POST /api/files/new_file` — upload a new file (multipart/form-data)
-- `PATCH /api/files/update` — update file metadata (JSON)
-- `GET /api/files/search/:page/:per_page` — file search and pagination
+- **Users/Roles:** `GET /user/all`, `GET /roles`
+- **Analytics:** `GET /analytics`, `GET /analytics/stats` for robust dashboard insights.
+- **Content:** Full CRUD support for `articles`, `blog`, `pages`, and `records`.
 
 ## License
 
-The project is licensed under the license specified in the `LICENSE` file in the root of the repository — please check it before distributing.
+This project is open-source and licensed under the MIT License. Please see the `LICENSE` file for more details.
