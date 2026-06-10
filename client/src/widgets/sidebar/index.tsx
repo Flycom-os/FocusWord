@@ -190,7 +190,6 @@ const menuItems: MenuItem[] = [
 //TODO:check docker
 // TODO:refact readmes
 // TODO:refact home, analytics
-//TODO: network refact in setting and seo
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);

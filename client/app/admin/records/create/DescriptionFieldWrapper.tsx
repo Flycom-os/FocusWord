@@ -58,11 +58,9 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
                 if (block.data?.style === "ordered") {
                   return items
                     .map((item: string, index: number) => `${index + 1}. ${item}`)
-                    .join("
-");
+                    .join("\n");
                 }
-                return items.map((item: string) => `- ${item}`).join("
-");
+                return items.map((item: string) => `- ${item}`).join("\n");
               }
               return "";
             case "image":
@@ -80,9 +78,7 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
           }
         })
         .filter((text) => text.trim())
-        .join("
-
-");
+        .join("\n\n");
     } catch (e) {
       // If not JSON, return as is
       return jsonValue;

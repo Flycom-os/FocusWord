@@ -8,7 +8,7 @@ import { fetchProductCategories } from "@/src/shared/api/products";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import Input from "@/src/shared/ui/Input/ui-input";
 import Button from "@/src/shared/ui/Button/ui-button";
-import Modal from "@/src/shared/ui/Modal";
+import Modal from "@/src/shared/ui/Modal/ui-modal";
 import styles from "./products.module.css";
 
 const ProductsPage = () => {

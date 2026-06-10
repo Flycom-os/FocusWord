@@ -33,6 +33,7 @@ model User {
   mediaFiles   MediaFile[]
   comments     Comment[]
   activityLogs ActivityLog[]
+  mailboxes    Mailbox[]
 }
 
 model Role {
@@ -69,7 +70,7 @@ model MediaFile {
   width        Int?
   height       Int?
 
-  featuredImageOfPosts BlogPost[] @relation("FeaturedImageOfBlogPost")
+  featuredImageOfPosts     Post[]     @relation("FeaturedImageOfPost")
   featuredImageOfPages Page[]     @relation("FeaturedImageOfPage")
   featuredImageOfRecords Record[] @relation("FeaturedImageOfRecord")
   featuredImageOfBlogPosts BlogPost[] @relation("FeaturedImageOfBlogPost")
@@ -424,6 +425,109 @@ model ActivityLog {
   userId Int?
 }
 
+// Enums for Email Integration
+enum EmailProviderType {
+  SMTP
+  SENDGRID
+  MAILGUN
+  AWS_SES
+  OAUTH_GOOGLE
+  OAUTH_MICROSOFT
+}
+
+enum DomainStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  FAILED_VERIFICATION
+  ACTIVE
+  INACTIVE
+}
+
+enum DnsProviderType {
+  CLOUDFLARE
+  ROUTE53
+  OTHER
+}
+
+enum MailboxType {
+  INBOUND
+  OUTBOUND
+  FULL_ACCESS
+}
+
+enum MailboxStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// Models for Email Integration
+model EmailProvider {
+  id        Int               @id @default(autoincrement())
+  name      String            @unique
+  type      EmailProviderType
+  isActive  Boolean           @default(true)
+  settings  Json              @default("{}") // Store provider-specific credentials/settings
+  isDefault Boolean           @default(false)
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  domains   Domain[]
+}
+
+model EmailTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  subject     String
+  bodyHtml    String
+  bodyText    String?
+  variables   Json     @default("{}") // Expected variables for templating
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Domain {
+  id                     Int             @id @default(autoincrement())
+  name                   String          @unique
+  isVerified             Boolean         @default(false)
+  verificationToken      String?
+  status                 DomainStatus    @default(PENDING_VERIFICATION)
+  mxRecordsSet           Boolean         @default(false)
+  spfRecordSet           Boolean         @default(false)
+  dkimRecordSet          Boolean         @default(false)
+  dmarcRecordSet         Boolean         @default(false)
+  dnsProviderType        DnsProviderType?
+  dnsProviderCredentials Json?           @default("{}") // Encrypted credentials for DNS provider API
+
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  defaultEmailProvider   EmailProvider?  @relation(fields: [defaultEmailProviderId], references: [id])
+  defaultEmailProviderId Int?
+
+  mailboxes              Mailbox[]
+}
+
+model Mailbox {
+  id              Int         @id @default(autoincrement())
+  emailAddress    String      @unique
+  domainId        Int
+  userId          Int?        // Optional: associate with a user
+  type            MailboxType
+  credentials     Json?       @default("{}") // Encrypted credentials for IMAP/POP3/SMTP access
+  status          MailboxStatus @default(ACTIVE)
+  autoReplyMessage String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  domain          Domain      @relation(fields: [domainId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
+}
+
 model Setting {
   id          Int      @id @default(autoincrement())
   key         String   @unique
@@ -499,7 +603,7 @@ model Article {
   contentBlocks Json? @default("[]")
   comments      Comment[]
   categories    Category[] @relation("ArticleCategories")
-  analyticsEntries AnalyticsEntry[] @relation("ArticleAnalytics", fields: [articleId], references: [id])
+  analyticsEntries AnalyticsEntry[] @relation("ArticleAnalytics")
   paymentMethod   PaymentMethod? @relation("ArticlePaymentMethod", fields: [paymentMethodId], references: [id])
   paymentMethodId Int?
   enableFeedback  Boolean        @default(true)

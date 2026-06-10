@@ -31,8 +31,7 @@ export class ArticlesService {
     for (const filePath of candidates) {
       if (!existsSync(filePath)) continue;
       const content = readFileSync(filePath, 'utf8');
-      const lines = content.split(/?
-/);
+      const lines = content.split(/\r?\n/);
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;

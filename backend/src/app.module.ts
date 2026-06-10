@@ -28,8 +28,12 @@ import { PaymentsModule } from './app/payments/payments.module';
 import { MailerModule } from './app/mailer/mailer.module';
 import { ProductsModule } from './app/products/products.module';
 import { ProductCategoriesModule } from './app/product-categories/product-categories.module';
+import { EmailProviderModule } from './app/email-providers/email-provider.module';
+import { EmailTemplatesModule } from './app/email-templates/email-template.module';
+import { DomainManagementModule } from './app/domain-management/domain.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ActivityLogInterceptor } from './common/interceptors/activity-log.interceptor';
+import { CommonServicesModule } from './common/common-services.module';
 
 @Module({
   imports: [
@@ -37,6 +41,7 @@ import { ActivityLogInterceptor } from './common/interceptors/activity-log.inter
       isGlobal: true,
       envFilePath: ['.env', 'backend/.env', '../.env'],
     }),
+    CommonServicesModule,
     RedisModule,
     AuthModule,
     UserModule,
@@ -61,6 +66,9 @@ import { ActivityLogInterceptor } from './common/interceptors/activity-log.inter
     PaymentsModule,
     // Mailer module provides email sending capabilities
     MailerModule,
+    EmailProviderModule,
+    EmailTemplatesModule,
+    DomainManagementModule,
     ProductsModule,
     ProductCategoriesModule,
   ],
