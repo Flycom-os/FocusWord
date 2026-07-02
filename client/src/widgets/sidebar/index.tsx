@@ -171,7 +171,7 @@ const menuItems: MenuItem[] = [
     minLevel: 0,
   },
 ];
-//TODO:check docker
+
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
