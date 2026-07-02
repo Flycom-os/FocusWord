@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Head from 'next/head';
-import { seoApi, SEOSettings } from '@/src/shared/api/seo';
+import Head from "next/head";
+import { seoApi, SEOSettings } from "@/src/shared/api/seo";
 
 interface SEOMetaProps {
   title?: string;
@@ -9,7 +9,7 @@ interface SEOMetaProps {
   keywords?: string;
   ogImage?: string;
   url?: string;
-  type?: 'website' | 'article';
+  type?: "website" | "article";
   siteSettings?: SEOSettings;
 }
 
@@ -19,15 +19,15 @@ export default function SEOMeta({
   keywords,
   ogImage,
   url,
-  type = 'website',
-  siteSettings
+  type = "website",
+  siteSettings,
 }: SEOMetaProps) {
   // Используем переданные пропсы или настройки сайта по умолчанию
-  const pageTitle = title || siteSettings?.siteTitle || 'FocusWord';
-  const pageDescription = description || siteSettings?.siteDescription || '';
-  const pageKeywords = keywords || siteSettings?.siteKeywords || '';
-  const pageOgImage = ogImage || siteSettings?.ogImage || '';
-  const pageUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
+  const pageTitle = title || siteSettings?.siteTitle || "FocusWord";
+  const pageDescription = description || siteSettings?.siteDescription || "";
+  const pageKeywords = keywords || siteSettings?.siteKeywords || "";
+  const pageOgImage = ogImage || siteSettings?.ogImage || "";
+  const pageUrl = url || (typeof window !== "undefined" ? window.location.href : "");
 
   return (
     <Head>
@@ -37,21 +37,21 @@ export default function SEOMeta({
       <meta name="keywords" content={pageKeywords} />
       <meta name="author" content="FocusWord" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      
+
       {/* Open Graph мета-теги */}
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageOgImage} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:type" content={type} />
-      <meta property="og:site_name" content={siteSettings?.siteTitle || 'FocusWord'} />
-      
+      <meta property="og:site_name" content={siteSettings?.siteTitle || "FocusWord"} />
+
       {/* Twitter Card мета-теги */}
-      <meta name="twitter:card" content={siteSettings?.twitterCard || 'summary_large_image'} />
+      <meta name="twitter:card" content={siteSettings?.twitterCard || "summary_large_image"} />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageOgImage} />
-      
+
       {/* Favicon */}
       {siteSettings?.favicon && (
         <>
@@ -59,13 +59,13 @@ export default function SEOMeta({
           <link rel="apple-touch-icon" href={siteSettings.favicon} />
         </>
       )}
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={pageUrl} />
-      
+
       {/* Robots */}
       <meta name="robots" content="index, follow" />
-      
+
       {/* Аналитика */}
       {siteSettings?.googleAnalytics && (
         <>
@@ -85,7 +85,7 @@ export default function SEOMeta({
           />
         </>
       )}
-      
+
       {siteSettings?.yandexMetrica && (
         <script
           type="text/javascript"

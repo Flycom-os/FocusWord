@@ -6,10 +6,10 @@ export interface WidgetDto {
   id: number;
   name: string;
   slug: string;
-  type: 'text' | 'image' | 'slider' | 'gallery' | 'form' | 'social' | 'custom';
+  type: "text" | "image" | "slider" | "gallery" | "form" | "social" | "custom";
   content: any;
   config: any;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   position: number;
   createdAt: string;
   updatedAt: string;
@@ -18,20 +18,20 @@ export interface WidgetDto {
 export interface CreateWidgetDto {
   name: string;
   slug: string;
-  type: 'text' | 'image' | 'slider' | 'gallery' | 'form' | 'social' | 'custom';
+  type: "text" | "image" | "slider" | "gallery" | "form" | "social" | "custom";
   content: any;
   config: any;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   position: number;
 }
 
 export interface UpdateWidgetDto {
   name?: string;
   slug?: string;
-  type?: 'text' | 'image' | 'slider' | 'gallery' | 'form' | 'social' | 'custom';
+  type?: "text" | "image" | "slider" | "gallery" | "form" | "social" | "custom";
   content?: any;
   config?: any;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
   position?: number;
 }
 
@@ -47,26 +47,31 @@ export interface WidgetQuery {
   limit?: number;
   search?: string;
   type?: string;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const widgetsApi = {
   // Получить все виджеты с пагинацией
-  getAll: async (token: string | null, params: WidgetQuery = {}): Promise<PaginatedWidgetsResponse> => {
+  getAll: async (
+    token: string | null,
+    params: WidgetQuery = {},
+  ): Promise<PaginatedWidgetsResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
       ...(params.search && { search: params.search }),
       ...(params.type && { type: params.type }),
-      ...(params.status && { status: params.status })
+      ...(params.status && { status: params.status }),
     });
-    
-    const { data } = await axios.get<PaginatedWidgetsResponse>(`${API_URL}/widgets?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedWidgetsResponse>(
+      `${API_URL}/widgets?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -102,19 +107,49 @@ export const widgetsApi = {
   },
 
   // Изменить статус виджета
-  changeStatus: async (token: string | null, id: number, status: 'active' | 'inactive'): Promise<WidgetDto> => {
-    const { data: result } = await axios.patch<WidgetDto>(`${API_URL}/widgets/${id}/status`, { status }, {
-      headers: authHeaders(token),
-    });
+  changeStatus: async (
+    token: string | null,
+    id: number,
+    status: "active" | "inactive",
+  ): Promise<WidgetDto> => {
+    const { data: result } = await axios.patch<WidgetDto>(
+      `${API_URL}/widgets/${id}/status`,
+      { status },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
   // Изменить позицию виджета
-  changePosition: async (token: string | null, id: number, position: number): Promise<WidgetDto> => {
-    const { data: result } = await axios.patch<WidgetDto>(`${API_URL}/widgets/${id}/position`, { position }, {
-      headers: authHeaders(token),
-    });
+  changePosition: async (
+    token: string | null,
+    id: number,
+    position: number,
+  ): Promise<WidgetDto> => {
+    const { data: result } = await axios.patch<WidgetDto>(
+      `${API_URL}/widgets/${id}/position`,
+      { position },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
+  },
+
+  // Публичный fetch: получить все активные виджеты
+  getPublicWidgets: async (type?: string): Promise<WidgetDto[]> => {
+    const { data } = await axios.get<WidgetDto[]>(
+      `${API_URL}/public/widgets${type ? `?type=${type}` : ""}`,
+    );
+    return data;
+  },
+
+  // Публичный fetch: получить активный виджет по slug
+  getPublicWidgetBySlug: async (slug: string): Promise<WidgetDto> => {
+    const { data } = await axios.get<WidgetDto>(`${API_URL}/public/widgets/slug/${slug}`);
+    return data;
   },
 };
 
@@ -126,3 +161,5 @@ export const updateWidget = widgetsApi.update;
 export const deleteWidget = widgetsApi.delete;
 export const changeWidgetStatus = widgetsApi.changeStatus;
 export const changeWidgetPosition = widgetsApi.changePosition;
+export const fetchPublicWidgets = widgetsApi.getPublicWidgets;
+export const fetchPublicWidgetBySlug = widgetsApi.getPublicWidgetBySlug;

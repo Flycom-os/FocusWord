@@ -19,7 +19,7 @@ describe('Auth (E2E)', () => {
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
-    // Создание пользователя вручную перед тестами
+    // Manually create user before tests
 
   });
 
@@ -28,7 +28,7 @@ describe('Auth (E2E)', () => {
   //   await app.close();
   // });
 
-  it('✅ Должен зарегистрировать нового пользователя', async () => {
+  it('✅ Should register a new user', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
@@ -42,11 +42,11 @@ describe('Auth (E2E)', () => {
     expect(response.body.user).toHaveProperty('id');
   });
 
-  it('✅ Должен авторизовать пользователя', async () => {
+  it('✅ Should authenticate a user', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
-        identifier: 'newuuser@example.com', // Исправлено: email -> identifier
+        identifier: 'newuuser@example.com', // Corrected: email -> identifier
         password: 'mypassword',
       });
 

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chat</title>
+
+  <style>
+      body {
+          margin: 0;
+          font-family: Arial, sans-serif;
+          background: #0f172a;
+          color: white;
+          display: flex;
+          justify-content: center;
+          height: 100vh;
+      }
+
+      .app {
+          width: 800px;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+      }
+
+      .header {
+          padding: 15px;
+          font-size: 18px;
+          border-bottom: 1px solid #1e293b;
+      }
+
+      .chat {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+
+      .msg {
+          padding: 10px 14px;
+          border-radius: 12px;
+          max-width: 70%;
+          white-space: pre-wrap;
+          line-height: 1.4;
+      }
+
+      .user {
+          align-self: flex-end;
+          background: #2563eb;
+      }
+
+      .bot {
+          align-self: flex-start;
+          background: #1e293b;
+      }
+
+      .input-area {
+          display: flex;
+          padding: 10px;
+          border-top: 1px solid #1e293b;
+          gap: 10px;
+      }
+
+      textarea {
+          flex: 1;
+          resize: none;
+          padding: 10px;
+          border-radius: 10px;
+          border: none;
+          outline: none;
+          height: 50px;
+          font-size: 14px;
+      }
+
+      button {
+          background: #22c55e;
+          border: none;
+          padding: 0 20px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-weight: bold;
+      }
+
+      button:disabled {
+          opacity: 0.5;
+      }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="header">Cerebras Chat</div>
+
+  <div id="chat" class="chat"></div>
+
+  <div class="input-area">
+    <textarea id="input" placeholder="Напиши сообщение..."></textarea>
+    <button id="btn" onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script>
+  const API_KEY = "csk-6m9t3fdvd8e3585yw6pxv5hthtw9353rm6mkkcjpdeerhpjf";
+
+  const chatEl = document.getElementById("chat");
+  const inputEl = document.getElementById("input");
+
+  let messages = [
+    { role: "system", content: "You are a helpful assistant." }
+  ];
+
+  function addMessage(text, type) {
+    const div = document.createElement("div");
+    div.className = `msg ${type}`;
+    div.textContent = text;
+    chatEl.appendChild(div);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    inputEl.value = "";
+
+    // user message
+    addMessage(text, "user");
+
+    messages.push({ role: "user", content: text });
+
+    const btn = document.getElementById("btn");
+    btn.disabled = true;
+
+    try {
+      const response = await fetch("https://api.cerebras.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "zai-glm-4.7",
+          messages: messages
+        })
+      });
+
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || "Error";
+
+      messages.push({ role: "assistant", content: reply });
+
+      addMessage(reply, "bot");
+
+    } catch (e) {
+      addMessage("Ошибка запроса", "bot");
+    }
+
+    btn.disabled = false;
+  }
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+</body>
+</html>

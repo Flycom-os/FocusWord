@@ -25,6 +25,7 @@ const createNoopRedisClient = () => ({
         const logger = new Logger('RedisModule');
         const redisEnabled = (configService.get<string>('REDIS_ENABLED') || 'true').toLowerCase() === 'true';
         const host = configService.get<string>('REDIS_HOST') || '127.0.0.1';
+        const resolvedHost = host === 'localhost' ? '127.0.0.1' : host;
         const port = parseInt(
           configService.get<string>('REDIS_PORT') || '6379',
           10,
@@ -41,7 +42,7 @@ const createNoopRedisClient = () => ({
         try {
           const store = await redisStore({
             socket: {
-              host,
+              host: resolvedHost,
               port,
             },
             ttl,
@@ -65,6 +66,7 @@ const createNoopRedisClient = () => ({
         const logger = new Logger('RedisModule');
         const redisEnabled = (configService.get<string>('REDIS_ENABLED') || 'true').toLowerCase() === 'true';
         const host = configService.get<string>('REDIS_HOST') || '127.0.0.1';
+        const resolvedHost = host === 'localhost' ? '127.0.0.1' : host;
         const port = parseInt(
           configService.get<string>('REDIS_PORT') || '6379',
           10,
@@ -75,9 +77,9 @@ const createNoopRedisClient = () => ({
           return createNoopRedisClient();
         }
 
-        logger.log(`Attempting to connect to direct IORedis client at host: ${host}, port: ${port}`);
+        logger.log(`Attempting to connect to direct IORedis client at host: ${resolvedHost}, port: ${port}`);
         const client = new IORedis({
-          host,
+          host: resolvedHost,
           port,
           lazyConnect: true,
           maxRetriesPerRequest: 1,

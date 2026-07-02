@@ -2,6 +2,8 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import styles from "@/src/shared/ui/Button/ui-button.module.css";
 import classNames from "@/src/shared/lib/classnames/classnames";
+import { ChevronDown, Plus, X } from "lucide-react";
+import styless from "@/src/widgets/block_management/index.module.css";
 
 export interface Button extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   theme?: VariantsType;
@@ -27,8 +29,6 @@ const Button = (props: Button) => {
     </button>
   );
 };
-import { ChevronDown, Plus, X } from "lucide-react";
-import styless from "@/src/widgets/block_management/index.module.css";
 
 interface searchProps {
   type?: VariantssType;
@@ -40,11 +40,11 @@ const BlockManagement = ({ type }: searchProps) => {
     <div className={styless.default}>
       {(type === "primary" || type === "secondary") && (
         <div className={styless.primary_or_secondary}>
-          <Button className={styless.close} theme={"close"}>
+          <Button className={styless.close} theme="close">
             <X className={styless.x} />
           </Button>
           <div className={styless.text}>Выбранно: {choosen}</div>
-          <Button theme={"warning"}>Удалить</Button>
+          <Button theme="warning">Удалить</Button>
         </div>
       )}
       {type === "secondary" && (
@@ -74,7 +74,6 @@ const BlockManagement = ({ type }: searchProps) => {
     </div>
   );
 };
-
 
 const meta: Meta<typeof BlockManagement> = {
   title: "Widgets/BlockManagement",

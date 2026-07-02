@@ -1,16 +1,27 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import styles from '../create.module.css';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { createPage, updatePage, PageDto, fetchPage } from '@/src/shared/api/pages';
-import { fetchSliders, SliderDto } from '@/src/shared/api/sliders';
-import { Notifications, UiButton, showToast } from '@/src/shared/ui';
-import Input from '@/src/shared/ui/Input/ui-input';
-import { OutputData } from '@editorjs/editorjs';
-import { MediaPickerModal } from '@/src/features/Media/ui/MediaPickerModal';
-import RichEditor from '@/src/features/Editor/RichEditor';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { updatePage, fetchPage } from "@/src/shared/api/pages";
+import { fetchSliders, getSlider, SliderDto, SliderDetailsDto } from "@/src/shared/api/sliders";
+import { PagePreviewModal } from "@/src/widgets/page-preview/PagePreviewModal";
+import { PageSlider, Notifications, UiButton, showToast } from "@/src/shared/ui";
+import Input from "@/src/shared/ui/Input/ui-input";
+import { OutputData } from "@editorjs/editorjs";
+import {
+  blocksFromPage,
+  blocksToMarkdown,
+  markdownToBlocks,
+  serializePageBlocks,
+  type PageBlock,
+} from "@/src/shared/lib/page-content";
+import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
+import { fetchCategories, CategoryDto } from "@/src/shared/api/categories";
+import { fetchWidgets, WidgetDto } from "@/src/shared/api/widgets";
+import { fetchPaymentMethods, PaymentMethodDto } from "@/src/shared/api/payments";
+import styles from "../create.module.css";
+import DescriptionFieldWrapper from "../DescriptionFieldWrapper";
 
 type EditorForm = {
   title: string;
@@ -21,17 +32,23 @@ type EditorForm = {
   seoDescription: string;
   metaKeywords: string;
   featuredSliderId?: number | null;
+  categoryIds: number[];
+  enableFeedback: boolean;
+  paymentMethodId?: number | null;
 };
 
 const defaultForm: EditorForm = {
-  title: '',
-  slug: '',
-  status: 'draft',
-  template: 'default',
-  seoTitle: '',
-  seoDescription: '',
-  metaKeywords: '',
+  title: "",
+  slug: "",
+  status: "draft",
+  template: "default",
+  seoTitle: "",
+  seoDescription: "",
+  metaKeywords: "",
   featuredSliderId: null,
+  categoryIds: [],
+  enableFeedback: true,
+  paymentMethodId: null,
 };
 
 const EditPagePage = ({ params }: { params: { id: string } }) => {
@@ -43,78 +60,107 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sliders, setSliders] = useState<SliderDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [widgets, setWidgets] = useState<WidgetDto[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDto[]>([]);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [mediaPickerCallback, setMediaPickerCallback] = useState<{ onSelect: (media: any) => void } | null>(null);
-  const [selectedSlider, setSelectedSlider] = useState<SliderDto | null>(null);
+  const [mediaPickerCallback, setMediaPickerCallback] = useState<{
+    onSelect: (media: any) => void;
+  } | null>(null);
+  const [selectedSlider, setSelectedSlider] = useState<SliderDetailsDto | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewContent, setPreviewContent] = useState('');
+
+  const loadSliders = async () => {
+    if (!accessToken) return;
+    try {
+      const res = await fetchSliders(accessToken, { page: 1, limit: 100 });
+      setSliders(res.data);
+    } catch (error) {
+      console.error("Error loading sliders:", error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await fetchCategories(1, 100);
+      setCategories(res.data || []);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  };
+
+  const loadWidgets = async () => {
+    if (!accessToken) return;
+    try {
+      const res = await fetchWidgets(accessToken, { page: 1, limit: 100 });
+      const filtered = (res.data || []).filter(
+        (w) =>
+          w.slug !== "header" &&
+          w.slug !== "footer" &&
+          !w.name.toLowerCase().includes("header") &&
+          !w.name.toLowerCase().includes("footer")
+      );
+      setWidgets(filtered);
+    } catch (error) {
+      console.error("Error loading widgets:", error);
+    }
+  };
+
+  const loadPaymentMethods = async () => {
+    try {
+      const res = await fetchPaymentMethods(accessToken);
+      setPaymentMethods(res.filter((m) => m.isEnabled) || []);
+    } catch (error) {
+      console.error("Error loading payment methods:", error);
+    }
+  };
 
   useEffect(() => {
     const loadPageData = async () => {
       if (!accessToken || !pageId) return;
       setIsLoading(true);
       try {
-        const page = await fetchPage(accessToken, parseInt(pageId));
+        const page = await fetchPage(accessToken, parseInt(pageId, 10));
         setForm({
-          title: page.title || '',
-          slug: page.slug || '',
-          status: page.status || 'draft',
-          template: page.template || 'default',
-          seoTitle: page.seoTitle || '',
-          seoDescription: page.seoDescription || '',
-          metaKeywords: (page.metaKeywords || []).join(', '),
+          title: page.title || "",
+          slug: page.slug || "",
+          status: page.status || "draft",
+          template: page.template || "default",
+          seoTitle: page.seoTitle || "",
+          seoDescription: page.seoDescription || "",
+          metaKeywords: (page.metaKeywords || []).join(", "),
           featuredSliderId: page.featuredSliderId || null,
+          categoryIds: (page.categories || []).map((c: any) => c.id),
+          enableFeedback: page.enableFeedback !== false, // default true
+          paymentMethodId: page.paymentMethodId || null,
         });
-        
-        // Set selected slider for preview
+
+        const blocks = blocksFromPage(page);
+        setEditorData({ blocks });
+
         if (page.featuredSliderId) {
-          const slider = sliders.find(s => s.id === page.featuredSliderId);
-          setSelectedSlider(slider || null);
-        }
-        
-        // Convert contentBlocks back to Editor.js format if exists
-        console.log('Page data:', page);
-        console.log('Content blocks:', page.contentBlocks);
-        if (page.contentBlocks && Array.isArray(page.contentBlocks)) {
-          const editorData = {
-            blocks: page.contentBlocks.map(block => ({
-              type: block.type,
-              data: block.config
-            }))
-          };
-          console.log('Converted editor data:', editorData);
-          setEditorData(editorData);
-        } else {
-          // If no contentBlocks, try to use content field
-          if (page.content) {
-            try {
-              const contentBlocks = JSON.parse(page.content);
-              if (Array.isArray(contentBlocks)) {
-                const editorData = {
-                  blocks: contentBlocks
-                };
-                console.log('Parsed content blocks:', editorData);
-                setEditorData(editorData);
-              }
-            } catch (error) {
-              console.log('Failed to parse content, using empty data');
-              setEditorData({ blocks: [] });
-            }
-          } else {
-            console.log('No content found, using empty data');
-            setEditorData({ blocks: [] });
+          try {
+            setSelectedSlider(await getSlider(accessToken, page.featuredSliderId));
+          } catch {
+            const slider = sliders.find((s) => s.id === page.featuredSliderId);
+            setSelectedSlider(slider ? { ...slider, slides: [] } : null);
           }
         }
-      } catch (error: any) {
-        showToast('Failed to load page data', 'error');
-        router.push('/admin/pages');
+      } catch {
+        showToast("Failed to load page", "error");
+        router.push("/admin/pages");
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadPageData();
-    loadSliders();
+    if (accessToken) {
+      loadSliders()
+        .then(() => loadCategories())
+        .then(() => loadWidgets())
+        .then(() => loadPaymentMethods())
+        .then(() => loadPageData());
+    }
   }, [accessToken, pageId]);
 
   useEffect(() => {
@@ -123,109 +169,84 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
       setIsMediaPickerOpen(true);
     };
 
-    window.addEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
-
+    window.addEventListener("open-media-picker", handleOpenMediaPicker as EventListener);
     return () => {
-      window.removeEventListener('open-media-picker', handleOpenMediaPicker as EventListener);
+      window.removeEventListener("open-media-picker", handleOpenMediaPicker as EventListener);
     };
   }, []);
 
-  
-  const loadSliders = async () => {
-    if (!accessToken) return;
-    try {
-      const res = await fetchSliders(accessToken, { page: 1, limit: 100 });
-      setSliders(res.data);
-    } catch (error) {
-      console.error('Error loading sliders:', error);
-    }
-  };
-
   const handleMediaSelect = () => {
-    // Открываем медиа пикер через кастомное событие
-    window.dispatchEvent(new CustomEvent('open-media-picker', {
-      detail: {
-        onSelect: (media: any) => {
-          // Вставляем медиафайл в редактор
-          const mediaBlock = {
-            id: Date.now().toString(),
-            type: 'media',
-            data: {
-              filename: media.filename,
-              url: media.filepath,
-              caption: media.altText || ''
-            }
-          };
-          
-          const currentData = editorData || { blocks: [] };
-          const newData = {
-            ...currentData,
-            blocks: [...currentData.blocks, mediaBlock]
-          };
-          setEditorData(newData);
-        }
-      }
-    }));
+    window.dispatchEvent(
+      new CustomEvent("open-media-picker", {
+        detail: {
+          onSelect: (media: any) => {
+            const mediaBlock: PageBlock = {
+              id: Date.now().toString(),
+              type: "media",
+              data: {
+                filename: media.filename,
+                filepath: media.filepath,
+                url: media.filepath,
+                caption: media.altText || "",
+              },
+            };
+            const currentBlocks = (editorData?.blocks as PageBlock[]) || [];
+            setEditorData({ blocks: [...currentBlocks, mediaBlock] });
+          },
+        },
+      }),
+    );
   };
 
   const handleSliderSelect = () => {
-    // Создаем простой селектор слайдеров
     if (sliders.length === 0) {
-      showToast('Сначала создайте слайдеры', 'error');
+      showToast("Create sliders first", "error");
       return;
     }
-    
-    // Создаем модальное окно для выбора слайдера
+
     const sliderHtml = `
-      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+      <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
         <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
-          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Выберите слайдер</h3>
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a slider</h3>
           <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${sliders.map(slider => `
-              <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
-                   onmouseover="this.style.background='#f9fafb'" 
-                   onmouseout="this.style.background='white'"
-                   onclick="selectSliderEdit(${JSON.stringify(slider).replace(/"/g, '&quot;')})">
+            ${sliders
+              .map(
+                (slider) => `
+              <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; cursor: pointer;"
+                   onclick="selectSliderEdit(${JSON.stringify(slider).replace(/"/g, "&quot;")})">
                 <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${slider.name}</h4>
-                <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${slider.slug}</p>
-                <p style="margin: 0; font-size: 12px; color: #6b7280;">${slider.description || 'Нет описания'}</p>
-              </div>
-            `).join('')}
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">Slug: /${slider.slug}</p>
+              </div>`,
+              )
+              .join("")}
           </div>
-          <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-            <button onclick="closeSliderModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Отмена</button>
+          <div style="margin-top: 20px; text-align: right;">
+            <button onclick="closeSliderModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
           </div>
         </div>
-      </div>
-    `;
-    
-    // Вставляем модальное окно в DOM
-    const modalDiv = document.createElement('div');
+      </div>`;
+
+    const modalDiv = document.createElement("div");
     modalDiv.innerHTML = sliderHtml;
     document.body.appendChild(modalDiv);
-    
-    // Функции для модального окна
-    (window as any).selectSliderEdit = (slider: any) => {
-      // Вставляем слайдер в редактор
-      const sliderBlock = {
+
+    (window as any).selectSliderEdit = (slider: SliderDto) => {
+      const sliderBlock: PageBlock = {
         id: Date.now().toString(),
-        type: 'slider',
+        type: "slider",
         data: {
+          sliderId: slider.id,
+          id: slider.id,
           name: slider.name,
           slug: slider.slug,
-          description: slider.description
-        }
+          description: slider.description,
+        },
       };
-      
-      const currentData = editorData || { blocks: [] };
-      const newData = {
-        ...currentData,
-        blocks: [...currentData.blocks, sliderBlock]
-      };
-      setEditorData(newData);
+      const currentBlocks = (editorData?.blocks as PageBlock[]) || [];
+      setEditorData({ blocks: [...currentBlocks, sliderBlock] });
       (window as any).closeSliderModalEdit();
     };
-    
+
     (window as any).closeSliderModalEdit = () => {
       document.body.removeChild(modalDiv);
       delete (window as any).selectSliderEdit;
@@ -233,182 +254,93 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
     };
   };
 
+  const handleWidgetSelect = () => {
+    if (widgets.length === 0) {
+      showToast("First, create widgets (except for Header and Footer)", "error");
+      return;
+    }
+
+    const widgetHtml = `
+      <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+        <div style="background: white; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 24px;">
+          <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600; color: #1f2937;">Select a widget</h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${widgets
+              .map(
+                (w) => `
+              <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; cursor: pointer;"
+                   onclick="selectWidgetEdit(${JSON.stringify(w).replace(/"/g, "&quot;")})">
+                <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${w.name}</h4>
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #6b7280;">Slug: /${w.slug}</p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">Type: ${w.type}</p>
+              </div>`,
+              )
+              .join("")}
+          </div>
+          <div style="margin-top: 20px; text-align: right;">
+            <button onclick="closeWidgetModalEdit()" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+
+    const modalDiv = document.createElement("div");
+    modalDiv.innerHTML = widgetHtml;
+    document.body.appendChild(modalDiv);
+
+    (window as any).selectWidgetEdit = (w: WidgetDto) => {
+      const widgetBlock: PageBlock = {
+        id: Date.now().toString(),
+        type: "widget",
+        data: {
+          slug: w.slug,
+          name: w.name,
+        },
+      };
+      const currentBlocks = (editorData?.blocks as PageBlock[]) || [];
+      setEditorData({ blocks: [...currentBlocks, widgetBlock] });
+      (window as any).closeWidgetModalEdit();
+    };
+
+    (window as any).closeWidgetModalEdit = () => {
+      document.body.removeChild(modalDiv);
+      delete (window as any).selectWidgetEdit;
+      delete (window as any).closeWidgetModalEdit;
+    };
+  };
+
   const handlePreview = () => {
-    if (!editorData) return;
-    
-    // Convert Editor.js blocks to HTML for preview
-    const html = editorData.blocks.map(block => {
-      switch (block.type) {
-        case 'list':
-          const items = (block.data.items || [])
-            .filter((item: string) => item.trim()) // Фильтруем пустые элементы
-            .map((item: string) => `<li>${item}</li>`).join('');
-          return block.data.style === 'ordered' ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
-        case 'paragraph':
-          return `<p>${block.data.text || ''}</p>`;
-        case 'header':
-          return `<h${block.data.level || 1}>${block.data.text || ''}</h${block.data.level || 1}>`;
-        case 'image':
-          if (block.data?.url) {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-            const imageUrl = block.data.url.startsWith('http') 
-              ? block.data.url 
-              : `${API_URL}${block.data.url}`;
-            return `<img src="${imageUrl}" alt="${block.data.caption || ''}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" /><p><em>${block.data.caption || ''}</em></p>`;
-          }
-          return `<div class="preview-placeholder">Изображение: ${block.data?.caption || 'Без заголовка'}</div>`;
-        case 'embed':
-          if (block.data?.url) {
-            return `<div class="preview-embed"><iframe src="${block.data.url}" style="width: 100%; height: 400px; border: 1px solid #ddd; border-radius: 8px;"></iframe></div>`;
-          }
-          return `<div class="preview-placeholder">Встраивание: ${block.data?.url || 'Без URL'}</div>`;
-        case 'slider':
-          // Ищем слайдер в списке sliders по slug
-          const slider = sliders.find(s => s.slug === block.data?.slug);
-          if (slider && (slider as any).slides && (slider as any).slides.length > 0) {
-            const slideItems = (slider as any).slides.map((slide: any, index: number) => {
-              if (slide.media && slide.media.url) {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-                const mediaUrl = slide.media.url.startsWith('http') 
-                  ? slide.media.url 
-                  : `${API_URL}${slide.media.url}`;
-                
-                const filename = slide.media.filename || '';
-                const isVideo = filename.match(/\.(mp4|webm|ogg|avi|mov)$/i);
-                const isAudio = filename.match(/\.(mp3|wav|ogg|flac|m4a)$/i);
-                const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
-                
-                if (isVideo) {
-                  return `<div class="slide-item">
-                    <video muted loop autoplay style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
-                      <source src="${mediaUrl}" type="video/mp4">
-                    </video>
-                  </div>`;
-                } else if (isAudio) {
-                  return `<div class="slide-item">
-                    <div class="audio-slide">
-                      <div class="audio-icon">🎵</div>
-                      <p>${slide.media.caption || 'Аудио'}</p>
-                    </div>
-                  </div>`;
-                } else if (isImage) {
-                  return `<div class="slide-item">
-                    <img src="${mediaUrl}" alt="${slide.media.caption || ''}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
-                  </div>`;
-                } else {
-                  return `<div class="slide-item">
-                    <div class="file-slide">
-                      <div class="file-icon">📄</div>
-                      <p>${slide.media.filename || 'Файл'}</p>
-                    </div>
-                  </div>`;
-                }
-              } else {
-                return `<div class="slide-item">
-                  <div class="empty-slide">
-                    <div class="empty-icon">📷</div>
-                    <p>Слайд ${index + 1}</p>
-                  </div>
-                </div>`;
-              }
-            }).join('');
-            
-            return `<div class="preview-slider-block">
-              <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
-              <div class="preview-slider-info">
-                <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
-                <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
-                <p><strong>Слайдов:</strong> ${(slider as any).slides.length}</p>
-              </div>
-              <div class="preview-slider-preview">
-                ${slideItems}
-              </div>
-            </div>`;
-          } else {
-            // Если слайдер не найден или нет слайдов
-            return `<div class="preview-slider-block">
-              <h4>🎠 Слайдер: ${block.data?.name || 'Без названия'}</h4>
-              <div class="preview-slider-info">
-                <p><strong>Slug:</strong> /${block.data?.slug || 'no-slug'}</p>
-                <p><strong>Описание:</strong> ${block.data?.description || 'Нет описания'}</p>
-                <p style="color: #ef4444;">⚠️ Слайдер не найден или нет слайдов</p>
-              </div>
-              <div class="preview-slider-preview">
-                <div class="slide-item">
-                  <div class="empty-slide">
-                    <div class="empty-icon">🎠</div>
-                    <p>Нет слайдов</p>
-                  </div>
-                </div>
-              </div>
-            </div>`;
-          }
-        case 'media':
-          if (block.data?.url) {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-            const mediaUrl = block.data.url.startsWith('http') 
-              ? block.data.url 
-              : `${API_URL}${block.data.url}`;
-            
-            const filename = block.data?.filename || '';
-            const isVideo = filename.match(/\.(mp4|webm|ogg|avi|mov)$/i);
-            const isAudio = filename.match(/\.(mp3|wav|ogg|flac|m4a)$/i);
-            const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
-            
-            if (isVideo) {
-              return `<div class="preview-media-block">
-                <video controls style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <source src="${mediaUrl}" type="video/mp4">
-                  Ваш браузер не поддерживает видео.
-                </video>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else if (isAudio) {
-              return `<div class="preview-media-block">
-                <audio controls style="width: 100%; margin: 8px 0;">
-                  <source src="${mediaUrl}" type="audio/mpeg">
-                  Ваш браузер не поддерживает аудио.
-                </audio>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else if (isImage) {
-              return `<div class="preview-media-block">
-                <img src="${mediaUrl}" alt="${block.data?.caption || ''}" style="max-width: 200px; height: 150px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            } else {
-              return `<div class="preview-media-block">
-                <div class="preview-file-icon">📄</div>
-                <p><strong>${filename}</strong></p>
-                <p><em>${block.data?.caption || 'Без заголовка'}</em></p>
-              </div>`;
-            }
-          }
-          return `<div class="preview-placeholder">Медиафайл: ${block.data?.filename || 'Без имени'}</div>`;
-        default:
-          return `<div class="preview-placeholder">${block.type}: ${JSON.stringify(block.data)}</div>`;
-      }
-    }).join('\n');
-    
-    setPreviewContent(html);
+    if (!editorData?.blocks?.length && !form.title.trim()) {
+      showToast("Fill in the title or content to preview", "error");
+      return;
+    }
     setShowPreview(true);
   };
 
-  const handleSliderChange = (sliderId: string) => {
-    const slider = sliders.find(s => s.id === parseInt(sliderId));
-    setSelectedSlider(slider || null);
+  const handleSliderChange = async (sliderId: string) => {
+    if (!sliderId || !accessToken) {
+      setSelectedSlider(null);
+      return;
+    }
+    const id = parseInt(sliderId, 10);
+    try {
+      setSelectedSlider(await getSlider(accessToken, id));
+    } catch {
+      const slider = sliders.find((s) => s.id === id);
+      setSelectedSlider(slider ? { ...slider, slides: [] } : null);
+    }
   };
 
   const handleSave = async () => {
     if (!accessToken || !pageId) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast('Название и slug обязательны', 'error');
+      showToast("Title and slug are required", "error");
       return;
     }
     setIsSaving(true);
-    
+
     try {
-      const pageData = {
+      const blocks = (editorData?.blocks as PageBlock[]) || [];
+      await updatePage(accessToken, parseInt(pageId, 10), {
         title: form.title.trim(),
         slug: form.slug.trim(),
         status: form.status,
@@ -416,23 +348,24 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
         seoTitle: form.seoTitle || undefined,
         seoDescription: form.seoDescription || undefined,
         metaKeywords: form.metaKeywords
-          .split(',')
+          .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
         featuredSliderId: form.featuredSliderId || undefined,
-        contentBlocks: editorData ? editorData.blocks.map(block => ({
-          type: block.type as any,
+        categoryIds: form.categoryIds,
+        enableFeedback: form.enableFeedback,
+        paymentMethodId: form.paymentMethodId || undefined,
+        contentBlocks: blocks.map((block) => ({
+          type: block.type,
           id: Date.now() + Math.random(),
-          config: block.data
-        })) : [],
-        content: editorData ? JSON.stringify(editorData.blocks) : '',
-      };
-
-      await updatePage(accessToken, parseInt(pageId), pageData);
-      showToast('Страница обновлена', 'success');
-      router.push('/admin/pages');
+          config: block.data,
+        })),
+        content: blocks.length ? serializePageBlocks(blocks) : "",
+      });
+      showToast("Page saved", "success");
+      router.push("/admin/pages");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || 'Ошибка сохранения', 'error');
+      showToast(error?.response?.data?.message || "Error saving", "error");
     } finally {
       setIsSaving(false);
     }
@@ -441,7 +374,7 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}>Loading...</div>
       </div>
     );
   }
@@ -453,9 +386,7 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
         open={isMediaPickerOpen}
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(media) => {
-          if (mediaPickerCallback) {
-            mediaPickerCallback.onSelect(media);
-          }
+          mediaPickerCallback?.onSelect(media);
           setIsMediaPickerOpen(false);
         }}
         zIndex={2001}
@@ -463,20 +394,24 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
 
       <div className={styles.header}>
         <div className={styles.breadcrumb}>
-          <button onClick={() => router.push('/admin/pages')} className={styles.backButton}>
-            ← Назад к страницам
+          <button
+            type="button"
+            onClick={() => router.push("/admin/pages")}
+            className={styles.backButton}
+          >
+            ← Back to pages
           </button>
-          <h1>Редактировать страницу</h1>
+          <h1>Edit Page</h1>
         </div>
         <div className={styles.actions}>
           <UiButton theme="secondary" onClick={handlePreview}>
-            Предпросмотр
+            Preview
           </UiButton>
-          <UiButton theme="secondary" onClick={() => router.push('/admin/pages')}>
-            Отмена
+          <UiButton theme="secondary" onClick={() => router.push("/admin/pages")}>
+            Cancel
           </UiButton>
           <UiButton theme="primary" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Сохранение...' : 'Обновить'}
+            {isSaving ? "Saving..." : "Save"}
           </UiButton>
         </div>
       </div>
@@ -488,17 +423,23 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
               className={styles.input}
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="Название страницы"
+              placeholder="Page title"
             />
-            
+
             <div className={styles.editorWrapper}>
-              <RichEditor
-                holder="editorjs-container"
-                data={editorData}
-                onChange={setEditorData}
-                placeholder="Начните писать контент страницы здесь..."
+              <DescriptionFieldWrapper
+                value={editorData?.blocks ? blocksToMarkdown(editorData.blocks as PageBlock[]) : ""}
+                onChange={(markdown) => {
+                  setEditorData({
+                    blocks: markdownToBlocks(markdown, (editorData?.blocks as PageBlock[]) || []),
+                  });
+                }}
+                placeholder="Start writing the page content here..."
+                id="page-content"
+                label="Page Content"
                 onMediaSelect={handleMediaSelect}
                 onSliderSelect={handleSliderSelect}
+                onWidgetSelect={handleWidgetSelect}
               />
             </div>
           </div>
@@ -506,94 +447,142 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
           <div className={styles.sideCol}>
             <div className={styles.formGroup}>
               <label className={styles.label}>Slug</label>
-              <Input 
-                value={form.slug} 
-                onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))} 
+              <Input
+                value={form.slug}
+                onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Статус</label>
+              <label className={styles.label}>Status</label>
               <select
                 className={styles.select}
                 value={form.status}
                 onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
               >
-                <option value="draft">Черновик</option>
-                <option value="published">Опубликовано</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Шаблон</label>
-              <Input 
-                value={form.template} 
-                onChange={(event) => setForm((prev) => ({ ...prev, template: event.target.value }))} 
+              <label className={styles.label}>Template</label>
+              <Input
+                value={form.template}
+                onChange={(e) => setForm((prev) => ({ ...prev, template: e.target.value }))}
+              />
+            </div>
+
+            {/* Checkbox enableFeedback */}
+            <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}>
+              <input
+                type="checkbox"
+                id="enableFeedback"
+                checked={form.enableFeedback}
+                onChange={(e) => setForm((prev) => ({ ...prev, enableFeedback: e.target.checked }))}
+                style={{ cursor: "pointer", width: "16px", height: "16px" }}
+              />
+              <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
+                Enable Feedback
+              </label>
+            </div>
+
+            {/* Select paymentMethodId */}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Payment Method (link)</label>
+              <select
+                className={styles.select}
+                value={form.paymentMethodId || ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
+              >
+                <option value="">No payment method</option>
+                {paymentMethods.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} ({m.slug})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>SEO Title</label>
+              <Input
+                value={form.seoTitle}
+                onChange={(e) => setForm((prev) => ({ ...prev, seoTitle: e.target.value }))}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>SEO заголовок</label>
-              <Input 
-                value={form.seoTitle} 
-                onChange={(event) => setForm((prev) => ({ ...prev, seoTitle: event.target.value }))} 
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>SEO описание</label>
+              <label className={styles.label}>SEO Description</label>
               <textarea
                 className={styles.textarea}
                 value={form.seoDescription}
-                onChange={(event) => setForm((prev) => ({ ...prev, seoDescription: event.target.value }))}
+                onChange={(e) => setForm((prev) => ({ ...prev, seoDescription: e.target.value }))}
                 rows={3}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Ключевые слова (через запятую)</label>
-              <Input 
-                value={form.metaKeywords} 
-                onChange={(event) => setForm((prev) => ({ ...prev, metaKeywords: event.target.value }))} 
+              <label className={styles.label}>Keywords (comma-separated)</label>
+              <Input
+                value={form.metaKeywords}
+                onChange={(e) => setForm((prev) => ({ ...prev, metaKeywords: e.target.value }))}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Основной слайдер</label>
+              <label className={styles.label}>Categories</label>
+              <div className={styles.categoriesContainer}>
+                {categories.map((category) => (
+                  <label key={category.id} className={styles.categoryCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={form.categoryIds.includes(category.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm((prev) => ({
+                            ...prev,
+                            categoryIds: [...prev.categoryIds, category.id],
+                          }));
+                        } else {
+                          setForm((prev) => ({
+                            ...prev,
+                            categoryIds: prev.categoryIds.filter((id) => id !== category.id),
+                          }));
+                        }
+                      }}
+                    />
+                    <span>{category.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Featured Slider</label>
               <select
                 className={styles.select}
-                value={form.featuredSliderId?.toString() || ''}
+                value={form.featuredSliderId?.toString() || ""}
                 onChange={(e) => {
-                  setForm((prev) => ({ 
-                    ...prev, 
-                    featuredSliderId: e.target.value ? parseInt(e.target.value) : null 
+                  setForm((prev) => ({
+                    ...prev,
+                    featuredSliderId: e.target.value ? parseInt(e.target.value, 10) : null,
                   }));
                   handleSliderChange(e.target.value);
                 }}
               >
-                <option value="">Без слайдера</option>
+                <option value="">No slider</option>
                 {sliders.map((slider) => (
                   <option key={slider.id} value={slider.id.toString()}>
                     {slider.name}
                   </option>
                 ))}
               </select>
-              
-              {selectedSlider && (
+
+              {selectedSlider?.slides && selectedSlider.slides.length > 0 && (
                 <div className={styles.sliderPreview}>
-                  <h4>Предпросмотр слайдера: {selectedSlider.name}</h4>
-                  <div className={styles.sliderInfo}>
-                    <p><strong>Slug:</strong> /{selectedSlider.slug}</p>
-                    <p><strong>Описание:</strong> {selectedSlider.description || 'Нет описания'}</p>
-                    <p><strong>Создан:</strong> {new Date(selectedSlider.createdAt).toLocaleDateString()}</p>
-                  </div>
-                  <div className={styles.sliderPlaceholder}>
-                    <div className={styles.sliderAnimation}>
-                      <div className={styles.slide}>Слайд 1</div>
-                      <div className={styles.slide}>Слайд 2</div>
-                      <div className={styles.slide}>Слайд 3</div>
-                    </div>
-                  </div>
+                  <h4>Slider: {selectedSlider.name}</h4>
+                  <PageSlider slider={selectedSlider as any} autoPlay showArrows showDots />
                 </div>
               )}
             </div>
@@ -601,50 +590,14 @@ const EditPagePage = ({ params }: { params: { id: string } }) => {
         </div>
       </div>
 
-      {/* Preview Modal */}
-      {showPreview && (
-        <div className={styles.previewOverlay}>
-          <div className={styles.previewModal}>
-            <div className={styles.previewHeader}>
-              <h3>Предпросмотр страницы</h3>
-              <button 
-                className={styles.closeButton}
-                onClick={() => setShowPreview(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className={styles.previewContent}>
-              <h1>{form.title}</h1>
-              <div className={styles.previewMeta}>
-                <span>Slug: /{form.slug}</span>
-                <span>Статус: {form.status === 'published' ? 'Опубликовано' : 'Черновик'}</span>
-              </div>
-              <div 
-                className={styles.previewBody}
-                dangerouslySetInnerHTML={{ __html: previewContent }}
-              />
-              {selectedSlider && (
-                <div className={styles.previewSlider}>
-                  <h4>Основной слайдер: {selectedSlider.name}</h4>
-                  <div className={styles.sliderPlaceholder}>
-                    <div className={styles.sliderAnimation}>
-                      <div className={styles.slide}>Слайд 1</div>
-                      <div className={styles.slide}>Слайд 2</div>
-                      <div className={styles.slide}>Слайд 3</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className={styles.previewActions}>
-              <UiButton theme="secondary" onClick={() => setShowPreview(false)}>
-                Закрыть
-              </UiButton>
-            </div>
-          </div>
-        </div>
-      )}
+      <PagePreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={form.title}
+        slug={form.slug}
+        editorData={editorData}
+        featuredSlider={selectedSlider}
+      />
     </div>
   );
 };

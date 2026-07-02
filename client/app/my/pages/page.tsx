@@ -1,9 +1,17 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { fetchPages, PageDto, PagesQuery } from "@/src/shared/api/pages";
-import { Body, Header, Footer, Notifications, Pagination, UiButton, showToast } from "@/src/shared/ui";
+import {
+  Body,
+  Header,
+  Footer,
+  Notifications,
+  Pagination,
+  UiButton,
+  showToast,
+} from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
 import styles from "@/src/pages/settings/index.module.css";
 
@@ -31,11 +39,11 @@ const MyPages = () => {
       setIsLoading(true);
       try {
         const res = await fetchPages(accessToken, { ...query, authorId: user.id });
-        setPages(res.data);
-        setTotal(res.total);
+        setPages(res);
+        setTotal(res.length); // Fallback to array length as res is PageDto[]
       } catch (error: any) {
         const message = error?.response?.data?.message || "Не удалось загрузить страницы";
-        showToast({ type: "error", message });
+        showToast(message, "error");
       } finally {
         setIsLoading(false);
       }
@@ -73,7 +81,10 @@ const MyPages = () => {
               <div key={page.id} className={styles.row}>
                 <div>{page.title}</div>
                 <div>
-                  <UiButton theme="third" onClick={() => (window.location.href = `/pages/${page.slug}`)}>
+                  <UiButton
+                    theme="third"
+                    onClick={() => (window.location.href = `/pages/${page.slug}`)}
+                  >
                     Открыть
                   </UiButton>
                 </div>
@@ -81,7 +92,12 @@ const MyPages = () => {
             ))}
           {!isLoading && !pages.length && <p>У вас пока нет страниц.</p>}
         </div>
-        <Pagination currentPage={query.page || 1} totalPages={totalPages} onPageChange={handlePageChange} />
+        <Pagination
+          page={query.page || 1}
+          total={total}
+          perPage={query.limit || 10}
+          onChange={handlePageChange}
+        />
       </Body>
       <Footer />
     </div>
@@ -89,5 +105,3 @@ const MyPages = () => {
 };
 
 export default MyPages;
-
-

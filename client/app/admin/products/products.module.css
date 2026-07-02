@@ -270,3 +270,67 @@
     overflow-x: auto;
   }
 }
+
+/* Compact tree selector styles */
+.categoryTree {
+  font-size: 13px;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid #e6eef6;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.treeNode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  transition: background 0.12s;
+}
+
+.treeNode:hover {
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.toggleButton {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.nodeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.radio {
+  width: 16px;
+  height: 16px;
+}
+
+.children {
+  margin-left: 4px;
+  padding-left: 8px;
+  border-left: 1px dashed #eef2f6;
+}
+
+.noCategory {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+}

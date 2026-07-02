@@ -52,7 +52,7 @@ export class PagesService {
     const normalized = (base || 'new-page')
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9а-яё\s-]/gi, '')
+      .replace(/[^a-z0-9\s-]/gi, '') // Removed Russian character range
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
@@ -85,9 +85,21 @@ export class PagesService {
       featuredImage: createPageDto.featuredImageId ? { connect: { id: createPageDto.featuredImageId } } : undefined,
       featuredSlider: createPageDto.featuredSliderId ? { connect: { id: createPageDto.featuredSliderId } } : undefined,
       parentPage: createPageDto.parentPageId ? { connect: { id: createPageDto.parentPageId } } : undefined,
+      categories: createPageDto.categoryIds && createPageDto.categoryIds.length > 0
+        ? { connect: createPageDto.categoryIds.map((id: number) => ({ id })) }
+        : undefined,
+      enableFeedback: createPageDto.enableFeedback ?? true,
+      paymentMethod: createPageDto.paymentMethodId ? { connect: { id: createPageDto.paymentMethodId } } : undefined,
     };
 
-    const newPage = await this.prisma.page.create({ data });
+    const newPage = await this.prisma.page.create({
+      data,
+      include: {
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
+      }
+    });
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
     if (keys.length > 0) {
@@ -97,7 +109,7 @@ export class PagesService {
   }
 
   async createDraft(createPageDraftDto: CreatePageDraftDto): Promise<Page> {
-    const title = createPageDraftDto.title?.trim() || 'Новая запись';
+    const title = createPageDraftDto.title?.trim() || 'New Page';
     const slug = await this.generateUniqueSlug(title);
 
     const draft = await this.prisma.page.create({
@@ -153,7 +165,11 @@ export class PagesService {
           },
           {
             role: 'user',
-            content: `Instruction:\n${prompt}\n\nCurrent content:\n${content || ''}`,
+            content: `Instruction:
+${prompt}
+
+Current content:
+${content || ''}`,
           },
         ],
         temperature: 0.7,
@@ -247,6 +263,9 @@ export class PagesService {
             filepath: true,
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       },
     });
 
@@ -291,12 +310,17 @@ export class PagesService {
             slug: true,
             description: true,
             slides: {
+              orderBy: { sortOrder: 'asc' },
               include: {
                 image: true,
               },
             },
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        },
+        paymentMethod: true
       },
     });
 
@@ -308,17 +332,47 @@ export class PagesService {
     return page;
   }
 
+  async findPublished(search?: string): Promise<any[]> {
+    const where: Prisma.PageWhereInput = { status: 'published' };
+    if (search?.trim()) {
+      where.OR = [
+        { title: { contains: search.trim(), mode: 'insensitive' } },
+        { slug: { contains: search.trim(), mode: 'insensitive' } },
+      ];
+    }
+    return this.prisma.page.findMany({
+      where,
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        publishedAt: true,
+        updatedAt: true,
+        seoTitle: true,
+        seoDescription: true,
+      },
+    });
+  }
+
   async findOneBySlug(slug: string): Promise<any | null> {
+    console.log(`[PagesService] findOneBySlug called with slug: "${slug}"`);
+    
     const cacheKey = `page_slug_${slug}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPage = await this.redisClient.get(cacheKey);
 
     if (cachedPage) {
       this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
-      return JSON.parse(cachedPage);
+      const parsed = JSON.parse(cachedPage);
+      console.log(`[PagesService] Returning cached page:`, { id: parsed.id, slug: parsed.slug, title: parsed.title });
+      return parsed;
     }
 
     this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    console.log(`[PagesService] Querying database for slug: "${slug}"`);
+    
     const page = await this.prisma.page.findUnique({
       where: { slug },
       include: {
@@ -344,14 +398,21 @@ export class PagesService {
             slug: true,
             description: true,
             slides: {
+              orderBy: { sortOrder: 'asc' },
               include: {
                 image: true,
               },
             },
           },
         },
+        categories: {
+          select: { id: true, name: true, slug: true }
+        },
+        paymentMethod: true
       },
     });
+
+    console.log(`[PagesService] Database query result:`, page ? { id: page.id, slug: page.slug, title: page.title, status: page.status } : 'null');
 
     if (page) {
       this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
@@ -367,7 +428,7 @@ export class PagesService {
       throw new NotFoundException(`Page with ID ${id} not found.`);
     }
 
-    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, ...rest } = updatePageDto;
+    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, categoryIds, ...rest } = updatePageDto;
 
     const data: Prisma.PageUpdateInput = {
       ...rest,
@@ -375,6 +436,11 @@ export class PagesService {
       ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
       ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
       ...(contentBlocks !== undefined && { contentBlocks: contentBlocks === null ? Prisma.DbNull : (contentBlocks as InputJsonValue) }),
+      ...(categoryIds !== undefined && {
+        categories: categoryIds
+          ? { set: categoryIds.map((cId: number) => ({ id: cId })) }
+          : undefined
+      }),
       updatedAt: new Date(),
     };
 
@@ -384,6 +450,9 @@ export class PagesService {
       include: {
         featuredSlider: true,
         featuredImage: true,
+        categories: {
+          select: { id: true, name: true, slug: true }
+        }
       },
     });
 

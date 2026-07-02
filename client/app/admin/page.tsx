@@ -1,17 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { fetchWidgets } from '@/src/shared/api/widgets';
-import { fetchFeedback } from '@/src/shared/api/feedback';
-import { fetchProductCategories } from '@/src/shared/api/products';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { Button } from '@/src/shared/ui/Button/ui-button';
-import styles from './admin.module.css';
-import { fetchPages } from '@/src/shared/api/pages';
-import { fetchSliders } from '@/src/shared/api/sliders';
-import { fetchRecords } from '@/src/shared/api/records';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { fetchWidgets } from "@/src/shared/api/widgets";
+import { fetchFeedback } from "@/src/shared/api/feedback";
+import { fetchProductCategories } from "@/src/shared/api/products";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { Button } from "@/src/shared/ui/Button/ui-button";
+import { fetchPages } from "@/src/shared/api/pages";
+import { fetchSliders } from "@/src/shared/api/sliders";
+import { fetchRecords } from "@/src/shared/api/records";
+import { fetchUsersResponse } from "@/src/shared/api/users";
+import { fetchRolesResponse } from "@/src/shared/api/roles";
+import { fetchBlog } from "@/src/shared/api/blog";
+import { fetchArticles } from "@/src/shared/api/articles";
+import styles from "./admin.module.css";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -22,62 +26,95 @@ export default function AdminDashboard() {
     records: 0,
     widgets: 0,
     feedback: 0,
-    categories: 0
+    categories: 0,
+    users: 0,
+    roles: 0,
+    blog: 0,
+    articles: 0,
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (accessToken) {
+      loadDashboardData();
+    }
+  }, [accessToken]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Загружаем статистику
-      // @ts-ignore
+
+      // Load statistics
       const [
         pagesResponse,
         slidersResponse,
         recordsResponse,
         widgetsResponse,
         feedbackResponse,
-        categoriesResponse
+        categoriesResponse,
+        usersResponse,
+        rolesResponse,
+        blogResponse,
+        articlesResponse,
       ] = await Promise.all([
-        fetchPages(accessToken, { page: 1, limit: 1 }),
+        fetchPages(accessToken, { page: 1, limit: 100 }),
         fetchSliders(accessToken, { page: 1, limit: 1 }),
-        fetchRecords(accessToken, { page: 1, limit: 1 }),
+        fetchRecords(1, 1, ""),
         fetchWidgets(accessToken, { page: 1, limit: 1 }),
         fetchFeedback(accessToken, { page: 1, limit: 5 }),
-        fetchProductCategories(accessToken, 1, 1, '')
+        fetchProductCategories(accessToken, 1, 1, ""),
+        fetchUsersResponse(accessToken, { page: 1, limit: 1 }),
+        fetchRolesResponse(accessToken, { page: 1, limit: 1 }),
+        fetchBlog(accessToken, { page: 1, limit: 1000 }),
+        fetchArticles(accessToken, { page: 1, limit: 1000 }),
       ]);
 
-      // @ts-ignore
+      // For pagesd, we need to check if there are more pagesd beyond the first 100
+      let pagesCount = Array.isArray(pagesResponse) ? pagesResponse.length : 0;
+      if (pagesResponse.length === 100) {
+        // There might be more pagesd, try to get the total count
+        try {
+          const secondPage = await fetchPages(accessToken, { page: 2, limit: 100 });
+          pagesCount += Array.isArray(secondPage) ? secondPage.length : 0;
+          // If second page is also full, there might be even more, but for dashboard we'll stop here
+          if (secondPage.length === 100) {
+            pagesCount = 200; // At least 200 pagesd
+          }
+        } catch (error) {
+          // If second page fails, we'll just use the first page count
+        }
+      }
+
       setStats({
-        //@ts-nocheck
-        pages: pagesResponse.total || 0,
+        pages: pagesCount,
         sliders: slidersResponse.total || 0,
         records: recordsResponse.total || 0,
         widgets: widgetsResponse.total || 0,
         feedback: feedbackResponse.total || 0,
-        categories: categoriesResponse.total || 0
+        categories: categoriesResponse.total || 0,
+        users: usersResponse?.total || 0,
+        roles: rolesResponse?.total || 0,
+        blog: Array.isArray(blogResponse) ? blogResponse.length : 0,
+        articles: Array.isArray(articlesResponse) ? articlesResponse.length : 0,
       });
 
-      // Формируем недавнюю активность
+      // Generate recent activity
       const activity = [
         ...feedbackResponse.data.map((item: any) => ({
-          type: 'feedback',
-          title: `Новый отзыв от ${item.name}`,
-          description: item.message.substring(0, 100) + '...',
+          type: "feedback",
+          title: `New feedback from ${item.name}`,
+          description: `${item.message.substring(0, 100)}...`,
           time: item.createdAt,
-          status: item.status
-        }))
-      ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 10);
+          status: item.status,
+        })),
+      ]
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 10);
 
       setRecentActivity(activity);
     } catch (error) {
-      showToast('Ошибка при загрузке данных дашборда', 'error');
+      showToast("Error loading dashboard data", "error");
     } finally {
       setLoading(false);
     }
@@ -85,65 +122,72 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: 'Создать страницу',
-      description: 'Добавить новую страницу на сайт',
-      icon: '📄',
-      action: () => router.push('/admin/pages/create')
+      title: "Create Page",
+      description: "Add a new page to the site",
+      icon: "📄",
+      action: () => router.push("/admin/pages/create"),
     },
     {
-      title: 'Создать запись',
-      description: 'Добавить новую запись в блог',
-      icon: '📝',
-      action: () => router.push('/admin/records/create')
+      title: "Create Post",
+      description: "Add a new post to the blog",
+      icon: "📝",
+      action: () => router.push("/admin/records/create"),
     },
     {
-      title: 'Создать виджет',
-      description: 'Добавить новый виджет на сайт',
-      icon: '🎯',
-      action: () => router.push('/admin/widgets')
+      title: "Create Widget",
+      description: "Add a new widget to the site",
+      icon: "🎯",
+      action: () => router.push("/admin/widgets"),
     },
     {
-      title: 'Создать слайдер',
-      description: 'Добавить новый слайдер',
-      icon: '🎠',
-      action: () => router.push('/admin/sliders')
-    }
+      title: "Create Slider",
+      description: "Add a new slider",
+      icon: "🎠",
+      action: () => router.push("/admin/sliders"),
+    },
   ];
 
   const navigationItems = [
     {
-      title: 'Контент',
+      title: "Content",
       items: [
-        { title: 'Страницы', count: stats.pages, icon: '📄', url: '/admin/pages' },
-        { title: 'Записи', count: stats.records, icon: '📝', url: '/admin/records' },
-        { title: 'Виджеты', count: stats.widgets, icon: '🎯', url: '/admin/widgets' },
-        { title: 'Слайдеры', count: stats.sliders, icon: '🎠', url: '/admin/sliders' }
-      ]
+        { title: "Pages", count: stats.pages, icon: "📄", url: "/admin/pages" },
+        { title: "Blog", count: stats.blog, icon: "📰", url: "/admin/blog" },
+        { title: "Articles", count: stats.articles, icon: "📚", url: "/admin/articles" },
+        { title: "Posts", count: stats.records, icon: "📝", url: "/admin/records" },
+        { title: "Widgets", count: stats.widgets, icon: "🎯", url: "/admin/widgets" },
+        { title: "Sliders", count: stats.sliders, icon: "🎠", url: "/admin/sliders" },
+      ],
     },
     {
-      title: 'Управление',
+      title: "Management",
       items: [
-        { title: 'Пользователи', count: null, icon: '👥', url: '/admin/users' },
-        { title: 'Роли', count: null, icon: '🔐', url: '/admin/roles' },
-        { title: 'Категории', count: stats.categories, icon: '📁', url: '/admin/product-categories' },
-        { title: 'Отзывы', count: stats.feedback, icon: '💬', url: '/admin/feedback' }
-      ]
+        { title: "Users", count: stats.users, icon: "👥", url: "/admin/users" },
+        { title: "Roles", count: stats.roles, icon: "🔐", url: "/admin/roles" },
+        {
+          title: "Categories",
+          count: stats.categories,
+          icon: "📁",
+          url: "/admin/product-categories",
+        },
+        { title: "Reviews", count: stats.feedback, icon: "💬", url: "/admin/feedback" },
+      ],
     },
     {
-      title: 'Настройки',
+      title: "Settings",
       items: [
-        { title: 'Общие настройки', count: null, icon: '⚙️', url: '/admin/settings' },
-        { title: 'SEO', count: null, icon: '🔍', url: '/admin/seo' },
-        { title: 'Медиафайлы', count: null, icon: '🖼️', url: '/admin/media-files' }
-      ]
-    }
+        { title: "General Settings", count: undefined, icon: "⚙️", url: "/admin/settings" },
+        { title: "SEO", count: undefined, icon: "🔍", url: "/admin/seo" },
+        { title: "Media Files", count: undefined, icon: "🖼️", url: "/admin/media-files" },
+      ],
+    },
   ];
 
   if (loading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner}></div>
-        <p>Загрузка дашборда...</p>
+        <div className={styles.spinner} />
+        <p>Loading dashboard...</p>
       </div>
     );
   }
@@ -152,34 +196,30 @@ export default function AdminDashboard() {
     <div className={styles.dashboard}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h1>Панель управления</h1>
-          <p>Добро пожаловать в FocusWord Admin Panel</p>
+          <h1>Dashboard</h1>
+          <p>Welcome to FocusWord Admin Panel</p>
         </div>
         <div className={styles.headerStats}>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.pages + stats.records}</div>
-            <div className={styles.statLabel}>Контент</div>
+            <div className={styles.statLabel}>Content</div>
           </div>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.widgets}</div>
-            <div className={styles.statLabel}>Виджеты</div>
+            <div className={styles.statLabel}>Widgets</div>
           </div>
           <div className={styles.statItem}>
             <div className={styles.statNumber}>{stats.feedback}</div>
-            <div className={styles.statLabel}>Отзывы</div>
+            <div className={styles.statLabel}>Reviews</div>
           </div>
         </div>
       </div>
 
       <div className={styles.quickActions}>
-        <h2>Быстрые действия</h2>
+        <h2>Quick Actions</h2>
         <div className={styles.actionGrid}>
           {quickActions.map((action, index) => (
-            <button
-              key={index}
-              onClick={action.action}
-              className={styles.actionCard}
-            >
+            <button key={index} onClick={action.action} className={styles.actionCard}>
               <div className={styles.actionIcon}>{action.icon}</div>
               <h3>{action.title}</h3>
               <p>{action.description}</p>
@@ -190,7 +230,7 @@ export default function AdminDashboard() {
 
       <div className={styles.mainContent}>
         <div className={styles.navigation}>
-          <h2>Навигация</h2>
+          <h2>Navigation</h2>
           <div className={styles.navGrid}>
             {navigationItems.map((section, index) => (
               <div key={index} className={styles.navSection}>
@@ -204,9 +244,7 @@ export default function AdminDashboard() {
                     >
                       <span className={styles.navIcon}>{item.icon}</span>
                       <span className={styles.navTitle}>{item.title}</span>
-                      {item.count !== null && (
-                        <span className={styles.navCount}>{item.count}</span>
-                      )}
+                      {item.count !== null && <span className={styles.navCount}>{item.count}</span>}
                     </button>
                   ))}
                 </div>
@@ -216,17 +254,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className={styles.recentActivity}>
-          <h2>Последняя активность</h2>
+          <h2>Recent Activity</h2>
           <div className={styles.activityList}>
             {recentActivity.length === 0 ? (
               <div className={styles.noActivity}>
-                <p>Нет недавней активности</p>
+                <p>No recent activity</p>
               </div>
             ) : (
               recentActivity.map((activity, index) => (
                 <div key={index} className={styles.activityItem}>
                   <div className={styles.activityIcon}>
-                    {activity.type === 'feedback' ? '💬' : '📝'}
+                    {activity.type === "feedback" ? "💬" : "📝"}
                   </div>
                   <div className={styles.activityContent}>
                     <h4>{activity.title}</h4>
@@ -237,8 +275,11 @@ export default function AdminDashboard() {
                       </span>
                       {activity.status && (
                         <span className={`${styles.activityStatus} ${styles[activity.status]}`}>
-                          {activity.status === 'pending' ? 'В ожидании' : 
-                           activity.status === 'approved' ? 'Одобрен' : 'Отклонен'}
+                          {activity.status === "pending"
+                            ? "Pending"
+                            : activity.status === "approved"
+                              ? "Approved"
+                              : "Rejected"}
                         </span>
                       )}
                     </div>
@@ -254,12 +295,8 @@ export default function AdminDashboard() {
         <div className={styles.footerContent}>
           <p>FocusWord Admin Panel v1.0</p>
           <div className={styles.footerLinks}>
-            <button onClick={() => router.push('/admin/settings')}>
-              ⚙️ Настройки
-            </button>
-            <button onClick={() => window.open('/', '_blank')}>
-              🌐 Сайт
-            </button>
+            <button onClick={() => router.push("/admin/settings")}>⚙️ Settings</button>
+            <button onClick={() => window.open("/", "_blank")}>🌐 Site</button>
           </div>
         </div>
       </div>

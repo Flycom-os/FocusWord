@@ -32,10 +32,10 @@
 //
 //   @UseGuards(JwtAuthGuard)
 //   @Post("register")
-//   @ApiOperation({ summary: "Газовый баллон успешно создан" })
+//   @ApiOperation({ summary: "Gas cylinder successfully created" })
 //   async register(
 //     @Req() req: Request,
-//     @Body() dto: Gass_ballon_replacementDto, // DTO для данных
+//     @Body() dto: Gass_ballon_replacementDto, // DTO for data
 //   ) {
 //
 //     const updatedDto: Gass_ballon_replacementDto = dto;
@@ -58,7 +58,7 @@
 //
 //
 //   @Get()
-//   @ApiOperation({ summary: "Газовый баллоны успешно получены" })
+//   @ApiOperation({ summary: "Gas cylinders successfully retrieved" })
 //   async filter(
 //     @Req() req: Request,
 //     @Query('page') page: string = '1',

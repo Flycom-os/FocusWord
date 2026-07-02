@@ -5,8 +5,8 @@ import { IsNotEmpty } from "class-validator";
 export class Gass_ballonDto{
   @ApiProperty({
     type: 'string',
-    format: 'binary',  // Указываем, что это бинарные данные (файл)
-    description: 'Изображение (файл)'
+    format: 'binary',  // Indicates that this is binary data (file)
+    description: 'Image (file)'
   })
   @IsNotEmpty()
   image: string;

@@ -26,7 +26,7 @@ export class JwtAuthGuard implements CanActivate {
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Требуется access_token');
+      throw new UnauthorizedException('Access token required');
     }
 
     const token = authHeader.split(' ')[1];
@@ -37,12 +37,12 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Токен истек, выполните повторный вход');
+        throw new UnauthorizedException('Token expired, please log in again');
       }
       if (error.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Некорректный токен');
+        throw new UnauthorizedException('Invalid token');
       }
-      throw new UnauthorizedException('Неверный access_token');
+      throw new UnauthorizedException('Invalid access token');
     }
   }
 }

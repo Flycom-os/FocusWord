@@ -1,11 +1,11 @@
-import React from 'react';
-import { ToastContainer, toast, ToastOptions } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import styles from './ui-notifications.module.css';
+import React from "react";
+import { ToastContainer, toast, ToastOptions } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import styles from "./ui-notifications.module.css";
 
-export type ToastType = 'success' | 'info' | 'warning' | 'error' | 'default';
+export type ToastType = "success" | "info" | "warning" | "error" | "default";
 
-export function showToast(message: string, type: ToastType = 'default', opts?: ToastOptions) {
+export function showToast(message: string, type: ToastType = "default", opts?: ToastOptions) {
   const fn = {
     success: toast.success,
     info: toast.info,
@@ -14,7 +14,7 @@ export function showToast(message: string, type: ToastType = 'default', opts?: T
     default: toast,
   }[type];
 
-  fn(message, { position: 'bottom-right', autoClose: 4000, ...opts });
+  fn(message, { position: "bottom-right", autoClose: 4000, ...opts });
 }
 
 const Notifications = () => {

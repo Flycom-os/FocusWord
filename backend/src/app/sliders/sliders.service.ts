@@ -94,6 +94,22 @@ export class SlidersService {
     return result;
   }
 
+  async findOneSliderBySlug(slug: string): Promise<Slider> {
+    const slider = await this.prisma.slider.findUnique({
+      where: { slug },
+      include: {
+        slides: {
+          orderBy: { sortOrder: 'asc' },
+          include: { image: true },
+        },
+      },
+    });
+    if (!slider) {
+      throw new NotFoundException(`Slider with slug "${slug}" not found`);
+    }
+    return slider;
+  }
+
   async findOneSlider(id: number): Promise<Slider> {
     const cacheKey = `slider_${id}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);

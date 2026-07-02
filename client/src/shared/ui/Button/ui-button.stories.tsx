@@ -1,8 +1,8 @@
 // ui-button.stories.tsx
 
 import type { Meta, StoryObj } from "@storybook/react";
-import UiButton from "./ui-button";
 import { action } from "@storybook/addon-actions";
+import UiButton from "./ui-button";
 
 const meta: Meta<typeof UiButton> = {
   title: "ui/Button",
@@ -14,12 +14,22 @@ const meta: Meta<typeof UiButton> = {
   argTypes: {
     theme: {
       control: { type: "select" },
-      options: ["primary", "secondary", "third", "warning", "close", "breadcrumb", "mini", "soft", ""],
+      options: [
+        "primary",
+        "secondary",
+        "third",
+        "warning",
+        "close",
+        "breadcrumb",
+        "mini",
+        "soft",
+        "",
+      ],
     },
     onClick: { action: "clicked" }, // автоматический лог в Storybook actions tab
   },
 };
-console.log('ui');
+console.log("ui");
 
 export default meta;
 type Story = StoryObj<typeof UiButton>;
@@ -56,7 +66,7 @@ export const WithAction: Story = {
 
 export const Learn: Story = {
   args: {
-    theme: 'soft',
+    theme: "third",
     children: (
       <>
         Learn About Machines <span style={{ marginLeft: 8 }}>↗</span>

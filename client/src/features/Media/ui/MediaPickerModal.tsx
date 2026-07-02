@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -32,14 +32,19 @@ interface MediaPickerModalProps {
 }
 
 const getFileUrl = (item: MediaFileDto) => {
-  if (item.filepath && item.filepath.startsWith('http')) {
+  if (item.filepath && item.filepath.startsWith("http")) {
     return item.filepath;
   }
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
   return `${API_URL}/backend/uploads/${item.filepath}`;
 };
 
-export const MediaPickerModal = ({ open, onClose, onSelect, zIndex }: MediaPickerModalProps & { zIndex?: number }) => {
+export const MediaPickerModal = ({
+  open,
+  onClose,
+  onSelect,
+  zIndex,
+}: MediaPickerModalProps & { zIndex?: number }) => {
   const { accessToken } = useAuth();
   const [mediaFiles, setMediaFiles] = useState<MediaFileDto[]>([]);
   const [mediaTotal, setMediaTotal] = useState(0);
@@ -71,30 +76,17 @@ export const MediaPickerModal = ({ open, onClose, onSelect, zIndex }: MediaPicke
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Выбрать медиа"
-      zIndex={zIndex}
-    >
+    <Modal open={open} onClose={onClose} title="Выбрать медиа" zIndex={zIndex}>
       <div className={styles.mediaModalContent}>
         {isLoadingMedia ? (
-          <div className={styles.centeredMessage}>
-            Загрузка медиафайлов...
-          </div>
+          <div className={styles.centeredMessage}>Загрузка медиафайлов...</div>
         ) : mediaFiles.length === 0 ? (
-          <div className={styles.centeredMessage}>
-            Медиафайлы не найдены
-          </div>
+          <div className={styles.centeredMessage}>Медиафайлы не найдены</div>
         ) : (
           <>
             <div className={styles.mediaGrid}>
               {mediaFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className={styles.mediaCard}
-                  onClick={() => handleSelect(file)}
-                >
+                <div key={file.id} className={styles.mediaCard} onClick={() => handleSelect(file)}>
                   <div className={styles.mediaPreview}>
                     {file.isImage ? (
                       <img src={getFileUrl(file)} alt={file.altText || file.filename} />
@@ -128,4 +120,3 @@ export const MediaPickerModal = ({ open, onClose, onSelect, zIndex }: MediaPicke
     </Modal>
   );
 };
-

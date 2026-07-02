@@ -1,65 +1,151 @@
-// import { Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
-// import { PrismaService } from '../../../../prisma/prisma/prisma.service';
-// import { Gass_ballonDto } from "../../../dto/techical_gass/gass_ballon.dto";
-// import { Gass_ballon_commentsDto } from "../../../dto/techical_gass/gas_ballon_comments.dto"
-// import { AGZSDto, AGZSPhotoDto, ApplicationDto, MainPhotoGalaryDto } from "../../../dto/agzs.dto";
-// import { CommentsDto } from "../../../dto/comments.dto";
-//
-// @Injectable()
-// export class CommentsService {
-//   constructor(private prisma:PrismaService) {}
-//   async post(user,dto:CommentsDto){
-//
-//     if (user.permission !< 2){
-//       throw new UnauthorizedException('You haven`t privileges admin users');
-//     }
-//     const newGasBallon = await this.prisma.comments.create({
-//       data: {
-//         name:dto.name,
-//         image:dto.image,
-//         description:dto.description,
-//         about:dto.about,
-//         date_created: new Date().toISOString(),
-//         date_updated: new Date().toISOString(),
-//       }
-//     });
-//     return newGasBallon;
-//   }
-//   async put(user, gas_ballon_id,dto:CommentsDto){
-//     if (user.permission !< 2){
-//       throw new UnauthorizedException('You haven`t privileges users');
-//     }
-//     const updatedGasBallon = await this.prisma.comments.update({where:{id:Number(gas_ballon_id)},
-//     data: {
-//       name:dto.name,
-//       image:dto.image,
-//       description:dto.description,
-//       about:dto.about,
-//       date_updated: new Date().toISOString(),
-//     }})
-//     return updatedGasBallon;
-//   }
-//   async get(status:string,page:number, limit:number) {
-//     const skip = (page - 1) * limit;
-//     const filterCondition = status ? {
-//       description:{
-//         contains: `${status}`,
-//       },
-//     }:{};
-//     const total = await this.prisma.comments.count({where:filterCondition});
-//     const data = await this.prisma.comments.findMany({
-//       where:filterCondition,
-//       skip,
-//       take:limit,
-//     });
-//     return {total, data };
-//   }
-//
-//   async delete(user,id:number){
-//     if (user.permission !< 2){
-//       throw new UnauthorizedException('You haven`t privileges users');
-//     }
-//     const deleteRecord = await this.prisma.comments.delete({where:{id:Number(id)}});
-//     return deleteRecord;
-//   }
-// }
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
+import { CreateCommentDto } from '../../dto/comments/create-comment.dto';
+import { UpdateCommentDto } from '../../dto/comments/update-comment.dto';
+import { CommentFilterDto } from '../../dto/comments/comment-filter.dto';
+
+@Injectable()
+export class CommentsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateCommentDto) {
+    if (!dto.postId && !dto.blogPostId && !dto.articleId) {
+      throw new BadRequestException('Comment must be associated with a Post, BlogPost, or Article');
+    }
+
+    return this.prisma.comment.create({
+      data: {
+        content: dto.content,
+        authorName: dto.authorName,
+        authorEmail: dto.authorEmail,
+        authorId: dto.authorId,
+        postId: dto.postId,
+        blogPostId: dto.blogPostId,
+        articleId: dto.articleId,
+        parentCommentId: dto.parentCommentId,
+        status: 'pending', // Default status for moderation
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAll(filterDto: CommentFilterDto) {
+    const { page = 1, limit = 10, search, status, postId, blogPostId, articleId, authorId } = filterDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (search) {
+      where.content = { contains: search, mode: 'insensitive' };
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (postId) where.postId = postId;
+    if (blogPostId) where.blogPostId = blogPostId;
+    if (articleId) where.articleId = articleId;
+    if (authorId) where.authorId = authorId;
+
+    const [total, data] = await Promise.all([
+      this.prisma.comment.count({ where }),
+      this.prisma.comment.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async findById(id: number) {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${id} not found`);
+    }
+    return comment;
+  }
+
+  async update(id: number, dto: UpdateCommentDto) {
+    await this.findById(id); // Throws if not found
+
+    return this.prisma.comment.update({
+      where: { id },
+      data: dto,
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+
+  async delete(id: number) {
+    await this.findById(id); // Throws if not found
+    await this.prisma.comment.delete({
+      where: { id },
+    });
+  }
+
+  async changeStatus(id: number, status: 'pending' | 'approved' | 'rejected') {
+    await this.findById(id);
+    return this.prisma.comment.update({
+      where: { id },
+      data: { status },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+  }
+}

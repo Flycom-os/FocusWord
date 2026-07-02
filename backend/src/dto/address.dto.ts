@@ -2,21 +2,21 @@ import { IsOptional, IsString, IsInt } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateAddressDto {
-  @ApiProperty({example: 'ул. Пушкина, д. 1, кв. 10', description: 'адрес'})
+  @ApiProperty({example: 'Pushkina st., 1, apt. 10', description: 'address'})
   @IsString()
   address: string;
-  @ApiProperty({example: 'ул. Ленина, д. 5, кв. 20', description: 'новый адрес', required: false})
+  @ApiProperty({example: 'Lenina st., 5, apt. 20', description: 'new address', required: false})
   @IsOptional()
   @IsString()
   userId?: number;
 }
 
 export class UpdateAddressDto {
-  @ApiProperty({example: 'ул. Ленина, д. 5, кв. 20', description: 'новый адрес', required: false})
+  @ApiProperty({example: 'Lenina st., 5, apt. 20', description: 'new address', required: false})
   @IsOptional()
   @IsString()
   address?: string;
-  @ApiProperty({example: 'ул. Ленина, д. 5, кв. 20', description: 'новый адрес', required: false})
+  @ApiProperty({example: 'Lenina st., 5, apt. 20', description: 'new address', required: false})
   @IsOptional()
   @IsString()
   userId?: number;

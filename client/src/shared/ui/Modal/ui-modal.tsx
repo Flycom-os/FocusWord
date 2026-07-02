@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './ui-modal.module.css';
+import React from "react";
+import styles from "./ui-modal.module.css";
 
 export interface ModalProps {
   open: boolean;
@@ -14,7 +14,12 @@ const Modal = ({ open, onClose, title, children, zIndex, className }: ModalProps
   if (!open) return null;
 
   return (
-    <div className={`${styles.backdrop} ${className || ''}`} role="dialog" aria-modal="true" style={{ zIndex: zIndex || 2000 }}>
+    <div
+      className={`${styles.backdrop} ${className || ""}`}
+      role="dialog"
+      aria-modal="true"
+      style={{ zIndex: zIndex || 2000 }}
+    >
       <div className={styles.modal}>
         <div className={styles.header}>
           {title && <h3 className={styles.title}>{title}</h3>}

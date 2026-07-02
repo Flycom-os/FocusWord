@@ -55,20 +55,22 @@ export interface BlockTemplate {
   configSchema?: any;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const blocksApi = {
   // Получить все блоки
-  getAll: async (token: string | null, params: BlocksQuery = {}): Promise<PaginatedBlocksResponse> => {
+  getAll: async (
+    token: string | null,
+    params: BlocksQuery = {},
+  ): Promise<PaginatedBlocksResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
       ...(params.search && { search: params.search }),
       ...(params.type && { type: params.type }),
-      ...(params.isActive !== undefined && { isActive: params.isActive.toString() })
+      ...(params.isActive !== undefined && { isActive: params.isActive.toString() }),
     });
-    
+
     const { data } = await axios.get<PaginatedBlocksResponse>(`${API_URL}/blocks?${queryParams}`, {
       headers: authHeaders(token),
     });
@@ -116,17 +118,25 @@ export const blocksApi = {
 
   // Включить/выключить блок
   toggleActive: async (token: string | null, id: number, isActive: boolean): Promise<BlockDto> => {
-    const { data } = await axios.patch<BlockDto>(`${API_URL}/blocks/${id}/toggle`, { isActive }, {
-      headers: authHeaders(token),
-    });
+    const { data } = await axios.patch<BlockDto>(
+      `${API_URL}/blocks/${id}/toggle`,
+      { isActive },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
   // Клонировать блок
   clone: async (token: string | null, id: number, newName: string): Promise<BlockDto> => {
-    const { data } = await axios.post<BlockDto>(`${API_URL}/blocks/${id}/clone`, { name: newName }, {
-      headers: authHeaders(token),
-    });
+    const { data } = await axios.post<BlockDto>(
+      `${API_URL}/blocks/${id}/clone`,
+      { name: newName },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -143,31 +153,48 @@ export const blocksApi = {
   },
 
   // Валидировать контент блока
-  validateContent: async (type: string, content: any): Promise<{ isValid: boolean; errors?: string[] }> => {
-    const { data } = await axios.post<{ isValid: boolean; errors?: string[] }>(`${API_URL}/blocks/validate`, { type, content });
+  validateContent: async (
+    type: string,
+    content: any,
+  ): Promise<{ isValid: boolean; errors?: string[] }> => {
+    const { data } = await axios.post<{ isValid: boolean; errors?: string[] }>(
+      `${API_URL}/blocks/validate`,
+      { type, content },
+    );
     return data;
   },
 
   // Экспортировать блоки
   export: async (token: string | null, blockIds: number[]): Promise<Blob> => {
-    const response = await axios.post(`${API_URL}/blocks/export`, { blockIds }, {
-      headers: authHeaders(token),
-      responseType: 'blob'
-    });
+    const response = await axios.post(
+      `${API_URL}/blocks/export`,
+      { blockIds },
+      {
+        headers: authHeaders(token),
+        responseType: "blob",
+      },
+    );
     return response.data;
   },
 
   // Импортировать блоки
-  import: async (token: string | null, file: File): Promise<{ imported: number; errors: string[] }> => {
+  import: async (
+    token: string | null,
+    file: File,
+  ): Promise<{ imported: number; errors: string[] }> => {
     const formData = new FormData();
-    formData.append('file', file);
-    
-    const { data } = await axios.post<{ imported: number; errors: string[] }>(`${API_URL}/blocks/import`, formData, {
-      headers: {
-        ...authHeaders(token),
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    formData.append("file", file);
+
+    const { data } = await axios.post<{ imported: number; errors: string[] }>(
+      `${API_URL}/blocks/import`,
+      formData,
+      {
+        headers: {
+          ...authHeaders(token),
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
     return data;
   },
 };

@@ -1,0 +1,92 @@
+.checkoutCard {
+  max-width: 550px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+.checkoutTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.formInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.875rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Dark Mode Overrides */
+:global(.dark) .checkoutCard {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+:global(.dark) .checkoutTitle {
+  color: white;
+}
+
+:global(.dark) .formLabel {
+  color: #d1d5db;
+}
+
+:global(.dark) .formInput {
+  background: #374151;
+  border-color: #4b5563;
+  color: white;
+}
+
+:global(.dark) .formInput:focus {
+  border-color: #818cf8;
+}

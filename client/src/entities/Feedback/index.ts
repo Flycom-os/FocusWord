@@ -2,9 +2,9 @@ export interface Feedback {
   id: string;
   title: string;
   description: string;
-  type: 'complaint' | 'suggestion' | 'question' | 'compliment';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  type: "complaint" | "suggestion" | "question" | "compliment";
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "resolved" | "closed";
   userId: string;
   user?: {
     id: string;
@@ -27,8 +27,8 @@ export interface Feedback {
 export interface FeedbackFormData {
   title: string;
   description: string;
-  type: 'complaint' | 'suggestion' | 'question' | 'compliment';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: "complaint" | "suggestion" | "question" | "compliment";
+  priority: "low" | "medium" | "high" | "urgent";
   userId: string;
   assignedToId?: string;
   tags: string[];

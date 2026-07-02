@@ -60,7 +60,7 @@
 //     const deleteRecord = await this.prisma.technical_gass.delete({where:{id:Number(id)}});
 //     return deleteRecord;
 //   }
-//   // Создание комментария
+//   // Create comment
 //   async postComment(user, technical_gass_id: number, dto: Gass_ballon_commentsDto) {
 //     if (user.permission < 1) {
 //       throw new UnauthorizedException('You unauthorized');
@@ -69,7 +69,7 @@
 //     try {
 //       const newComment = await this.prisma.comment.create({
 //         data: {
-//           name: String(user.email), // ✅ исправлено
+//           name: String(user.email), // ✅ corrected
 //           text: dto.text,
 //           raiting: dto.raiting,
 //           technical_gassId: Number(technical_gass_id),
@@ -81,8 +81,8 @@
 //       return newComment;
 //
 //     } catch (error) {
-//       console.error('🔥 Ошибка при создании комментария:', error);
-//       throw new InternalServerErrorException('Что-то пошло не так при создании комментария');
+//       console.error('🔥 Error creating comment:', error);
+//       throw new InternalServerErrorException('Something went wrong while creating the comment');
 //     }
 //   }
 //

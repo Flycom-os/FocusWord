@@ -1,0 +1,46 @@
+.container {
+  padding: 12px;
+}
+
+.loading {
+  padding: 12px;
+  color: #666;
+}
+
+.image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+}
+
+.info {
+  margin-top: 12px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.price {
+  color: #0070f3;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.description {
+  color: #333;
+  line-height: 1.4;
+}
+
+.reviews {
+  margin-top: 12px;
+}
+
+.review {
+  border-top: 1px solid #eee;
+  padding: 8px 0;
+}

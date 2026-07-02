@@ -274,3 +274,78 @@
     width: 100%;
   }
 }
+
+.categoryTree {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.treeNode {
+  margin: 4px 0;
+}
+
+.toggleButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.nodeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio {
+  margin-right: 8px;
+}
+
+.children {
+  margin-left: 6px;
+  border-left: 1px dashed #f3f4f6;
+  padding-left: 8px;
+}
+
+.noCategory {
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.autocomplete {
+  position: relative;
+}
+
+.autocompleteInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.autocompleteDropdown {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 8px;
+  max-height: 260px;
+  overflow: auto;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.autocompleteItem {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.autocompleteItem:hover {
+  background: #f8fafc;
+}

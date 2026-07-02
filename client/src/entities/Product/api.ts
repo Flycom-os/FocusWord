@@ -1,17 +1,39 @@
-import { Product, ProductFormData, ProductCategory, ProductCategoryFormData } from './index';
-import axios from 'axios';
+import axios from "axios";
+import { Product, ProductFormData, ProductCategory, ProductCategoryFormData } from "./index";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
 export const productsApi = {
   // Products
-  getProducts: async (): Promise<Product[]> => {
-    const response = await axios.get(`${API_URL}/products`);
-    return response.data;
+  // Accepts optional query params. Backend may return either an array or a paginated object { data, total, page, limit }
+  getProducts: async (params?: { page?: number; limit?: number; search?: string; categoryId?: number }): Promise<Product[] | any> => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.search) query.set('search', params.search);
+    if (params?.categoryId) query.set('categoryId', String(params.categoryId));
+
+    const url = `${API_URL}/products${query.toString() ? `?${query.toString()}` : ''}`;
+    const response = await axios.get(url);
+    // Normalize: if backend returns paginated object, return it as-is; else return array
+    if (response.data && response.data.data) {
+      return response.data; // paginated
+    }
+    return response.data; // array
   },
 
   getProduct: async (id: string): Promise<Product> => {
     const response = await axios.get(`${API_URL}/products/${id}`);
+    return response.data;
+  },
+
+  getProductReviews: async (id: string) => {
+    const response = await axios.get(`${API_URL}/products/${id}/reviews`);
+    return response.data;
+  },
+
+  addProductReview: async (id: string, data: { name: string; email: string; message: string; rating: number }) => {
+    const response = await axios.post(`${API_URL}/products/${id}/reviews`, data);
     return response.data;
   },
 
@@ -45,7 +67,10 @@ export const productsApi = {
     return response.data;
   },
 
-  updateCategory: async (id: string, data: Partial<ProductCategoryFormData>): Promise<ProductCategory> => {
+  updateCategory: async (
+    id: string,
+    data: Partial<ProductCategoryFormData>,
+  ): Promise<ProductCategory> => {
     const response = await axios.put(`${API_URL}/product-categories/${id}`, data);
     return response.data;
   },

@@ -1,4 +1,3 @@
-
 import { ChevronDown, Plus, X } from "lucide-react";
 import styles from "@/src/widgets/block_management/index.module.css";
 import Button from "@/src/shared/ui/Button/ui-button";
@@ -13,11 +12,11 @@ const BlockManagement = ({ type }: searchProps) => {
     <div className={styles.default}>
       {(type === "primary" || type === "secondary") && (
         <div className={styles.primary_or_secondary}>
-          <Button className={styles.close} theme={"close"}>
+          <Button className={styles.close} theme="close">
             <X className={styles.x} />
           </Button>
           <div className={styles.text}>Выбранно: {choosen}</div>
-          <Button theme={"warning"}>Удалить</Button>
+          <Button theme="warning">Удалить</Button>
         </div>
       )}
       {type === "secondary" && (

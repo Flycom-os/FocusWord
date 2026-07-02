@@ -1,8 +1,8 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import Notifications, { showToast } from './ui-notifications';
+import React from "react";
+import { render } from "@testing-library/react";
+import Notifications, { showToast } from "./ui-notifications";
 
-jest.mock('react-toastify', () => ({
+jest.mock("react-toastify", () => ({
   toast: {
     success: jest.fn(),
     info: jest.fn(),
@@ -12,14 +12,14 @@ jest.mock('react-toastify', () => ({
   ToastContainer: (props: any) => <div data-testid="toast-container" {...props} />,
 }));
 
-test('renders ToastContainer', () => {
+test("renders ToastContainer", () => {
   const { getByTestId } = render(<Notifications />);
-  expect(getByTestId('toast-container')).toBeInTheDocument();
+  expect(getByTestId("toast-container")).toBeInTheDocument();
 });
 
-test('showToast calls toast.success for success', () => {
+test("showToast calls toast.success for success", () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { toast } = require('react-toastify');
-  showToast('ok', 'success');
+  const { toast } = require("react-toastify");
+  showToast("ok", "success");
   expect(toast.success).toHaveBeenCalled();
 });

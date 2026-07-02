@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -20,5 +20,3 @@ const PermissionGate = ({ resource, level, children }: PermissionGateProps) => {
 };
 
 export default PermissionGate;
-
-
