@@ -13,19 +13,19 @@ describe("Checkbox component", () => {
     render(<Checkbox />);
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
 
-    expect(checkbox.checked).toBe(false);
+    expect(checkbox).not.toBeChecked();
 
     await userEvent.click(checkbox);
-    expect(checkbox.checked).toBe(true);
+    expect(checkbox).toBeChecked();
 
     await userEvent.click(checkbox);
-    expect(checkbox.checked).toBe(false);
+    expect(checkbox).not.toBeChecked();
   });
 
   it("renders with default checked prop", () => {
     render(<Checkbox checked readOnly />);
     const checkbox = screen.getByRole("checkbox") as HTMLInputElement;
-    expect(checkbox.checked).toBe(true);
+    expect(checkbox).toBeChecked();
   });
 
   it("applies custom className if provided", () => {

@@ -28,7 +28,7 @@ describe('AuthService = Login', () => {
     prisma = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
   });
-  it('✅ Должен авторизовать пользователя по email', async () => {
+  it('✅ Should authenticate user by email', async () => {
     prisma.user.findFirst = jest.fn().mockResolvedValue({
       id: 12,
       email: 'newuuser@example.com',
@@ -41,7 +41,7 @@ describe('AuthService = Login', () => {
     // expect(result).toHaveProperty('refresh_token');
   });
 
-  it('❌ Должен выдать ошибку, если пользователь не найден', async () => {
+  it('❌ Should throw an error if user not found', async () => {
     prisma.user.findFirst = jest.fn().mockResolvedValue(null);
 
     await expect(
@@ -49,7 +49,7 @@ describe('AuthService = Login', () => {
     ).rejects.toThrow(UnauthorizedException);
   });
 
-  it('❌ Должен выдать ошибку, если пароль неверный', async () => {
+  it('❌ Should throw an error if password is incorrect', async () => {
     prisma.user.findFirst = jest.fn().mockResolvedValue({
       id: 1,
       email: 'test@example.com',

@@ -25,5 +25,3 @@ export const registerRequest = async (payload: RegisterPayload): Promise<AuthRes
   const { data } = await axios.post<AuthResponse>(`${API_URL}/auth/register`, payload);
   return data;
 };
-
-

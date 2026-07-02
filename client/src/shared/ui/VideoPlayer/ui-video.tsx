@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import styles from './ui-video.module.css';
+import React, { useRef, useState, useEffect } from "react";
+import styles from "./ui-video.module.css";
 
 export interface VideoPlayerProps {
   src: string;
@@ -7,7 +7,7 @@ export interface VideoPlayerProps {
   height?: number | string;
 }
 
-const VideoPlayer = ({ src, width = '480px', height = '270px' }: VideoPlayerProps) => {
+const VideoPlayer = ({ src, width = "480px", height = "270px" }: VideoPlayerProps) => {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -16,8 +16,8 @@ const VideoPlayer = ({ src, width = '480px', height = '270px' }: VideoPlayerProp
     const v = ref.current;
     if (!v) return;
     const onTime = () => setProgress((v.currentTime / (v.duration || 1)) * 100);
-    v.addEventListener('timeupdate', onTime);
-    return () => v.removeEventListener('timeupdate', onTime);
+    v.addEventListener("timeupdate", onTime);
+    return () => v.removeEventListener("timeupdate", onTime);
   }, []);
 
   const toggle = () => {
@@ -32,14 +32,32 @@ const VideoPlayer = ({ src, width = '480px', height = '270px' }: VideoPlayerProp
     }
   };
 
+  const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+    const v = ref.current;
+    if (!v) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * v.duration;
+
+    v.currentTime = newTime;
+  };
+
   return (
     <div className={styles.videoWrap} style={{ width }}>
-      <video ref={ref} src={src} width={width} height={height} style={{ display: 'block', borderRadius: 8 }} />
+      <video
+        ref={ref}
+        src={src}
+        width={width}
+        height={height}
+        style={{ display: "block", borderRadius: 8 }}
+      />
       <div className={styles.controls}>
-        <button onClick={toggle} className={styles.play} aria-label={playing ? 'Pause' : 'Play'}>
-          {playing ? '❚❚' : '▶'}
+        <button onClick={toggle} className={styles.play} aria-label={playing ? "Pause" : "Play"}>
+          {playing ? "❚❚" : "▶"}
         </button>
-        <div className={styles.progressWrap}>
+        <div className={styles.progressWrap} onClick={seek}>
           <div className={styles.progress} style={{ width: `${progress}%` }} />
         </div>
       </div>

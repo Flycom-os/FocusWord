@@ -1,22 +1,27 @@
-import axios from 'axios';
-import { SearchQueryDto } from '@/src/shared/lib/types'; // Assuming types are here or create a new file
+import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'; // Assuming API runs on port 3000
+export interface SearchQueryDto {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"; // Assuming API runs on port 3000
 
 export interface User {
+  id: number;
+  email: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
+  avatarUrl?: string;
+  role?: {
     id: number;
-    email: string;
-    username?: string;
-    firstName?: string;
-    lastName?: string;
-    createdAt: string;
-    updatedAt: string;
-    lastLogin?: string;
-    avatarUrl?: string;
-    role?: {
-      id: number;
-      name: string;
-    }
+    name: string;
+  };
 }
 
 export interface GetUsersResponse {

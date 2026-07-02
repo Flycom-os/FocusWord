@@ -1,4 +1,5 @@
 import { IsOptional, IsString, IsArray, IsEnum, IsInt, Min, Max } from "class-validator";
+import { Type } from "class-transformer";
 import { ApiProperty } from '@nestjs/swagger';
 import { SearchQueryDto, SortOrder } from "../common/search-query.dto";
 
@@ -38,9 +39,10 @@ export class SearchRolesDto{
     example: 1,
   })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  page: number = 1;
+  page?: number;
 
   @ApiProperty({
     description: 'Number of items per page for pagination',
@@ -48,10 +50,13 @@ export class SearchRolesDto{
     default: 10,
     example: 10,
   })
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100) // Assuming a reasonable max limit
-  limit: number = 10;
+  @Max(100)
+  limit?: number;
+
   @ApiProperty({ description: 'The name of the role', example: 'Admin', required: false })
   @IsString()
   @IsOptional()

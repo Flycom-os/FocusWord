@@ -16,6 +16,6 @@ import { Pool } from 'pg';
       },
     },
   ],
-  exports: ['PG_POOL'], // 👈 Экспортируем PG_POOL, чтобы использовать в других модулях
+  exports: ['PG_POOL'], // 👈 Export PG_POOL to use in other modules
 })
 export class DatabaseModule {}

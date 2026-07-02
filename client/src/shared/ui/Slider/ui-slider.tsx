@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import styles from './ui-slider.module.css';
-import VideoPlayer from '../VideoPlayer/ui-video';
-import AudioPlayer from '../AudioPlayer/ui-audio';
+import React, { useState, useEffect } from "react";
+import styles from "./ui-slider.module.css";
+import VideoPlayer from "../VideoPlayer/ui-video";
+import AudioPlayer from "../AudioPlayer/ui-audio";
 
 export interface SliderItem {
   id: number;
   src: string;
-  type: 'image' | 'video' | 'audio';
+  type: "image" | "video" | "audio";
   alt?: string;
   caption?: string;
 }
@@ -68,53 +68,39 @@ const Slider: React.FC<SliderProps> = ({
           ×
         </button>
       )}
-      
+
       <div className={styles.sliderContent}>
         {showControls && items.length > 1 && (
-          <button
-            className={styles.navButton}
-            onClick={goToPrevious}
-            aria-label="Предыдущий"
-          >
+          <button className={styles.navButton} onClick={goToPrevious} aria-label="Предыдущий">
             ‹
           </button>
         )}
 
         <div className={styles.slideContainer}>
           <div className={styles.slide}>
-            {currentItem.type === 'image' && (
+            {currentItem.type === "image" && (
               <img
                 src={currentItem.src}
-                alt={currentItem.alt || ''}
+                alt={currentItem.alt || ""}
                 className={styles.slideImage}
               />
             )}
-            {currentItem.type === 'video' && (
+            {currentItem.type === "video" && (
               <div className={styles.slideVideo}>
-                <VideoPlayer
-                  src={currentItem.src}
-                  width="100%"
-                  height="100%"
-                />
+                <VideoPlayer src={currentItem.src} width="100%" height="100%" />
               </div>
             )}
-            {currentItem.type === 'audio' && (
+            {currentItem.type === "audio" && (
               <div className={styles.slideAudio}>
                 <AudioPlayer src={currentItem.src} theme="primary" />
               </div>
             )}
           </div>
-          {currentItem.caption && (
-            <div className={styles.caption}>{currentItem.caption}</div>
-          )}
+          {currentItem.caption && <div className={styles.caption}>{currentItem.caption}</div>}
         </div>
 
         {showControls && items.length > 1 && (
-          <button
-            className={styles.navButton}
-            onClick={goToNext}
-            aria-label="Следующий"
-          >
+          <button className={styles.navButton} onClick={goToNext} aria-label="Следующий">
             ›
           </button>
         )}
@@ -125,7 +111,7 @@ const Slider: React.FC<SliderProps> = ({
           {items.map((_, index) => (
             <button
               key={index}
-              className={`${styles.dot} ${index === currentIndex ? styles.active : ''}`}
+              className={`${styles.dot} ${index === currentIndex ? styles.active : ""}`}
               onClick={() => goToSlide(index)}
               aria-label={`Перейти к слайду ${index + 1}`}
             />
@@ -143,6 +129,3 @@ const Slider: React.FC<SliderProps> = ({
 };
 
 export default Slider;
-
-
-

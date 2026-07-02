@@ -46,12 +46,14 @@ export interface StructuredDataQuery {
   postId?: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const structuredDataApi = {
   // Получить все структурированные данные
-  getAll: async (token: string | null, params: StructuredDataQuery = {}): Promise<PaginatedStructuredDataResponse> => {
+  getAll: async (
+    token: string | null,
+    params: StructuredDataQuery = {},
+  ): Promise<PaginatedStructuredDataResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
@@ -59,12 +61,15 @@ export const structuredDataApi = {
       ...(params.type && { type: params.type }),
       ...(params.isActive !== undefined && { isActive: params.isActive.toString() }),
       ...(params.pageId && { pageId: params.pageId.toString() }),
-      ...(params.postId && { postId: params.postId.toString() })
+      ...(params.postId && { postId: params.postId.toString() }),
     });
-    
-    const { data } = await axios.get<PaginatedStructuredDataResponse>(`${API_URL}/structured-data?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedStructuredDataResponse>(
+      `${API_URL}/structured-data?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -77,18 +82,33 @@ export const structuredDataApi = {
   },
 
   // Создать структурированные данные
-  create: async (token: string | null, data: CreateStructuredDataDto): Promise<StructuredDataDto> => {
-    const { data: result } = await axios.post<StructuredDataDto>(`${API_URL}/structured-data`, data, {
-      headers: authHeaders(token),
-    });
+  create: async (
+    token: string | null,
+    data: CreateStructuredDataDto,
+  ): Promise<StructuredDataDto> => {
+    const { data: result } = await axios.post<StructuredDataDto>(
+      `${API_URL}/structured-data`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
   // Обновить структурированные данные
-  update: async (token: string | null, id: number, data: UpdateStructuredDataDto): Promise<StructuredDataDto> => {
-    const { data: result } = await axios.put<StructuredDataDto>(`${API_URL}/structured-data/${id}`, data, {
-      headers: authHeaders(token),
-    });
+  update: async (
+    token: string | null,
+    id: number,
+    data: UpdateStructuredDataDto,
+  ): Promise<StructuredDataDto> => {
+    const { data: result } = await axios.put<StructuredDataDto>(
+      `${API_URL}/structured-data/${id}`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
@@ -100,10 +120,18 @@ export const structuredDataApi = {
   },
 
   // Включить/выключить структурированные данные
-  toggleActive: async (token: string | null, id: number, isActive: boolean): Promise<StructuredDataDto> => {
-    const { data } = await axios.patch<StructuredDataDto>(`${API_URL}/structured-data/${id}/toggle`, { isActive }, {
-      headers: authHeaders(token),
-    });
+  toggleActive: async (
+    token: string | null,
+    id: number,
+    isActive: boolean,
+  ): Promise<StructuredDataDto> => {
+    const { data } = await axios.patch<StructuredDataDto>(
+      `${API_URL}/structured-data/${id}/toggle`,
+      { isActive },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -115,7 +143,10 @@ export const structuredDataApi = {
 
   // Валидировать JSON-LD
   validateJsonLd: async (jsonLd: any): Promise<{ isValid: boolean; errors?: string[] }> => {
-    const { data } = await axios.post<{ isValid: boolean; errors?: string[] }>(`${API_URL}/structured-data/validate`, { jsonLd });
+    const { data } = await axios.post<{ isValid: boolean; errors?: string[] }>(
+      `${API_URL}/structured-data/validate`,
+      { jsonLd },
+    );
     return data;
   },
 };

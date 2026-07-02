@@ -8,7 +8,7 @@ export interface PostDto {
   slug: string;
   content: string;
   excerpt?: string | null;
-  status: 'draft' | 'published';
+  status: "draft" | "published";
   createdAt: string;
   updatedAt: string;
   publishedAt?: string | null;
@@ -25,7 +25,7 @@ export interface CreatePostDto {
   slug: string;
   content: string;
   excerpt?: string;
-  status: 'draft' | 'published';
+  status: "draft" | "published";
   authorId?: number;
   featuredImageId?: number;
   seoTitle?: string;
@@ -39,7 +39,7 @@ export interface UpdatePostDto {
   slug?: string;
   content?: string;
   excerpt?: string;
-  status?: 'draft' | 'published';
+  status?: "draft" | "published";
   authorId?: number;
   featuredImageId?: number;
   seoTitle?: string;
@@ -59,18 +59,20 @@ export interface PostsQuery {
   page?: number;
   limit?: number;
   search?: string;
-  status?: 'draft' | 'published';
+  status?: "draft" | "published";
   authorId?: number;
   categoryId?: number;
   tagId?: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const postsApi = {
   // Получить все посты с пагинацией
-  getAll: async (token: string | null, params: PostsQuery = {}): Promise<PaginatedPostsResponse> => {
+  getAll: async (
+    token: string | null,
+    params: PostsQuery = {},
+  ): Promise<PaginatedPostsResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
@@ -78,9 +80,9 @@ export const postsApi = {
       ...(params.status && { status: params.status }),
       ...(params.authorId && { authorId: params.authorId.toString() }),
       ...(params.categoryId && { categoryId: params.categoryId.toString() }),
-      ...(params.tagId && { tagId: params.tagId.toString() })
+      ...(params.tagId && { tagId: params.tagId.toString() }),
     });
-    
+
     const { data } = await axios.get<PaginatedPostsResponse>(`${API_URL}/posts?${queryParams}`, {
       headers: authHeaders(token),
     });
@@ -120,17 +122,25 @@ export const postsApi = {
 
   // Опубликовать пост
   publish: async (token: string | null, id: number): Promise<PostDto> => {
-    const { data } = await axios.patch<PostDto>(`${API_URL}/posts/${id}/publish`, {}, {
-      headers: authHeaders(token),
-    });
+    const { data } = await axios.patch<PostDto>(
+      `${API_URL}/posts/${id}/publish`,
+      {},
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
   // Снять с публикации пост
   unpublish: async (token: string | null, id: number): Promise<PostDto> => {
-    const { data } = await axios.patch<PostDto>(`${API_URL}/posts/${id}/unpublish`, {}, {
-      headers: authHeaders(token),
-    });
+    const { data } = await axios.patch<PostDto>(
+      `${API_URL}/posts/${id}/unpublish`,
+      {},
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 };

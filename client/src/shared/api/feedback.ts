@@ -8,7 +8,7 @@ export interface FeedbackDto {
   email: string;
   message: string;
   rating?: number | null;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +21,7 @@ export interface CreateFeedbackDto {
 }
 
 export interface UpdateFeedbackDto {
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: "pending" | "approved" | "rejected";
 }
 
 export interface PaginatedFeedbackResponse {
@@ -35,25 +35,30 @@ export interface FeedbackQuery {
   page?: number;
   limit?: number;
   search?: string;
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: "pending" | "approved" | "rejected";
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const feedbackApi = {
   // Получить все отзывы с пагинацией
-  getAll: async (token: string | null, params: FeedbackQuery = {}): Promise<PaginatedFeedbackResponse> => {
+  getAll: async (
+    token: string | null,
+    params: FeedbackQuery = {},
+  ): Promise<PaginatedFeedbackResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
       ...(params.search && { search: params.search }),
-      ...(params.status && { status: params.status })
+      ...(params.status && { status: params.status }),
     });
-    
-    const { data } = await axios.get<PaginatedFeedbackResponse>(`${API_URL}/feedback?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedFeedbackResponse>(
+      `${API_URL}/feedback?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -72,7 +77,11 @@ export const feedbackApi = {
   },
 
   // Обновить отзыв
-  update: async (token: string | null, id: number, data: UpdateFeedbackDto): Promise<FeedbackDto> => {
+  update: async (
+    token: string | null,
+    id: number,
+    data: UpdateFeedbackDto,
+  ): Promise<FeedbackDto> => {
     const { data: result } = await axios.put<FeedbackDto>(`${API_URL}/feedback/${id}`, data, {
       headers: authHeaders(token),
     });
@@ -87,10 +96,18 @@ export const feedbackApi = {
   },
 
   // Изменить статус отзыва
-  changeStatus: async (token: string | null, id: number, status: 'pending' | 'approved' | 'rejected'): Promise<FeedbackDto> => {
-    const { data: result } = await axios.patch<FeedbackDto>(`${API_URL}/feedback/${id}/status`, { status }, {
-      headers: authHeaders(token),
-    });
+  changeStatus: async (
+    token: string | null,
+    id: number,
+    status: "pending" | "approved" | "rejected",
+  ): Promise<FeedbackDto> => {
+    const { data: result } = await axios.patch<FeedbackDto>(
+      `${API_URL}/feedback/${id}/status`,
+      { status },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 };

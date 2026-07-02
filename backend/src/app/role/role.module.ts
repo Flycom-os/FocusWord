@@ -28,22 +28,94 @@ export class RoleModule implements OnModuleInit {
     const defaultRoles = [
       {
         name: 'Admin',
-        description: 'Administrator role with full access to mediafiles, pages, and sliders.',
+        description: 'Administrator role with full access to admin panel.',
         permissions: [
-          'mediafiles:2', // Full access
-          'pages:2',      // Full access
-          'sliders:2',    // Full access
-          'roles:2',      // Full access
-          'users:2',      // Full access
+          'analytics:2',
+          'products:2',
+          'product-categories:2',
+          'feedback:2',
+          'media-files:2',
+          'sliders:2',
+          'records:2',
+          'record-categories:2',
+          'pages:2',
+          'posts:2',
+          'users:2',
+          'roles:2',
+          'profiles:2',
+          'settings:2',
+          'payment:2',
+          'activity-logs:2',
+          'structured-data:2',
+          'blocks:2',
+          'comments:2',
+          'tags:2',
+          'widgets:2',
+          'seo:2'
+        ],
+      },
+      {
+        name: 'Editor',
+        description: 'Editor role with full access to admin panel.',
+        permissions: [
+          'analytics:1',
+          'products:1',
+          'product-categories:1',
+          'feedback:1',
+          'media-files:1',
+          'sliders:1',
+          'records:1',
+          'record-categories:1',
+          'pages:1',
+          'posts:1',
+          'users:1',
+          'roles:1',
+          'profiles:2',
+          'settings:2',
+          'payment:1',
+          'activity-logs:1',
+          'structured-data:1',
+          'blocks:1',
+          'comments:1',
+          'tags:1',
+          'widgets:1',
+          'seo:1'
+        ],
+      },
+      {
+        name: 'Reader',
+        description: 'Reader role with read-only access to admin panel.',
+        permissions: [
+          'analytics:0',
+          'products:0',
+          'product-categories:0',
+          'feedback:0',
+          'media-files:0',
+          'sliders:0',
+          'records:0',
+          'record-categories:0',
+          'pages:0',
+          'posts:0',
+          'users:0',
+          'roles:0',
+          'profiles:2',
+          'settings:2',
+          'payment:0',
+          'activity-logs:0',
+          'structured-data:0',
+          'blocks:0',
+          'comments:0',
+          'tags:0',
+          'widgets:0',
+          'seo:0'
         ],
       },
       {
         name: 'Guest',
-        description: 'Guest role with read-only access to mediafiles, pages, and sliders.',
+        description: 'Guest role with read-only access to admin panel.',
         permissions: [
-          'mediafiles:0', // Read-only
-          'pages:0',      // Read-only
-          'sliders:0',    // Read-only
+          'profiles:2',
+          'settings:2'
         ],
       },
     ];

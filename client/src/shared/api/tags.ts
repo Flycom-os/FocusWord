@@ -36,8 +36,7 @@ export interface TagsQuery {
   search?: string;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const tagsApi = {
   // Получить все теги с пагинацией
@@ -45,9 +44,9 @@ export const tagsApi = {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
-      ...(params.search && { search: params.search })
+      ...(params.search && { search: params.search }),
     });
-    
+
     const { data } = await axios.get<PaginatedTagsResponse>(`${API_URL}/tags?${queryParams}`, {
       headers: authHeaders(token),
     });

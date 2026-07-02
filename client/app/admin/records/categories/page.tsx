@@ -1,41 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Input from '@/src/shared/ui/Input/ui-input';
-import Button from '@/src/shared/ui/Button/ui-button';
-import { recordsApi, RecordDto } from '@/src/shared/api/records';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import styles from './categories.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/src/shared/ui/Input/ui-input";
+import Button from "@/src/shared/ui/Button/ui-button";
+import {
+  recordsApi,
+  RecordDto,
+  CategoryDto,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from "@/src/shared/api/records";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import styles from "./categories.module.css";
 
 export default function RecordCategoriesPage() {
   const router = useRouter();
-  const [records, setRecords] = useState<RecordDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<RecordDto | null>(null);
+  const [editingCategory, setEditingCategory] = useState<CategoryDto | null>(null);
   const [categoryForm, setCategoryForm] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    status: 'draft' as 'draft' | 'published'
+    title: "",
+    slug: "",
+    description: "",
   });
 
   useEffect(() => {
-    loadRecords();
+    loadCategories();
   }, [currentPage, search]);
 
-  const loadRecords = async () => {
+  const loadCategories = async () => {
     setLoading(true);
     try {
-      const response = await recordsApi.getAll(currentPage, 10, search);
-      setRecords(response.data);
+      const response = await recordsApi.getCategories(currentPage, 10, search);
+      setCategories(response.data);
       setTotalPages(Math.ceil(response.total / 10));
     } catch (error) {
-      showToast('Ошибка при загрузке категорий', 'error');
+      showToast("Error loading categories", "error");
     } finally {
       setLoading(false);
     }
@@ -43,104 +48,70 @@ export default function RecordCategoriesPage() {
 
   const handleCreateCategory = () => {
     setCategoryForm({
-      title: '',
-      slug: '',
-      description: '',
-      status: 'draft'
+      title: "",
+      slug: "",
+      description: "",
     });
     setEditingCategory(null);
     setShowCreateModal(true);
   };
 
-  const handleEditCategory = (record: RecordDto) => {
+  const handleEditCategory = (category: CategoryDto) => {
     setCategoryForm({
-      title: record.title,
-      slug: record.slug,
-      description: record.content || '',
-      status: record.status
+      title: category.name,
+      slug: category.slug,
+      description: category.description || "",
     });
-    setEditingCategory(record);
+    setEditingCategory(category);
     setShowCreateModal(true);
   };
 
   const handleSaveCategory = async () => {
     try {
+      const categoryData: CreateCategoryDto = {
+        name: categoryForm.title,
+        slug: categoryForm.slug,
+        description: categoryForm.description,
+      };
+
       if (editingCategory) {
-        await recordsApi.update(editingCategory.id.toString(), {
-          ...categoryForm,
-          content: categoryForm.description,
-          contentBlocks: [{ type: 'paragraph', data: { text: categoryForm.description } }]
+        await recordsApi.updateCategory(editingCategory.id.toString(), {
+          ...categoryData,
+          id: editingCategory.id,
         });
-        showToast('Категория обновлена', 'success');
+        showToast("Category updated", "success");
       } else {
-        await recordsApi.create({
-          ...categoryForm,
-          content: categoryForm.description,
-          contentBlocks: [{ type: 'paragraph', data: { text: categoryForm.description } }]
-        });
-        showToast('Категория создана', 'success');
+        await recordsApi.createCategory(categoryData);
+        showToast("Category created", "success");
       }
-      
+
       setShowCreateModal(false);
       setEditingCategory(null);
-      loadRecords();
+      loadCategories();
     } catch (error) {
-      showToast('Ошибка при сохранении категории', 'error');
+      showToast("Error saving category", "error");
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить эту категорию?')) {
+    if (!confirm("Are you sure you want to delete this category?")) {
       return;
     }
-    
+
     try {
-      await recordsApi.delete(id);
-      showToast('Категория удалена', 'success');
-      loadRecords();
+      await recordsApi.deleteCategory(id);
+      showToast("Category deleted", "success");
+      loadCategories();
     } catch (error) {
-      showToast('Ошибка при удалении категории', 'error');
-    }
-  };
-
-  const handleStatusChange = async (id: string, status: 'draft' | 'published') => {
-    try {
-      await recordsApi.changeStatus(id, status);
-      showToast(`Статус изменен на ${status === 'published' ? 'опубликована' : 'черновик'}`, 'success');
-      loadRecords();
-    } catch (error) {
-      showToast('Ошибка при изменении статуса', 'error');
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const baseClass = styles.statusBadge;
-    switch (status) {
-      case 'published':
-        return `${baseClass} ${styles.published}`;
-      case 'draft':
-        return `${baseClass} ${styles.draft}`;
-      default:
-        return baseClass;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'published':
-        return 'Опубликована';
-      case 'draft':
-        return 'Черновик';
-      default:
-        return status;
+      showToast("Error deleting category", "error");
     }
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Категории записей</h1>
-        <p>Управление категориями для записей</p>
+        <h1>Record Categories</h1>
+        <p>Manage categories for records</p>
       </div>
 
       <div className={styles.toolbar}>
@@ -148,79 +119,60 @@ export default function RecordCategoriesPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск категорий..."
+            placeholder="Search categories..."
             className={styles.searchInput}
           />
         </div>
-        <Button
-          onClick={handleCreateCategory}
-          className={styles.createButton}
-        >
-          ➕ Создать категорию
+        <Button onClick={handleCreateCategory} className={styles.createButton}>
+          ➕ Create Category
         </Button>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
-        ) : records.length === 0 ? (
+          <div className={styles.loading}>Loading...</div>
+        ) : categories.length === 0 ? (
           <div className={styles.empty}>
-            <h3>Нет категорий</h3>
-            <p>Создайте первую категорию для записей</p>
-            <Button onClick={handleCreateCategory}>
-              Создать категорию
-            </Button>
+            <h3>No categories</h3>
+            <p>Create the first category for records</p>
+            <Button onClick={handleCreateCategory}>Create Category</Button>
           </div>
         ) : (
           <div className={styles.grid}>
-            {records.map(record => (
-              <div key={record.id} className={styles.card}>
+            {categories.map((category) => (
+              <div key={category.id} className={styles.card}>
                 <div className={styles.cardHeader}>
-                  <h3>{record.title}</h3>
-                  <span className={getStatusBadge(record.status)}>
-                    {getStatusText(record.status)}
-                  </span>
+                  <h3>{category.name}</h3>
                 </div>
-                
+
                 <div className={styles.cardContent}>
-                  <p className={styles.slug}>/{record.slug}</p>
-                  <p className={styles.description}>
-                    {record.content || 'Нет описания'}
-                  </p>
+                  <p className={styles.slug}>/{category.slug}</p>
+                  <p className={styles.description}>{category.description || "No description"}</p>
                 </div>
 
                 <div className={styles.cardMeta}>
                   <span className={styles.date}>
-                    Создано: {new Date(record.createdAt).toLocaleDateString('ru-RU')}
+                    Created: {new Date(category.createdAt).toLocaleDateString("en-US")}
                   </span>
-                  {record.updatedAt !== record.createdAt && (
+                  {category.updatedAt !== category.createdAt && (
                     <span className={styles.date}>
-                      Обновлено: {new Date(record.updatedAt).toLocaleDateString('ru-RU')}
+                      Updated: {new Date(category.updatedAt).toLocaleDateString("en-US")}
                     </span>
                   )}
                 </div>
 
                 <div className={styles.cardActions}>
                   <Button
-                    onClick={() => handleEditCategory(record)}
+                    onClick={() => handleEditCategory(category)}
                     className={styles.editButton}
                   >
-                    ✏️ Редактировать
+                    ✏️ Edit
                   </Button>
                   <Button
-                    onClick={() => handleStatusChange(
-                      record.id.toString(), 
-                      record.status === 'published' ? 'draft' : 'published'
-                    )}
-                    className={styles.statusButton}
-                  >
-                    {record.status === 'published' ? '📝 В черновик' : '📤 Опубликовать'}
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteCategory(record.id.toString())}
+                    onClick={() => handleDeleteCategory(category.id.toString())}
                     className={styles.deleteButton}
                   >
-                    🗑️ Удалить
+                    🗑️ Delete
                   </Button>
                 </div>
               </div>
@@ -229,21 +181,21 @@ export default function RecordCategoriesPage() {
         )}
       </div>
 
-      {/* Пагинация */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
           <Button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
             className={styles.paginationButton}
           >
             ←
           </Button>
           <span className={styles.paginationInfo}>
-            Страница {currentPage} из {totalPages}
+            Page {currentPage} of {totalPages}
           </span>
           <Button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
             className={styles.paginationButton}
           >
@@ -252,29 +204,24 @@ export default function RecordCategoriesPage() {
         </div>
       )}
 
-      {/* Модальное окно создания/редактирования */}
+      {/* Create/Edit Modal */}
       {showCreateModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
-              <h3>
-                {editingCategory ? 'Редактирование категории' : 'Создание категории'}
-              </h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className={styles.closeButton}
-              >
+              <h3>{editingCategory ? "Edit Category" : "Create Category"}</h3>
+              <button onClick={() => setShowCreateModal(false)} className={styles.closeButton}>
                 ✕
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Название категории</label>
+                <label className={styles.label}>Category Name</label>
                 <Input
                   value={categoryForm.title}
-                  onChange={(e) => setCategoryForm(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Введите название категории"
+                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter category name"
                 />
               </div>
 
@@ -282,50 +229,31 @@ export default function RecordCategoriesPage() {
                 <label className={styles.label}>Slug</label>
                 <Input
                   value={categoryForm.slug}
-                  onChange={(e) => setCategoryForm(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) => setCategoryForm((prev) => ({ ...prev, slug: e.target.value }))}
                   placeholder="url-slug"
                 />
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Описание</label>
+                <label className={styles.label}>Description</label>
                 <textarea
                   value={categoryForm.description}
-                  onChange={(e) => setCategoryForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Описание категории"
+                  onChange={(e) =>
+                    setCategoryForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  placeholder="Category description"
                   className={styles.textarea}
                   rows={4}
                 />
               </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Статус</label>
-                <select
-                  value={categoryForm.status}
-                  onChange={(e) => setCategoryForm(prev => ({ 
-                    ...prev, 
-                    status: e.target.value as 'draft' | 'published' 
-                  }))}
-                  className={styles.select}
-                >
-                  <option value="draft">Черновик</option>
-                  <option value="published">Опубликована</option>
-                </select>
-              </div>
             </div>
 
             <div className={styles.modalActions}>
-              <Button
-                onClick={() => setShowCreateModal(false)}
-                className={styles.cancelButton}
-              >
-                Отмена
+              <Button onClick={() => setShowCreateModal(false)} className={styles.cancelButton}>
+                Cancel
               </Button>
-              <Button
-                onClick={handleSaveCategory}
-                className={styles.saveButton}
-              >
-                {editingCategory ? 'Сохранить изменения' : 'Создать категорию'}
+              <Button onClick={handleSaveCategory} className={styles.saveButton}>
+                {editingCategory ? "Save Changes" : "Create Category"}
               </Button>
             </div>
           </div>

@@ -20,15 +20,20 @@ model User {
   lastLogin DateTime?
 
   avatarUrl String?
+  themeMode String? @default("light")
 
   role   Role? @relation(fields: [roleId], references: [id])
   roleId Int?
 
   posts        Post[]
   pages        Page[]
+  blogPosts    BlogPost[] @relation("UserBlogPosts")
+  articles     Article[]  @relation("UserArticles")
+  records      Record[]
   mediaFiles   MediaFile[]
   comments     Comment[]
   activityLogs ActivityLog[]
+  mailboxes    Mailbox[]
 }
 
 model Role {
@@ -65,8 +70,11 @@ model MediaFile {
   width        Int?
   height       Int?
 
-  featuredImageOfPosts Post[]  @relation("FeaturedImageOfPost")
-  featuredImageOfPages Page[]  @relation("FeaturedImageOfPage")
+  featuredImageOfPosts     Post[]     @relation("FeaturedImageOfPost")
+  featuredImageOfPages Page[]     @relation("FeaturedImageOfPage")
+  featuredImageOfRecords Record[] @relation("FeaturedImageOfRecord")
+  featuredImageOfBlogPosts BlogPost[] @relation("FeaturedImageOfBlogPost")
+  featuredImageOfArticles  Article[]  @relation("FeaturedImageOfArticle")
   slideImage           Slide[]
 }
 
@@ -95,19 +103,23 @@ model Page {
   seoTitle       String?
   seoDescription String?
   metaKeywords   String[]   @default([])
-  
-  // Content blocks - слайдеры, медиа и другой контент
+
+  // Content blocks - sliders, media, and other content
   featuredSlider   Slider? @relation("FeaturedSliderOfPage", fields: [featuredSliderId], references: [id])
   featuredSliderId Int?
-  
-  // JSON массив с метаданными о вставленных контент блоках
-  // Структура: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
+
+  // JSON array with metadata about inserted content blocks
+  // Structure: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
   contentBlocks Json? @default("[]")
-  
+
   menuItems      MenuItem[] @relation("MenuItemPage")
 
   analyticsEntries AnalyticsEntry[] @relation("PageAnalytics")
   structuredData   StructuredData[] @relation("PageStructuredData")
+  categories       Category[] @relation("PageCategories")
+  paymentMethod   PaymentMethod? @relation("PagePaymentMethod", fields: [paymentMethodId], references: [id])
+  paymentMethodId Int?
+  enableFeedback  Boolean        @default(true)
 }
 
 model Post {
@@ -141,6 +153,38 @@ model Post {
   structuredData   StructuredData[] @relation("PostStructuredData")
 }
 
+model Record {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  status      String    @default("draft")
+  template    String    @default("default")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  categories Category[] @relation("RecordCategories")
+
+  featuredImage   MediaFile? @relation("FeaturedImageOfRecord", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
+
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+
+  featuredSlider   Slider? @relation("FeaturedSliderOfRecord", fields: [featuredSliderId], references: [id])
+  featuredSliderId Int?
+
+  contentBlocks Json? @default("[]")
+
+  analyticsEntries AnalyticsEntry[] @relation("RecordAnalytics")
+  structuredData   StructuredData[] @relation("RecordStructuredData")
+}
+
 model Category {
   id          Int      @id @default(autoincrement())
   name        String   @unique
@@ -149,7 +193,11 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts Post[] @relation("PostCategories")
+  posts     Post[]     @relation("PostCategories")
+  records   Record[]   @relation("RecordCategories")
+  blogPosts BlogPost[] @relation("BlogPostCategories")
+  articles  Article[]  @relation("ArticleCategories")
+  pages     Page[]     @relation("PageCategories")
 
   parentCategory   Category?  @relation("CategoryHierarchy", fields: [parentCategoryId], references: [id])
   parentCategoryId Int?
@@ -184,6 +232,12 @@ model Comment {
   post   Post? @relation(fields: [postId], references: [id])
   postId Int?
 
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  blogPostId Int?
+
+  article   Article? @relation(fields: [articleId], references: [id])
+  articleId Int?
+
   parentComment   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
   parentCommentId Int?
   childComments   Comment[] @relation("CommentReplies")
@@ -198,9 +252,12 @@ model Slider {
   updatedAt   DateTime @updatedAt
 
   slides Slide[]
-  
-  // Страницы, которые используют этот слайдер как основной
+
+  // Pages that use this slider as featured
   featuredInPages Page[] @relation("FeaturedSliderOfPage")
+  featuredInRecords Record[] @relation("FeaturedSliderOfRecord")
+  featuredInBlogPosts BlogPost[] @relation("FeaturedSliderOfBlogPost")
+  featuredInArticles  Article[]  @relation("FeaturedSliderOfArticle")
 }
 
 model Slide {
@@ -217,17 +274,6 @@ model Slide {
 
   slider   Slider? @relation(fields: [sliderId], references: [id])
   sliderId Int?
-}
-
-model Setting {
-  id          Int      @id @default(autoincrement())
-  key         String   @unique
-  value       String
-  type        String   @default("string")
-  description String?
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model Redirect {
@@ -303,6 +349,10 @@ model PaymentMethod {
 
   gateway          PaymentGateway? @relation(fields: [paymentGatewayId], references: [id])
   paymentGatewayId Int?
+
+  pages     Page[]     @relation("PagePaymentMethod")
+  blogPosts BlogPost[] @relation("BlogPostPaymentMethod")
+  articles  Article[]  @relation("ArticlePaymentMethod")
 }
 
 model AnalyticsEntry {
@@ -313,10 +363,16 @@ model AnalyticsEntry {
   bounceRate    Float?
   avgTimeOnPage Int?
 
-  page   Page? @relation("PageAnalytics", fields: [pageId], references: [id])
-  pageId Int?
-  post   Post? @relation("PostAnalytics", fields: [postId], references: [id])
-  postId Int?
+  page    Page?     @relation("PageAnalytics", fields: [pageId], references: [id])
+  pageId  Int?
+  post    Post?     @relation("PostAnalytics", fields: [postId], references: [id])
+  postId  Int?
+  record  Record?   @relation("RecordAnalytics", fields: [recordId], references: [id])
+  recordId Int?
+  blogPost BlogPost? @relation("BlogPostAnalytics", fields: [blogPostId], references: [id])
+  blogPostId Int?
+  article Article?  @relation("ArticleAnalytics", fields: [articleId], references: [id])
+  articleId Int?
 
   referrers ReferrerDetail[]
 }
@@ -348,10 +404,12 @@ model StructuredData {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  page   Page? @relation("PageStructuredData", fields: [pageId], references: [id])
-  pageId Int?
-  post   Post? @relation("PostStructuredData", fields: [postId], references: [id])
-  postId Int?
+  page    Page?     @relation("PageStructuredData", fields: [pageId], references: [id])
+  pageId  Int?
+  post    Post?     @relation("PostStructuredData", fields: [postId], references: [id])
+  postId  Int?
+  record  Record?   @relation("RecordStructuredData", fields: [recordId], references: [id])
+  recordId Int?
 }
 
 model ActivityLog {
@@ -367,14 +425,256 @@ model ActivityLog {
   userId Int?
 }
 
+// Enums for Email Integration
+enum EmailProviderType {
+  SMTP
+  SENDGRID
+  MAILGUN
+  AWS_SES
+  OAUTH_GOOGLE
+  OAUTH_MICROSOFT
+}
+
+enum DomainStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  FAILED_VERIFICATION
+  ACTIVE
+  INACTIVE
+}
+
+enum DnsProviderType {
+  CLOUDFLARE
+  ROUTE53
+  OTHER
+}
+
+enum MailboxType {
+  INBOUND
+  OUTBOUND
+  FULL_ACCESS
+}
+
+enum MailboxStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// Models for Email Integration
+model EmailProvider {
+  id        Int               @id @default(autoincrement())
+  name      String            @unique
+  type      EmailProviderType
+  isActive  Boolean           @default(true)
+  settings  Json              @default("{}") // Store provider-specific credentials/settings
+  isDefault Boolean           @default(false)
+
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  domains   Domain[]
+}
+
+model EmailTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  subject     String
+  bodyHtml    String
+  bodyText    String?
+  variables   Json     @default("{}") // Expected variables for templating
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Domain {
+  id                     Int             @id @default(autoincrement())
+  name                   String          @unique
+  isVerified             Boolean         @default(false)
+  verificationToken      String?
+  status                 DomainStatus    @default(PENDING_VERIFICATION)
+  mxRecordsSet           Boolean         @default(false)
+  spfRecordSet           Boolean         @default(false)
+  dkimRecordSet          Boolean         @default(false)
+  dmarcRecordSet         Boolean         @default(false)
+  dnsProviderType        DnsProviderType?
+  dnsProviderCredentials Json?           @default("{}") // Encrypted credentials for DNS provider API
+
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  defaultEmailProvider   EmailProvider?  @relation(fields: [defaultEmailProviderId], references: [id])
+  defaultEmailProviderId Int?
+
+  mailboxes              Mailbox[]
+}
+
+model Mailbox {
+  id              Int         @id @default(autoincrement())
+  emailAddress    String      @unique
+  domainId        Int
+  userId          Int?        // Optional: associate with a user
+  type            MailboxType
+  credentials     Json?       @default("{}") // Encrypted credentials for IMAP/POP3/SMTP access
+  status          MailboxStatus @default(ACTIVE)
+  autoReplyMessage String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  domain          Domain      @relation(fields: [domainId], references: [id])
+  user            User?       @relation(fields: [userId], references: [id])
+}
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  type        String   @default("string")
+  description String?
+  category    String   @default("general")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlogPost {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String?
+  status      String    @default("draft")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User? @relation("UserBlogPosts", fields: [authorId], references: [id])
+  authorId Int?
+
+  template String @default("default")
+
+  featuredImage   MediaFile? @relation("FeaturedImageOfBlogPost", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
+
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+
+  featuredSlider   Slider? @relation("FeaturedSliderOfBlogPost", fields: [featuredSliderId], references: [id])
+  featuredSliderId Int?
+
+  contentBlocks Json? @default("[]")
+  comments      Comment[]
+  categories    Category[] @relation("BlogPostCategories")
+  analyticsEntries AnalyticsEntry[] @relation("BlogPostAnalytics")
+  paymentMethod   PaymentMethod? @relation("BlogPostPaymentMethod", fields: [paymentMethodId], references: [id])
+  paymentMethodId Int?
+  enableFeedback  Boolean        @default(true)
+}
+
+model Article {
+  id          Int       @id @default(autoincrement())
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String?
+  status      String    @default("draft")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  author   User? @relation("UserArticles", fields: [authorId], references: [id])
+  authorId Int?
+
+  template String @default("default")
+
+  featuredImage   MediaFile? @relation("FeaturedImageOfArticle", fields: [featuredImageId], references: [id])
+  featuredImageId Int?
+
+  seoTitle       String?
+  seoDescription String?
+  metaKeywords   String[]   @default([])
+
+  featuredSlider   Slider? @relation("FeaturedSliderOfArticle", fields: [featuredSliderId], references: [id])
+  featuredSliderId Int?
+
+  contentBlocks Json? @default("[]")
+  comments      Comment[]
+  categories    Category[] @relation("ArticleCategories")
+  analyticsEntries AnalyticsEntry[] @relation("ArticleAnalytics")
+  paymentMethod   PaymentMethod? @relation("ArticlePaymentMethod", fields: [paymentMethodId], references: [id])
+  paymentMethodId Int?
+  enableFeedback  Boolean        @default(true)
+}
+
 model Block {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   slug        String   @unique
   type        String
-  content     Json
+  content     Json     @default("[]")
+  config      Json?    @default("{}")
+  position    Int      @default(0)
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  rating    Int?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  price       Float
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryId  Int?
+  category    ProductCategory? @relation("ProductToCategory", fields: [categoryId], references: [id])
+
+  reviews     ProductReview[]
+}
+
+model ProductCategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parentId    Int?
+  parent      ProductCategory?  @relation("ProductCategoryHierarchy", fields: [parentId], references: [id])
+  children    ProductCategory[] @relation("ProductCategoryHierarchy")
+
+  products    Product[] @relation("ProductToCategory")
+}
+
+model ProductReview {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }

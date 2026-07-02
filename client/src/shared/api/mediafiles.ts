@@ -92,5 +92,3 @@ export const uploadMediaFile = async (
   });
   return data;
 };
-
-

@@ -1,4 +1,5 @@
 import { IsOptional, IsString, IsNotEmpty, IsEmail, IsEnum, IsInt, Min, Max } from "class-validator";
+import { Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 import { SearchQueryDto, SortOrder } from "./common/search-query.dto";
 
@@ -27,6 +28,11 @@ export class UpdateUserDto {
   @IsString()
   @ApiProperty({example:'/uploads/avatar.jpg', description:'URL to user avatar'})
   avatarUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({example:'light', description:'User theme preference: light or dark', required: false})
+  themeMode?: string;
 }
 
 export class SearchUsersDto {
@@ -64,9 +70,11 @@ export class SearchUsersDto {
     default: 1,
     example: 1,
   })
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  page: number = 1;
+  page?: number;
 
   @ApiProperty({
     description: 'Number of items per page for pagination',
@@ -74,10 +82,13 @@ export class SearchUsersDto {
     default: 10,
     example: 10,
   })
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100) // Assuming a reasonable max limit
-  limit: number = 10;
+  @Max(100)
+  limit?: number;
+
   @IsOptional()
   @IsString()
   @ApiProperty({example:'John', description:'search by first name', required: false})

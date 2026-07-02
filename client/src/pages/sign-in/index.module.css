@@ -5,6 +5,16 @@
   justify-content: center;
   background: radial-gradient(circle at top left, #eaf5ff 0, #ffffff 40%, #f9fafb 100%);
   padding: 24px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .card {
@@ -16,6 +26,18 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .logo {
@@ -43,12 +65,40 @@
   font-size: 13px;
   color: #6b7280;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tab:hover {
+  color: #003d6c;
+  transform: translateY(-1px);
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 61, 108, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.tab:hover::before {
+  width: 100px;
+  height: 100px;
 }
 
 .active {
   background: #ffffff;
   color: #003d6c;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+  transform: scale(1.05);
+  font-weight: 500;
 }
 
 .form {
@@ -56,10 +106,48 @@
   flex-direction: column;
   gap: 12px;
   margin-top: 8px;
+  position: relative;
+}
+
+.formField {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.formField:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.formField:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.formField:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.formField:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.formField:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .input {
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .permissionRow {
@@ -80,14 +168,98 @@
   padding: 8px 10px;
   font-size: 13px;
   outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: #003d6c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 61, 108, 0.15);
 }
 
 .select:focus {
   border-color: #003d6c;
-  box-shadow: 0 0 0 1px rgba(0, 61, 108, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 61, 108, 0.2);
+  transform: translateY(-1px);
 }
 
 .submit {
   width: 100%;
   margin-top: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 61, 108, 0.3);
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.submit:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.submit.loading {
+  pointer-events: none;
+}
+
+.submit.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.passwordError {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }

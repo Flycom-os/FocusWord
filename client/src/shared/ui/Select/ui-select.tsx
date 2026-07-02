@@ -1,14 +1,22 @@
-import React from 'react';
-import styles from './ui-select.module.css';
+import React from "react";
+import styles from "./ui-select.module.css";
 
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+export interface SelectProps
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "onChange"> {
   label?: string;
-  theme?: 'primary' | 'secondary';
+  theme?: "primary" | "secondary";
   options?: { value: string; label: string }[];
   onChange?: (value: string) => void; // Explicitly define onChange to accept string value
 }
 
-const Select = ({ label, theme = 'primary', options = [], className = '', onChange, ...rest }: SelectProps) => {
+const Select = ({
+  label,
+  theme = "primary",
+  options = [],
+  className = "",
+  onChange,
+  ...rest
+}: SelectProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (onChange) {
       onChange(event.target.value);

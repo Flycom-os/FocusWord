@@ -8,7 +8,7 @@ export interface Product {
   sku: string;
   stock: number;
   images: string[];
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
   createdAt: string;
   updatedAt: string;
 }
@@ -32,7 +32,7 @@ export interface ProductFormData {
   sku: string;
   stock: number;
   images: string[];
-  status: 'active' | 'inactive' | 'draft';
+  status: "active" | "inactive" | "draft";
 }
 
 export interface ProductCategoryFormData {

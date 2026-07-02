@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength, IsObject, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -74,4 +74,20 @@ export class CreatePageDto {
   @IsString()
   @IsOptional()
   template?: string;
+
+  @ApiProperty({ description: 'Category IDs to bind to the page', required: false, type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  @IsOptional()
+  categoryIds?: number[];
+
+  @ApiProperty({ description: 'Enable feedback framework on the page', required: false, default: true })
+  @IsBoolean()
+  @IsOptional()
+  enableFeedback?: boolean;
+
+  @ApiProperty({ description: 'The ID of the payment method to bind to the page', required: false })
+  @IsInt()
+  @IsOptional()
+  paymentMethodId?: number | null;
 }

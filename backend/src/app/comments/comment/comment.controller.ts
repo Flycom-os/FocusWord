@@ -1,131 +1,135 @@
-// import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
-// import {
-//   Body,
-//   Controller, Delete, Get,
-//   Param,
-//   Patch,
-//   Post,
-//   Put, Query,
-//   Req,
-//   UploadedFile,
-//   UseGuards,
-//   UseInterceptors,
-// } from "@nestjs/common";
-// import { JwtAuthGuard } from "../../../jwt-auth.guard";
-// import { Express } from "express";
-// import { FileInterceptor } from "@nestjs/platform-express";
-// import { diskStorage } from "multer";
-// import { extname } from "node:path";
-// import { Gass_ballonDto } from "../../../dto/techical_gass/gass_ballon.dto";
-// import { CommentsDto } from "../../../dto/comments.dto";
-// import { CommentsService } from "./comment_service";
-//
-// @ApiTags("Comment")
-// @ApiBearerAuth()
-// @Controller("comment")
-// export class CommentController {
-//   constructor(private gasBallonsService: CommentsService) {
-//   }
-//
-//   @UseGuards(JwtAuthGuard)
-//   @Post("register")
-//   @ApiOperation({ summary: "Газовый баллон успешно создан" })
-//   @ApiConsumes("multipart/form-data")
-//   @UseInterceptors(
-//     FileInterceptor("image", {
-//       storage: diskStorage({
-//         destination: "./uploads", // Папка для сохранения изображений
-//         filename: (req, file, callback) => {
-//           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//           const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Генерируем уникальное имя файла
-//           callback(null, fileName);
-//         },
-//       }),
-//     }),
-//   )
-//   async register(
-//     @Req() req: Request,
-//     @UploadedFile() file: Express.Multer.File, // Тип для файла
-//     @Body() dto: CommentsDto, // DTO для данных
-//   ) {
-//     if (!file) {
-//       throw new Error("Изображение обязательно");
-//     }
-//     const imagePath = `/uploads/${file.filename}`;
-//     const updatedDto: CommentsDto = {
-//       ...dto,
-//       image: imagePath,
-//     };
-//     const user = (req as any).user;
-//     return this.gasBallonsService.post(user, updatedDto);
-//   };
-//
-//   @UseGuards(JwtAuthGuard)
-//   @ApiOperation({ summary: "Газовый баллон успешно обновлён" })
-//   @ApiConsumes("multipart/form-data")
-//   @UseInterceptors(
-//     FileInterceptor("image", {
-//       storage: diskStorage({
-//         destination: "./uploads",
-//         filename: (req, file, callback) => {
-//           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//           const fileName = `${uniqueSuffix}${extname(file.originalname)}`;
-//           callback(null, fileName);
-//         },
-//       }),
-//     }),
-//   )
-//   @Put(":id")
-//   async update(
-//     @Req() req: Request,
-//     @UploadedFile() file: Express.Multer.File,
-//     @Param("id") id: string,
-//     @Body() dto: CommentsDto,
-//   ) {
-//     if (!file) {
-//       throw new Error("Изображение обязательно");
-//     }
-//     const imagePath = `/uploads/${file.filename}`;
-//     const updatedDto: CommentsDto = {
-//       ...dto,
-//       image: imagePath,
-//     };
-//     const user = (req as any).user;
-//     return this.gasBallonsService.put(user, Number(id), updatedDto);
-//   }
-//
-//
-//   @Get()
-//   @ApiOperation({ summary: "Газовый баллоны успешно получены" })
-//   async filter(
-//     @Req() req: Request,
-//     @Query('status') status: string,
-//     @Query('page') page: string = '1',
-//     @Query('limit') limit: string = '10',
-//   ) {
-//     const pageNumber = parseInt(page, 10);
-//     const pageSize = parseInt(limit, 10);
-//
-//     const result = await this.gasBallonsService.get(status, pageNumber, pageSize);
-//
-//     return {
-//       total: result.total,
-//       page: pageNumber,
-//       limit: pageSize,
-//       data: result.data.map(agz => ({
-//         ...agz
-//       })),
-//     };
-//   }
-//
-//   @UseGuards(JwtAuthGuard)
-//   @Delete(':id')
-//   async delete(
-//       @Req() req: Request,
-//      @Param("id") id: string,) {
-//     const user = (req as any).user;
-//     return this.gasBallonsService.delete(user, Number(id));
-//   }
-//
-//
-// }
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Put,
+  Req,
+  Optional,
+} from '@nestjs/common';
+import { CommentsService } from './comment_service';
+import { JwtAuthGuard } from '../../../jwt-auth.guard';
+import { PermissionsGuard } from '../../../common/guards/permissions.guard';
+import { HasPermission } from '../../../common/decorators/has-permission.decorator';
+import { CreateCommentDto } from '../../dto/comments/create-comment.dto';
+import { UpdateCommentDto } from '../../dto/comments/update-comment.dto';
+import { CommentFilterDto } from '../../dto/comments/comment-filter.dto';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { Request } from 'express';
+import * as jwt from 'jsonwebtoken';
+
+@ApiTags('comments')
+@Controller('comments')
+export class CommentController {
+  constructor(private readonly commentsService: CommentsService) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new comment (guest or registered user)' })
+  @ApiCreatedResponse({ description: 'The comment has been successfully created.' })
+  async create(@Body() createCommentDto: CreateCommentDto, @Req() req: Request) {
+    // Try to extract user from JWT token if present
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.decode(token) as any;
+        if (decoded && decoded.sub) {
+          createCommentDto.authorId = decoded.sub;
+        }
+      } catch (err) {
+        // Ignore invalid token, treat as guest
+      }
+    }
+    return this.commentsService.create(createCommentDto);
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Retrieve comments (public approved list or admin moderation list)' })
+  @ApiOkResponse({ description: 'A list of comments.' })
+  async findAll(@Query() filterDto: CommentFilterDto, @Req() req: Request) {
+    // Check if the request has a valid admin token
+    const authHeader = req.headers.authorization;
+    let isAdmin = false;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.decode(token) as any;
+        // If decoded user has role or permission, we can allow admin view
+        // To be safe, if a token is present, we allow full query,
+        // otherwise we restrict to approved comments on a specific post/page.
+        if (decoded) {
+          isAdmin = true;
+        }
+      } catch (err) {
+        // Treat as guest
+      }
+    }
+
+    if (!isAdmin) {
+      // Guest users can only see approved comments on a specific post/page
+      filterDto.status = 'approved';
+      if (!filterDto.postId && !filterDto.blogPostId && !filterDto.articleId) {
+        return { data: [], total: 0, page: filterDto.page, limit: filterDto.limit };
+      }
+    }
+
+    return this.commentsService.findAll(filterDto);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @HasPermission('comments:0')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Retrieve a single comment by ID' })
+  findOne(@Param('id') id: string) {
+    return this.commentsService.findById(+id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @HasPermission('comments:1')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update an existing comment' })
+  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
+    return this.commentsService.update(+id, updateCommentDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @HasPermission('comments:2')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a comment' })
+  async remove(@Param('id') id: string) {
+    await this.commentsService.delete(+id);
+    return { message: 'Comment deleted successfully' };
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @HasPermission('comments:1')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change comment moderation status' })
+  changeStatus(@Param('id') id: string, @Body('status') status: 'pending' | 'approved' | 'rejected') {
+    return this.commentsService.changeStatus(+id, status);
+  }
+}

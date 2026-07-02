@@ -33,10 +33,10 @@
 //   @UseInterceptors(
 //     FileInterceptor("image", {
 //       storage: diskStorage({
-//         destination: "./uploads", // Папка для сохранения изображений
+//         destination: "./uploads", // Folder for saving images
 //         filename: (req, file, callback) => {
 //           const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//           const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Генерируем уникальное имя файла
+//           const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Generate unique file name
 //           callback(null, fileName);
 //         },
 //       }),
@@ -44,11 +44,11 @@
 //   )
 //   async register(
 //     @Req() req: Request,
-//     @UploadedFile() file: Express.Multer.File, // Тип для файла
-//     @Body() dto: NewsDto, // DTO для данных
+//     @UploadedFile() file: Express.Multer.File, // File type
+//     @Body() dto: NewsDto, // DTO for data
 //   ) {
 //     if (!file) {
-//       throw new Error("Изображение обязательно");
+//       throw new Error("Image is required");
 //     }
 //     const imagePath = `/uploads/${file.filename}`;
 //     const updatedDto: NewsDto = {
@@ -60,7 +60,7 @@
 //   };
 //
 //   @UseGuards(JwtAuthGuard)
-//   @ApiOperation({ summary: "Газовый баллон успешно обновлён" })
+//   @ApiOperation({ summary: "Gas cylinder successfully updated" })
 //   @ApiConsumes("multipart/form-data")
 //   @UseInterceptors(
 //     FileInterceptor("image", {
@@ -82,7 +82,7 @@
 //     @Body() dto: NewsDto,
 //   ) {
 //     if (!file) {
-//       throw new Error("Изображение обязательно");
+//       throw new Error("Image is required");
 //     }
 //     const imagePath = `/uploads/${file.filename}`;
 //     const updatedDto: NewsDto = {
@@ -95,7 +95,7 @@
 //
 //
 //   @Get()
-//   @ApiOperation({ summary: "Газовый баллоны успешно получены" })
+//   @ApiOperation({ summary: "Gas cylinders successfully retrieved" })
 //   async filter(
 //     @Req() req: Request,
 //     @Query('status') status: string,

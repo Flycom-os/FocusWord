@@ -1,14 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Input from '@/src/shared/ui/Input/ui-input';
-import Button from '@/src/shared/ui/Button/ui-button';
-import { fetchPosts, createPost, updatePost, deletePost, publishPost, unpublishPost } from '@/src/shared/api/posts';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Modal, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './posts.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/src/shared/ui/Input/ui-input";
+import Button from "@/src/shared/ui/Button/ui-button";
+import {
+  fetchPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  publishPost,
+  unpublishPost,
+} from "@/src/shared/api/posts";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Modal,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./posts.module.css";
 
 export default function PostsPage() {
   const router = useRouter();
@@ -16,19 +32,19 @@ export default function PostsPage() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published'>('all');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published">("all");
   const [showModal, setShowModal] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
   const [form, setForm] = useState({
-    title: '',
-    slug: '',
-    content: '',
-    excerpt: '',
-    status: 'draft' as 'draft' | 'published',
-    seoTitle: '',
-    seoDescription: '',
-    metaKeywords: ''
+    title: "",
+    slug: "",
+    content: "",
+    excerpt: "",
+    status: "draft" as "draft" | "published",
+    seoTitle: "",
+    seoDescription: "",
+    metaKeywords: "",
   });
 
   useEffect(() => {
@@ -42,12 +58,12 @@ export default function PostsPage() {
         page: pagination.page,
         limit: pagination.limit,
         search,
-        status: statusFilter === 'all' ? undefined : statusFilter
+        status: statusFilter === "all" ? undefined : statusFilter,
       });
       setPosts(response.data);
-      setPagination(prev => ({ ...prev, total: response.total }));
+      setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast('Ошибка при загрузке постов', 'error');
+      showToast("Error loading posts", "error");
     } finally {
       setLoading(false);
     }
@@ -56,14 +72,14 @@ export default function PostsPage() {
   const handleCreate = () => {
     setEditingPost(null);
     setForm({
-      title: '',
-      slug: '',
-      content: '',
-      excerpt: '',
-      status: 'draft',
-      seoTitle: '',
-      seoDescription: '',
-      metaKeywords: ''
+      title: "",
+      slug: "",
+      content: "",
+      excerpt: "",
+      status: "draft",
+      seoTitle: "",
+      seoDescription: "",
+      metaKeywords: "",
     });
     setShowModal(true);
   };
@@ -74,11 +90,11 @@ export default function PostsPage() {
       title: post.title,
       slug: post.slug,
       content: post.content,
-      excerpt: post.excerpt || '',
+      excerpt: post.excerpt || "",
       status: post.status,
-      seoTitle: post.seoTitle || '',
-      seoDescription: post.seoDescription || '',
-      metaKeywords: post.metaKeywords?.join(', ') || ''
+      seoTitle: post.seoTitle || "",
+      seoDescription: post.seoDescription || "",
+      metaKeywords: post.metaKeywords?.join(", ") || "",
     });
     setShowModal(true);
   };
@@ -87,31 +103,36 @@ export default function PostsPage() {
     try {
       const postData = {
         ...form,
-        metaKeywords: form.metaKeywords ? form.metaKeywords.split(',').map(k => k.trim()).filter(k => k) : []
+        metaKeywords: form.metaKeywords
+          ? form.metaKeywords
+              .split(",")
+              .map((k) => k.trim())
+              .filter((k) => k)
+          : [],
       };
 
       if (editingPost) {
         await updatePost(accessToken, editingPost.id, postData);
-        showToast('Пост обновлен', 'success');
+        showToast("Post updated", "success");
       } else {
         await createPost(accessToken, postData);
-        showToast('Пост создан', 'success');
+        showToast("Post created", "success");
       }
       setShowModal(false);
       loadPosts();
     } catch (error) {
-      showToast('Ошибка при сохранении поста', 'error');
+      showToast("Error saving post", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Вы уверены что хотите удалить этот пост?')) {
+    if (confirm("Are you sure you want to delete this post?")) {
       try {
         await deletePost(accessToken, id);
-        showToast('Пост удален', 'success');
+        showToast("Post deleted", "success");
         loadPosts();
       } catch (error) {
-        showToast('Ошибка при удалении поста', 'error');
+        showToast("Error deleting post", "error");
       }
     }
   };
@@ -119,50 +140,56 @@ export default function PostsPage() {
   const handlePublish = async (id: number) => {
     try {
       await publishPost(accessToken, id);
-      showToast('Пост опубликован', 'success');
+      showToast("Post published", "success");
       loadPosts();
     } catch (error) {
-      showToast('Ошибка при публикации поста', 'error');
+      showToast("Error publishing post", "error");
     }
   };
 
   const handleUnpublish = async (id: number) => {
     try {
       await unpublishPost(accessToken, id);
-      showToast('Пост снят с публикации', 'success');
+      showToast("Post unpublished", "success");
       loadPosts();
     } catch (error) {
-      showToast('Ошибка при снятии с публикации', 'error');
+      showToast("Error unpublishing post", "error");
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return styles.published;
-      case 'draft': return styles.draft;
-      default: return styles.draft;
+      case "published":
+        return styles.published;
+      case "draft":
+        return styles.draft;
+      default:
+        return styles.draft;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'published': return 'Опубликовано';
-      case 'draft': return 'Черновик';
-      default: return status;
+      case "published":
+        return "Published";
+      case "draft":
+        return "Draft";
+      default:
+        return status;
     }
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Посты блога</h1>
-        <p>Управление постами и статьями</p>
+        <h1>Blog Posts</h1>
+        <p>Manage posts and articles</p>
       </div>
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
           <Input
-            placeholder="Поиск постов..."
+            placeholder="Search posts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.search}
@@ -172,28 +199,28 @@ export default function PostsPage() {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className={styles.select}
           >
-            <option value="all">Все статусы</option>
-            <option value="draft">Черновики</option>
-            <option value="published">Опубликовано</option>
+            <option value="all">All statuses</option>
+            <option value="draft">Drafts</option>
+            <option value="published">Published</option>
           </select>
         </div>
         <Button onClick={handleCreate} className={styles.createButton}>
-          ➕ Создать пост
+          ➕ Create Post
         </Button>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>Loading...</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Заголовок</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Дата создания</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date created</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,10 +231,9 @@ export default function PostsPage() {
                       <div className={styles.postTitle}>{post.title}</div>
                       {post.excerpt && (
                         <div className={styles.postExcerpt}>
-                          {post.excerpt.length > 100 
-                            ? `${post.excerpt.substring(0, 100)}...` 
-                            : post.excerpt
-                          }
+                          {post.excerpt.length > 100
+                            ? `${post.excerpt.substring(0, 100)}...`
+                            : post.excerpt}
                         </div>
                       )}
                     </div>
@@ -221,13 +247,10 @@ export default function PostsPage() {
                   <TableCell>{new Date(post.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button
-                        onClick={() => handleEdit(post)}
-                        className={styles.editButton}
-                      >
+                      <Button onClick={() => handleEdit(post)} className={styles.editButton}>
                         ✏️
                       </Button>
-                      {post.status === 'draft' ? (
+                      {post.status === "draft" ? (
                         <Button
                           onClick={() => handlePublish(post.id)}
                           className={styles.publishButton}
@@ -242,10 +265,7 @@ export default function PostsPage() {
                           📥
                         </Button>
                       )}
-                      <Button
-                        onClick={() => handleDelete(post.id)}
-                        className={styles.deleteButton}
-                      >
+                      <Button onClick={() => handleDelete(post.id)} className={styles.deleteButton}>
                         🗑️
                       </Button>
                     </div>
@@ -263,7 +283,7 @@ export default function PostsPage() {
             page={pagination.page}
             total={pagination.total}
             perPage={pagination.limit}
-            onChange={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           />
         </div>
       )}
@@ -271,15 +291,15 @@ export default function PostsPage() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editingPost ? 'Редактировать пост' : 'Создать пост'}
+        title={editingPost ? "Edit Post" : "Create Post"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Заголовок</label>
+            <label>Title</label>
             <Input
               value={form.title}
-              onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Введите заголовок поста"
+              onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+              placeholder="Enter post title"
             />
           </div>
 
@@ -287,83 +307,82 @@ export default function PostsPage() {
             <label>Slug</label>
             <Input
               value={form.slug}
-              onChange={(e) => setForm(prev => ({ ...prev, slug: e.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
               placeholder="url-slug"
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Краткое описание</label>
+            <label>Excerpt</label>
             <textarea
               value={form.excerpt}
-              onChange={(e) => setForm(prev => ({ ...prev, excerpt: e.target.value }))}
-              placeholder="Краткое описание поста"
+              onChange={(e) => setForm((prev) => ({ ...prev, excerpt: e.target.value }))}
+              placeholder="Post excerpt"
               className={styles.textarea}
               rows={3}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Содержимое</label>
+            <label>Content</label>
             <textarea
               value={form.content}
-              onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Полное содержимое поста"
+              onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+              placeholder="Full post content"
               className={styles.textarea}
               rows={10}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Статус</label>
+            <label>Status</label>
             <select
               value={form.status}
-              onChange={(e) => setForm(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, status: e.target.value as "draft" | "published" }))
+              }
               className={styles.select}
             >
-              <option value="draft">Черновик</option>
-              <option value="published">Опубликовано</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
             </select>
           </div>
 
           <div className={styles.formGroup}>
-            <label>SEO заголовок</label>
+            <label>SEO Title</label>
             <Input
               value={form.seoTitle}
-              onChange={(e) => setForm(prev => ({ ...prev, seoTitle: e.target.value }))}
-              placeholder="SEO заголовок"
+              onChange={(e) => setForm((prev) => ({ ...prev, seoTitle: e.target.value }))}
+              placeholder="SEO Title"
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>SEO описание</label>
+            <label>SEO Description</label>
             <textarea
               value={form.seoDescription}
-              onChange={(e) => setForm(prev => ({ ...prev, seoDescription: e.target.value }))}
-              placeholder="SEO описание"
+              onChange={(e) => setForm((prev) => ({ ...prev, seoDescription: e.target.value }))}
+              placeholder="SEO Description"
               className={styles.textarea}
               rows={2}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Ключевые слова</label>
+            <label>Keywords</label>
             <Input
               value={form.metaKeywords}
-              onChange={(e) => setForm(prev => ({ ...prev, metaKeywords: e.target.value }))}
-              placeholder="ключевые, слова, через, запятую"
+              onChange={(e) => setForm((prev) => ({ ...prev, metaKeywords: e.target.value }))}
+              placeholder="keywords, comma, separated"
             />
           </div>
 
           <div className={styles.modalActions}>
             <Button onClick={handleSave} className={styles.saveButton}>
-              {editingPost ? 'Сохранить' : 'Создать'}
+              {editingPost ? "Save" : "Create"}
             </Button>
-            <Button
-              onClick={() => setShowModal(false)}
-              className={styles.cancelButton}
-            >
-              Отмена
+            <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
+              Cancel
             </Button>
           </div>
         </div>

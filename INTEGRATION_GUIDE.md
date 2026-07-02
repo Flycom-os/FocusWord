@@ -1,83 +1,83 @@
-# Интеграция Слайдеров, Медиа и Страниц - Полная Документация
+# Integration of Sliders, Media, and Pages - Full Documentation
 
-## 🎯 Обзор
+## 🎯 Overview
 
-Система полностью интегрирует управление слайдерами, медиа-файлами и их вставку в страницы сайта. Это позволяет создавать богатый мультимедийный контент.
+The system fully integrates the management of sliders, media files, and their insertion into website pages. This allows for the creation of rich multimedia content.
 
-## 🏗️ Архитектура
+## 🏗️ Architecture
 
 ### Backend
 
-#### Модель данных (Prisma)
+#### Data Model (Prisma)
 
 ```prisma
 model Page {
-  // ... основные поля
+  // ... core fields
   featuredSlider   Slider? @relation("FeaturedSliderOfPage", fields: [featuredSliderId], references: [id])
   featuredSliderId Int?
   
-  // JSON массив с метаданными о контент блоках
+  // JSON array with metadata about content blocks
   contentBlocks Json? @default("[]")
-  // Структура: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
+  // Structure: [{ type: 'slider' | 'media' | 'gallery', id: number, position: number, config?: object }]
 }
 
 model Slider {
-  // ... основные поля
+  // ... core fields
   slides Slide[]
   featuredInPages Page[] @relation("FeaturedSliderOfPage")
 }
 
 model Slide {
-  // ... основные поля
+  // ... core fields
   image   MediaFile? @relation(fields: [imageId], references: [id])
   imageId Int?
 }
 ```
 
-#### API эндпойнты
+#### API Endpoints
 
-- **Слайдеры:**
-  - `POST /sliders` - создать слайдер
-  - `GET /sliders` - получить список слайдеров
-  - `GET /sliders/:id` - получить слайдер по ID
-  - `PATCH /sliders/:id` - обновить слайдер
-  - `DELETE /sliders/:id` - удалить слайдер
+- **Sliders:**
+  - `POST /sliders` - create slider
+  - `GET /sliders` - get list of sliders
+  - `GET /sliders/:id` - get slider by ID
+  - `PATCH /sliders/:id` - update slider
+  - `DELETE /sliders/:id` - delete slider
 
-- **Слайды:**
-  - `POST /sliders/:sliderId/slides` - создать слайд
-  - `GET /sliders/:sliderId/slides` - получить слайды слайдера
-  - `GET /sliders/:sliderId/slides/:slideId` - получить слайд
-  - `PATCH /sliders/:sliderId/slides/:slideId` - обновить слайд
-  - `DELETE /sliders/:sliderId/slides/:slideId` - удалить слайд
+- **Slides:**
+  - `POST /sliders/:sliderId/slides` - create slide
+  - `GET /sliders/:sliderId/slides` - get slider slides
+  - `GET /sliders/:sliderId/slides/:slideId` - get slide
+  - `PATCH /sliders/:sliderId/slides/:slideId` - update slide
+  - `DELETE /sliders/:sliderId/slides/:slideId` - delete slide
 
-- **Страницы:**
-  - `POST /pages` - создать страницу
-  - `GET /pages` - получить список страниц
-  - `GET /pages/:id` - получить страницу по ID
-  - `PATCH /pages/:id` - обновить страницу (+ слайдеры и contentBlocks)
-  - `DELETE /pages/:id` - удалить страницу
+- **Pages:**
+  - `POST /pages` - create page
+  - `GET /pages` - get list of pages
+  - `GET /pages/:id` - get page by ID
+  - `PATCH /pages/:id` - update page (+ sliders and contentBlocks)
+  - `DELETE /pages/:id` - delete page
 
 ### Frontend
 
-#### Компоненты
+#### Components
 
 1. **PageSlider** (`shared/ui/PageSlider`)
-   - Компонент для отображения слайдера на странице
+   - Component for displaying a slider on the page
    - Props:
-     - `slider`: объект слайдера с данными
-     - `autoPlay`: автоматическое воспроизведение (default: true)
-     - `interval`: интервал автопередвижения в ms (default: 5000)
-     - `showArrows`: показать стрелки навигации (default: true)
-     - `showDots`: показать индикаторы (default: true)
+     - `slider`: slider object with data
+     - `autoPlay`: autoplay (default: true)
+     - `interval`: autoplay interval in ms (default: 5000)
+     - `showArrows`: show navigation arrows (default: true)
+     - `showDots`: show indicators (default: true)
 
 2. **Pages Admin View** (`app/ui/admin/pages/pages-admin-view`)
-   - Расширенный интерфейс для управления страницами
-   - Поддержка выбора Featured Slider
-   - Интегрированный редактор HTML
+   - Extended interface for page management
+   - Supports Featured Slider selection
+   - Integrated HTML editor
 
-#### API Интеграция
+#### API Integration
 
-**API для страниц** (`shared/api/pages.ts`):
+**API for pages** (`shared/api/pages.ts`):
 ```typescript
 interface PageDto {
   id: number;
@@ -108,64 +108,64 @@ interface PageDto {
       };
     }>;
   };
-  // ... остальные поля
+  // ... other fields
 }
 ```
 
-## 📖 Как Использовать
+## 📖 How to Use
 
-### 1️⃣ Создание Слайдера
+### 1️⃣ Creating a Slider
 
 **Backend:**
 ```bash
 POST /sliders
 
 {
-  "name": "Главный слайдер",
+  "name": "Main slider",
   "slug": "main-slider",
-  "description": "Основной слайдер для главной страницы"
+  "description": "Main slider for the home page"
 }
 ```
 
 **Frontend (Admin):**
-- Перейти в раздел "Слайдеры"
-- Нажать "Добавить слайдер"
-- Заполнить название, slug и описание
-- Сохранить
+- Go to "Sliders" section
+- Click "Add slider"
+- Fill in name, slug, and description
+- Save
 
-### 2️⃣ Добавление Слайдов со Средой
+### 2️⃣ Adding Slides with Media
 
 **Backend:**
 ```bash
 POST /sliders/:sliderId/slides
 
 {
-  "title": "Первый слайд",
-  "description": "Описание первого слайда",
+  "title": "First slide",
+  "description": "Description of the first slide",
   "linkUrl": "https://example.com",
   "sortOrder": 0,
-  "imageId": 1  // ID медиа файла
+  "imageId": 1  // Media file ID
 }
 ```
 
 **Frontend (Admin):**
-- Выбрать слайдер из списка
-- Нажать "Добавить слайд"
-- Заполнить информацию слайда
-- Нажать "Выбрать медиа" и выбрать изображение из библиотеки
-- Сохранить
+- Select a slider from the list
+- Click "Add slide"
+- Fill in slide information
+- Click "Select media" and choose an image from the library
+- Save
 
-### 3️⃣ Вставка Слайдера в Страницу
+### 3️⃣ Inserting a Slider into a Page
 
 **Backend:**
 ```bash
 PATCH /pages/:pageId
 
 {
-  "title": "Моя страница",
+  "title": "My page",
   "slug": "my-page",
-  "content": "<h1>Содержимое страницы</h1>",
-  "featuredSliderId": 1,  // ID слайдера
+  "content": "<h1>Page Content</h1>",
+  "featuredSliderId": 1,  // Slider ID
   "contentBlocks": [
     {
       "type": "slider",
@@ -177,55 +177,55 @@ PATCH /pages/:pageId
 ```
 
 **Frontend (Admin):**
-- Перейти в раздел "Страницы"
-- Создать новую или редактировать существующую
-- В боковой колонке выбрать "Основной слайдер"
-- Из dropdown выбрать нужный слайдер
-- Сохранить
+- Go to "Pages" section
+- Create a new or edit an existing one
+- In the sidebar, select "Featured Slider"
+- Choose the desired slider from the dropdown
+- Save
 
-### 4️⃣ Просмотр Страницы с Слайдером (Public)
+### 4️⃣ Viewing a Page with a Slider (Public)
 
-- Открыть страницу по URL `/pages/my-page`
-- Слайдер будет отображаться с автопроигрыванием
-- Пользователь может:
-  - Автоматический перелистывание каждые 5 сек
-  - Клик на точки для перехода к определённому слайду
-  - Использовать стрелки для ручного навигирования
+- Open the page at URL `/pages/my-page`
+- The slider will display with autoplay
+- The user can:
+  - Autoplay every 5 seconds
+  - Click on dots to jump to a specific slide
+  - Use arrows for manual navigation
 
-## 🚀 Особенности
+## 🚀 Features
 
 ### Backend
-- ✅ Полная поддержка CRUD операций для слайдеров и слайдов
-- ✅ Связь слайдов с медиа-файлами
-- ✅ Связь страниц со слайдерами
-- ✅ JSON поле `contentBlocks` для расширяемости
-- ✅ Redis кеширование для производительности
-- ✅ Автоматическая инвалидация кеша при изменениях
+- ✅ Full support for CRUD operations for sliders and slides
+- ✅ Linking slides with media files
+- ✅ Linking pages with sliders
+- ✅ JSON field `contentBlocks` for extensibility
+- ✅ Redis caching for performance
+- ✅ Automatic cache invalidation on changes
 
 ### Frontend
-- ✅ Адаптивный компонент PageSlider
-- ✅ Автоматическое воспроизведение с настройками
-- ✅ Сенсорная навигация (стрелки + точки)
-- ✅ Отзывчивый дизайн для мобильных устройств
-- ✅ Оптимизация изображений и загрузки
-- ✅ Интегрированный редактор для администратора
+- ✅ Responsive PageSlider component
+- ✅ Autoplay with settings
+- ✅ Touch navigation (arrows + dots)
+- ✅ Responsive design for mobile devices
+- ✅ Image and load optimization
+- ✅ Integrated editor for administrator
 
-## 📱 Детали Реализации
+## 📱 Implementation Details
 
-### Слайдеры теперь включают медиа-файлы
+### Sliders now include media files
 
-При запросе слайдов включаются связанные медиа-файлы:
+When requesting slides, associated media files are included:
 
 ```typescript
 await this.prisma.slide.findMany({
   where: { ... },
-  include: { image: true },  // ✅ Теперь работает!
+  include: { image: true },  // ✅ Now works!
 });
 ```
 
-### Страницы имеют соотношение со слайдерами
+### Pages have a relationship with sliders
 
-При получении страницы включается релевантный слайдер:
+When retrieving a page, the relevant slider is included:
 
 ```typescript
 const page = await this.prisma.page.findUnique({
@@ -242,9 +242,9 @@ const page = await this.prisma.page.findUnique({
 });
 ```
 
-### Компонент PageSlider
+### PageSlider Component
 
-Реактивный компонент отображения:
+Reactive display component:
 
 ```tsx
 <PageSlider 
@@ -256,48 +256,48 @@ const page = await this.prisma.page.findUnique({
 />
 ```
 
-## 🔄 Workflow: От A до Z
+## 🔄 Workflow: From A to Z
 
-1. **Администратор загружает медиа:**
-   - Переходит в "Медиафайлы"
-   - Загружает изображения
-   - Добавляет альтекст и подписи
+1. **Administrator uploads media:**
+   - Goes to "Media Files"
+   - Uploads images
+   - Adds alt text and captions
 
-2. **Администратор создает слайдер:**
-   - Создает новый слайдер "Главный баннер"
-   - Добавляет слайды
-   - Для каждого слайда выбирает загруженное изображение
-   - Добавляет заголовок, описание, ссылку
-   - Устанавливает порядок сортировки
+2. **Administrator creates a slider:**
+   - Creates a new slider "Main Banner"
+   - Adds slides
+   - For each slide, selects an uploaded image
+   - Adds title, description, link
+   - Sets sort order
 
-3. **Администратор создает страницу:**
-   - Создает новую страницу "О нас"
-   - Пишет контент в редакторе HTML
-   - В боковой панели выбирает слайдер "Главный баннер" как Featured Slider
-   - Сохраняет страницу
+3. **Administrator creates a page:**
+   - Creates a new page "About Us"
+   - Writes content in the HTML editor
+   - In the sidebar, selects "Main Banner" as Featured Slider
+   - Saves the page
 
-4. **Пользователь просматривает страницу:**
-   - Открывает URL `/pages/about`
-   - Видит заголовок страницы
-   - Видит слайдер с автопроигрыванием
-   - Может кликать на стрелки или точки для навигации
-   - Видит оставшийся контент ниже слайдера
+4. **User views the page:**
+   - Opens URL `/pages/about`
+   - Sees page title
+   - Sees slider with autoplay
+   - Can click on arrows or dots for navigation
+   - Sees remaining content below the slider
 
-## 🛠️ Расширение
+## 🛠️ Extension
 
-### Добавление новых типов контента
+### Adding new content types
 
-Чтобы добавить новый тип контента (например, видео-галерея):
+To add a new content type (e.g., video gallery):
 
 1. **Backend:**
-   - Создать новую модель в Prisma
-   - Добавить связь с Page
-   - Добавить новый контроллер и сервис
+   - Create a new model in Prisma
+   - Add relationship with Page
+   - Add new controller and service
 
 2. **Frontend:**
-   - Создать новый компонент (например, `PageVideoGallery`)
-   - Добавить в admin интерфейс поле выбора
-   - Обновить API типы
+   - Create a new component (e.g., `PageVideoGallery`)
+   - Add selection field in admin interface
+   - Update API types
 
 3. **contentBlocks:**
    ```json
@@ -309,37 +309,37 @@ const page = await this.prisma.page.findUnique({
    }
    ```
 
-## 📊 Производительность
+## 📊 Performance
 
-- **Кеширование:** Redis кеш для всех запросов
-- **Изображения:** Оптимизация размеров через проверку медиа-данных
-- **Lazy Loading:** Компонент поддерживает ленивую загрузку
-- **SSR/SSG:** Страницы готовы для улучшенной генерации
+- **Caching:** Redis cache for all requests
+- **Images:** Size optimization through media data verification
+- **Lazy Loading:** Component supports lazy loading
+- **SSR/SSG:** Pages are ready for enhanced generation
 
-## ✅ Тестирование
+## ✅ Testing
 
-### Проверить предпросмотр медиа в слайдерах:
+### Test media preview in sliders:
 
-1. Создать слайдер → Добавить слайд → Выбрать медиа
-2. Проверить что изображение отображается в таблице слайдов
-3. Подтверждение: ✅ Предпросмотр работает
+1. Create slider → Add slide → Select media
+2. Verify that the image appears in the slides table
+3. Confirmation: ✅ Preview works
 
-### Проверить вставку слайдера в страницу:
+### Test slider insertion into page:
 
-1. Создать страницу → Выбрать слайдер в dropdown
-2. Открыть страницу публично
-3. Проверить что слайдер отображается и работает навигация
+1. Create page → Select slider in dropdown
+2. Open page publicly
+3. Verify that the slider is displayed and navigation works
 
-## 🎨 Кастомизация Стилей
+## 🎨 Style Customization
 
-Файл `PageSlider.module.css` содержит все стили компонента. Легко изменить:
-- Размеры и пропорции
-- Цвета и прозрачность
-- Анимации и переходы
-- Адаптивность для различных размеров экранов
+The `PageSlider.module.css` file contains all component styles. Easily change:
+- Sizes and proportions
+- Colors and transparency
+- Animations and transitions
+- Responsiveness for different screen sizes
 
 ---
 
-**Версия:** 1.0.0  
-**Дата обновления:** Апрель 2026  
-**Статус:** ✅ Полностью интегрировано
+**Version:** 1.0.0  
+**Update Date:** April 2026  
+**Status:** ✅ Fully Integrated

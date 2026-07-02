@@ -17,7 +17,7 @@
 //
 //     if (!user) throw new NotFoundException('User not found');
 //
-//     // Ищем активную корзину (например, по статусу "active" или последнюю)
+//     // Search for an active cart (e.g., by "active" status or the latest one)
 //     let cart = await this.prisma.cart.findFirst({
 //       where: {
 //         userId,
@@ -47,7 +47,7 @@
 //       },
 //     });
 //
-//     // Обновим count_product в корзине
+//     // Update count_product in cart
 //     await this.prisma.cart.update({
 //       where: { id: cart.id },
 //       data: {
@@ -71,10 +71,10 @@
 //     });
 //
 //     if (!cart || cart.product.length === 0) {
-//       throw new BadRequestException('Корзина пуста или не найдена');
+//       throw new BadRequestException('Cart is empty or not found');
 //     }
 //
-//     // Создаем заказ
+//     // Create order
 //     const order = await this.prisma.order.create({
 //       data: {
 //         userId,
@@ -102,7 +102,7 @@
 //       },
 //     });
 //
-//     // Очистим корзину
+//     // Clear cart
 //     await this.prisma.product.deleteMany({
 //       where: {
 //         cartId: cart.id,
@@ -121,7 +121,7 @@
 //       where: { id: orderId },
 //     });
 //
-//     if (!order) throw new NotFoundException('Заказ не найден');
+//     if (!order) throw new NotFoundException('Order not found');
 //
 //     const newStatus = String(Number(order.status) + 1);
 //
@@ -147,7 +147,7 @@
 //     });
 //
 //     if (!cart) {
-//       throw new NotFoundException('Корзина не найдена');
+//       throw new NotFoundException('Cart not found');
 //     }
 //
 //     return cart;
@@ -161,7 +161,7 @@
 //       where: {
 //         userId,
 //         status: {
-//           [comparator]: `${value}`, // status у тебя String в схеме
+//           [comparator]: `${value}`, // status is String in your schema
 //         },
 //       },
 //       include: {

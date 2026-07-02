@@ -1,99 +1,117 @@
-'use client'
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MessageSquare, Clock, CheckCircle, AlertCircle, User } from 'lucide-react';
-import { Feedback } from '@/src/entities/Feedback';
-import { feedbackApi } from '@/src/entities/Feedback/api';
-import styles from './feedback.module.css';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
+  Filter,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  User,
+} from "lucide-react";
+import { Feedback } from "@/src/entities/Feedback";
+import { feedbackApi } from "@/src/entities/Feedback/api";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import styles from "./feedback.module.css";
 
 const FeedbackPage = () => {
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const { accessToken } = useAuth();
 
   useEffect(() => {
-    loadFeedback();
-  }, []);
+    if (accessToken) {
+      loadFeedback();
+    }
+  }, [accessToken]);
 
   const loadFeedback = async () => {
     try {
-      const data = await feedbackApi.getFeedback();
+      const data = await feedbackApi.getFeedback(accessToken);
       setFeedback(data);
     } catch (error) {
-      console.error('Failed to load feedback:', error);
+      console.error("Failed to load feedback:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusIcon = (status: Feedback['status']) => {
+  const getStatusIcon = (status: Feedback["status"]) => {
     switch (status) {
-      case 'open':
+      case "open":
         return <MessageSquare size={16} />;
-      case 'in_progress':
+      case "in_progress":
         return <Clock size={16} />;
-      case 'resolved':
+      case "resolved":
         return <CheckCircle size={16} />;
-      case 'closed':
+      case "closed":
         return <AlertCircle size={16} />;
       default:
         return <MessageSquare size={16} />;
     }
   };
 
-  const getStatusColor = (status: Feedback['status']) => {
+  const getStatusColor = (status: Feedback["status"]) => {
     switch (status) {
-      case 'open':
-        return '#3b82f6';
-      case 'in_progress':
-        return '#f59e0b';
-      case 'resolved':
-        return '#10b981';
-      case 'closed':
-        return '#6b7280';
+      case "open":
+        return "#3b82f6";
+      case "in_progress":
+        return "#f59e0b";
+      case "resolved":
+        return "#10b981";
+      case "closed":
+        return "#6b7280";
       default:
-        return '#3b82f6';
+        return "#3b82f6";
     }
   };
 
-  const getPriorityColor = (priority: Feedback['priority']) => {
+  const getPriorityColor = (priority: Feedback["priority"]) => {
     switch (priority) {
-      case 'low':
-        return '#10b981';
-      case 'medium':
-        return '#f59e0b';
-      case 'high':
-        return '#ef4444';
-      case 'urgent':
-        return '#dc2626';
+      case "low":
+        return "#10b981";
+      case "medium":
+        return "#f59e0b";
+      case "high":
+        return "#ef4444";
+      case "urgent":
+        return "#dc2626";
       default:
-        return '#10b981';
+        return "#10b981";
     }
   };
 
-  const getTypeColor = (type: Feedback['type']) => {
+  const getTypeColor = (type: Feedback["type"]) => {
     switch (type) {
-      case 'complaint':
-        return '#ef4444';
-      case 'suggestion':
-        return '#3b82f6';
-      case 'question':
-        return '#f59e0b';
-      case 'compliment':
-        return '#10b981';
+      case "complaint":
+        return "#ef4444";
+      case "suggestion":
+        return "#3b82f6";
+      case "question":
+        return "#f59e0b";
+      case "compliment":
+        return "#10b981";
       default:
-        return '#3b82f6';
+        return "#3b82f6";
     }
   };
 
-  const filteredFeedback = feedback.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    const matchesType = typeFilter === 'all' || item.type === typeFilter;
-    const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter;
+  const filteredFeedback = feedback.filter((item) => {
+    const title = (item.title || item.name || "").toString();
+    const description = (item.description || item.message || "").toString();
+    const matchesSearch =
+      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+    const matchesType = typeFilter === "all" || item.type === typeFilter;
+    const matchesPriority = priorityFilter === "all" || item.priority === priorityFilter;
 
     return matchesSearch && matchesStatus && matchesType && matchesPriority;
   });
@@ -119,20 +137,18 @@ const FeedbackPage = () => {
         </div>
         <div className={styles.statCard}>
           <h3>Open</h3>
-          <p className={styles.statValue}>
-            {feedback.filter(f => f.status === 'open').length}
-          </p>
+          <p className={styles.statValue}>{feedback.filter((f) => f.status === "open").length}</p>
         </div>
         <div className={styles.statCard}>
           <h3>In Progress</h3>
           <p className={styles.statValue}>
-            {feedback.filter(f => f.status === 'in_progress').length}
+            {feedback.filter((f) => f.status === "in_progress").length}
           </p>
         </div>
         <div className={styles.statCard}>
           <h3>Resolved</h3>
           <p className={styles.statValue}>
-            {feedback.filter(f => f.status === 'resolved').length}
+            {feedback.filter((f) => f.status === "resolved").length}
           </p>
         </div>
       </div>
@@ -147,8 +163,8 @@ const FeedbackPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <select 
+
+        <select
           className={styles.filterSelect}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -160,7 +176,7 @@ const FeedbackPage = () => {
           <option value="closed">Closed</option>
         </select>
 
-        <select 
+        <select
           className={styles.filterSelect}
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
@@ -172,7 +188,7 @@ const FeedbackPage = () => {
           <option value="compliment">Compliment</option>
         </select>
 
-        <select 
+        <select
           className={styles.filterSelect}
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
@@ -190,46 +206,54 @@ const FeedbackPage = () => {
           <div key={item.id} className={styles.feedbackCard}>
             <div className={styles.cardHeader}>
               <div className={styles.titleSection}>
-                <h3>{item.title}</h3>
+                <h3>{item.title || item.name || `#${item.id}`}</h3>
                 <div className={styles.badges}>
-                  <span 
-                    className={styles.badge}
-                    style={{ backgroundColor: getTypeColor(item.type) + '20', color: getTypeColor(item.type) }}
-                  >
-                    {item.type}
-                  </span>
-                  <span 
-                    className={styles.badge}
-                    style={{ backgroundColor: getPriorityColor(item.priority) + '20', color: getPriorityColor(item.priority) }}
-                  >
-                    {item.priority}
-                  </span>
+                  {item.type && (
+                    <span
+                      className={styles.badge}
+                      style={{
+                        backgroundColor: `${getTypeColor(item.type)}20`,
+                        color: getTypeColor(item.type),
+                      }}
+                    >
+                      {item.type}
+                    </span>
+                  )}
+                  {item.priority && (
+                    <span
+                      className={styles.badge}
+                      style={{
+                        backgroundColor: `${getPriorityColor(item.priority)}20`,
+                        color: getPriorityColor(item.priority),
+                      }}
+                    >
+                      {item.priority}
+                    </span>
+                  )}
+                  {!item.type && !item.priority && item.rating !== undefined && (
+                    <span className={styles.badge}>{`★ ${item.rating}`}</span>
+                  )}
                 </div>
               </div>
               <div className={styles.statusSection}>
-                <div 
-                  className={styles.status}
-                  style={{ color: getStatusColor(item.status) }}
-                >
+                <div className={styles.status} style={{ color: getStatusColor(item.status) }}>
                   {getStatusIcon(item.status)}
-                  <span>{item.status.replace('_', ' ')}</span>
+                  <span>{item.status.replace("_", " ")}</span>
                 </div>
               </div>
             </div>
 
-            <p className={styles.description}>{item.description}</p>
+                <p className={styles.description}>{item.description || item.message}</p>
 
             <div className={styles.cardFooter}>
               <div className={styles.userInfo}>
                 <User size={16} />
-                <span>{item.user?.name || 'Unknown User'}</span>
+                <span>{item.user?.name || item.name || item.email || "Unknown User"}</span>
               </div>
-              <div className={styles.date}>
-                {new Date(item.createdAt).toLocaleDateString()}
-              </div>
+              <div className={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</div>
             </div>
 
-            {item.tags.length > 0 && (
+            {item.tags && item.tags.length > 0 && (
               <div className={styles.tags}>
                 {item.tags.map((tag, index) => (
                   <span key={index} className={styles.tag}>

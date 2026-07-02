@@ -11,6 +11,8 @@ export interface AnalyticsEntryDto {
   avgTimeOnPage?: number | null;
   pageId?: number | null;
   postId?: number | null;
+  blogPostId?: number | null;
+  articleId?: number | null;
 }
 
 export interface ReferrerDetailDto {
@@ -28,6 +30,8 @@ export interface CreateAnalyticsEntryDto {
   avgTimeOnPage?: number;
   pageId?: number;
   postId?: number;
+  blogPostId?: number;
+  articleId?: number;
 }
 
 export interface UpdateAnalyticsEntryDto {
@@ -69,24 +73,29 @@ export interface AnalyticsStats {
   }>;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const analyticsApi = {
   // Получить все записи аналитики
-  getAll: async (token: string | null, params: AnalyticsQuery = {}): Promise<PaginatedAnalyticsResponse> => {
+  getAll: async (
+    token: string | null,
+    params: AnalyticsQuery = {},
+  ): Promise<PaginatedAnalyticsResponse> => {
     const queryParams = new URLSearchParams({
       page: (params.page || 1).toString(),
       limit: (params.limit || 10).toString(),
       ...(params.startDate && { startDate: params.startDate }),
       ...(params.endDate && { endDate: params.endDate }),
       ...(params.pageId && { pageId: params.pageId.toString() }),
-      ...(params.postId && { postId: params.postId.toString() })
+      ...(params.postId && { postId: params.postId.toString() }),
     });
-    
-    const { data } = await axios.get<PaginatedAnalyticsResponse>(`${API_URL}/analytics?${queryParams}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedAnalyticsResponse>(
+      `${API_URL}/analytics?${queryParams}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -99,7 +108,10 @@ export const analyticsApi = {
   },
 
   // Создать запись аналитики
-  create: async (token: string | null, data: CreateAnalyticsEntryDto): Promise<AnalyticsEntryDto> => {
+  create: async (
+    token: string | null,
+    data: CreateAnalyticsEntryDto,
+  ): Promise<AnalyticsEntryDto> => {
     const { data: result } = await axios.post<AnalyticsEntryDto>(`${API_URL}/analytics`, data, {
       headers: authHeaders(token),
     });
@@ -107,10 +119,18 @@ export const analyticsApi = {
   },
 
   // Обновить запись аналитики
-  update: async (token: string | null, id: number, data: UpdateAnalyticsEntryDto): Promise<AnalyticsEntryDto> => {
-    const { data: result } = await axios.put<AnalyticsEntryDto>(`${API_URL}/analytics/${id}`, data, {
-      headers: authHeaders(token),
-    });
+  update: async (
+    token: string | null,
+    id: number,
+    data: UpdateAnalyticsEntryDto,
+  ): Promise<AnalyticsEntryDto> => {
+    const { data: result } = await axios.put<AnalyticsEntryDto>(
+      `${API_URL}/analytics/${id}`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
@@ -122,12 +142,15 @@ export const analyticsApi = {
   },
 
   // Получить статистику
-  getStats: async (token: string | null, params: { startDate?: string; endDate?: string } = {}): Promise<AnalyticsStats> => {
+  getStats: async (
+    token: string | null,
+    params: { startDate?: string; endDate?: string } = {},
+  ): Promise<AnalyticsStats> => {
     const queryParams = new URLSearchParams({
       ...(params.startDate && { startDate: params.startDate }),
-      ...(params.endDate && { endDate: params.endDate })
+      ...(params.endDate && { endDate: params.endDate }),
     });
-    
+
     const { data } = await axios.get<AnalyticsStats>(`${API_URL}/analytics/stats?${queryParams}`, {
       headers: authHeaders(token),
     });
@@ -136,17 +159,28 @@ export const analyticsApi = {
 
   // Получить рефереры для записи аналитики
   getReferrers: async (token: string | null, analyticsId: number): Promise<ReferrerDetailDto[]> => {
-    const { data } = await axios.get<ReferrerDetailDto[]>(`${API_URL}/analytics/${analyticsId}/referrers`, {
-      headers: authHeaders(token),
-    });
+    const { data } = await axios.get<ReferrerDetailDto[]>(
+      `${API_URL}/analytics/${analyticsId}/referrers`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
   // Добавить реферер
-  addReferrer: async (token: string | null, analyticsId: number, referrerUrl: string): Promise<ReferrerDetailDto> => {
-    const { data } = await axios.post<ReferrerDetailDto>(`${API_URL}/analytics/${analyticsId}/referrers`, { referrerUrl }, {
-      headers: authHeaders(token),
-    });
+  addReferrer: async (
+    token: string | null,
+    analyticsId: number,
+    referrerUrl: string,
+  ): Promise<ReferrerDetailDto> => {
+    const { data } = await axios.post<ReferrerDetailDto>(
+      `${API_URL}/analytics/${analyticsId}/referrers`,
+      { referrerUrl },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 };
@@ -159,4 +193,4 @@ export const updateAnalyticsEntry = analyticsApi.update;
 export const deleteAnalyticsEntry = analyticsApi.delete;
 export const fetchAnalyticsStats = analyticsApi.getStats;
 export const fetchReferrers = analyticsApi.getReferrers;
-export const addReferrer = analyticsApi.addReferrer;
+export const { addReferrer } = analyticsApi;

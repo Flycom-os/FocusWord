@@ -19,7 +19,12 @@ export interface PageDto {
   metaKeywords?: string[];
   parentPageId?: number | null;
   template?: string;
-  contentBlocks?: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }>;
+  contentBlocks?: Array<{
+    type: string;
+    id: number;
+    position?: number;
+    config?: Record<string, unknown>;
+  }>;
   author?: {
     id: number;
     username: string | null;
@@ -49,6 +54,9 @@ export interface PageDto {
       } | null;
     }>;
   } | null;
+  enableFeedback?: boolean;
+  paymentMethodId?: number | null;
+  categories?: any[];
 }
 
 export interface PagesQuery {
@@ -59,18 +67,30 @@ export interface PagesQuery {
   limit?: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+export interface PublicPageSummary {
+  id: number;
+  title: string;
+  slug: string;
+  status: string;
+  publishedAt?: string | null;
+  updatedAt: string;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+}
+
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const fetchPages = async (token: string | null, params: PagesQuery): Promise<PageDto[]> => {
-  const headers = authHeaders(token);
-  console.log('API: Fetching pages with headers:', headers);
-  console.log('API: Request URL:', `${API_URL}/pages`);
-  console.log('API: Request params:', params);
-  
   const { data } = await axios.get<PageDto[]>(`${API_URL}/pages`, {
     params,
-    headers,
+    headers: authHeaders(token),
+  });
+  return data;
+};
+
+export const fetchPublicPages = async (search?: string): Promise<PublicPageSummary[]> => {
+  const { data } = await axios.get<PublicPageSummary[]>(`${API_URL}/public/pages`, {
+    params: search ? { search } : undefined,
   });
   return data;
 };
@@ -89,6 +109,11 @@ export const fetchPageBySlug = async (token: string | null, slug: string): Promi
   return data;
 };
 
+export const fetchPublicPageBySlug = async (slug: string): Promise<PageDto> => {
+  const { data } = await axios.get<PageDto>(`${API_URL}/public/pages/slug/${slug}`);
+  return data;
+};
+
 export const createPage = async (
   token: string | null,
   payload: {
@@ -103,7 +128,15 @@ export const createPage = async (
     metaKeywords?: string[];
     parentPageId?: number;
     template?: string;
-    contentBlocks?: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }>;
+    categoryIds?: number[];
+    enableFeedback?: boolean;
+    paymentMethodId?: number | null;
+    contentBlocks?: Array<{
+      type: string;
+      id: number;
+      position?: number;
+      config?: Record<string, unknown>;
+    }>;
   },
 ): Promise<PageDto> => {
   const { data } = await axios.post<PageDto>(`${API_URL}/pages`, payload, {
@@ -141,7 +174,15 @@ export const updatePage = async (
     parentPageId: number;
     template: string;
     publishedAt: string;
-    contentBlocks: Array<{ type: 'slider' | 'media' | 'gallery'; id: number; position?: number; config?: Record<string, any> }> | null;
+    categoryIds: number[];
+    enableFeedback: boolean;
+    paymentMethodId: number | null;
+    contentBlocks: Array<{
+      type: string;
+      id: number;
+      position?: number;
+      config?: Record<string, unknown>;
+    }> | null;
   }>,
 ): Promise<PageDto> => {
   const { data } = await axios.patch<PageDto>(`${API_URL}/pages/${id}`, payload, {
@@ -157,16 +198,24 @@ export const deletePage = async (token: string | null, id: number): Promise<void
 };
 
 export const publishPage = async (token: string | null, id: number): Promise<PageDto> => {
-  const { data } = await axios.patch<PageDto>(`${API_URL}/pages/${id}/publish`, {}, {
-    headers: authHeaders(token),
-  });
+  const { data } = await axios.patch<PageDto>(
+    `${API_URL}/pages/${id}/publish`,
+    {},
+    {
+      headers: authHeaders(token),
+    },
+  );
   return data;
 };
 
 export const unpublishPage = async (token: string | null, id: number): Promise<PageDto> => {
-  const { data } = await axios.patch<PageDto>(`${API_URL}/pages/${id}/unpublish`, {}, {
-    headers: authHeaders(token),
-  });
+  const { data } = await axios.patch<PageDto>(
+    `${API_URL}/pages/${id}/unpublish`,
+    {},
+    {
+      headers: authHeaders(token),
+    },
+  );
   return data;
 };
 
@@ -179,5 +228,3 @@ export const completePageWithAi = async (
   });
   return data;
 };
-
-

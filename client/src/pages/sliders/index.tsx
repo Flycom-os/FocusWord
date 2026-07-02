@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from "react";
 import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/sliders/index.module.css";
-import { useAuth } from '@/src/app/providers/auth-provider'
+import { useAuth } from "@/src/app/providers/auth-provider";
 import {
   fetchSliders,
   createSlider,
@@ -206,18 +206,22 @@ const SlidersPage = () => {
     setSlideDescription(slide.description || "");
     setSlideLinkUrl(slide.linkUrl || "");
     setSlideSortOrder(slide.sortOrder);
-    setSelectedImage(slide.image ? { 
-  ...slide.image, 
-  mimetype: '', 
-  fileSize: 0, 
-  uploadedAt: '', 
-  updatedAt: '', 
-  altText: '', 
-  caption: '',
-  isImage: slide.image.filepath.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null,
-  isVideo: slide.image.filepath.match(/\.(mp4|avi|mov|webm)$/i) !== null,
-  isAudio: slide.image.filepath.match(/\.(mp3|wav|ogg)$/i) !== null
-} : null);
+    setSelectedImage(
+      slide.image
+        ? {
+            ...slide.image,
+            mimetype: "",
+            fileSize: 0,
+            uploadedAt: "",
+            updatedAt: "",
+            altText: "",
+            caption: "",
+            isImage: slide.image.filepath.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null,
+            isVideo: slide.image.filepath.match(/\.(mp4|avi|mov|webm)$/i) !== null,
+            isAudio: slide.image.filepath.match(/\.(mp3|wav|ogg)$/i) !== null,
+          }
+        : null,
+    );
     setIsSlideModalOpen(true);
   };
 
@@ -258,7 +262,7 @@ const SlidersPage = () => {
       showToast(message, "error");
     }
   };
-  
+
   const handleMediaSelect = (media: MediaFileDto) => {
     setSelectedImage(media);
     setIsMediaModalOpen(false);
@@ -267,16 +271,16 @@ const SlidersPage = () => {
   const getSlideMediaPreview = (slide: SlideDto) => {
     if (slide.image) {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-      const imageUrl = slide.image.filepath.startsWith('http')
+      const imageUrl = slide.image.filepath.startsWith("http")
         ? slide.image.filepath
         : `${API_URL}/backend/uploads/${slide.image.filepath}`;
       return <img src={imageUrl} alt={slide.image.filename} className={styles.slidePreview} />;
     }
     return <div className={styles.slidePreviewPlaceholder}>Нет изображения</div>;
   };
-  
+
   const getFileUrl = (item: MediaFileDto) => {
-    if (item.filepath && item.filepath.startsWith('http')) {
+    if (item.filepath && item.filepath.startsWith("http")) {
       return item.filepath;
     }
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
@@ -286,7 +290,7 @@ const SlidersPage = () => {
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type={"third"} />
+      <BlockManagement type="third" />
 
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
@@ -326,7 +330,7 @@ const SlidersPage = () => {
                 >
                   <TableCell>{slider.name}</TableCell>
                   <TableCell>{slider.slug}</TableCell>
-                  <TableCell>{slider.description || '-'}</TableCell>
+                  <TableCell>{slider.description || "-"}</TableCell>
                   <TableCell className={styles.actionsColumn} onClick={(e) => e.stopPropagation()}>
                     <PermissionGate resource="sliders" level={1}>
                       <UiButton theme="secondary" onClick={() => handleEditSlider(slider)}>
@@ -363,7 +367,7 @@ const SlidersPage = () => {
                 </UiButton>
               </PermissionGate>
             </div>
-            
+
             <Table className={styles.table}>
               <TableHeader>
                 <TableRow>
@@ -379,9 +383,9 @@ const SlidersPage = () => {
                 {slides.map((slide) => (
                   <TableRow key={slide.id}>
                     <TableCell>{getSlideMediaPreview(slide)}</TableCell>
-                    <TableCell>{slide.title || '-'}</TableCell>
-                    <TableCell>{slide.description || '-'}</TableCell>
-                    <TableCell>{slide.linkUrl || '-'}</TableCell>
+                    <TableCell>{slide.title || "-"}</TableCell>
+                    <TableCell>{slide.description || "-"}</TableCell>
+                    <TableCell>{slide.linkUrl || "-"}</TableCell>
                     <TableCell>{slide.sortOrder}</TableCell>
                     <TableCell className={styles.actionsColumn}>
                       <PermissionGate resource="sliders" level={1}>
@@ -412,7 +416,11 @@ const SlidersPage = () => {
       </div>
 
       {/* Slider Modal */}
-      <Modal open={isSliderModalOpen} onClose={() => setIsSliderModalOpen(false)} title={editingSlider ? 'Редактировать слайдер' : 'Создать слайдер'}>
+      <Modal
+        open={isSliderModalOpen}
+        onClose={() => setIsSliderModalOpen(false)}
+        title={editingSlider ? "Редактировать слайдер" : "Создать слайдер"}
+      >
         <div className={styles.modalContent}>
           <div className={styles.formField}>
             <label className={styles.formLabel}>Название</label>
@@ -423,7 +431,7 @@ const SlidersPage = () => {
               placeholder="Название слайдера"
             />
           </div>
-          
+
           <div className={styles.formField}>
             <label className={styles.formLabel}>Slug</label>
             <Input
@@ -433,7 +441,7 @@ const SlidersPage = () => {
               placeholder="slider-slug"
             />
           </div>
-          
+
           <div className={styles.formField}>
             <label className={styles.formLabel}>Описание</label>
             <textarea
@@ -450,14 +458,18 @@ const SlidersPage = () => {
               Отмена
             </UiButton>
             <UiButton theme="primary" onClick={handleSaveSlider}>
-              {editingSlider ? 'Обновить' : 'Создать'}
+              {editingSlider ? "Обновить" : "Создать"}
             </UiButton>
           </div>
         </div>
       </Modal>
 
       {/* Slide Modal */}
-      <Modal open={isSlideModalOpen} onClose={() => setIsSlideModalOpen(false)} title={editingSlide ? 'Редактировать слайд' : 'Создать слайд'}>
+      <Modal
+        open={isSlideModalOpen}
+        onClose={() => setIsSlideModalOpen(false)}
+        title={editingSlide ? "Редактировать слайд" : "Создать слайд"}
+      >
         <div className={styles.modalContent}>
           <div className={styles.formField}>
             <label className={styles.formLabel}>Заголовок</label>
@@ -468,7 +480,7 @@ const SlidersPage = () => {
               placeholder="Заголовок слайда"
             />
           </div>
-          
+
           <div className={styles.formField}>
             <label className={styles.formLabel}>Описание</label>
             <textarea
@@ -531,7 +543,7 @@ const SlidersPage = () => {
               Отмена
             </UiButton>
             <UiButton theme="primary" onClick={handleSaveSlide}>
-              {editingSlide ? 'Обновить' : 'Создать'}
+              {editingSlide ? "Обновить" : "Создать"}
             </UiButton>
           </div>
         </div>

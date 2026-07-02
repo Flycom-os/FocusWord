@@ -1,44 +1,47 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Input from '@/src/shared/ui/Input/ui-input';
-import Button from '@/src/shared/ui/Button/ui-button';
-import { fetchSliders, updateSlider, getSlider } from '@/src/shared/api/sliders';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { MediaPickerModal } from '@/src/features/Media/ui/MediaPickerModal';
-import styles from './edit.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/src/shared/ui/Input/ui-input";
+import Button from "@/src/shared/ui/Button/ui-button";
+import { fetchSliders, updateSlider, getSlider } from "@/src/shared/api/sliders";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import { MediaPickerModal } from "@/src/features/Media/ui/MediaPickerModal";
+import styles from "./edit.module.css";
 
 export default function EditSliderPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [slider, setSlider] = useState<any>(null);
   const [slides, setSlides] = useState<any[]>([]);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
-  const [mediaPickerCallback, setMediaPickerCallback] = useState<{ onSelect: (media: any) => void } | null>(null);
+  const [mediaPickerCallback, setMediaPickerCallback] = useState<{
+    onSelect: (media: any) => void;
+  } | null>(null);
 
   useEffect(() => {
     loadSlider();
     setupMediaPicker();
-  }, [params.id]);
+  }, [params.id, accessToken]);
 
   const loadSlider = async () => {
+    if (!accessToken) return;
     try {
-      const { accessToken } = useAuth();
-      const data = await getSlider(accessToken, parseInt(params.id));
+      const data = await getSlider(accessToken, parseInt(params.id, 10));
       setSlider(data);
       if (data.slides) {
         setSlides(data.slides);
       }
     } catch (error) {
-      showToast('Ошибка при загрузке слайдера', 'error');
-      router.push('/admin/sliders');
+      showToast("Ошибка при загрузке слайдера", "error");
+      router.push("/admin/sliders");
     }
   };
 
   const setupMediaPicker = () => {
-    window.addEventListener('open-media-picker', handleMediaPickerEvent as EventListener);
+    window.addEventListener("open-media-picker", handleMediaPickerEvent as EventListener);
   };
 
   const handleMediaPickerEvent = (event: CustomEvent) => {
@@ -51,22 +54,18 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
     const newSlide = {
       id: Date.now().toString(),
       media: null,
-      caption: '',
-      order: slides.length + 1
+      caption: "",
+      order: slides.length + 1,
     };
     setSlides([...slides, newSlide]);
   };
 
   const handleRemoveSlide = (slideId: string) => {
-    setSlides(slides.filter(slide => slide.id !== slideId));
+    setSlides(slides.filter((slide) => slide.id !== slideId));
   };
 
-  const handleSlideChange = (slideId: string, field: 'media' | 'caption', value: any) => {
-    setSlides(slides.map(slide => 
-      slide.id === slideId 
-        ? { ...slide, [field]: value }
-        : slide
-    ));
+  const handleSlideChange = (slideId: string, field: "media" | "caption", value: any) => {
+    setSlides(slides.map((slide) => (slide.id === slideId ? { ...slide, [field]: value } : slide)));
   };
 
   const handleMediaSelect = () => {
@@ -75,34 +74,34 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
         // Добавляем медиа к последнему слайду
         const lastSlide = slides[slides.length - 1];
         if (lastSlide) {
-          handleSlideChange(lastSlide.id, 'media', {
+          handleSlideChange(lastSlide.id, "media", {
             filename: media.filename,
             url: media.url,
-            caption: media.caption || ''
+            caption: media.caption || "",
           });
         }
-      }
+      },
     });
     setShowMediaPicker(true);
   };
 
   const handleSave = async () => {
-    if (!slider) return;
-    
+    if (!slider || !accessToken) return;
+
     setLoading(true);
     try {
       const sliderData = {
         name: slider.name,
         slug: slider.slug,
         description: slider.description,
-        slides: slides
+        slides,
       };
 
-      await updateSlider(params.id, sliderData);
-      showToast('Слайдер обновлен', 'success');
-      router.push('/admin/sliders');
+      await updateSlider(accessToken, parseInt(params.id, 10), sliderData);
+      showToast("Слайдер обновлен", "success");
+      router.push("/admin/sliders");
     } catch (error) {
-      showToast('Ошибка при сохранении', 'error');
+      showToast("Ошибка при сохранении", "error");
     } finally {
       setLoading(false);
     }
@@ -123,18 +122,18 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
         <div className={styles.mainCol}>
           <div className={styles.formGroup}>
             <label className={styles.label}>Название слайдера</label>
-            <Input 
-              value={slider.name} 
-              onChange={(e) => setSlider(prev => ({ ...prev, name: e.target.value }))}
+            <Input
+              value={slider.name}
+              onChange={(e) => setSlider((prev: any) => ({ ...prev, name: e.target.value }))}
               placeholder="Введите название слайдера"
             />
           </div>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Slug</label>
-            <Input 
-              value={slider.slug} 
-              onChange={(e) => setSlider(prev => ({ ...prev, slug: e.target.value }))} 
+            <Input
+              value={slider.slug}
+              onChange={(e) => setSlider((prev: any) => ({ ...prev, slug: e.target.value }))}
               placeholder="url-slug"
             />
           </div>
@@ -142,8 +141,8 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
           <div className={styles.formGroup}>
             <label className={styles.label}>Описание</label>
             <textarea
-              value={slider.description || ''}
-              onChange={(e) => setSlider(prev => ({ ...prev, description: e.target.value }))}
+              value={slider.description || ""}
+              onChange={(e) => setSlider((prev: any) => ({ ...prev, description: e.target.value }))}
               placeholder="Описание слайдера"
               className={styles.textarea}
               rows={3}
@@ -153,10 +152,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
           <div className={styles.slidesSection}>
             <div className={styles.slidesHeader}>
               <h3>Слайды</h3>
-              <Button
-                onClick={handleAddSlide}
-                className={styles.addSlideButton}
-              >
+              <Button onClick={handleAddSlide} className={styles.addSlideButton}>
                 ➕ Добавить слайд
               </Button>
             </div>
@@ -179,19 +175,18 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
                       <label className={styles.label}>Медиафайл</label>
                       <div className={styles.mediaInput}>
                         <Input
-                          value={slide.media?.filename || ''}
-                          onChange={(e) => handleSlideChange(slide.id, 'media', {
-                            filename: e.target.value,
-                            url: slide.media?.url || '',
-                            caption: slide.media?.caption || ''
-                          })}
+                          value={slide.media?.filename || ""}
+                          onChange={(e) =>
+                            handleSlideChange(slide.id, "media", {
+                              filename: e.target.value,
+                              url: slide.media?.url || "",
+                              caption: slide.media?.caption || "",
+                            })
+                          }
                           placeholder="Выберите медиафайл"
                           readOnly
                         />
-                        <Button
-                          onClick={handleMediaSelect}
-                          className={styles.selectMediaButton}
-                        >
+                        <Button onClick={handleMediaSelect} className={styles.selectMediaButton}>
                           📷 Выбрать
                         </Button>
                       </div>
@@ -200,17 +195,17 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Подпись</label>
                       <Input
-                        value={slide.caption || ''}
-                        onChange={(e) => handleSlideChange(slide.id, 'caption', e.target.value)}
+                        value={slide.caption || ""}
+                        onChange={(e) => handleSlideChange(slide.id, "caption", e.target.value)}
                         placeholder="Подпись к слайду"
                       />
                     </div>
 
                     {slide.media?.url && (
                       <div className={styles.mediaPreview}>
-                        <img 
-                          src={slide.media.url} 
-                          alt={slide.media.caption || ''} 
+                        <img
+                          src={slide.media.url}
+                          alt={slide.media.caption || ""}
                           className={styles.mediaImage}
                         />
                       </div>
@@ -222,17 +217,10 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className={styles.actions}>
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className={styles.saveButton}
-            >
-              {loading ? 'Сохранение...' : 'Сохранить изменения'}
+            <Button onClick={handleSave} disabled={loading} className={styles.saveButton}>
+              {loading ? "Сохранение..." : "Сохранить изменения"}
             </Button>
-            <Button
-              onClick={() => router.push('/admin/sliders')}
-              className={styles.cancelButton}
-            >
+            <Button onClick={() => router.push("/admin/sliders")} className={styles.cancelButton}>
               Отмена
             </Button>
           </div>
@@ -241,6 +229,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
 
       {showMediaPicker && mediaPickerCallback && (
         <MediaPickerModal
+          open={showMediaPicker}
           onSelect={mediaPickerCallback.onSelect}
           onClose={() => setShowMediaPicker(false)}
         />

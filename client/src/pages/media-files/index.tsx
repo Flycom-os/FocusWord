@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * @page MediaFiles
@@ -8,8 +8,31 @@ import { useEffect, useMemo, useState } from "react";
 import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/media-files/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
-import { deleteMediaFile, fetchMediaFiles, MediaFileDto, MediaFilesQuery, uploadMediaFile, updateMediaFile } from "@/src/shared/api/mediafiles";
-import { Pagination, PermissionGate, UiButton, Modal, Notifications, showToast, VideoPlayer, AudioPlayer, Table, TableHeader, TableBody, TableHead, TableRow, TableCell, Select } from "@/src/shared/ui";
+import {
+  deleteMediaFile,
+  fetchMediaFiles,
+  MediaFileDto,
+  MediaFilesQuery,
+  uploadMediaFile,
+  updateMediaFile,
+} from "@/src/shared/api/mediafiles";
+import {
+  Pagination,
+  PermissionGate,
+  UiButton,
+  Modal,
+  Notifications,
+  showToast,
+  VideoPlayer,
+  AudioPlayer,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  Select,
+} from "@/src/shared/ui";
 import Input from "@/src/shared/ui/Input/ui-input";
 
 const defaultQuery: MediaFilesQuery = {
@@ -36,6 +59,8 @@ const MediaFilesPage = () => {
   const [fileTypeFilter, setFileTypeFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("");
   const [authorFilter, setAuthorFilter] = useState<string>("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const totalPages = useMemo(() => {
     if (!query.limit) return 1;
@@ -60,8 +85,68 @@ const MediaFilesPage = () => {
     load();
   }, [accessToken, query]);
 
-  const handleToggleSelect = (id: number) => {
+  const handleToggleSelect = (id: number, index?: number) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const handleShiftSelect = (id: number, index: number) => {
+    console.log("handleShiftSelect:", { id, index, lastSelectedIndex });
+
+    if (lastSelectedIndex === null) {
+      console.log("No last selected index, selecting single item");
+      setSelectedIds([id]);
+      setLastSelectedIndex(index);
+      return;
+    }
+
+    const startIndex = Math.min(lastSelectedIndex, index);
+    const endIndex = Math.max(lastSelectedIndex, index);
+
+    console.log("Selecting range:", { startIndex, endIndex });
+
+    const rangeIds = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      if (data[i]) {
+        rangeIds.push(data[i].id);
+      }
+    }
+
+    console.log("Range IDs:", rangeIds);
+
+    // При Shift+click заменяем выделение на новый диапазон
+    setSelectedIds(rangeIds);
+    setLastSelectedIndex(index);
+  };
+
+  const handleItemClick = (id: number, index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+
+    console.log("handleItemClick:", {
+      id,
+      index,
+      shiftKey: e.shiftKey,
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+    });
+
+    if (e.shiftKey && data.length > 1) {
+      console.log("Shift+click detected");
+      handleShiftSelect(id, index);
+    } else {
+      // При обычном клике переключаем выделение одного элемента
+      if (e.ctrlKey || e.metaKey) {
+        // Multi-select с Ctrl/Cmd
+        console.log("Ctrl/Cmd+click detected");
+        setSelectedIds((prev) =>
+          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+        );
+      } else {
+        // Обычный клик - выделяем только этот элемент
+        console.log("Normal click - selecting single item");
+        setSelectedIds([id]);
+      }
+      setLastSelectedIndex(index);
+    }
   };
 
   const handleSelectAll = () => {
@@ -95,7 +180,7 @@ const MediaFilesPage = () => {
       // Редактирование
       try {
         await updateMediaFile(accessToken, editingFile.id, {
-          altText: altText,
+          altText,
           caption: caption || undefined,
         });
         showToast("Файл обновлен", "success");
@@ -167,6 +252,32 @@ const MediaFilesPage = () => {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      const file = files[0];
+      setFileToUpload(file);
+      setFilename(file.name);
+      setEditingFile(null);
+      setAltText("");
+      setCaption("");
+      setIsModalOpen(true);
+    }
+  };
+
   const handleSearchChange = (value: string) => {
     setQuery((prev) => ({ ...prev, page: 1, search: value }));
   };
@@ -214,7 +325,7 @@ const MediaFilesPage = () => {
     setQuery((prev) => {
       const newQuery: MediaFilesQuery = { ...prev, page: 1 };
       newQuery.uploadedById = undefined;
-      
+
       const adminUserId = 1;
 
       if (value === "admin") {
@@ -230,17 +341,17 @@ const MediaFilesPage = () => {
 
   const getFileUrl = (item: MediaFileDto) => {
     // filepath теперь уже содержит полный URL с http://
-    if (item.filepath && item.filepath.startsWith('http')) {
+    if (item.filepath && item.filepath.startsWith("http")) {
       return item.filepath;
     }
     // Fallback для старых записей
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
     // Если filepath это имя файла, используем backend/uploads
-    if (item.filepath && !item.filepath.includes('/')) {
+    if (item.filepath && !item.filepath.includes("/")) {
       return `${API_URL}/backend/uploads/${item.filepath}`;
     }
     // Если filepath уже содержит путь, используем его
-    if (item.filepath && item.filepath.startsWith('/')) {
+    if (item.filepath && item.filepath.startsWith("/")) {
       return `${API_URL}${item.filepath}`;
     }
     return `${API_URL}/backend/uploads/${item.filepath}`;
@@ -251,19 +362,23 @@ const MediaFilesPage = () => {
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+    return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
   };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
-    <div className={styles.root}>
+    <div
+      className={`${styles.root} ${isDragging ? styles.dragging : ""}`}
+      style={{ padding: "20px" }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <Notifications />
-      <BlockManagement type={"third"} />
-
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
           <Input
@@ -278,35 +393,35 @@ const MediaFilesPage = () => {
           </UiButton>
         </div>
         <div className={styles.filters}>
-          <Select 
-            className={styles.filterSelect} 
+          <Select
+            className={styles.filterSelect}
             options={[
               { value: "", label: "Файл" },
               { value: "image", label: "Изображения" },
               { value: "video", label: "Видео" },
-              { value: "audio", label: "Аудио" }
-            ]} 
-            value={fileTypeFilter} 
-            onChange={(value) => handleFileTypeFilter(value as string)} 
+              { value: "audio", label: "Аудио" },
+            ]}
+            value={fileTypeFilter}
+            onChange={(value) => handleFileTypeFilter(value as string)}
           />
-          <Select 
-            className={styles.filterSelect} 
+          <Select
+            className={styles.filterSelect}
             options={[
               { value: "", label: "Автор" },
-              { value: "admin", label: "Админ" }
-            ]} 
-            value={authorFilter} 
-            onChange={(value) => handleAuthorFilter(value as string)} 
+              { value: "admin", label: "Админ" },
+            ]}
+            value={authorFilter}
+            onChange={(value) => handleAuthorFilter(value as string)}
           />
-          <Select 
-            className={styles.filterSelect} 
+          <Select
+            className={styles.filterSelect}
             options={[
               { value: "", label: "Дата" },
               { value: "newest", label: "Новые" },
-              { value: "oldest", label: "Старые" }
-            ]} 
-            value={dateFilter} 
-            onChange={(value) => handleDateFilter(value as string)} 
+              { value: "oldest", label: "Старые" },
+            ]}
+            value={dateFilter}
+            onChange={(value) => handleDateFilter(value as string)}
           />
         </div>
         <div className={styles.viewToggle}>
@@ -316,10 +431,42 @@ const MediaFilesPage = () => {
             title="Режим карточек"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="1" y="1" width="6" height="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              <rect x="9" y="1" width="6" height="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              <rect x="1" y="9" width="6" height="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              <rect x="9" y="9" width="6" height="6" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              <rect
+                x="1"
+                y="1"
+                width="6"
+                height="6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <rect
+                x="9"
+                y="1"
+                width="6"
+                height="6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <rect
+                x="1"
+                y="9"
+                width="6"
+                height="6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <rect
+                x="9"
+                y="9"
+                width="6"
+                height="6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
             </svg>
           </button>
           <button
@@ -328,48 +475,66 @@ const MediaFilesPage = () => {
             title="Режим таблицы"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <line x1="1" y1="4" x2="15" y2="4" stroke="currentColor" strokeWidth="1.5"/>
-              <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5"/>
-              <line x1="1" y1="12" x2="15" y2="12" stroke="currentColor" strokeWidth="1.5"/>
+              <line x1="1" y1="4" x2="15" y2="4" stroke="currentColor" strokeWidth="1.5" />
+              <line x1="1" y1="8" x2="15" y2="8" stroke="currentColor" strokeWidth="1.5" />
+              <line x1="1" y1="12" x2="15" y2="12" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </button>
         </div>
-        <div className={styles.actions}>
-          {selectedIds.length > 0 && (
-            <PermissionGate resource="mediafiles" level={2}>
-              <UiButton theme="warning" onClick={handleDeleteSelected}>
-                Выбрано: {selectedIds.length} Удалить
-              </UiButton>
-            </PermissionGate>
-          )}
-          {selectedIds.length === 1 && (
+        <PermissionGate resource="media-files" level={2}>
+          <UiButton theme="primary" onClick={handleCreate}>
+            + Добавить
+          </UiButton>
+        </PermissionGate>
+      </div>
+
+      {/* Отдельная строка для индикатора выбранных элементов */}
+      <div className={styles.selectionBar}>
+        <div className={styles.selectionInfo}>
+          {selectedIds.length > 0 ? (
             <>
-              <UiButton theme="secondary" onClick={() => {
-                const file = data.find(f => f.id === selectedIds[0]);
-                if (file) window.open(getFileUrl(file), '_blank');
-              }}>
-                Открыть оригинал
-              </UiButton>
-              <UiButton theme="secondary" onClick={() => {
-                const file = data.find(f => f.id === selectedIds[0]);
-                if (file && file.thumbnailUrl) window.open(file.thumbnailUrl, '_blank');
-                else if (file) window.open(getFileUrl(file), '_blank');
-              }}>
-                Открыть миниатюру
-              </UiButton>
-              <UiButton theme="secondary" onClick={() => {
-                const file = data.find(f => f.id === selectedIds[0]);
-                if (file) handleEdit(file);
-              }}>
-                Редактировать
-              </UiButton>
+              <span>Выбрано: {selectedIds.length}</span>
+              <PermissionGate resource="media-files" level={2}>
+                <UiButton theme="warning" onClick={handleDeleteSelected}>
+                  Удалить
+                </UiButton>
+              </PermissionGate>
+              {selectedIds.length === 1 && (
+                <>
+                  <UiButton
+                    theme="secondary"
+                    onClick={() => {
+                      const file = data.find((f) => f.id === selectedIds[0]);
+                      if (file) window.open(getFileUrl(file), "_blank");
+                    }}
+                  >
+                    Открыть оригинал
+                  </UiButton>
+                  <UiButton
+                    theme="secondary"
+                    onClick={() => {
+                      const file = data.find((f) => f.id === selectedIds[0]);
+                      if (file && file.thumbnailUrl) window.open(file.thumbnailUrl, "_blank");
+                      else if (file) window.open(getFileUrl(file), "_blank");
+                    }}
+                  >
+                    Открыть миниатюру
+                  </UiButton>
+                  <UiButton
+                    theme="secondary"
+                    onClick={() => {
+                      const file = data.find((f) => f.id === selectedIds[0]);
+                      if (file) handleEdit(file);
+                    }}
+                  >
+                    Редактировать
+                  </UiButton>
+                </>
+              )}
             </>
+          ) : (
+            <span className={styles.selectionEmpty}>Пусто</span>
           )}
-          <PermissionGate resource="mediafiles" level={2}>
-            <UiButton theme="primary" onClick={handleCreate}>
-              + Добавить
-            </UiButton>
-          </PermissionGate>
         </div>
       </div>
 
@@ -390,60 +555,91 @@ const MediaFilesPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((item) => (
-            <TableRow 
-              key={item.id} 
-              className={`${selectedIds.includes(item.id) ? styles.rowSelected : ""} ${styles.clickableRow}`}
-              onClick={(e) => {
-                // Если клик на чекбокс, только выбираем
-                if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).closest('input')) {
-                  return;
-                }
-                // Иначе открываем модалку редактирования
-                handleEdit(item);
-              }}
-            >
-              <TableCell className={styles.checkboxColumn} onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(item.id)}
-                  onChange={() => handleToggleSelect(item.id)}
-                />
-              </TableCell>
-              <TableCell>
-                <div className={styles.fileCell}>
-                  <div className={styles.thumbnail}>
-                    {item.isImage ? (
-                      <img src={getFileUrl(item)} alt={item.altText || item.filename} />
-                    ) : item.isVideo ? (
-                      <VideoPlayer src={getFileUrl(item)} width="60px" height="60px" />
-                    ) : item.isAudio ? (
-                      <AudioPlayer src={getFileUrl(item)} theme="primary" />
-                    ) : (
-                      <div className={styles.placeholder}>{item.mimetype}</div>
-                    )}
+            {data.map((item, index) => (
+              <TableRow
+                key={item.id}
+                className={`${selectedIds.includes(item.id) ? styles.rowSelected : ""} ${styles.clickableRow}`}
+                onMouseDown={(e) => {
+                  // Если клик на чекбокс, не обрабатываем здесь
+                  if (
+                    (e.target as HTMLElement).tagName === "INPUT" ||
+                    (e.target as HTMLElement).closest("input")
+                  ) {
+                    return;
+                  }
+                  // Обрабатываем выделение
+                  handleItemClick(item.id, index, e);
+                  // Открываем редактирование только если не нажаты модификаторы
+                  if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                    handleEdit(item);
+                  }
+                }}
+              >
+                <TableCell className={styles.checkboxColumn}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(item.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      // Для чекбокса используем логику множественного выделения
+                      setSelectedIds((prev) =>
+                        prev.includes(item.id)
+                          ? prev.filter((x) => x !== item.id)
+                          : [...prev, item.id],
+                      );
+                      setLastSelectedIndex(index);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className={styles.fileCell}>
+                    <div className={styles.thumbnail}>
+                      {item.isImage ? (
+                        <img src={getFileUrl(item)} alt={item.altText || item.filename} />
+                      ) : item.isVideo ? (
+                        <VideoPlayer src={getFileUrl(item)} width="60px" height="60px" />
+                      ) : item.isAudio ? (
+                        <div className={styles.audioIconOverlay}>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M3 5v6h2l3 3V2L5 5H3z" fill="currentColor" />
+                            <path
+                              d="M11 8c0-1.5-1-2.5-2-2.5v5c1 0 2-1 2-2.5z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </div>
+                      ) : (
+                        <div className={styles.placeholder}>{item.mimetype}</div>
+                      )}
+                    </div>
+                    <span className={styles.filename}>{item.filename}</span>
                   </div>
-                  <span className={styles.filename}>{item.filename}</span>
-                </div>
-              </TableCell>
-              <TableCell>Админ</TableCell>
-              <TableCell>{formatDate(item.uploadedAt)}</TableCell>
-            </TableRow>
+                </TableCell>
+                <TableCell>Админ</TableCell>
+                <TableCell>{formatDate(item.uploadedAt)}</TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
       ) : (
-        <div className={styles.grid}>
-          {data.map((item) => (
+        <div className={`${styles.gridContainer} ${styles.grid}`}>
+          {data.map((item, index) => (
             <div
               key={item.id}
               className={`${styles.card} ${selectedIds.includes(item.id) ? styles.cardSelected : ""}`}
-              onClick={(e) => {
+              onMouseDown={(e) => {
                 // Если клик на чекбокс, только выбираем
-                if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).closest('input')) {
-                  handleToggleSelect(item.id);
-                } else {
-                  // Иначе открываем модалку редактирования
+                if (
+                  (e.target as HTMLElement).tagName === "INPUT" ||
+                  (e.target as HTMLElement).closest("input")
+                ) {
+                  return; // Чекбокс обрабатывается отдельно
+                }
+                // Иначе обрабатываем выделение
+                handleItemClick(item.id, index, e);
+                // Открываем редактирование только если не нажаты модификаторы
+                if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
                   handleEdit(item);
                 }
               }}
@@ -454,11 +650,69 @@ const MediaFilesPage = () => {
                   checked={selectedIds.includes(item.id)}
                   onChange={(e) => {
                     e.stopPropagation();
-                    handleToggleSelect(item.id);
+                    // Для чекбокса используем логику множественного выделения
+                    setSelectedIds((prev) =>
+                      prev.includes(item.id)
+                        ? prev.filter((x) => x !== item.id)
+                        : [...prev, item.id],
+                    );
+                    setLastSelectedIndex(index);
                   }}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
+
+              {/* Иконка типа медиа в левом верхнем углу */}
+              <div className={styles.mediaTypeIcon}>
+                {item.isImage ? (
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <rect
+                      x="2"
+                      y="3"
+                      width="12"
+                      height="10"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      fill="none"
+                    />
+                    <circle cx="6" cy="7" r="1.5" fill="currentColor" />
+                    <path d="M9 10l2-2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                  </svg>
+                ) : item.isVideo ? (
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <rect
+                      x="2"
+                      y="3"
+                      width="12"
+                      height="10"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      fill="none"
+                    />
+                    <polygon points="6,5 6,11 11,8" fill="currentColor" />
+                  </svg>
+                ) : item.isAudio ? (
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M3 5v6h2l3 3V2L5 5H3z" fill="currentColor" />
+                    <path d="M11 8c0-1.5-1-2.5-2-2.5v5c1 0 2-1 2-2.5z" fill="currentColor" />
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <rect
+                      x="3"
+                      y="4"
+                      width="10"
+                      height="8"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      fill="none"
+                    />
+                    <line x1="6" y1="7" x2="10" y2="7" stroke="currentColor" strokeWidth="1" />
+                    <line x1="6" y1="9" x2="10" y2="9" stroke="currentColor" strokeWidth="1" />
+                  </svg>
+                )}
+              </div>
+
               <div className={styles.preview}>
                 {item.isImage ? (
                   <img src={getFileUrl(item)} alt={item.altText || item.filename} />
@@ -488,20 +742,28 @@ const MediaFilesPage = () => {
       </div>
 
       {isModalOpen && (
-        <div className={styles.editModal} onClick={(e) => {
-          if (e.target === e.currentTarget) setIsModalOpen(false);
-        }}>
+        <div
+          className={styles.editModal}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
+        >
           <div className={styles.editModalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.editModalHeader}>
               <h2>{editingFile ? "Редактирование файла" : "Загрузка файла"}</h2>
-              <button className={styles.closeButton} onClick={() => setIsModalOpen(false)}>×</button>
+              <button className={styles.closeButton} onClick={() => setIsModalOpen(false)}>
+                ×
+              </button>
             </div>
             {editingFile ? (
               <>
                 <div className={styles.previewSection}>
                   <div className={styles.previewBox}>
                     {editingFile.isImage ? (
-                      <img src={getFileUrl(editingFile)} alt={editingFile.altText || editingFile.filename} />
+                      <img
+                        src={getFileUrl(editingFile)}
+                        alt={editingFile.altText || editingFile.filename}
+                      />
                     ) : editingFile.isVideo ? (
                       <VideoPlayer src={getFileUrl(editingFile)} width="100%" height="200px" />
                     ) : editingFile.isAudio ? (
@@ -522,14 +784,15 @@ const MediaFilesPage = () => {
                   </div>
                   <div className={styles.formField}>
                     <label>Alt-атрибут</label>
-                    <Input
-                      value={altText}
-                      onChange={(e) => setAltText(e.target.value)}
-                    />
+                    <Input value={altText} onChange={(e) => setAltText(e.target.value)} />
                   </div>
                   <div className={styles.formField}>
                     <label>Сжатие</label>
-                    <Select options={[{ value: "none", label: "Отсутствует" }]} value="none" onChange={() => {}} />
+                    <Select
+                      options={[{ value: "none", label: "Отсутствует" }]}
+                      value="none"
+                      onChange={() => {}}
+                    />
                   </div>
                   <div className={styles.formField}>
                     <label>Размер файла</label>
@@ -537,17 +800,27 @@ const MediaFilesPage = () => {
                   </div>
                 </div>
                 <div className={styles.editModalActions}>
-                  <UiButton theme="warning" onClick={() => editingFile && handleDeleteFile(editingFile.id)}>
-                    Удалить
-                  </UiButton>
-                  <UiButton theme="secondary" onClick={() => {
-                    if (editingFile) window.open(getFileUrl(editingFile), '_blank');
-                  }}>
+                  <PermissionGate resource="media-files" level={2}>
+                    <UiButton
+                      theme="warning"
+                      onClick={() => editingFile && handleDeleteFile(editingFile.id)}
+                    >
+                      Удалить
+                    </UiButton>
+                  </PermissionGate>
+                  <UiButton
+                    theme="secondary"
+                    onClick={() => {
+                      if (editingFile) window.open(getFileUrl(editingFile), "_blank");
+                    }}
+                  >
                     Скачать оригинал
                   </UiButton>
-                  <UiButton theme="primary" onClick={handleSave}>
-                    Сохранить
-                  </UiButton>
+                  <PermissionGate resource="media-files" level={1}>
+                    <UiButton theme="primary" onClick={handleSave}>
+                      Сохранить
+                    </UiButton>
+                  </PermissionGate>
                 </div>
               </>
             ) : (
@@ -555,11 +828,15 @@ const MediaFilesPage = () => {
                 <div className={styles.previewSection}>
                   <div className={styles.previewBox}>
                     {fileToUpload ? (
-                      fileToUpload.type.startsWith('image/') ? (
+                      fileToUpload.type.startsWith("image/") ? (
                         <img src={URL.createObjectURL(fileToUpload)} alt="Preview" />
-                      ) : fileToUpload.type.startsWith('video/') ? (
-                        <VideoPlayer src={URL.createObjectURL(fileToUpload)} width="100%" height="200px" />
-                      ) : fileToUpload.type.startsWith('audio/') ? (
+                      ) : fileToUpload.type.startsWith("video/") ? (
+                        <VideoPlayer
+                          src={URL.createObjectURL(fileToUpload)}
+                          width="100%"
+                          height="200px"
+                        />
+                      ) : fileToUpload.type.startsWith("audio/") ? (
                         <AudioPlayer src={URL.createObjectURL(fileToUpload)} theme="primary" />
                       ) : (
                         <div className={styles.previewPlaceholder}>миниатюра</div>
@@ -572,11 +849,7 @@ const MediaFilesPage = () => {
                 <div className={styles.formSection}>
                   <div className={styles.formField}>
                     <label>Файл</label>
-                    <input
-                      type="file"
-                      onChange={handleFileSelect}
-                      className={styles.fileInput}
-                    />
+                    <input type="file" onChange={handleFileSelect} className={styles.fileInput} />
                   </div>
                   <div className={styles.formField}>
                     <label>Название</label>
@@ -588,14 +861,15 @@ const MediaFilesPage = () => {
                   </div>
                   <div className={styles.formField}>
                     <label>Alt-атрибут</label>
-                    <Input
-                      value={altText}
-                      onChange={(e) => setAltText(e.target.value)}
-                    />
+                    <Input value={altText} onChange={(e) => setAltText(e.target.value)} />
                   </div>
                   <div className={styles.formField}>
                     <label>Сжатие</label>
-                    <Select options={[{ value: "none", label: "Отсутствует" }]} value="none" onChange={() => {}} />
+                    <Select
+                      options={[{ value: "none", label: "Отсутствует" }]}
+                      value="none"
+                      onChange={() => {}}
+                    />
                   </div>
                   {fileToUpload && (
                     <div className={styles.formField}>
@@ -605,9 +879,11 @@ const MediaFilesPage = () => {
                   )}
                 </div>
                 <div className={styles.editModalActions}>
-                  <UiButton theme="primary" onClick={handleSave} disabled={!fileToUpload}>
-                    Сохранить
-                  </UiButton>
+                  <PermissionGate resource="media-files" level={1}>
+                    <UiButton theme="primary" onClick={handleSave} disabled={!fileToUpload}>
+                      Сохранить
+                    </UiButton>
+                  </PermissionGate>
                 </div>
               </>
             )}

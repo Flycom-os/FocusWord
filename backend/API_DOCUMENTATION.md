@@ -1,72 +1,72 @@
-# API Документация - Цветочный магазин
+# API Documentation - Flower Shop
 
-## Пользователи (User API)
+## Users (User API)
 
-### Получить информацию о текущем пользователе
+### Get information about the current user
 ```
 GET /user/me
 Authorization: Bearer <token>
 ```
-Возвращает полную информацию о пользователе включая корзину, заказы, комментарии и адреса.
+Returns complete user information including cart, orders, comments, and addresses.
 
-### Получить всех пользователей с поиском
+### Get all users with search
 ```
 GET /user/all?name=John&page=0&limit=10
 Authorization: Bearer <token>
 ```
-Параметры:
-- `name` (опционально) - поиск по имени, фамилии или email
-- `page` (опционально) - номер страницы (по умолчанию 0)
-- `limit` (опционально) - количество элементов на странице (по умолчанию 10)
+Parameters:
+- `name` (optional) - search by first name, last name, or email
+- `page` (optional) - page number (default 0)
+- `limit` (optional) - number of items per page (default 10)
 
-### Обновить данные текущего пользователя
+### Update current user data
 ```
 PATCH /user/me
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
 {
-  "name": "Новое имя",
-  "surname": "Новая фамилия",
+  "name": "New Name",
+  "surname": "New Surname",
   "email": "new@example.com",
-  "face": <файл изображения>
+  "face": <image file>
 }
 ```
 
-### Удалить текущего пользователя
+### Delete current user
 ```
 DELETE /user/me
 Authorization: Bearer <token>
 ```
 
-### Получить пользователя по ID
+### Get user by ID
 ```
 GET /user/:id
 Authorization: Bearer <token>
 ```
 
-### Обновить пользователя по ID
+### Update user by ID
 ```
 PATCH /user/:id
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 ```
 
-### Удалить пользователя по ID
+### Delete user by ID
 ```
 DELETE /user/:id
 Authorization: Bearer <token>
 ```
 
-## Корзина (Cart API)
+## Cart (Cart API)
 
-### Получить корзину пользователя
+### Get user's cart
 ```
 GET /cart
 Authorization: Bearer <token>
 ```
 
-### Добавить товар в корзину
+### Add item to cart
 ```
 POST /cart/add
 Authorization: Bearer <token>
@@ -78,7 +78,7 @@ Content-Type: application/json
 }
 ```
 
-### Обновить количество товара в корзине
+### Update item quantity in cart
 ```
 PATCH /cart/item/:itemId
 Authorization: Bearer <token>
@@ -89,28 +89,28 @@ Content-Type: application/json
 }
 ```
 
-### Удалить товар из корзины
+### Remove item from cart
 ```
 DELETE /cart/item/:itemId
 Authorization: Bearer <token>
 ```
 
-### Очистить корзину
+### Clear cart
 ```
 DELETE /cart/clear
 Authorization: Bearer <token>
 ```
 
-## Заказы (Orders API)
+## Orders (Orders API)
 
-### Создать новый заказ
+### Create a new order
 ```
 POST /orders
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "address": "ул. Пушкина, д. 1",
+  "address": "1 Pushkina St.",
   "date_delivery": "2024-01-15",
   "total_service": "1000",
   "items": [
@@ -126,30 +126,30 @@ Content-Type: application/json
 }
 ```
 
-### Получить заказы с фильтрацией
+### Get orders with filtering
 ```
 GET /orders?userId=1&status=pending&page=0&limit=10
 Authorization: Bearer <token>
 ```
-Параметры:
-- `userId` (опционально) - фильтр по пользователю
-- `status` (опционально) - фильтр по статусу заказа
-- `page` (опционально) - номер страницы
-- `limit` (опционально) - количество элементов на странице
+Parameters:
+- `userId` (optional) - filter by user
+- `status` (optional) - filter by order status
+- `page` (optional) - page number
+- `limit` (optional) - number of items per page
 
-### Получить заказы текущего пользователя
+### Get current user's orders
 ```
 GET /orders/my?status=pending&page=0&limit=10
 Authorization: Bearer <token>
 ```
 
-### Получить заказ по ID
+### Get order by ID
 ```
 GET /orders/:id
 Authorization: Bearer <token>
 ```
 
-### Обновить заказ
+### Update an order
 ```
 PATCH /orders/:id
 Authorization: Bearer <token>
@@ -157,81 +157,81 @@ Content-Type: application/json
 
 {
   "status": "processing",
-  "address": "Новый адрес",
+  "address": "New Address",
   "date_delivery": "2024-01-20",
   "total_service": "1200"
 }
 ```
 
-### Удалить заказ
+### Delete an order
 ```
 DELETE /orders/:id
 Authorization: Bearer <token>
 ```
 
-## Адреса (Address API)
+## Addresses (Address API)
 
-### Создать новый адрес
+### Create a new address
 ```
 POST /address
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "address": "ул. Пушкина, д. 1, кв. 10"
+  "address": "1 Pushkina St., Apt. 10"
 }
 ```
 
-### Получить адреса с фильтрацией
+### Get addresses with filtering
 ```
 GET /address?userId=1&page=0&limit=10
 Authorization: Bearer <token>
 ```
-Параметры:
-- `userId` (опционально) - фильтр по пользователю
-- `page` (опционально) - номер страницы
-- `limit` (опционально) - количество элементов на странице
+Parameters:
+- `userId` (optional) - filter by user
+- `page` (optional) - page number
+- `limit` (optional) - number of items per page
 
-### Получить адреса текущего пользователя
+### Get current user's addresses
 ```
 GET /address/my?page=0&limit=10
 Authorization: Bearer <token>
 ```
 
-### Получить адрес по ID
+### Get address by ID
 ```
 GET /address/:id
 Authorization: Bearer <token>
 ```
 
-### Обновить адрес
+### Update an address
 ```
 PATCH /address/:id
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "address": "ул. Ленина, д. 5, кв. 20"
+  "address": "5 Lenina St., Apt. 20"
 }
 ```
 
-### Удалить адрес
+### Delete an address
 ```
 DELETE /address/:id
 Authorization: Bearer <token>
 ```
 
-## Статусы заказов
+## Order Statuses
 
-- `pending` - ожидает обработки
-- `processing` - в обработке
-- `shipped` - отправлен
-- `delivered` - доставлен
-- `cancelled` - отменен
+- `pending` - awaiting processing
+- `processing` - in process
+- `shipped` - shipped
+- `delivered` - delivered
+- `cancelled` - cancelled
 
-## Ответы API
+## API Responses
 
-### Успешный ответ
+### Successful Response
 ```json
 {
   "success": true,
@@ -239,16 +239,16 @@ Authorization: Bearer <token>
 }
 ```
 
-### Ошибка
+### Error
 ```json
 {
   "success": false,
-  "message": "Описание ошибки",
+  "message": "Error description",
   "statusCode": 400
 }
 ```
 
-### Пагинация
+### Pagination
 ```json
 {
   "data": [...],
@@ -259,13 +259,13 @@ Authorization: Bearer <token>
 }
 ```
 
-## Аутентификация
+## Authentication
 
-Все API (кроме аутентификации) требуют JWT токен в заголовке:
+All APIs (except authentication) require a JWT token in the header:
 ```
 Authorization: Bearer <your-jwt-token>
 ```
 
-## Загрузка файлов
+## File Upload
 
-Для загрузки изображений используйте `multipart/form-data` с полем `face`.
+To upload images, use `multipart/form-data` with the `face` field.

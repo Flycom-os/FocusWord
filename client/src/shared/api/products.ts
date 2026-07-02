@@ -9,7 +9,7 @@ export interface ProductDto {
   description?: string | null;
   price: number;
   categoryId?: number | null;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +20,7 @@ export interface ProductCategoryDto {
   slug: string;
   description?: string | null;
   parentId?: number | null;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
@@ -30,7 +30,7 @@ export interface CreateProductCategoryDto {
   slug: string;
   description?: string;
   parentId?: number;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export interface UpdateProductCategoryDto {
@@ -38,7 +38,7 @@ export interface UpdateProductCategoryDto {
   slug?: string;
   description?: string;
   parentId?: number;
-  status?: 'active' | 'inactive';
+  status?: "active" | "inactive";
 }
 
 export interface PaginatedProductCategoriesResponse {
@@ -48,22 +48,29 @@ export interface PaginatedProductCategoriesResponse {
   limit: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const productsApi = {
   // === КАТЕГОРИИ ТОВАРОВ ===
   // Получить все категории товаров
-  getCategories: async (token: string | null, page = 1, limit = 10, search = ''): Promise<PaginatedProductCategoriesResponse> => {
+  getCategories: async (
+    token: string | null,
+    page = 1,
+    limit = 10,
+    search = "",
+  ): Promise<PaginatedProductCategoriesResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
-      ...(search && { search })
+      ...(search && { search }),
     });
-    
-    const { data } = await axios.get<PaginatedProductCategoriesResponse>(`${API_URL}/product-categories?${params}`, {
-      headers: authHeaders(token),
-    });
+
+    const { data } = await axios.get<PaginatedProductCategoriesResponse>(
+      `${API_URL}/product-categories?${params}`,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -76,18 +83,33 @@ export const productsApi = {
   },
 
   // Создать категорию товара
-  createCategory: async (token: string | null, data: CreateProductCategoryDto): Promise<ProductCategoryDto> => {
-    const { data: result } = await axios.post<ProductCategoryDto>(`${API_URL}/product-categories`, data, {
-      headers: authHeaders(token),
-    });
+  createCategory: async (
+    token: string | null,
+    data: CreateProductCategoryDto,
+  ): Promise<ProductCategoryDto> => {
+    const { data: result } = await axios.post<ProductCategoryDto>(
+      `${API_URL}/product-categories`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
   // Обновить категорию товара
-  updateCategory: async (token: string | null, id: number, data: UpdateProductCategoryDto): Promise<ProductCategoryDto> => {
-    const { data: result } = await axios.put<ProductCategoryDto>(`${API_URL}/product-categories/${id}`, data, {
-      headers: authHeaders(token),
-    });
+  updateCategory: async (
+    token: string | null,
+    id: number,
+    data: UpdateProductCategoryDto,
+  ): Promise<ProductCategoryDto> => {
+    const { data: result } = await axios.put<ProductCategoryDto>(
+      `${API_URL}/product-categories/${id}`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 

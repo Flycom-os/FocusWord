@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import styles from './PageSlider.module.css';
+import React, { useEffect, useState } from "react";
+import styles from "./PageSlider.module.css";
 
 export interface PageSliderProps {
   slider?: {
@@ -66,10 +66,10 @@ const PageSlider: React.FC<PageSliderProps> = ({
   };
 
   const getImageUrl = (filepath: string): string => {
-    if (filepath.startsWith('http')) {
+    if (filepath.startsWith("http")) {
       return filepath;
     }
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1331';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
     return `${API_URL}/uploads/${filepath}`;
   };
 
@@ -81,7 +81,7 @@ const PageSlider: React.FC<PageSliderProps> = ({
         {slides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`${styles.slide} ${index === currentSlide ? styles.slideActive : ''}`}
+            className={`${styles.slide} ${index === currentSlide ? styles.slideActive : ""}`}
           >
             {slide.image ? (
               <img
@@ -100,7 +100,12 @@ const PageSlider: React.FC<PageSliderProps> = ({
                   <p className={styles.slideDescription}>{slide.description}</p>
                 )}
                 {slide.linkUrl && (
-                  <a href={slide.linkUrl} className={styles.slideLink} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={slide.linkUrl}
+                    className={styles.slideLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Подробнее →
                   </a>
                 )}
@@ -112,18 +117,10 @@ const PageSlider: React.FC<PageSliderProps> = ({
 
       {showArrows && slides.length > 1 && (
         <>
-          <button
-            className={styles.arrowPrev}
-            onClick={prevSlide}
-            aria-label="Предыдущий слайд"
-          >
+          <button className={styles.arrowPrev} onClick={prevSlide} aria-label="Предыдущий слайд">
             ←
           </button>
-          <button
-            className={styles.arrowNext}
-            onClick={nextSlide}
-            aria-label="Следующий слайд"
-          >
+          <button className={styles.arrowNext} onClick={nextSlide} aria-label="Следующий слайд">
             →
           </button>
         </>
@@ -134,7 +131,7 @@ const PageSlider: React.FC<PageSliderProps> = ({
           {slides.map((_, index) => (
             <button
               key={index}
-              className={`${styles.dot} ${index === currentSlide ? styles.dotActive : ''}`}
+              className={`${styles.dot} ${index === currentSlide ? styles.dotActive : ""}`}
               onClick={() => goToSlide(index)}
               aria-label={`Перейти к слайду ${index + 1}`}
             />

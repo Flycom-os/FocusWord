@@ -24,6 +24,12 @@
   background: #efeaf9;
   border-radius: 6px;
   overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.progressWrap:hover {
+  background: #e8e3f7;
 }
 .progress {
   height: 100%;

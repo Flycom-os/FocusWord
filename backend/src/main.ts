@@ -10,28 +10,15 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: (origin, callback) => {
-        if (!origin) {
-          callback(null, true);
-          return;
-        }
-
-        const allowed = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
-        if (allowed) {
-          callback(null, true);
-          return;
-        }
-
-        callback(new Error(`CORS blocked for origin: ${origin}`), false);
-      },
+      origin: true,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     },});
   const config = new DocumentBuilder()
     .setTitle('API documentation')
-    .setDescription('API requests for FocusWord 2.0')
-    .setVersion('2.0')
+    .setDescription('API requests for FocusWord 2.1')
+    .setVersion('2.1')
     .addTag('Auth')
     .addBearerAuth()
     .build();
@@ -40,7 +27,7 @@ async function bootstrap() {
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
   });
-  // Статическая раздача файлов из backend/uploads
+  // Static file serving from backend/uploads
   app.useStaticAssets(join(process.cwd(), 'backend', 'uploads'), {
     prefix: '/backend/uploads',
   });

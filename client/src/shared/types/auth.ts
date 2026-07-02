@@ -1,4 +1,4 @@
-export type PermissionString = string; // формат: "mediafiles:0", "pages:2" и т.п.
+export type PermissionString = string; // формат: "media-files:0", "pages:2" и т.п.
 
 export interface RoleDto {
   id: number;
@@ -12,6 +12,7 @@ export interface AuthUser {
   username?: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  avatarUrl?: string | null;
   role?: RoleDto | null;
 }
 
@@ -21,5 +22,3 @@ export interface AuthResponse {
   access_token: string;
   refreash_token: string;
 }
-
-

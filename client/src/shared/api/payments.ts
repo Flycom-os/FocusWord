@@ -20,7 +20,7 @@ export interface PaymentMethodDto {
   slug: string;
   description?: string | null;
   isEnabled: boolean;
-  type: 'card' | 'bank' | 'crypto' | 'other';
+  type: "card" | "bank" | "crypto" | "other";
   createdAt: string;
   updatedAt: string;
   paymentGatewayId?: number | null;
@@ -49,7 +49,7 @@ export interface CreatePaymentMethodDto {
   slug: string;
   description?: string;
   isEnabled?: boolean;
-  type?: 'card' | 'bank' | 'crypto' | 'other';
+  type?: "card" | "bank" | "crypto" | "other";
   paymentGatewayId?: number;
 }
 
@@ -58,7 +58,7 @@ export interface UpdatePaymentMethodDto {
   slug?: string;
   description?: string;
   isEnabled?: boolean;
-  type?: 'card' | 'bank' | 'crypto' | 'other';
+  type?: "card" | "bank" | "crypto" | "other";
   paymentGatewayId?: number;
 }
 
@@ -76,8 +76,7 @@ export interface PaginatedPaymentMethodsResponse {
   limit: number;
 }
 
-const authHeaders = (token: string | null) =>
-  token ? { Authorization: `Bearer ${token}` } : {};
+const authHeaders = (token: string | null) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 export const paymentsApi = {
   // === ПЛАТЕЖНЫЕ ШЛЮЗЫ ===
@@ -98,18 +97,33 @@ export const paymentsApi = {
   },
 
   // Создать платежный шлюз
-  createGateway: async (token: string | null, data: CreatePaymentGatewayDto): Promise<PaymentGatewayDto> => {
-    const { data: result } = await axios.post<PaymentGatewayDto>(`${API_URL}/payment-gateways`, data, {
-      headers: authHeaders(token),
-    });
+  createGateway: async (
+    token: string | null,
+    data: CreatePaymentGatewayDto,
+  ): Promise<PaymentGatewayDto> => {
+    const { data: result } = await axios.post<PaymentGatewayDto>(
+      `${API_URL}/payment-gateways`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
   // Обновить платежный шлюз
-  updateGateway: async (token: string | null, id: number, data: UpdatePaymentGatewayDto): Promise<PaymentGatewayDto> => {
-    const { data: result } = await axios.put<PaymentGatewayDto>(`${API_URL}/payment-gateways/${id}`, data, {
-      headers: authHeaders(token),
-    });
+  updateGateway: async (
+    token: string | null,
+    id: number,
+    data: UpdatePaymentGatewayDto,
+  ): Promise<PaymentGatewayDto> => {
+    const { data: result } = await axios.put<PaymentGatewayDto>(
+      `${API_URL}/payment-gateways/${id}`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
@@ -121,10 +135,18 @@ export const paymentsApi = {
   },
 
   // Включить/выключить шлюз
-  toggleGateway: async (token: string | null, id: number, isEnabled: boolean): Promise<PaymentGatewayDto> => {
-    const { data } = await axios.patch<PaymentGatewayDto>(`${API_URL}/payment-gateways/${id}/toggle`, { isEnabled }, {
-      headers: authHeaders(token),
-    });
+  toggleGateway: async (
+    token: string | null,
+    id: number,
+    isEnabled: boolean,
+  ): Promise<PaymentGatewayDto> => {
+    const { data } = await axios.patch<PaymentGatewayDto>(
+      `${API_URL}/payment-gateways/${id}/toggle`,
+      { isEnabled },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
   },
 
@@ -146,18 +168,33 @@ export const paymentsApi = {
   },
 
   // Создать платежный метод
-  createMethod: async (token: string | null, data: CreatePaymentMethodDto): Promise<PaymentMethodDto> => {
-    const { data: result } = await axios.post<PaymentMethodDto>(`${API_URL}/payment-methods`, data, {
-      headers: authHeaders(token),
-    });
+  createMethod: async (
+    token: string | null,
+    data: CreatePaymentMethodDto,
+  ): Promise<PaymentMethodDto> => {
+    const { data: result } = await axios.post<PaymentMethodDto>(
+      `${API_URL}/payment-methods`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
   // Обновить платежный метод
-  updateMethod: async (token: string | null, id: number, data: UpdatePaymentMethodDto): Promise<PaymentMethodDto> => {
-    const { data: result } = await axios.put<PaymentMethodDto>(`${API_URL}/payment-methods/${id}`, data, {
-      headers: authHeaders(token),
-    });
+  updateMethod: async (
+    token: string | null,
+    id: number,
+    data: UpdatePaymentMethodDto,
+  ): Promise<PaymentMethodDto> => {
+    const { data: result } = await axios.put<PaymentMethodDto>(
+      `${API_URL}/payment-methods/${id}`,
+      data,
+      {
+        headers: authHeaders(token),
+      },
+    );
     return result;
   },
 
@@ -169,11 +206,33 @@ export const paymentsApi = {
   },
 
   // Включить/выключить метод
-  toggleMethod: async (token: string | null, id: number, isEnabled: boolean): Promise<PaymentMethodDto> => {
-    const { data } = await axios.patch<PaymentMethodDto>(`${API_URL}/payment-methods/${id}/toggle`, { isEnabled }, {
-      headers: authHeaders(token),
-    });
+  toggleMethod: async (
+    token: string | null,
+    id: number,
+    isEnabled: boolean,
+  ): Promise<PaymentMethodDto> => {
+    const { data } = await axios.patch<PaymentMethodDto>(
+      `${API_URL}/payment-methods/${id}/toggle`,
+      { isEnabled },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return data;
+  },
+
+  // Создать платеж ЮMoney
+  createYooMoneyPayment: async (data: {
+    amount: number;
+    description: string;
+    email: string;
+    name?: string;
+  }): Promise<{ success: boolean; redirectUrl: string }> => {
+    const { data: result } = await axios.post<{ success: boolean; redirectUrl: string }>(
+      `${API_URL}/payments/yoomoney/create`,
+      data,
+    );
+    return result;
   },
 };
 
@@ -190,3 +249,4 @@ export const createPaymentMethod = paymentsApi.createMethod;
 export const updatePaymentMethod = paymentsApi.updateMethod;
 export const deletePaymentMethod = paymentsApi.deleteMethod;
 export const togglePaymentMethod = paymentsApi.toggleMethod;
+export const createYooMoneyPayment = paymentsApi.createYooMoneyPayment;

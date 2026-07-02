@@ -1,14 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Input from '@/src/shared/ui/Input/ui-input';
-import Button from '@/src/shared/ui/Button/ui-button';
-import { fetchComments, updateComment, deleteComment, changeCommentStatus } from '@/src/shared/api/comments';
-import { showToast } from '@/src/shared/ui/Notifications/ui-notifications';
-import { useAuth } from '@/src/app/providers/auth-provider';
-import { Pagination, Modal, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/src/shared/ui';
-import styles from './comments.module.css';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Input from "@/src/shared/ui/Input/ui-input";
+import Button from "@/src/shared/ui/Button/ui-button";
+import {
+  fetchComments,
+  updateComment,
+  deleteComment,
+  changeCommentStatus,
+} from "@/src/shared/api/comments";
+import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import { useAuth } from "@/src/app/providers/auth-provider";
+import {
+  Pagination,
+  Modal,
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/src/shared/ui";
+import styles from "./comments.module.css";
 
 export default function CommentsPage() {
   const router = useRouter();
@@ -16,13 +30,15 @@ export default function CommentsPage() {
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">(
+    "all",
+  );
   const [showModal, setShowModal] = useState(false);
   const [editingComment, setEditingComment] = useState<any>(null);
   const [form, setForm] = useState({
-    content: '',
-    status: 'pending' as 'pending' | 'approved' | 'rejected'
+    content: "",
+    status: "pending" as "pending" | "approved" | "rejected",
   });
 
   useEffect(() => {
@@ -36,12 +52,12 @@ export default function CommentsPage() {
         page: pagination.page,
         limit: pagination.limit,
         search,
-        status: statusFilter === 'all' ? undefined : statusFilter
+        status: statusFilter === "all" ? undefined : statusFilter,
       });
       setComments(response.data);
-      setPagination(prev => ({ ...prev, total: response.total }));
+      setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast('Ошибка при загрузке комментариев', 'error');
+      showToast("Error loading comments", "error");
     } finally {
       setLoading(false);
     }
@@ -51,7 +67,7 @@ export default function CommentsPage() {
     setEditingComment(comment);
     setForm({
       content: comment.content,
-      status: comment.status
+      status: comment.status,
     });
     setShowModal(true);
   };
@@ -59,51 +75,59 @@ export default function CommentsPage() {
   const handleSave = async () => {
     try {
       await updateComment(accessToken, editingComment.id, form);
-      showToast('Комментарий обновлен', 'success');
+      showToast("Comment updated", "success");
       setShowModal(false);
       loadComments();
     } catch (error) {
-      showToast('Ошибка при сохранении комментария', 'error');
+      showToast("Error saving comment", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('Вы уверены что хотите удалить этот комментарий?')) {
+    if (confirm("Are you sure you want to delete this comment?")) {
       try {
         await deleteComment(accessToken, id);
-        showToast('Комментарий удален', 'success');
+        showToast("Comment deleted", "success");
         loadComments();
       } catch (error) {
-        showToast('Ошибка при удалении комментария', 'error');
+        showToast("Error deleting comment", "error");
       }
     }
   };
 
-  const handleStatusChange = async (id: number, status: 'pending' | 'approved' | 'rejected') => {
+  const handleStatusChange = async (id: number, status: "pending" | "approved" | "rejected") => {
     try {
       await changeCommentStatus(accessToken, id, status);
-      showToast('Статус изменен', 'success');
+      showToast("Status changed", "success");
       loadComments();
     } catch (error) {
-      showToast('Ошибка при изменении статуса', 'error');
+      showToast("Error changing status", "error");
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return styles.approved;
-      case 'rejected': return styles.rejected;
-      case 'pending': return styles.pending;
-      default: return styles.pending;
+      case "approved":
+        return styles.approved;
+      case "rejected":
+        return styles.rejected;
+      case "pending":
+        return styles.pending;
+      default:
+        return styles.pending;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'approved': return 'Одобрен';
-      case 'rejected': return 'Отклонен';
-      case 'pending': return 'В ожидании';
-      default: return status;
+      case "approved":
+        return "Approved";
+      case "rejected":
+        return "Rejected";
+      case "pending":
+        return "Pending";
+      default:
+        return status;
     }
   };
 
@@ -114,14 +138,14 @@ export default function CommentsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Комментарии</h1>
-        <p>Управление комментариями пользователей</p>
+        <h1>Comments</h1>
+        <p>Manage user comments</p>
       </div>
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
           <Input
-            placeholder="Поиск комментариев..."
+            placeholder="Search comments..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.search}
@@ -131,26 +155,26 @@ export default function CommentsPage() {
             onChange={(e) => setStatusFilter(e.target.value as any)}
             className={styles.select}
           >
-            <option value="all">Все статусы</option>
-            <option value="pending">В ожидании</option>
-            <option value="approved">Одобренные</option>
-            <option value="rejected">Отклоненные</option>
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}>Loading...</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Автор</TableHead>
-                <TableHead>Комментарий</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Дата</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead>Author</TableHead>
+                <TableHead>Comment</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,16 +182,14 @@ export default function CommentsPage() {
                 <TableRow key={comment.id}>
                   <TableCell>
                     <div className={styles.author}>
-                      {comment.authorName || 'Аноним'}
+                      {comment.authorName || "Anonymous"}
                       {comment.authorEmail && (
                         <div className={styles.email}>{comment.authorEmail}</div>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className={styles.commentContent}>
-                      {truncateText(comment.content)}
-                    </div>
+                    <div className={styles.commentContent}>{truncateText(comment.content)}</div>
                   </TableCell>
                   <TableCell>
                     <span className={`${styles.status} ${getStatusColor(comment.status)}`}>
@@ -177,23 +199,20 @@ export default function CommentsPage() {
                   <TableCell>{new Date(comment.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button
-                        onClick={() => handleEdit(comment)}
-                        className={styles.editButton}
-                      >
+                      <Button onClick={() => handleEdit(comment)} className={styles.editButton}>
                         ✏️
                       </Button>
                       <Button
-                        onClick={() => handleStatusChange(comment.id, 'approved')}
+                        onClick={() => handleStatusChange(comment.id, "approved")}
                         className={styles.approveButton}
-                        title="Одобрить"
+                        title="Approve"
                       >
                         ✅
                       </Button>
                       <Button
-                        onClick={() => handleStatusChange(comment.id, 'rejected')}
+                        onClick={() => handleStatusChange(comment.id, "rejected")}
                         className={styles.rejectButton}
-                        title="Отклонить"
+                        title="Reject"
                       >
                         ❌
                       </Button>
@@ -218,50 +237,43 @@ export default function CommentsPage() {
             page={pagination.page}
             total={pagination.total}
             perPage={pagination.limit}
-            onChange={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
           />
         </div>
       )}
 
-      <Modal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        title="Редактировать комментарий"
-      >
+      <Modal open={showModal} onClose={() => setShowModal(false)} title="Edit comment">
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Содержимое</label>
+            <label>Content</label>
             <textarea
               value={form.content}
-              onChange={(e) => setForm(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Текст комментария"
+              onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+              placeholder="Comment text"
               className={styles.textarea}
               rows={6}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Статус</label>
+            <label>Status</label>
             <select
               value={form.status}
-              onChange={(e) => setForm(prev => ({ ...prev, status: e.target.value as any }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as any }))}
               className={styles.select}
             >
-              <option value="pending">В ожидании</option>
-              <option value="approved">Одобрен</option>
-              <option value="rejected">Отклонен</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 
           <div className={styles.modalActions}>
             <Button onClick={handleSave} className={styles.saveButton}>
-              Сохранить
+              Save
             </Button>
-            <Button
-              onClick={() => setShowModal(false)}
-              className={styles.cancelButton}
-            >
-              Отмена
+            <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
+              Cancel
             </Button>
           </div>
         </div>
