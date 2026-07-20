@@ -34,23 +34,23 @@ const ProductCategoriesPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
+  const { accessToken } = useAuth();
 
   const loadCategories = async () => {
     try {
-      // @ts-ignore
-      const data = await productsApi.getCategories();
-      // @ts-ignore
-      setCategories(data);
+      const res = await productsApi.getCategories(accessToken, 1, 1000);
+      const items = res && res.data ? res.data : (res as any) || [];
+      setCategories(items);
     } catch (error) {
       console.error("Failed to load categories:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadCategories();
+  }, [accessToken]);
 
   const toggleExpanded = (categoryId: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -70,8 +70,7 @@ const ProductCategoriesPage = () => {
   const confirmDelete = async () => {
     if (selectedCategory) {
       try {
-        // @ts-ignore
-        await productsApi.deleteCategory(selectedCategory.id);
+        await productsApi.deleteCategory(accessToken, selectedCategory.id);
         await loadCategories();
         setShowDeleteModal(false);
         setSelectedCategory(null);
@@ -145,15 +144,15 @@ const ProductCategoriesPage = () => {
       <div className={styles.statsContainer}>
         <div className={styles.statCard}>
           <h3>Total Categories</h3>
-          <p className={styles.statValue}>{categories.length}</p>
+          <p className={styles.statValue}>{Array.isArray(categories) ? categories.length : 0}</p>
         </div>
         <div className={styles.statCard}>
           <h3>Parent Categories</h3>
-          <p className={styles.statValue}>{categories.filter((cat) => !cat.parentId).length}</p>
+          <p className={styles.statValue}>{(Array.isArray(categories) ? categories : []).filter((cat) => !cat.parentId).length}</p>
         </div>
         <div className={styles.statCard}>
           <h3>Subcategories</h3>
-          <p className={styles.statValue}>{categories.filter((cat) => cat.parentId).length}</p>
+          <p className={styles.statValue}>{(Array.isArray(categories) ? categories : []).filter((cat) => cat.parentId).length}</p>
         </div>
       </div>
 
@@ -169,7 +168,7 @@ const ProductCategoriesPage = () => {
             </tr>
           </thead>
           <tbody>
-            {categories
+            {(Array.isArray(categories) ? categories : [])
               .filter((category) => !category.parentId)
               .map((category) => renderCategory(category))}
           </tbody>

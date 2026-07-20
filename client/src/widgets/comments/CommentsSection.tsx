@@ -50,7 +50,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
     if (!content.trim()) return;
 
     if (!user && (!authorName.trim() || !authorEmail.trim())) {
-      showToast("Пожалуйста, заполните имя и email", "error");
+      showToast("Please fill in your name and email", "error");
       return;
     }
 
@@ -58,7 +58,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
       setSubmitting(true);
       await commentsApi.create({
         content,
-        authorName: user ? user.username || "Пользователь" : authorName,
+        authorName: user ? user.username || "User" : authorName,
         authorEmail: user ? user.email : authorEmail,
         postId,
         blogPostId,
@@ -71,8 +71,8 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         setAuthorEmail("");
       }
 
-      setSubmittedMessage("Ваш комментарий отправлен и появится после проверки модератором.");
-      showToast("Комментарий отправлен на модерацию", "success");
+      setSubmittedMessage("Your comment has been submitted and will appear after moderation check.");
+      showToast("Comment submitted for moderation", "success");
 
       // Auto-clear message after 5 seconds
       setTimeout(() => setSubmittedMessage(""), 7000);
@@ -80,7 +80,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
       // Reload comments in case some auto-approval is active, or just to keep state clean
       loadComments();
     } catch (error) {
-      showToast("Не удалось отправить комментарий", "error");
+      showToast("Failed to submit comment", "error");
     } finally {
       setSubmitting(false);
     }
@@ -89,14 +89,14 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
   return (
     <div className="mt-12 border-t border-gray-100 pt-8 max-w-3xl mx-auto">
       <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        💬 Комментарии ({comments.length})
+        💬 Comments ({comments.length})
       </h3>
 
       {/* List of comments */}
       {loading ? (
-        <div className="flex justify-center py-6 text-gray-500">Загрузка комментариев...</div>
+        <div className="flex justify-center py-6 text-gray-500">Loading comments...</div>
       ) : comments.length === 0 ? (
-        <p className="text-gray-500 italic mb-8">Комментариев пока нет. Будьте первым!</p>
+        <p className="text-gray-500 italic mb-8">No comments yet. Be the first to comment!</p>
       ) : (
         <div className="space-y-4 mb-8">
           {comments.map((comment) => (
@@ -106,10 +106,10 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
             >
               <div className="flex justify-between items-center mb-2">
                 <span className="font-semibold text-gray-800 text-sm">
-                  {comment.authorName || (comment.author && comment.author.username) || "Аноним"}
+                  {comment.authorName || (comment.author && comment.author.username) || "Anonymous"}
                 </span>
                 <span className="text-xs text-gray-400">
-                  {new Date(comment.createdAt).toLocaleDateString("ru-RU", {
+                  {new Date(comment.createdAt).toLocaleDateString("en-US", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -129,7 +129,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         onSubmit={handleSubmit}
         className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4"
       >
-        <h4 className="font-semibold text-gray-800 text-base">Оставить комментарий</h4>
+        <h4 className="font-semibold text-gray-800 text-base">Leave a comment</h4>
 
         {submittedMessage && (
           <div className="p-3 bg-emerald-50 text-emerald-800 text-xs rounded-lg border border-emerald-100">
@@ -140,19 +140,19 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         {!user && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Ваше Имя</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Your Name</label>
               <input
                 type="text"
                 required
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
                 className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                placeholder="Иван Иванов"
+                placeholder="John Doe"
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                Email (не публикуется)
+                Email (not published)
               </label>
               <input
                 type="email"
@@ -168,20 +168,20 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
 
         {user && (
           <div className="text-xs text-gray-500 flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg w-max">
-            👤 Вы авторизованы как{" "}
+            👤 You are logged in as{" "}
             <span className="font-semibold text-gray-700">{user.username || user.email}</span>
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Текст комментария</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Comment Text</label>
           <textarea
             required
             rows={4}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-            placeholder="Напишите здесь ваше мнение..."
+            placeholder="Write your comment here..."
           />
         </div>
 
@@ -190,7 +190,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
           disabled={submitting}
           className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-5 py-2.5 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
         >
-          {submitting ? "Отправка..." : "Отправить комментарий"}
+          {submitting ? "Submitting..." : "Submit Comment"}
         </button>
       </form>
     </div>

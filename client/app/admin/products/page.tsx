@@ -39,7 +39,8 @@ const ProductsPage = () => {
 
   const loadProducts = async () => {
     try {
-      const data = await productsApi.getProducts();
+      const res = await productsApi.getProducts();
+      const data = res && res.data ? res.data : res || [];
       setProducts(data);
     } catch (error) {
       console.error("Failed to load products:", error);
@@ -201,7 +202,7 @@ const ProductsPage = () => {
     }
   };
 
-  const filteredProducts = products.filter(
+  const filteredProducts = (Array.isArray(products) ? products : []).filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()),

@@ -34,7 +34,7 @@ export default function SEOPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p>Проверка прав доступа...</p>
+          <p>Checking access rights...</p>
         </div>
       </div>
     );
@@ -42,10 +42,10 @@ export default function SEOPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">SEO Управление</h1>
+      <h1 className="text-2xl font-bold mb-6">SEO Management</h1>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Настройки SEO</h2>
+        <h2 className="text-lg font-semibold mb-4">SEO Settings</h2>
 
         <div className="space-y-4">
           <div>
@@ -53,7 +53,7 @@ export default function SEOPage() {
             <input
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Введите meta title"
+              placeholder="Enter meta title"
             />
           </div>
 
@@ -62,7 +62,7 @@ export default function SEOPage() {
             <textarea
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={4}
-              placeholder="Введите meta description"
+              placeholder="Enter meta description"
             />
           </div>
 
@@ -71,14 +71,14 @@ export default function SEOPage() {
             <input
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Введите ключевые слова через запятую"
+              placeholder="Enter keywords separated by commas"
             />
           </div>
         </div>
 
         <div className="mt-6">
           <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-            Сохранить настройки
+            Save Settings
           </button>
         </div>
       </div>

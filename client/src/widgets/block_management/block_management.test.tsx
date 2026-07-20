@@ -9,39 +9,39 @@ describe("BlockManagement component", () => {
   it("renders primary and secondary type correctly", () => {
     render(<BlockManagement type="primary" />);
 
-    // Проверяем, что отображаются кнопки для 'primary'
-    expect(screen.getByText("Выбранно: 2")).toBeInTheDocument();
+    // Check that buttons for 'primary' are displayed
+    expect(screen.getByText("Selected: 2")).toBeInTheDocument();
   });
 
   it("renders secondary type correctly", () => {
     render(<BlockManagement type="secondary" />);
 
-    // Проверяем, что отображаются кнопки для 'secondary'
-    expect(screen.getByText("Открыть оригинал")).toBeInTheDocument();
-    expect(screen.getByText("Открыть миниатюру")).toBeInTheDocument();
-    expect(screen.getByText("Редактировать")).toBeInTheDocument();
+    // Check that buttons for 'secondary' are displayed
+    expect(screen.getByText("Open Original")).toBeInTheDocument();
+    expect(screen.getByText("Open Thumbnail")).toBeInTheDocument();
+    expect(screen.getByText("Edit")).toBeInTheDocument();
 
-    // Проверяем наличие кнопки удаления
-    expect(screen.getByText("Удалить")).toBeInTheDocument();
+    // Check if delete button is present
+    expect(screen.getByText("Delete")).toBeInTheDocument();
   });
 
   it("renders third type correctly", () => {
     render(<BlockManagement type="third" />);
 
-    // Проверяем, что отображаются кнопки для 'third'
-    expect(screen.getByText("Файл")).toBeInTheDocument();
-    expect(screen.getByText("Автор")).toBeInTheDocument();
-    expect(screen.getByText("Дата")).toBeInTheDocument();
+    // Check that buttons for 'third' are displayed
+    expect(screen.getByText("File")).toBeInTheDocument();
+    expect(screen.getByText("Author")).toBeInTheDocument();
+    expect(screen.getByText("Date")).toBeInTheDocument();
 
-    // Проверяем наличие кнопки "Добавить"
-    expect(screen.getByText("Добавить")).toBeInTheDocument();
+    // Check if "Add" button is present
+    expect(screen.getByText("Add")).toBeInTheDocument();
   });
 
   it("renders default (empty) state correctly", () => {
     render(<BlockManagement />);
 
-    // Проверяем, что отображается только кнопка "Добавить"
-    expect(screen.getByText("Добавить")).toBeInTheDocument();
+    // Check that only "Add" button is displayed
+    expect(screen.getByText("Add")).toBeInTheDocument();
   });
 
   it("calls the 'close' button action", () => {
@@ -49,20 +49,20 @@ describe("BlockManagement component", () => {
 
     render(<BlockManagement type="primary" />);
 
-    // Кликаем по кнопке закрытия
+    // Click on the close button
     // screen.getByRole("button", { name: "close" }).click();
 
-    // Проверяем, что был вызван обработчик события
+    // Check that the event handler was called
     // expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
   it("renders the ChevronDown and Plus icons correctly", () => {
     render(<BlockManagement type="third" />);
 
-    // Проверяем наличие иконок ChevronDown и Plus
-    expect(screen.getByRole("button", { name: "Файл" }).querySelector("svg")).toBeInTheDocument();
+    // Check for ChevronDown and Plus icons
+    expect(screen.getByRole("button", { name: "File" }).querySelector("svg")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Добавить" }).querySelector("svg"),
+      screen.getByRole("button", { name: "Add" }).querySelector("svg"),
     ).toBeInTheDocument();
   });
 });
