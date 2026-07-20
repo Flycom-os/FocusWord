@@ -17,7 +17,10 @@ export class UpdateAnalyticsEntryDto {
   @IsOptional()
   bounceRate?: number;
 
-  @ApiProperty({ description: 'Average time spent on page in seconds', required: false })
+  @ApiProperty({
+    description: 'Average time spent on page in seconds',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   avgTimeOnPage?: number;

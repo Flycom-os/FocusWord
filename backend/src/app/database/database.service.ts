@@ -26,9 +26,31 @@ export class DatabaseService {
     const zip = new AdmZip();
 
     const models = [
-      'role', 'user', 'mediaFile', 'category', 'tag', 'slider', 'slide', 'menu', 'menuItem',
-      'page', 'post', 'record', 'blogPost', 'article', 'comment', 'paymentGateway', 'paymentMethod',
-      'analyticsEntry', 'referrerDetail', 'sEOSetting', 'structuredData', 'activityLog', 'setting', 'block', 'feedback'
+      'role',
+      'user',
+      'mediaFile',
+      'category',
+      'tag',
+      'slider',
+      'slide',
+      'menu',
+      'menuItem',
+      'page',
+      'post',
+      'record',
+      'blogPost',
+      'article',
+      'comment',
+      'paymentGateway',
+      'paymentMethod',
+      'analyticsEntry',
+      'referrerDetail',
+      'sEOSetting',
+      'structuredData',
+      'activityLog',
+      'setting',
+      'block',
+      'feedback',
     ];
 
     const dbData: Record<string, any[]> = {};
@@ -38,8 +60,11 @@ export class DatabaseService {
         dbData[model] = data;
       }
     }
-    
-    zip.addFile('database.json', Buffer.from(JSON.stringify(dbData, null, 2), 'utf8'));
+
+    zip.addFile(
+      'database.json',
+      Buffer.from(JSON.stringify(dbData, null, 2), 'utf8'),
+    );
 
     const uploadsDir = this.getUploadsDir();
     if (fs.existsSync(uploadsDir)) {
@@ -51,12 +76,12 @@ export class DatabaseService {
 
   async importDatabase(fileBuffer: Buffer): Promise<void> {
     const zip = new AdmZip(fileBuffer);
-    
+
     const dbEntry = zip.getEntry('database.json');
     if (dbEntry) {
       const dbDataStr = zip.readAsText(dbEntry);
       const dbData = JSON.parse(dbDataStr);
-      
+
       try {
         await this.prisma.$executeRawUnsafe(`
           DO $$ DECLARE
@@ -70,21 +95,49 @@ export class DatabaseService {
       } catch (err) {
         this.logger.error('Failed to truncate tables', err);
       }
-      
+
       const order = [
-        'role', 'user', 'mediaFile', 'category', 'tag', 'slider', 'slide', 'menu', 'menuItem',
-        'page', 'post', 'record', 'blogPost', 'article', 'comment', 'paymentGateway', 'paymentMethod',
-        'analyticsEntry', 'referrerDetail', 'sEOSetting', 'structuredData', 'activityLog', 'setting', 'block', 'feedback'
+        'role',
+        'user',
+        'mediaFile',
+        'category',
+        'tag',
+        'slider',
+        'slide',
+        'menu',
+        'menuItem',
+        'page',
+        'post',
+        'record',
+        'blogPost',
+        'article',
+        'comment',
+        'paymentGateway',
+        'paymentMethod',
+        'analyticsEntry',
+        'referrerDetail',
+        'sEOSetting',
+        'structuredData',
+        'activityLog',
+        'setting',
+        'block',
+        'feedback',
       ];
 
       for (const model of order) {
-        if (dbData[model] && dbData[model].length > 0 && (this.prisma as any)[model]) {
+        if (
+          dbData[model] &&
+          dbData[model].length > 0 &&
+          (this.prisma as any)[model]
+        ) {
           try {
             await (this.prisma as any)[model].createMany({
-              data: dbData[model]
+              data: dbData[model],
             });
             const tableName = model.charAt(0).toUpperCase() + model.slice(1);
-            await this.prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${tableName}"', 'id'), coalesce(max(id), 0) + 1, false) FROM "${tableName}";`);
+            await this.prisma.$executeRawUnsafe(
+              `SELECT setval(pg_get_serial_sequence('"${tableName}"', 'id'), coalesce(max(id), 0) + 1, false) FROM "${tableName}";`,
+            );
           } catch (e) {
             this.logger.error(`Error importing ${model}`, e);
           }
@@ -93,7 +146,7 @@ export class DatabaseService {
     }
 
     const uploadsDir = this.getUploadsDir();
-    zip.getEntries().forEach(entry => {
+    zip.getEntries().forEach((entry) => {
       if (entry.entryName.startsWith('uploads/')) {
         const relativePart = entry.entryName.substring('uploads/'.length);
         if (relativePart) {
@@ -106,6 +159,5 @@ export class DatabaseService {
         }
       }
     });
-
   }
 }

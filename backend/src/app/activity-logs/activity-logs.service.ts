@@ -30,7 +30,16 @@ export class ActivityLogsService {
   }
 
   async findAll(filterDto: ActivityLogFilterDto) {
-    const { page = 1, limit = 10, search, action, entityType, userId, startDate, endDate } = filterDto;
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      action,
+      entityType,
+      userId,
+      startDate,
+      endDate,
+    } = filterDto;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -132,33 +141,34 @@ export class ActivityLogsService {
       if (endDate) where.timestamp.lte = new Date(endDate);
     }
 
-    const [totalActions, actionsGrouped, usersGrouped, recentActions] = await Promise.all([
-      this.prisma.activityLog.count({ where }),
-      this.prisma.activityLog.groupBy({
-        by: ['action'],
-        where,
-        _count: { id: true },
-      }),
-      this.prisma.activityLog.groupBy({
-        by: ['userId'],
-        where: { ...where, NOT: { userId: null } },
-        _count: { id: true },
-      }),
-      this.prisma.activityLog.findMany({
-        where,
-        take: 10,
-        orderBy: { timestamp: 'desc' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              username: true,
+    const [totalActions, actionsGrouped, usersGrouped, recentActions] =
+      await Promise.all([
+        this.prisma.activityLog.count({ where }),
+        this.prisma.activityLog.groupBy({
+          by: ['action'],
+          where,
+          _count: { id: true },
+        }),
+        this.prisma.activityLog.groupBy({
+          by: ['userId'],
+          where: { ...where, NOT: { userId: null } },
+          _count: { id: true },
+        }),
+        this.prisma.activityLog.findMany({
+          where,
+          take: 10,
+          orderBy: { timestamp: 'desc' },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                username: true,
+              },
             },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
 
     // Map actionsByType
     const actionsByType: Record<string, number> = {};
@@ -167,14 +177,16 @@ export class ActivityLogsService {
     }
 
     // Map actionsByUser
-    const userIds = usersGrouped.map(g => g.userId).filter((id): id is number => id !== null);
+    const userIds = usersGrouped
+      .map((g) => g.userId)
+      .filter((id): id is number => id !== null);
     const users = await this.prisma.user.findMany({
       where: { id: { in: userIds } },
       select: { id: true, username: true, email: true },
     });
 
-    const actionsByUser = usersGrouped.map(g => {
-      const u = users.find(x => x.id === g.userId);
+    const actionsByUser = usersGrouped.map((g) => {
+      const u = users.find((x) => x.id === g.userId);
       return {
         userId: g.userId!,
         username: u?.username || u?.email || 'User',
@@ -195,7 +207,7 @@ export class ActivityLogsService {
       distinct: ['action'],
       select: { action: true },
     });
-    return actions.map(a => a.action);
+    return actions.map((a) => a.action);
   }
 
   async getEntityTypes(): Promise<string[]> {
@@ -204,6 +216,6 @@ export class ActivityLogsService {
       where: { NOT: { entityType: null } },
       select: { entityType: true },
     });
-    return types.map(t => t.entityType as string);
+    return types.map((t) => t.entityType as string);
   }
 }

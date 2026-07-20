@@ -1,10 +1,19 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { SettingsService } from './settings.service';
-import { JwtAuthGuard } from "../../jwt-auth.guard";
+import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateSettingDto } from "../../dto/settings/create-setting.dto";
-import { UpdateSettingDto } from "../../dto/settings/update-setting.dto";
-import { SearchSettingsDto } from "../../dto/settings/search-settings.dto";
+import { CreateSettingDto } from '../../dto/settings/create-setting.dto';
+import { UpdateSettingDto } from '../../dto/settings/update-setting.dto';
+import { SearchSettingsDto } from '../../dto/settings/search-settings.dto';
 
 @ApiTags('Settings')
 @ApiBearerAuth()
@@ -44,7 +53,10 @@ export class SettingsController {
     @Query('force') force?: string,
   ) {
     const forceFlag = force === 'true' || force === '1';
-    return this.settingsService.updateMultiple(updateSettingsDto.settings, forceFlag);
+    return this.settingsService.updateMultiple(
+      updateSettingsDto.settings,
+      forceFlag,
+    );
   }
 
   @Put(':key')

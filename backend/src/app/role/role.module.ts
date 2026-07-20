@@ -51,7 +51,7 @@ export class RoleModule implements OnModuleInit {
           'comments:2',
           'tags:2',
           'widgets:2',
-          'seo:2'
+          'seo:2',
         ],
       },
       {
@@ -79,7 +79,7 @@ export class RoleModule implements OnModuleInit {
           'comments:1',
           'tags:1',
           'widgets:1',
-          'seo:1'
+          'seo:1',
         ],
       },
       {
@@ -107,16 +107,13 @@ export class RoleModule implements OnModuleInit {
           'comments:0',
           'tags:0',
           'widgets:0',
-          'seo:0'
+          'seo:0',
         ],
       },
       {
         name: 'Guest',
         description: 'Guest role with read-only access to admin panel.',
-        permissions: [
-          'profiles:2',
-          'settings:2'
-        ],
+        permissions: ['profiles:2', 'settings:2'],
       },
     ];
 
@@ -127,17 +124,25 @@ export class RoleModule implements OnModuleInit {
 
       if (!existingRole) {
         await this.roleService.create(roleData);
-        this.logger.log(`Role "${roleData.name}" created with permissions: ${roleData.permissions.join(', ')}`);
+        this.logger.log(
+          `Role "${roleData.name}" created with permissions: ${roleData.permissions.join(', ')}`,
+        );
       } else {
         // Optionally update permissions if the existing role doesn't match
         const currentPermissions = existingRole.permissions.sort().join(',');
         const newPermissions = roleData.permissions.sort().join(',');
 
         if (currentPermissions !== newPermissions) {
-          await this.roleService.update(existingRole.id, { permissions: roleData.permissions });
-          this.logger.log(`Role "${roleData.name}" updated with new permissions: ${roleData.permissions.join(', ')}`);
+          await this.roleService.update(existingRole.id, {
+            permissions: roleData.permissions,
+          });
+          this.logger.log(
+            `Role "${roleData.name}" updated with new permissions: ${roleData.permissions.join(', ')}`,
+          );
         } else {
-          this.logger.log(`Role "${roleData.name}" already exists with correct permissions.`);
+          this.logger.log(
+            `Role "${roleData.name}" already exists with correct permissions.`,
+          );
         }
       }
     }

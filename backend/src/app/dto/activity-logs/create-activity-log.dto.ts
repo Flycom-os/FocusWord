@@ -7,12 +7,18 @@ export class CreateActivityLogDto {
   @IsNotEmpty()
   action: string;
 
-  @ApiProperty({ description: 'The type of the entity involved', required: false })
+  @ApiProperty({
+    description: 'The type of the entity involved',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   entityType?: string;
 
-  @ApiProperty({ description: 'The ID of the entity involved', required: false })
+  @ApiProperty({
+    description: 'The ID of the entity involved',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   entityId?: number;

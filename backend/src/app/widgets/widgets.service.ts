@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateWidgetDto } from '../dto/widgets/create-widget.dto';
 import { UpdateWidgetDto } from '../dto/widgets/update-widget.dto';
@@ -23,15 +27,18 @@ export class WidgetsService {
       where: { slug: createWidgetDto.slug },
     });
     if (existing) {
-      throw new BadRequestException(`Widget with slug "${createWidgetDto.slug}" already exists`);
+      throw new BadRequestException(
+        `Widget with slug "${createWidgetDto.slug}" already exists`,
+      );
     }
 
     const isActive = createWidgetDto.status === 'inactive' ? false : true;
 
     // Handle content blocks blocks or serialization if needed. Content can be string or JSON object.
-    const contentJson = typeof createWidgetDto.content === 'string' 
-      ? JSON.parse(createWidgetDto.content) 
-      : (createWidgetDto.content || []);
+    const contentJson =
+      typeof createWidgetDto.content === 'string'
+        ? JSON.parse(createWidgetDto.content)
+        : createWidgetDto.content || [];
 
     const block = await this.prisma.block.create({
       data: {
@@ -81,7 +88,7 @@ export class WidgetsService {
     ]);
 
     return {
-      data: data.map(item => this.mapToDto(item)),
+      data: data.map((item) => this.mapToDto(item)),
       total,
       page,
       limit,
@@ -110,28 +117,36 @@ export class WidgetsService {
 
     const updateData: any = {};
 
-    if (updateWidgetDto.name !== undefined) updateData.name = updateWidgetDto.name;
+    if (updateWidgetDto.name !== undefined)
+      updateData.name = updateWidgetDto.name;
     if (updateWidgetDto.slug !== undefined) {
       const existing = await this.prisma.block.findFirst({
         where: { slug: updateWidgetDto.slug, NOT: { id } },
       });
       if (existing) {
-        throw new BadRequestException(`Widget with slug "${updateWidgetDto.slug}" already exists`);
+        throw new BadRequestException(
+          `Widget with slug "${updateWidgetDto.slug}" already exists`,
+        );
       }
       updateData.slug = updateWidgetDto.slug;
     }
-    if (updateWidgetDto.type !== undefined) updateData.type = updateWidgetDto.type;
-    
+    if (updateWidgetDto.type !== undefined)
+      updateData.type = updateWidgetDto.type;
+
     if (updateWidgetDto.content !== undefined) {
-      updateData.content = typeof updateWidgetDto.content === 'string'
-        ? JSON.parse(updateWidgetDto.content)
-        : updateWidgetDto.content;
+      updateData.content =
+        typeof updateWidgetDto.content === 'string'
+          ? JSON.parse(updateWidgetDto.content)
+          : updateWidgetDto.content;
     }
-    
-    if (updateWidgetDto.config !== undefined) updateData.config = updateWidgetDto.config;
-    if (updateWidgetDto.position !== undefined) updateData.position = updateWidgetDto.position;
-    if (updateWidgetDto.description !== undefined) updateData.description = updateWidgetDto.description;
-    
+
+    if (updateWidgetDto.config !== undefined)
+      updateData.config = updateWidgetDto.config;
+    if (updateWidgetDto.position !== undefined)
+      updateData.position = updateWidgetDto.position;
+    if (updateWidgetDto.description !== undefined)
+      updateData.description = updateWidgetDto.description;
+
     if (updateWidgetDto.status !== undefined) {
       updateData.isActive = updateWidgetDto.status === 'active';
     }

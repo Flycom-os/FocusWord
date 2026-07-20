@@ -7,7 +7,7 @@ import { CreateSlideDto } from '../dto/sliders/create-slide.dto';
 import { UpdateSlideDto } from '../dto/sliders/update-slide.dto';
 import { QuerySliderDto, SortOrder } from '../dto/sliders/query-slider.dto';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 
 export interface PaginatedSliders {
   data: Slider[];
@@ -52,7 +52,9 @@ export class SlidersService {
       return JSON.parse(cachedSliders);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { page = 1, limit = 10, search, sortBy, sortOrder } = query;
     const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
     const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
@@ -68,9 +70,9 @@ export class SlidersService {
 
     const orderBy: Prisma.SliderOrderByWithRelationInput = {};
     if (sortBy) {
-        orderBy[sortBy] = sortOrder || SortOrder.DESC;
+      orderBy[sortBy] = sortOrder || SortOrder.DESC;
     } else {
-        orderBy.createdAt = SortOrder.DESC; // Default sort
+      orderBy.createdAt = SortOrder.DESC; // Default sort
     }
 
     const [data, total] = await this.prisma.$transaction([
@@ -120,7 +122,9 @@ export class SlidersService {
       return JSON.parse(cachedSlider);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const slider = await this.prisma.slider.findUnique({
       where: { id },
       include: {
@@ -145,7 +149,7 @@ export class SlidersService {
       data,
     });
     if (!slider) {
-        throw new NotFoundException(`Slider with ID ${id} not found`);
+      throw new NotFoundException(`Slider with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: slider_${id}`);
     await this.redisClient.del(`slider_${id}`);
@@ -160,7 +164,7 @@ export class SlidersService {
   async removeSlider(id: number): Promise<Slider> {
     const slider = await this.prisma.slider.delete({ where: { id } });
     if (!slider) {
-        throw new NotFoundException(`Slider with ID ${id} not found`);
+      throw new NotFoundException(`Slider with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: slider_${id}`);
     await this.redisClient.del(`slider_${id}`);
@@ -191,7 +195,9 @@ export class SlidersService {
       include: { image: true },
     });
 
-    this.logger.log(`[INVALIDATE] Deleting cache for key: 'slides_in_slider_${sliderId}'`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: 'slides_in_slider_${sliderId}'`,
+    );
     const keys = await this.redisClient.keys(`slides_${sliderId}_*`);
     if (keys.length > 0) {
       await this.redisClient.del(keys);
@@ -199,7 +205,10 @@ export class SlidersService {
     return newSlide;
   }
 
-  async findAllSlides(sliderId: number, query: QuerySliderDto): Promise<PaginatedSlides> {
+  async findAllSlides(
+    sliderId: number,
+    query: QuerySliderDto,
+  ): Promise<PaginatedSlides> {
     const cacheKey = `slides_${sliderId}_${JSON.stringify(query)}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedSlides = await this.redisClient.get(cacheKey);
@@ -209,7 +218,9 @@ export class SlidersService {
       return JSON.parse(cachedSlides);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { page = 1, limit = 10, search, sortBy, sortOrder } = query;
     const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
     const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
@@ -227,9 +238,9 @@ export class SlidersService {
 
     const orderBy: Prisma.SlideOrderByWithRelationInput = {};
     if (sortBy) {
-        orderBy[sortBy] = sortOrder || SortOrder.ASC;
+      orderBy[sortBy] = sortOrder || SortOrder.ASC;
     } else {
-        orderBy.sortOrder = SortOrder.ASC; // Default sort for slides
+      orderBy.sortOrder = SortOrder.ASC; // Default sort for slides
     }
 
     const [data, total] = await this.prisma.$transaction([
@@ -264,8 +275,10 @@ export class SlidersService {
       return JSON.parse(cachedSlide);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const slide = await this.prisma.slide.findUnique({ 
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
+    const slide = await this.prisma.slide.findUnique({
       where: { id },
       include: { image: true },
     });
@@ -285,11 +298,13 @@ export class SlidersService {
       include: { image: true },
     });
     if (!slide) {
-        throw new NotFoundException(`Slide with ID ${id} not found`);
+      throw new NotFoundException(`Slide with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: slide_${id}`);
     await this.redisClient.del(`slide_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: 'slides_in_slider_${slide.sliderId}'`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: 'slides_in_slider_${slide.sliderId}'`,
+    );
     const keys = await this.redisClient.keys(`slides_${slide.sliderId}_*`);
     if (keys.length > 0) {
       await this.redisClient.del(keys);
@@ -306,7 +321,9 @@ export class SlidersService {
 
     this.logger.log(`[INVALIDATE] Deleting cache for key: slide_${id}`);
     await this.redisClient.del(`slide_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: 'slides_in_slider_${slide.sliderId}'`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: 'slides_in_slider_${slide.sliderId}'`,
+    );
     const keys = await this.redisClient.keys(`slides_${slide.sliderId}_*`);
     if (keys.length > 0) {
       await this.redisClient.del(keys);

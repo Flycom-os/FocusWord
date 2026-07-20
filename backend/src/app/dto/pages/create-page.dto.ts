@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength, IsObject, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsInt,
+  MinLength,
+  IsObject,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -19,7 +28,11 @@ export class CreatePageDto {
   @IsNotEmpty()
   content: string;
 
-  @ApiProperty({ description: 'The status of the page (e.g., draft, published, pending)', required: false, default: 'draft' })
+  @ApiProperty({
+    description: 'The status of the page (e.g., draft, published, pending)',
+    required: false,
+    default: 'draft',
+  })
   @IsString()
   @IsOptional()
   status?: string;
@@ -34,7 +47,10 @@ export class CreatePageDto {
   @IsOptional()
   featuredImageId?: number;
 
-  @ApiProperty({ description: 'The ID of the featured slider', required: false })
+  @ApiProperty({
+    description: 'The ID of the featured slider',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   featuredSliderId?: number | null;
@@ -44,49 +60,75 @@ export class CreatePageDto {
   @IsOptional()
   seoTitle?: string;
 
-  @ApiProperty({ description: 'The SEO description for the page', required: false })
+  @ApiProperty({
+    description: 'The SEO description for the page',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   seoDescription?: string;
 
-  @ApiProperty({ description: 'Keywords for SEO', required: false, type: [String] })
+  @ApiProperty({
+    description: 'Keywords for SEO',
+    required: false,
+    type: [String],
+  })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   metaKeywords?: string[];
 
-  @ApiProperty({ 
-    description: 'Content blocks configuration - array of objects with type (slider|media|gallery), id, position', 
+  @ApiProperty({
+    description:
+      'Content blocks configuration - array of objects with type (slider|media|gallery), id, position',
     required: false,
     example: [{ type: 'slider', id: 1, position: 0 }],
-    type: 'array'
+    type: 'array',
   })
   @IsOptional()
   @Type(() => Object)
   contentBlocks?: Record<string, any>[] | null;
 
-  @ApiProperty({ description: 'The ID of the parent page for hierarchical structure', required: false })
+  @ApiProperty({
+    description: 'The ID of the parent page for hierarchical structure',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   parentPageId?: number;
 
-  @ApiProperty({ description: 'Page template name', required: false, default: 'default' })
+  @ApiProperty({
+    description: 'Page template name',
+    required: false,
+    default: 'default',
+  })
   @IsString()
   @IsOptional()
   template?: string;
 
-  @ApiProperty({ description: 'Category IDs to bind to the page', required: false, type: [Number] })
+  @ApiProperty({
+    description: 'Category IDs to bind to the page',
+    required: false,
+    type: [Number],
+  })
   @IsArray()
   @IsInt({ each: true })
   @IsOptional()
   categoryIds?: number[];
 
-  @ApiProperty({ description: 'Enable feedback framework on the page', required: false, default: true })
+  @ApiProperty({
+    description: 'Enable feedback framework on the page',
+    required: false,
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   enableFeedback?: boolean;
 
-  @ApiProperty({ description: 'The ID of the payment method to bind to the page', required: false })
+  @ApiProperty({
+    description: 'The ID of the payment method to bind to the page',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   paymentMethodId?: number | null;

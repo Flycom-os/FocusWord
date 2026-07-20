@@ -17,7 +17,9 @@ export class DomainService {
 
   async create(createDomainDto: CreateDomainDto): Promise<Domain> {
     // Generate a verification token
-    const verificationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const verificationToken =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
     return this.prisma.domain.create({
       data: {
         ...createDomainDto,
@@ -51,10 +53,18 @@ export class DomainService {
     if (!domain) {
       throw new Error('Domain not found.');
     }
-    if (!domain.verificationToken || !domain.dnsProviderType || !domain.dnsProviderCredentials) {
-      this.logger.warn(`Domain ${domain.name} (ID: ${id}) missing verification token, DNS provider type, or credentials for automated verification.`);
+    if (
+      !domain.verificationToken ||
+      !domain.dnsProviderType ||
+      !domain.dnsProviderCredentials
+    ) {
+      this.logger.warn(
+        `Domain ${domain.name} (ID: ${id}) missing verification token, DNS provider type, or credentials for automated verification.`,
+      );
       // In a real scenario, you'd provide instructions for manual verification or throw an error.
-      throw new Error('Automated verification not possible without DNS provider configuration.');
+      throw new Error(
+        'Automated verification not possible without DNS provider configuration.',
+      );
     }
 
     // Check TXT record for verification
@@ -70,7 +80,9 @@ export class DomainService {
         data: { status: DomainStatus.VERIFIED, isVerified: true },
       });
     } else {
-      throw new Error('Domain verification failed: TXT record not found or mismatched.');
+      throw new Error(
+        'Domain verification failed: TXT record not found or mismatched.',
+      );
     }
   }
 
@@ -86,11 +98,26 @@ export class DomainService {
     // Here you would call dnsProviderService methods to check MX, SPF, DKIM, DMARC
     // This is a placeholder for actual DNS record checks
     this.logger.log(`Checking DNS records for domain: ${domain.name}`);
-    const mxCheck = await this.dnsProviderService.checkMxRecords(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name);
-    const spfCheck = await this.dnsProviderService.checkSpfRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name);
-    const dkimCheck = await this.dnsProviderService.checkDkimRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name);
-    const dmarcCheck = await this.dnsProviderService.checkDmarcRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name);
-
+    const mxCheck = await this.dnsProviderService.checkMxRecords(
+      domain.dnsProviderType,
+      domain.dnsProviderCredentials as any,
+      domain.name,
+    );
+    const spfCheck = await this.dnsProviderService.checkSpfRecord(
+      domain.dnsProviderType,
+      domain.dnsProviderCredentials as any,
+      domain.name,
+    );
+    const dkimCheck = await this.dnsProviderService.checkDkimRecord(
+      domain.dnsProviderType,
+      domain.dnsProviderCredentials as any,
+      domain.name,
+    );
+    const dmarcCheck = await this.dnsProviderService.checkDmarcRecord(
+      domain.dnsProviderType,
+      domain.dnsProviderCredentials as any,
+      domain.name,
+    );
 
     return this.prisma.domain.update({
       where: { id },
@@ -100,37 +127,67 @@ export class DomainService {
         dkimRecordSet: dkimCheck,
         dmarcRecordSet: dmarcCheck,
         // Update status based on checks
-        status: (mxCheck && spfCheck && dkimCheck && dmarcCheck) ? DomainStatus.ACTIVE : DomainStatus.VERIFIED, // If all checks pass, it's active. Otherwise, still verified but records might be off.
+        status:
+          mxCheck && spfCheck && dkimCheck && dmarcCheck
+            ? DomainStatus.ACTIVE
+            : DomainStatus.VERIFIED, // If all checks pass, it's active. Otherwise, still verified but records might be off.
       },
     });
   }
 
-  async updateDnsRecords(id: number, updateDnsRecordsDto: UpdateDnsRecordsDto): Promise<Domain> {
+  async updateDnsRecords(
+    id: number,
+    updateDnsRecordsDto: UpdateDnsRecordsDto,
+  ): Promise<Domain> {
     const domain = await this.prisma.domain.findUnique({ where: { id } });
     if (!domain) {
       throw new Error('Domain not found.');
     }
     if (!domain.dnsProviderType || !domain.dnsProviderCredentials) {
-      throw new Error('DNS provider not configured for this domain for automated updates.');
+      throw new Error(
+        'DNS provider not configured for this domain for automated updates.',
+      );
     }
 
-    const { mxRecords, spfRecord, dkimRecords, dmarcRecord } = updateDnsRecordsDto;
+    const { mxRecords, spfRecord, dkimRecords, dmarcRecord } =
+      updateDnsRecordsDto;
 
     if (mxRecords) {
-      await this.dnsProviderService.updateMxRecords(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name, mxRecords);
+      await this.dnsProviderService.updateMxRecords(
+        domain.dnsProviderType,
+        domain.dnsProviderCredentials as any,
+        domain.name,
+        mxRecords,
+      );
     }
     if (spfRecord) {
-      await this.dnsProviderService.updateSpfRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name, spfRecord);
+      await this.dnsProviderService.updateSpfRecord(
+        domain.dnsProviderType,
+        domain.dnsProviderCredentials as any,
+        domain.name,
+        spfRecord,
+      );
     }
     if (dkimRecords) {
       // Logic to update DKIM records - this is often more complex as it involves selectors
       // For simplicity, this is a placeholder
       for (const dkim of dkimRecords) {
-        await this.dnsProviderService.updateDkimRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name, dkim.selector, dkim.publicKey);
+        await this.dnsProviderService.updateDkimRecord(
+          domain.dnsProviderType,
+          domain.dnsProviderCredentials as any,
+          domain.name,
+          dkim.selector,
+          dkim.publicKey,
+        );
       }
     }
     if (dmarcRecord) {
-      await this.dnsProviderService.updateDmarcRecord(domain.dnsProviderType, domain.dnsProviderCredentials as any, domain.name, dmarcRecord);
+      await this.dnsProviderService.updateDmarcRecord(
+        domain.dnsProviderType,
+        domain.dnsProviderCredentials as any,
+        domain.name,
+        dmarcRecord,
+      );
     }
 
     return this.checkDnsRecords(id); // Re-check and update domain status after changes

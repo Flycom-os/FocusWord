@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class PageAiCompleteDto {
-  @ApiProperty({ description: 'Instruction for AI', example: 'Make the text more formal' })
+  @ApiProperty({
+    description: 'Instruction for AI',
+    example: 'Make the text more formal',
+  })
   @IsString()
   prompt: string;
 

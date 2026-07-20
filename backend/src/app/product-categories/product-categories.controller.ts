@@ -1,6 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ProductCategoriesService } from './product-categories.service';
-import { JwtAuthGuard } from "../../jwt-auth.guard";
+import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Product Categories')
@@ -12,7 +22,16 @@ export class ProductCategoriesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a product category' })
-  create(@Body() body: { name: string; slug: string; description?: string; parentId?: number; status?: string }) {
+  create(
+    @Body()
+    body: {
+      name: string;
+      slug: string;
+      description?: string;
+      parentId?: number;
+      status?: string;
+    },
+  ) {
     return this.service.create(body);
   }
 
@@ -34,7 +53,14 @@ export class ProductCategoriesController {
   @ApiOperation({ summary: 'Update product category' })
   update(
     @Param('id') id: string,
-    @Body() body: { name?: string; slug?: string; description?: string; parentId?: number; status?: string }
+    @Body()
+    body: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      parentId?: number;
+      status?: string;
+    },
   ) {
     return this.service.update(Number(id), body);
   }

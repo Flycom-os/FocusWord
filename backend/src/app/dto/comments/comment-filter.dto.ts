@@ -10,7 +10,11 @@ export class CommentFilterDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiProperty({ description: 'Number of items per page', required: false, default: 10 })
+  @ApiProperty({
+    description: 'Number of items per page',
+    required: false,
+    default: 10,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
@@ -22,19 +26,29 @@ export class CommentFilterDto {
   @IsOptional()
   search?: string;
 
-  @ApiProperty({ description: 'Filter by status', enum: ['pending', 'approved', 'rejected'], required: false })
+  @ApiProperty({
+    description: 'Filter by status',
+    enum: ['pending', 'approved', 'rejected'],
+    required: false,
+  })
   @IsString()
   @IsOptional()
   @IsIn(['pending', 'approved', 'rejected'])
   status?: 'pending' | 'approved' | 'rejected';
 
-  @ApiProperty({ description: 'Filter by related general Post ID', required: false })
+  @ApiProperty({
+    description: 'Filter by related general Post ID',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   @Type(() => Number)
   postId?: number;
 
-  @ApiProperty({ description: 'Filter by related Blog Post ID', required: false })
+  @ApiProperty({
+    description: 'Filter by related Blog Post ID',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   @Type(() => Number)

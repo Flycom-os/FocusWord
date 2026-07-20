@@ -1,6 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { JwtAuthGuard } from "../../jwt-auth.guard";
+import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Products')
@@ -12,13 +22,31 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create product' })
-  create(@Body() body: { name: string; slug: string; description?: string; price: number; categoryId?: number; status?: string }) {
+  create(
+    @Body()
+    body: {
+      name: string;
+      slug: string;
+      description?: string;
+      price: number;
+      categoryId?: number;
+      status?: string;
+    },
+  ) {
     return this.service.create(body);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all products' })
-  findAll(@Query() query: { page?: number; limit?: number; search?: string; categoryId?: number }) {
+  findAll(
+    @Query()
+    query: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      categoryId?: number;
+    },
+  ) {
     return this.service.findAll(query);
   }
 
@@ -40,7 +68,15 @@ export class ProductsController {
   @ApiOperation({ summary: 'Update product' })
   update(
     @Param('id') id: string,
-    @Body() body: { name?: string; slug?: string; description?: string; price?: number; categoryId?: number; status?: string }
+    @Body()
+    body: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      price?: number;
+      categoryId?: number;
+      status?: string;
+    },
   ) {
     return this.service.update(Number(id), body);
   }
@@ -58,7 +94,8 @@ export class ProductsController {
   @ApiOperation({ summary: 'Add review to product' })
   addReview(
     @Param('id') id: string,
-    @Body() body: { name: string; email: string; message: string; rating: number }
+    @Body()
+    body: { name: string; email: string; message: string; rating: number },
   ) {
     return this.service.addReview(Number(id), body);
   }

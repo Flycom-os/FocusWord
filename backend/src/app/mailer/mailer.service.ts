@@ -23,10 +23,11 @@ export class MailerService {
     // Try to load nodemailer lazily; if it's not installed, provide a clear error
     let nodemailer: any;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       nodemailer = require('nodemailer');
     } catch (err) {
-      this.logger.error('nodemailer is not installed. Run `npm install nodemailer` to enable email sending.');
+      this.logger.error(
+        'nodemailer is not installed. Run `npm install nodemailer` to enable email sending.',
+      );
       throw err;
     }
 
@@ -51,13 +52,19 @@ export class MailerService {
 
     // Fallback to environment variables
     const host = process.env.SMTP_HOST || (config && config.host);
-    const port = (process.env.SMTP_PORT && Number(process.env.SMTP_PORT)) || (config && config.port) || 587;
+    const port =
+      (process.env.SMTP_PORT && Number(process.env.SMTP_PORT)) ||
+      (config && config.port) ||
+      587;
     const user = process.env.SMTP_USER || (config && config.user);
     const pass = process.env.SMTP_PASS || (config && config.pass);
-    const secure = (process.env.SMTP_SECURE === 'true') || (config && config.secure) || false;
+    const secure =
+      process.env.SMTP_SECURE === 'true' || (config && config.secure) || false;
 
     if (!host) {
-      this.logger.warn('No SMTP host configured; mail sending will fail until configured.');
+      this.logger.warn(
+        'No SMTP host configured; mail sending will fail until configured.',
+      );
     }
 
     const transporter = nodemailer.createTransport({
@@ -76,7 +83,8 @@ export class MailerService {
 
   async sendMail(options: SendOptions & { transportConfig?: any }) {
     const transporter = await this.getTransporter(options.transportConfig);
-    const from = options.from || process.env.SMTP_FROM || 'no-reply@focusword.com';
+    const from =
+      options.from || process.env.SMTP_FROM || 'no-reply@focusword.com';
 
     const mailOptions = {
       from,

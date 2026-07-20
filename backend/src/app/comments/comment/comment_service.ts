@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { CreateCommentDto } from '../../dto/comments/create-comment.dto';
 import { UpdateCommentDto } from '../../dto/comments/update-comment.dto';
@@ -10,7 +14,9 @@ export class CommentsService {
 
   async create(dto: CreateCommentDto) {
     if (!dto.postId && !dto.blogPostId && !dto.articleId) {
-      throw new BadRequestException('Comment must be associated with a Post, BlogPost, or Article');
+      throw new BadRequestException(
+        'Comment must be associated with a Post, BlogPost, or Article',
+      );
     }
 
     return this.prisma.comment.create({
@@ -39,7 +45,16 @@ export class CommentsService {
   }
 
   async findAll(filterDto: CommentFilterDto) {
-    const { page = 1, limit = 10, search, status, postId, blogPostId, articleId, authorId } = filterDto;
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      status,
+      postId,
+      blogPostId,
+      articleId,
+      authorId,
+    } = filterDto;
     const skip = (page - 1) * limit;
 
     const where: any = {};

@@ -39,8 +39,13 @@ export class CommentController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new comment (guest or registered user)' })
-  @ApiCreatedResponse({ description: 'The comment has been successfully created.' })
-  async create(@Body() createCommentDto: CreateCommentDto, @Req() req: Request) {
+  @ApiCreatedResponse({
+    description: 'The comment has been successfully created.',
+  })
+  async create(
+    @Body() createCommentDto: CreateCommentDto,
+    @Req() req: Request,
+  ) {
     // Try to extract user from JWT token if present
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -59,7 +64,10 @@ export class CommentController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retrieve comments (public approved list or admin moderation list)' })
+  @ApiOperation({
+    summary:
+      'Retrieve comments (public approved list or admin moderation list)',
+  })
   @ApiOkResponse({ description: 'A list of comments.' })
   async findAll(@Query() filterDto: CommentFilterDto, @Req() req: Request) {
     // Check if the request has a valid admin token
@@ -85,7 +93,12 @@ export class CommentController {
       // Guest users can only see approved comments on a specific post/page
       filterDto.status = 'approved';
       if (!filterDto.postId && !filterDto.blogPostId && !filterDto.articleId) {
-        return { data: [], total: 0, page: filterDto.page, limit: filterDto.limit };
+        return {
+          data: [],
+          total: 0,
+          page: filterDto.page,
+          limit: filterDto.limit,
+        };
       }
     }
 
@@ -129,7 +142,10 @@ export class CommentController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Change comment moderation status' })
-  changeStatus(@Param('id') id: string, @Body('status') status: 'pending' | 'approved' | 'rejected') {
+  changeStatus(
+    @Param('id') id: string,
+    @Body('status') status: 'pending' | 'approved' | 'rejected',
+  ) {
     return this.commentsService.changeStatus(+id, status);
   }
 }

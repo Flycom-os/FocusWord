@@ -1,12 +1,25 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete,
-  UseGuards, HttpCode, HttpStatus, Query, Req,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Req,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse,
-  ApiTags, ApiOperation,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { CreateArticleDto } from '../dto/articles/create-article.dto';
 import { CreateArticleDraftDto } from '../dto/articles/create-article-draft.dto';
@@ -28,7 +41,9 @@ export class ArticlesController {
   @HasPermission('articles:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new article' })
-  @ApiCreatedResponse({ description: 'The article has been successfully created.' })
+  @ApiCreatedResponse({
+    description: 'The article has been successfully created.',
+  })
   async create(@Body() dto: CreateArticleDto, @Req() req: RequestWithUser) {
     dto.authorId = req.user.userId;
     return this.articlesService.create(dto);
@@ -38,8 +53,13 @@ export class ArticlesController {
   @HasPermission('articles:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create an article draft with defaults' })
-  @ApiCreatedResponse({ description: 'The article draft has been successfully created.' })
-  async createDraft(@Body() dto: CreateArticleDraftDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The article draft has been successfully created.',
+  })
+  async createDraft(
+    @Body() dto: CreateArticleDraftDto,
+    @Req() req: RequestWithUser,
+  ) {
     dto.authorId = req.user.userId;
     return this.articlesService.createDraft(dto);
   }
@@ -56,7 +76,9 @@ export class ArticlesController {
   @Get()
   @HasPermission('articles:0')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retrieve a list of articles with optional filtering' })
+  @ApiOperation({
+    summary: 'Retrieve a list of articles with optional filtering',
+  })
   @ApiOkResponse({ description: 'A list of articles.' })
   findAll(@Query() filterDto: ArticleFilterDto) {
     return this.articlesService.findAll(filterDto);
@@ -102,7 +124,9 @@ export class ArticlesController {
   @HasPermission('articles:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publish an article' })
-  @ApiOkResponse({ description: 'The article has been successfully published.' })
+  @ApiOkResponse({
+    description: 'The article has been successfully published.',
+  })
   publish(@Param('id') id: string) {
     return this.articlesService.publish(+id);
   }
@@ -111,7 +135,9 @@ export class ArticlesController {
   @HasPermission('articles:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Unpublish an article' })
-  @ApiOkResponse({ description: 'The article has been successfully unpublished.' })
+  @ApiOkResponse({
+    description: 'The article has been successfully unpublished.',
+  })
   unpublish(@Param('id') id: string) {
     return this.articlesService.unpublish(+id);
   }

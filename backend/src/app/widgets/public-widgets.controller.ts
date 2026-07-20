@@ -8,11 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { WidgetsService } from './widgets.service';
-import {
-  ApiOkResponse,
-  ApiTags,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('public widgets')
 @Controller('public/widgets')
@@ -41,7 +37,9 @@ export class PublicWidgetsController {
     const widget = await this.widgetsService.findOneBySlug(slug);
 
     if (!widget || widget.status !== 'active') {
-      throw new NotFoundException(`Widget with slug "${slug}" not found or inactive`);
+      throw new NotFoundException(
+        `Widget with slug "${slug}" not found or inactive`,
+      );
     }
 
     return widget;

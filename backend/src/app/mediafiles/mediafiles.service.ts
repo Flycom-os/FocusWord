@@ -2,9 +2,12 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateMediaFileDto } from '../dto/mediafiles/create-media-file.dto';
 import { UpdateMediaFileDto } from '../dto/mediafiles/update-media-file.dto';
-import { QueryMediaFileDto, SortOrder } from '../dto/mediafiles/query-media-file.dto';
+import {
+  QueryMediaFileDto,
+  SortOrder,
+} from '../dto/mediafiles/query-media-file.dto';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 import { Prisma, MediaFile } from '@prisma/client';
 import { unlink } from 'fs/promises';
 import { join, basename } from 'path';
@@ -45,8 +48,21 @@ export class MediafilesService {
       return JSON.parse(cachedMediaFiles);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
-    const { page = 1, limit = 10, search, mimetype, sortBy, sortOrder, isImage, isVideo, isAudio, uploadedById } = query;
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      mimetype,
+      sortBy,
+      sortOrder,
+      isImage,
+      isVideo,
+      isAudio,
+      uploadedById,
+    } = query;
     const pageNum = page;
     const limitNum = limit;
     const skip = (pageNum - 1) * limitNum;
@@ -77,9 +93,9 @@ export class MediafilesService {
 
     const orderBy: Prisma.MediaFileOrderByWithRelationInput = {};
     if (sortBy) {
-        orderBy[sortBy] = sortOrder || SortOrder.DESC;
+      orderBy[sortBy] = sortOrder || SortOrder.DESC;
     } else {
-        orderBy.uploadedAt = SortOrder.DESC; // Default sort
+      orderBy.uploadedAt = SortOrder.DESC; // Default sort
     }
 
     const [data, total] = await this.prisma.$transaction([
@@ -114,7 +130,9 @@ export class MediafilesService {
       return JSON.parse(cachedMediaFile);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const mediaFile = await this.prisma.mediaFile.findUnique({ where: { id } });
     if (!mediaFile) {
       throw new NotFoundException(`MediaFile with ID ${id} not found`);
@@ -131,7 +149,7 @@ export class MediafilesService {
       data,
     });
     if (!mediaFile) {
-        throw new NotFoundException(`MediaFile with ID ${id} not found`);
+      throw new NotFoundException(`MediaFile with ID ${id} not found`);
     }
     this.logger.log(`[INVALIDATE] Deleting cache for key: mediafile_${id}`);
     await this.redisClient.del(`mediafile_${id}`);
@@ -157,12 +175,16 @@ export class MediafilesService {
       await unlink(filePath);
       this.logger.log(`Successfully deleted file: ${diskFilename}`);
     } catch (error) {
-      this.logger.error(`Failed to delete file for MediaFile ID ${id}. File may not exist or there was a permission issue. Error: ${error.message}`);
+      this.logger.error(
+        `Failed to delete file for MediaFile ID ${id}. File may not exist or there was a permission issue. Error: ${error.message}`,
+      );
       // We don't re-throw the error, allowing the DB record to be deleted even if the file is missing.
     }
-    
+
     // Delete the record from the database
-    const deletedMediaFile = await this.prisma.mediaFile.delete({ where: { id } });
+    const deletedMediaFile = await this.prisma.mediaFile.delete({
+      where: { id },
+    });
 
     // Invalidate caches
     this.logger.log(`[INVALIDATE] Deleting cache for key: mediafile_${id}`);

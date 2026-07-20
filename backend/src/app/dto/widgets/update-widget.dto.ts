@@ -7,15 +7,18 @@ export class UpdateWidgetDto {
   @IsOptional()
   name?: string;
 
-  @ApiProperty({ description: 'The unique slug for the widget', required: false })
+  @ApiProperty({
+    description: 'The unique slug for the widget',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   slug?: string;
 
-  @ApiProperty({ 
-    description: 'The type of the widget', 
+  @ApiProperty({
+    description: 'The type of the widget',
     enum: ['text', 'image', 'slider', 'gallery', 'form', 'social', 'custom'],
-    required: false 
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -26,22 +29,35 @@ export class UpdateWidgetDto {
   @IsOptional()
   content?: any;
 
-  @ApiProperty({ description: 'The configuration object for the widget', required: false })
+  @ApiProperty({
+    description: 'The configuration object for the widget',
+    required: false,
+  })
   @IsOptional()
   config?: any;
 
-  @ApiProperty({ description: 'The status of the widget', enum: ['active', 'inactive'], required: false })
+  @ApiProperty({
+    description: 'The status of the widget',
+    enum: ['active', 'inactive'],
+    required: false,
+  })
   @IsString()
   @IsOptional()
   @IsIn(['active', 'inactive'])
   status?: 'active' | 'inactive';
 
-  @ApiProperty({ description: 'The display position of the widget', required: false })
+  @ApiProperty({
+    description: 'The display position of the widget',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   position?: number;
 
-  @ApiProperty({ description: 'Optional description of the widget', required: false })
+  @ApiProperty({
+    description: 'Optional description of the widget',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   description?: string;

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateTagDto } from '../dto/tags/create-tag.dto';
 import { UpdateTagDto } from '../dto/tags/update-tag.dto';
@@ -11,15 +15,14 @@ export class TagsService {
   async create(dto: CreateTagDto) {
     const existing = await this.prisma.tag.findFirst({
       where: {
-        OR: [
-          { name: dto.name },
-          { slug: dto.slug },
-        ],
+        OR: [{ name: dto.name }, { slug: dto.slug }],
       },
     });
 
     if (existing) {
-      throw new BadRequestException('Tag with this name or slug already exists');
+      throw new BadRequestException(
+        'Tag with this name or slug already exists',
+      );
     }
 
     return this.prisma.tag.create({
@@ -82,7 +85,9 @@ export class TagsService {
         },
       });
       if (existing) {
-        throw new BadRequestException('Tag with this name or slug already exists');
+        throw new BadRequestException(
+          'Tag with this name or slug already exists',
+        );
       }
     }
 

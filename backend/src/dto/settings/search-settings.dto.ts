@@ -1,7 +1,7 @@
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from "class-validator";
-import { Type } from "class-transformer";
+import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { SearchQueryDto, SortOrder } from "../common/search-query.dto";
+import { SearchQueryDto, SortOrder } from '../common/search-query.dto';
 
 export class SearchSettingsDto {
   @ApiProperty({

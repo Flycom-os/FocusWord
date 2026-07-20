@@ -13,11 +13,7 @@ import { SeoService, SEOSettings } from './seo.service';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('seo')
 @Controller('api/seo')

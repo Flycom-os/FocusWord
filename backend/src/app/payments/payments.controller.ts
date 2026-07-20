@@ -12,7 +12,13 @@ export class PaymentsController {
   @Post('yoomoney/create')
   @ApiOperation({ summary: 'Create YooMoney payment session' })
   async createYooMoneyPayment(
-    @Body() dto: { amount: number; description: string; email: string; name?: string }
+    @Body()
+    dto: {
+      amount: number;
+      description: string;
+      email: string;
+      name?: string;
+    },
   ) {
     return this.paymentsService.createYooMoneyPayment({
       amount: dto.amount,

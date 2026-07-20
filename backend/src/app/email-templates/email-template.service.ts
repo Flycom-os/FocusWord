@@ -8,7 +8,9 @@ import { EmailTemplate } from '@prisma/client';
 export class EmailTemplateService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createEmailTemplateDto: CreateEmailTemplateDto): Promise<EmailTemplate> {
+  async create(
+    createEmailTemplateDto: CreateEmailTemplateDto,
+  ): Promise<EmailTemplate> {
     return this.prisma.emailTemplate.create({ data: createEmailTemplateDto });
   }
 
@@ -20,7 +22,10 @@ export class EmailTemplateService {
     return this.prisma.emailTemplate.findUnique({ where: { id } });
   }
 
-  async update(id: number, updateEmailTemplateDto: UpdateEmailTemplateDto): Promise<EmailTemplate> {
+  async update(
+    id: number,
+    updateEmailTemplateDto: UpdateEmailTemplateDto,
+  ): Promise<EmailTemplate> {
     return this.prisma.emailTemplate.update({
       where: { id },
       data: updateEmailTemplateDto,
@@ -31,8 +36,13 @@ export class EmailTemplateService {
     return this.prisma.emailTemplate.delete({ where: { id } });
   }
 
-  async renderTemplate(name: string, variables: Record<string, any>): Promise<{ subject: string; html: string; text: string | null }> {
-    const template = await this.prisma.emailTemplate.findUnique({ where: { name } });
+  async renderTemplate(
+    name: string,
+    variables: Record<string, any>,
+  ): Promise<{ subject: string; html: string; text: string | null }> {
+    const template = await this.prisma.emailTemplate.findUnique({
+      where: { name },
+    });
     if (!template) {
       throw new Error(`Email template "${name}" not found.`);
     }

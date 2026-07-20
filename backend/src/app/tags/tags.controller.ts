@@ -18,11 +18,7 @@ import { HasPermission } from '../../common/decorators/has-permission.decorator'
 import { CreateTagDto } from '../dto/tags/create-tag.dto';
 import { UpdateTagDto } from '../dto/tags/update-tag.dto';
 import { TagFilterDto } from '../dto/tags/tag-filter.dto';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiTags('tags')

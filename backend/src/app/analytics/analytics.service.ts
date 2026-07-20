@@ -10,7 +10,7 @@ export class AnalyticsService {
 
   async create(dto: CreateAnalyticsEntryDto) {
     const entryDate = dto.date ? new Date(dto.date) : new Date();
-    
+
     // We can allow one entry per date + pageId/postId/recordId combo
     const where: any = {
       date: entryDate,
@@ -46,8 +46,12 @@ export class AnalyticsService {
         data: {
           totalViews: { increment: dto.totalViews || 1 },
           uniqueViews: { increment: dto.uniqueViews || 1 },
-          bounceRate: dto.bounceRate !== undefined ? dto.bounceRate : existing.bounceRate,
-          avgTimeOnPage: dto.avgTimeOnPage !== undefined ? dto.avgTimeOnPage : existing.avgTimeOnPage,
+          bounceRate:
+            dto.bounceRate !== undefined ? dto.bounceRate : existing.bounceRate,
+          avgTimeOnPage:
+            dto.avgTimeOnPage !== undefined
+              ? dto.avgTimeOnPage
+              : existing.avgTimeOnPage,
         },
       });
     }
@@ -78,7 +82,15 @@ export class AnalyticsService {
   }
 
   async findAll(filterDto: AnalyticsFilterDto) {
-    const { page = 1, limit = 10, startDate, endDate, pageId, postId, recordId } = filterDto;
+    const {
+      page = 1,
+      limit = 10,
+      startDate,
+      endDate,
+      pageId,
+      postId,
+      recordId,
+    } = filterDto;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -204,7 +216,10 @@ export class AnalyticsService {
     let sumTimeOnPage = 0;
     let timeCount = 0;
 
-    const pageViewsMap: Record<string, { id: number; title: string; views: number }> = {};
+    const pageViewsMap: Record<
+      string,
+      { id: number; title: string; views: number }
+    > = {};
     const referrersMap: Record<string, number> = {};
 
     for (const entry of entries) {
@@ -225,43 +240,66 @@ export class AnalyticsService {
       if (entry.pageId && entry.page) {
         const key = `page_${entry.pageId}`;
         if (!pageViewsMap[key]) {
-          pageViewsMap[key] = { id: entry.pageId, title: entry.page.title, views: 0 };
+          pageViewsMap[key] = {
+            id: entry.pageId,
+            title: entry.page.title,
+            views: 0,
+          };
         }
         pageViewsMap[key].views += entry.totalViews;
       } else if (entry.postId && entry.post) {
         const key = `post_${entry.postId}`;
         if (!pageViewsMap[key]) {
-          pageViewsMap[key] = { id: entry.postId, title: entry.post.title, views: 0 };
+          pageViewsMap[key] = {
+            id: entry.postId,
+            title: entry.post.title,
+            views: 0,
+          };
         }
         pageViewsMap[key].views += entry.totalViews;
       } else if (entry.recordId && entry.record) {
         const key = `record_${entry.recordId}`;
         if (!pageViewsMap[key]) {
-          pageViewsMap[key] = { id: entry.recordId, title: entry.record.title, views: 0 };
+          pageViewsMap[key] = {
+            id: entry.recordId,
+            title: entry.record.title,
+            views: 0,
+          };
         }
         pageViewsMap[key].views += entry.totalViews;
       } else if (entry.blogPostId && entry.blogPost) {
         const key = `blogPost_${entry.blogPostId}`;
         if (!pageViewsMap[key]) {
-          pageViewsMap[key] = { id: entry.blogPostId, title: entry.blogPost.title, views: 0 };
+          pageViewsMap[key] = {
+            id: entry.blogPostId,
+            title: entry.blogPost.title,
+            views: 0,
+          };
         }
         pageViewsMap[key].views += entry.totalViews;
       } else if (entry.articleId && entry.article) {
         const key = `article_${entry.articleId}`;
         if (!pageViewsMap[key]) {
-          pageViewsMap[key] = { id: entry.articleId, title: entry.article.title, views: 0 };
+          pageViewsMap[key] = {
+            id: entry.articleId,
+            title: entry.article.title,
+            views: 0,
+          };
         }
         pageViewsMap[key].views += entry.totalViews;
       }
 
       // Group referrers
       for (const ref of entry.referrers) {
-        referrersMap[ref.referrerUrl] = (referrersMap[ref.referrerUrl] || 0) + ref.count;
+        referrersMap[ref.referrerUrl] =
+          (referrersMap[ref.referrerUrl] || 0) + ref.count;
       }
     }
 
-    const avgBounceRate = bounceCount > 0 ? Number((sumBounceRate / bounceCount).toFixed(2)) : 0;
-    const avgTimeOnPage = timeCount > 0 ? Math.round(sumTimeOnPage / timeCount) : 0;
+    const avgBounceRate =
+      bounceCount > 0 ? Number((sumBounceRate / bounceCount).toFixed(2)) : 0;
+    const avgTimeOnPage =
+      timeCount > 0 ? Math.round(sumTimeOnPage / timeCount) : 0;
 
     const topPages = Object.values(pageViewsMap)
       .sort((a, b) => b.views - a.views)

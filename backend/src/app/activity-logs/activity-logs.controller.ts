@@ -36,7 +36,9 @@ export class ActivityLogsController {
   @HasPermission('activity-logs:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new activity log entry' })
-  @ApiCreatedResponse({ description: 'The activity log has been successfully created.' })
+  @ApiCreatedResponse({
+    description: 'The activity log has been successfully created.',
+  })
   create(@Body() dto: CreateActivityLogDto) {
     return this.activityLogsService.create(dto);
   }
@@ -103,7 +105,9 @@ export class ActivityLogsController {
   @HasPermission('activity-logs:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete an activity log entry' })
-  @ApiOkResponse({ description: 'The activity log has been successfully deleted.' })
+  @ApiOkResponse({
+    description: 'The activity log has been successfully deleted.',
+  })
   async remove(@Param('id') id: string) {
     await this.activityLogsService.delete(+id);
     return { message: 'Activity log deleted successfully' };

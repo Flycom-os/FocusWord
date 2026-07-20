@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { DomainService } from './domain.service';
 import { CreateDomainDto } from './dto/create-domain.dto';
 import { UpdateDomainDto } from './dto/update-domain.dto';
@@ -24,7 +33,10 @@ export class DomainController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateDomainDto: UpdateDomainDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDomainDto: UpdateDomainDto,
+  ) {
     return this.domainService.update(id, updateDomainDto);
   }
 
@@ -44,7 +56,10 @@ export class DomainController {
   }
 
   @Patch(':id/dns-records')
-  updateDnsRecords(@Param('id', ParseIntPipe) id: number, @Body() updateDnsRecordsDto: UpdateDnsRecordsDto) {
+  updateDnsRecords(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDnsRecordsDto: UpdateDnsRecordsDto,
+  ) {
     return this.domainService.updateDnsRecords(id, updateDnsRecordsDto);
   }
 }

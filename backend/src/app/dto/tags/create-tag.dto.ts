@@ -13,7 +13,10 @@ export class CreateTagDto {
   @MinLength(1)
   slug: string;
 
-  @ApiProperty({ description: 'Optional description of the tag', required: false })
+  @ApiProperty({
+    description: 'Optional description of the tag',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   description?: string;

@@ -44,8 +44,13 @@ export class RecordsController {
   @HasPermission('records:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new record' })
-  @ApiCreatedResponse({ description: 'The record has been successfully created.' })
-  async create(@Body() createRecordDto: CreateRecordDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+  })
+  async create(
+    @Body() createRecordDto: CreateRecordDto,
+    @Req() req: RequestWithUser,
+  ) {
     createRecordDto.authorId = req.user.userId;
     return this.recordsService.create(createRecordDto);
   }
@@ -54,8 +59,13 @@ export class RecordsController {
   @HasPermission('records:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a record draft with defaults' })
-  @ApiCreatedResponse({ description: 'The record draft has been successfully created.' })
-  async createDraft(@Body() createRecordDraftDto: CreateRecordDraftDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The record draft has been successfully created.',
+  })
+  async createDraft(
+    @Body() createRecordDraftDto: CreateRecordDraftDto,
+    @Req() req: RequestWithUser,
+  ) {
     createRecordDraftDto.authorId = req.user.userId;
     return this.recordsService.createDraft(createRecordDraftDto);
   }
@@ -72,7 +82,9 @@ export class RecordsController {
   @Get()
   @HasPermission('records:0')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retrieve a list of records with optional filtering' })
+  @ApiOperation({
+    summary: 'Retrieve a list of records with optional filtering',
+  })
   @ApiOkResponse({ description: 'A list of records.' })
   findAll(@Query() filterDto: RecordFilterDto) {
     return this.recordsService.findAll(filterDto);
@@ -127,8 +139,13 @@ export class RecordsController {
   @HasPermission('records:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Change record status' })
-  @ApiOkResponse({ description: 'The status of the record has been successfully changed.' })
-  changeStatus(@Param('id') id: string, @Body('status') status: 'draft' | 'published') {
+  @ApiOkResponse({
+    description: 'The status of the record has been successfully changed.',
+  })
+  changeStatus(
+    @Param('id') id: string,
+    @Body('status') status: 'draft' | 'published',
+  ) {
     return this.recordsService.changeStatus(+id, status);
   }
 }

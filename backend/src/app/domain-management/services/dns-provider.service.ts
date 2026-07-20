@@ -28,47 +28,111 @@ export class DnsProviderService {
   }
 
   // Generic methods to dispatch to specific strategies
-  async getTxtRecord(type: DnsProviderType, settings: Record<string, any>, name: string): Promise<string[]> {
+  async getTxtRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    name: string,
+  ): Promise<string[]> {
     return this.getStrategy(type).getTxtRecord(settings, name);
   }
 
-  async addTxtRecord(type: DnsProviderType, settings: Record<string, any>, name: string, value: string): Promise<void> {
+  async addTxtRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    name: string,
+    value: string,
+  ): Promise<void> {
     return this.getStrategy(type).addTxtRecord(settings, name, value);
   }
 
-  async deleteTxtRecord(type: DnsProviderType, settings: Record<string, any>, name: string, value: string): Promise<void> {
+  async deleteTxtRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    name: string,
+    value: string,
+  ): Promise<void> {
     return this.getStrategy(type).deleteTxtRecord(settings, name, value);
   }
 
-  async checkMxRecords(type: DnsProviderType, settings: Record<string, any>, domainName: string): Promise<boolean> {
+  async checkMxRecords(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+  ): Promise<boolean> {
     return this.getStrategy(type).checkMxRecords(settings, domainName);
   }
 
-  async checkSpfRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string): Promise<boolean> {
+  async checkSpfRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+  ): Promise<boolean> {
     return this.getStrategy(type).checkSpfRecord(settings, domainName);
   }
 
-  async checkDkimRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string): Promise<boolean> {
+  async checkDkimRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+  ): Promise<boolean> {
     return this.getStrategy(type).checkDkimRecord(settings, domainName);
   }
 
-  async checkDmarcRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string): Promise<boolean> {
+  async checkDmarcRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+  ): Promise<boolean> {
     return this.getStrategy(type).checkDmarcRecord(settings, domainName);
   }
 
-  async updateMxRecords(type: DnsProviderType, settings: Record<string, any>, domainName: string, records: { exchange: string; priority: number }[]): Promise<void> {
-    return this.getStrategy(type).updateMxRecords(settings, domainName, records);
+  async updateMxRecords(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+    records: { exchange: string; priority: number }[],
+  ): Promise<void> {
+    return this.getStrategy(type).updateMxRecords(
+      settings,
+      domainName,
+      records,
+    );
   }
 
-  async updateSpfRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string, record: string): Promise<void> {
+  async updateSpfRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+    record: string,
+  ): Promise<void> {
     return this.getStrategy(type).updateSpfRecord(settings, domainName, record);
   }
 
-  async updateDkimRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string, selector: string, publicKey: string): Promise<void> {
-    return this.getStrategy(type).updateDkimRecord(settings, domainName, selector, publicKey);
+  async updateDkimRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+    selector: string,
+    publicKey: string,
+  ): Promise<void> {
+    return this.getStrategy(type).updateDkimRecord(
+      settings,
+      domainName,
+      selector,
+      publicKey,
+    );
   }
 
-  async updateDmarcRecord(type: DnsProviderType, settings: Record<string, any>, domainName: string, record: string): Promise<void> {
-    return this.getStrategy(type).updateDmarcRecord(settings, domainName, record);
+  async updateDmarcRecord(
+    type: DnsProviderType,
+    settings: Record<string, any>,
+    domainName: string,
+    record: string,
+  ): Promise<void> {
+    return this.getStrategy(type).updateDmarcRecord(
+      settings,
+      domainName,
+      record,
+    );
   }
 }

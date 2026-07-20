@@ -1,4 +1,10 @@
-import { IsString, IsBoolean, IsOptional, IsEnum, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+  IsObject,
+} from 'class-validator';
 import { DnsProviderType } from '../domain.enums'; // Adjust path if necessary
 
 export class CreateDomainDto {

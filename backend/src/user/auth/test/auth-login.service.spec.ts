@@ -11,18 +11,21 @@ describe('AuthService = Login', () => {
   let jwtService: JwtService;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService,
+      providers: [
+        AuthService,
         {
           provide: PrismaService,
-          useValue:{
-            user:{findFirst: jest.fn()},
-          }
-        },{
-        provide: JwtService,
-          useValue:{
-          sign:jest.fn().mockReturnValue('mocked-token')
-          }
-        }],
+          useValue: {
+            user: { findFirst: jest.fn() },
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn().mockReturnValue('mocked-token'),
+          },
+        },
+      ],
     }).compile();
     authService = module.get<AuthService>(AuthService);
     prisma = module.get<PrismaService>(PrismaService);
@@ -35,7 +38,10 @@ describe('AuthService = Login', () => {
       password: await bcrypt.hash('mypassword', 10),
     });
 
-    const result = await authService.signIn('newuuser@example.com', 'mypassword');
+    const result = await authService.signIn(
+      'newuuser@example.com',
+      'mypassword',
+    );
 
     expect(result).toHaveProperty('access_token');
     // expect(result).toHaveProperty('refresh_token');
@@ -56,8 +62,8 @@ describe('AuthService = Login', () => {
       password: await bcrypt.hash('mypassword', 10),
     });
 
-    await expect(authService.signIn('test@example.com', 'wrongpassword')).rejects.toThrow(
-      UnauthorizedException,
-    );
+    await expect(
+      authService.signIn('test@example.com', 'wrongpassword'),
+    ).rejects.toThrow(UnauthorizedException);
   });
-})
+});

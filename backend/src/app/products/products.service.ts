@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 
 @Injectable()
 export class ProductsService {
@@ -13,7 +13,14 @@ export class ProductsService {
     @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
   ) {}
 
-  async create(data: { name: string; slug: string; description?: string; price: number; categoryId?: number; status?: string }) {
+  async create(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    price: number;
+    categoryId?: number;
+    status?: string;
+  }) {
     const product = await this.prisma.product.create({
       data: {
         name: data.name,
@@ -29,7 +36,12 @@ export class ProductsService {
     return product;
   }
 
-  async findAll(query: { page?: number; limit?: number; search?: string; categoryId?: number }) {
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    categoryId?: number;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const search = query.search || '';
@@ -120,7 +132,17 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: number, data: { name?: string; slug?: string; description?: string; price?: number; categoryId?: number; status?: string }) {
+  async update(
+    id: number,
+    data: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      price?: number;
+      categoryId?: number;
+      status?: string;
+    },
+  ) {
     const updateData: any = {
       name: data.name,
       slug: data.slug,
@@ -165,8 +187,13 @@ export class ProductsService {
   }
 
   // === REVIEWS ===
-  async addReview(productId: number, data: { name: string; email: string; message: string; rating: number }) {
-    const product = await this.prisma.product.findUnique({ where: { id: productId } });
+  async addReview(
+    productId: number,
+    data: { name: string; email: string; message: string; rating: number },
+  ) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }

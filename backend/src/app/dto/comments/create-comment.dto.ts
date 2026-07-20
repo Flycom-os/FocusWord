@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, IsEmail } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  IsEmail,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDto {
@@ -12,32 +18,50 @@ export class CreateCommentDto {
   @IsOptional()
   authorName?: string;
 
-  @ApiProperty({ description: 'The email of the guest author', required: false })
+  @ApiProperty({
+    description: 'The email of the guest author',
+    required: false,
+  })
   @IsEmail()
   @IsOptional()
   authorEmail?: string;
 
-  @ApiProperty({ description: 'The registered user ID as author', required: false })
+  @ApiProperty({
+    description: 'The registered user ID as author',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   authorId?: number;
 
-  @ApiProperty({ description: 'The ID of the related general Post', required: false })
+  @ApiProperty({
+    description: 'The ID of the related general Post',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   postId?: number;
 
-  @ApiProperty({ description: 'The ID of the related Blog Post', required: false })
+  @ApiProperty({
+    description: 'The ID of the related Blog Post',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   blogPostId?: number;
 
-  @ApiProperty({ description: 'The ID of the related Article', required: false })
+  @ApiProperty({
+    description: 'The ID of the related Article',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   articleId?: number;
 
-  @ApiProperty({ description: 'The parent comment ID for replies', required: false })
+  @ApiProperty({
+    description: 'The parent comment ID for replies',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   parentCommentId?: number;

@@ -1,5 +1,11 @@
 import {
-  Controller, Get, Param, HttpCode, HttpStatus, NotFoundException, Query,
+  Controller,
+  Get,
+  Param,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { ApiOkResponse, ApiTags, ApiOperation } from '@nestjs/swagger';

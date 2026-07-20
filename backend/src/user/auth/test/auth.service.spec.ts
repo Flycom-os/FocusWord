@@ -1,9 +1,8 @@
-import { AuthService } from "../signup-service";
-import { PrismaService } from "../../../../prisma/prisma.service";
+import { AuthService } from '../signup-service';
+import { PrismaService } from '../../../../prisma/prisma.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
 
 describe('Authenticate User Controller', () => {
   let authService: AuthService;
@@ -35,18 +34,20 @@ describe('Authenticate User Controller', () => {
   });
   it('It need signup new user', async () => {
     prisma.user.findUnique = jest.fn().mockResolvedValue(null);
-    prisma.user.create = jest.fn().mockResolvedValue({id:1});
+    prisma.user.create = jest.fn().mockResolvedValue({ id: 1 });
     const result = await authService.register({
       email: 'test@example.com',
       password: 'mypassword',
       name: 'Test',
-      surname: "tt",
-      permission:1,
+      surname: 'tt',
+      permission: 1,
     });
 
-    expect(result).toEqual({ message: 'Registration successful', user:{id:1}});
+    expect(result).toEqual({
+      message: 'Registration successful',
+      user: { id: 1 },
+    });
     expect(prisma.user.create).toHaveBeenCalled();
-
   });
   it('❌ Should throw an error if email is already taken', async () => {
     prisma.user.findUnique = jest.fn().mockResolvedValue({ id: 1 });
@@ -55,10 +56,10 @@ describe('Authenticate User Controller', () => {
       authService.register({
         email: 'test@example.com',
         password: 'mypassword',
-        surname: "tt",
-        permission:1,
+        surname: 'tt',
+        permission: 1,
         name: 'Test',
       }),
     ).rejects.toThrow(BadRequestException);
   });
-})
+});

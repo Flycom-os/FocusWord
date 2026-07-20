@@ -8,7 +8,12 @@ import { Route53DnsStrategy } from './strategies/route53-dns.strategy';
 
 @Module({
   imports: [PrismaModule],
-  providers: [DomainService, DnsProviderService, CloudflareDnsStrategy, Route53DnsStrategy],
+  providers: [
+    DomainService,
+    DnsProviderService,
+    CloudflareDnsStrategy,
+    Route53DnsStrategy,
+  ],
   controllers: [DomainController],
   exports: [DomainService],
 })

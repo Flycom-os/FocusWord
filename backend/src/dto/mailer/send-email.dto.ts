@@ -22,7 +22,11 @@ export class SendEmailDto {
   @IsString()
   html?: string;
 
-  @ApiProperty({ description: 'Optional mailer config (JSON string) to use for this test. Overrides saved settings.', required: false })
+  @ApiProperty({
+    description:
+      'Optional mailer config (JSON string) to use for this test. Overrides saved settings.',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   mailerConfig?: string;

@@ -56,13 +56,15 @@ export class ActivityLogInterceptor implements NestInterceptor {
           next: async (response) => {
             try {
               const parts = url.split('?')[0].split('/').filter(Boolean);
-              
+
               // Filter out common prefix parts
-              const filteredParts = parts.filter(p => p !== 'api' && p !== 'public');
-              
+              const filteredParts = parts.filter(
+                (p) => p !== 'api' && p !== 'public',
+              );
+
               let entityType = filteredParts[0] || 'unknown';
               let entityId: number | undefined;
-              
+
               const lastPart = filteredParts[filteredParts.length - 1];
               if (lastPart && !isNaN(Number(lastPart))) {
                 entityId = parseInt(lastPart, 10);
@@ -108,7 +110,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
               this.logger.error('Failed to write activity log', err);
             }
           },
-        })
+        }),
       );
     }
 
