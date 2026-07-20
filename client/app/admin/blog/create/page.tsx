@@ -105,7 +105,7 @@ const CreateBlogPostPage = () => {
           w.slug !== "header" &&
           w.slug !== "footer" &&
           !w.name.toLowerCase().includes("header") &&
-          !w.name.toLowerCase().includes("footer")
+          !w.name.toLowerCase().includes("footer"),
       );
       setWidgets(filtered);
     } catch (error) {
@@ -417,7 +417,7 @@ const CreateBlogPostPage = () => {
             />
 
             <div className={styles.editorWrapper}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={blogSystemPrompt}
                   onGenerated={(content) => {
@@ -431,10 +431,15 @@ const CreateBlogPostPage = () => {
                 />
               </div>
               <DescriptionFieldWrapper
-                value={editorData?.blocks ? blocksToMarkdown(editorData.blocks as BlogPostBlock[]) : ""}
+                value={
+                  editorData?.blocks ? blocksToMarkdown(editorData.blocks as BlogPostBlock[]) : ""
+                }
                 onChange={(markdown) => {
                   setEditorData({
-                    blocks: markdownToBlocks(markdown, (editorData?.blocks as BlogPostBlock[]) || []),
+                    blocks: markdownToBlocks(
+                      markdown,
+                      (editorData?.blocks as BlogPostBlock[]) || [],
+                    ),
                   });
                 }}
                 placeholder="Start writing your blog post content here..."
@@ -477,7 +482,10 @@ const CreateBlogPostPage = () => {
             </div>
 
             {/* Checkbox enableFeedback */}
-            <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}>
+            <div
+              className={styles.formGroup}
+              style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}
+            >
               <input
                 type="checkbox"
                 id="enableFeedback"
@@ -485,7 +493,11 @@ const CreateBlogPostPage = () => {
                 onChange={(e) => setForm((prev) => ({ ...prev, enableFeedback: e.target.checked }))}
                 style={{ cursor: "pointer", width: "16px", height: "16px" }}
               />
-              <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
+              <label
+                htmlFor="enableFeedback"
+                className={styles.label}
+                style={{ margin: 0, cursor: "pointer" }}
+              >
                 Enable Feedback
               </label>
             </div>
@@ -496,7 +508,12 @@ const CreateBlogPostPage = () => {
               <select
                 className={styles.select}
                 value={form.paymentMethodId || ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null,
+                  }))
+                }
               >
                 <option value="">No payment method</option>
                 {paymentMethods.map((m) => (
@@ -516,11 +533,11 @@ const CreateBlogPostPage = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={seoSystemPrompt}
                   onGenerated={(content) => {
-                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                    setForm((prev) => ({ ...prev, seoDescription: content }));
                   }}
                 />
               </div>

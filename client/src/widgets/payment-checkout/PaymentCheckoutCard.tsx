@@ -68,7 +68,7 @@ export const PaymentCheckoutCard = ({ title, paymentMethodId }: PaymentCheckoutC
   return (
     <div className={styles.checkoutCard}>
       <h2 className={styles.checkoutTitle}>{title || "Оплата заказа"}</h2>
-      
+
       <form onSubmit={handlePay}>
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Сумма к оплате (₽)</label>
@@ -118,11 +118,7 @@ export const PaymentCheckoutCard = ({ title, paymentMethodId }: PaymentCheckoutC
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={paying}
-          className={styles.submitButton}
-        >
+        <button type="submit" disabled={paying} className={styles.submitButton}>
           {paying ? "Инициализация..." : "Перейти к оплате"}
         </button>
       </form>

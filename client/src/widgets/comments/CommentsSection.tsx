@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { commentsApi, CommentDto } from "@/src/shared/api/comments";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
@@ -23,11 +23,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
   const [authorEmail, setAuthorEmail] = useState("");
   const [submittedMessage, setSubmittedMessage] = useState("");
 
-  useEffect(() => {
-    loadComments();
-  }, [postId, blogPostId, articleId]);
-
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await commentsApi.getAll(null, {
@@ -39,11 +35,16 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
       });
       setComments(response.data || []);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to load comments", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, blogPostId, articleId]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,9 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         setAuthorEmail("");
       }
 
-      setSubmittedMessage("Your comment has been submitted and will appear after moderation check.");
+      setSubmittedMessage(
+        "Your comment has been submitted and will appear after moderation check.",
+      );
       showToast("Comment submitted for moderation", "success");
 
       // Auto-clear message after 5 seconds
@@ -79,7 +82,7 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
 
       // Reload comments in case some auto-approval is active, or just to keep state clean
       loadComments();
-    } catch (error) {
+    } catch {
       showToast("Failed to submit comment", "error");
     } finally {
       setSubmitting(false);
@@ -93,11 +96,13 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
       </h3>
 
       {/* List of comments */}
-      {loading ? (
-        <div className="flex justify-center py-6 text-gray-500">Loading comments...</div>
-      ) : comments.length === 0 ? (
+      {loading && <div className="flex justify-center py-6 text-gray-500">Loading comments...</div>}
+
+      {!loading && comments.length === 0 && (
         <p className="text-gray-500 italic mb-8">No comments yet. Be the first to comment!</p>
-      ) : (
+      )}
+
+      {!loading && comments.length > 0 && (
         <div className="space-y-4 mb-8">
           {comments.map((comment) => (
             <div
@@ -140,8 +145,11 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         {!user && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Your Name</label>
+              <label htmlFor="author-name" className="block text-xs font-medium text-gray-500 mb-1">
+                Your Name
+              </label>
               <input
+                id="author-name"
                 type="text"
                 required
                 value={authorName}
@@ -151,10 +159,14 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label
+                htmlFor="author-email"
+                className="block text-xs font-medium text-gray-500 mb-1"
+              >
                 Email (not published)
               </label>
               <input
+                id="author-email"
                 type="email"
                 required
                 value={authorEmail}
@@ -174,8 +186,11 @@ export const CommentsSection = ({ postId, blogPostId, articleId }: CommentsSecti
         )}
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Comment Text</label>
+          <label htmlFor="comment-content" className="block text-xs font-medium text-gray-500 mb-1">
+            Comment Text
+          </label>
           <textarea
+            id="comment-content"
             required
             rows={4}
             value={content}

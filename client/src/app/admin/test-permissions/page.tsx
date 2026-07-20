@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 
-export default function TestPermissionsPage() {
+const TestPermissionsPage = () => {
   const { accessToken, user, hasPermission } = useAuth();
   const [cookieValue, setCookieValue] = useState<string>("");
 
@@ -67,4 +67,6 @@ export default function TestPermissionsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default TestPermissionsPage;

@@ -1,26 +1,29 @@
 // client/app/admin/settings/email/components/AddEditEmailTemplateModal.tsx
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
+import React, { useState, useEffect } from "react";
+import Modal from "./Modal";
 
 const apiClient = {
-  post: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
-  patch: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
+  post: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
+  patch: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
 };
 
 interface AddEditEmailTemplateModalProps {
@@ -36,11 +39,11 @@ const AddEditEmailTemplateModal: React.FC<AddEditEmailTemplateModalProps> = ({
   onSuccess,
   templateToEdit,
 }) => {
-  const [name, setName] = useState('');
-  const [subject, setSubject] = useState('');
-  const [bodyHtml, setBodyHtml] = useState('');
-  const [bodyText, setBodyText] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [bodyHtml, setBodyHtml] = useState("");
+  const [bodyText, setBodyText] = useState("");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,15 +52,15 @@ const AddEditEmailTemplateModal: React.FC<AddEditEmailTemplateModalProps> = ({
       setName(templateToEdit.name);
       setSubject(templateToEdit.subject);
       setBodyHtml(templateToEdit.bodyHtml);
-      setBodyText(templateToEdit.bodyText || '');
-      setDescription(templateToEdit.description || '');
+      setBodyText(templateToEdit.bodyText || "");
+      setDescription(templateToEdit.description || "");
     } else {
       // Reset form
-      setName('');
-      setSubject('');
-      setBodyHtml('');
-      setBodyText('');
-      setDescription('');
+      setName("");
+      setSubject("");
+      setBodyHtml("");
+      setBodyText("");
+      setDescription("");
     }
   }, [templateToEdit, isOpen]);
 
@@ -72,22 +75,26 @@ const AddEditEmailTemplateModal: React.FC<AddEditEmailTemplateModalProps> = ({
       if (templateToEdit) {
         await apiClient.patch(`/email-templates/${templateToEdit.id}`, payload);
       } else {
-        await apiClient.post('/email-templates', payload);
+        await apiClient.post("/email-templates", payload);
       }
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to save template.');
+      setError(err.message || "Failed to save template.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={templateToEdit ? 'Edit Template' : 'Add Template'}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={templateToEdit ? "Edit Template" : "Add Template"}
+    >
       <form onSubmit={handleSubmit}>
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Template Name</label>
           <input
@@ -121,7 +128,7 @@ const AddEditEmailTemplateModal: React.FC<AddEditEmailTemplateModalProps> = ({
             placeholder="<p>Hello {{name}},</p>"
           />
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Text Body (Optional)</label>
           <textarea
@@ -156,7 +163,7 @@ const AddEditEmailTemplateModal: React.FC<AddEditEmailTemplateModalProps> = ({
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             disabled={loading}
           >
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? "Saving..." : "Save"}
           </button>
         </div>
       </form>

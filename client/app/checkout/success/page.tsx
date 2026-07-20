@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import styles from "./success.module.css";
 
-function SuccessPageContent() {
+const SuccessPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [transactionId, setTransactionId] = useState("");
@@ -16,7 +16,10 @@ function SuccessPageContent() {
 
   useEffect(() => {
     // Generate a random-looking transaction ID
-    const randomId = "TXN-" + Math.floor(100000 + Math.random() * 900000) + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const randomId = `TXN-${Math.floor(100000 + Math.random() * 900000)}-${Math.random()
+      .toString(36)
+      .substring(2, 6)
+      .toUpperCase()}`;
     setTransactionId(randomId);
   }, []);
 
@@ -36,12 +39,7 @@ function SuccessPageContent() {
           width="40"
           height="40"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="3"
-            d="M5 13l4 4L19 7"
-          ></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
         </svg>
       </div>
 
@@ -85,17 +83,36 @@ function SuccessPageContent() {
       </button>
     </div>
   );
-}
+};
 
 export default function CheckoutSuccessPage() {
   return (
     <div className={styles.container}>
-      <Suspense fallback={
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-          <div className={styles.spinner} style={{ width: "40px", height: "40px", border: "4px solid #e2e8f0", borderTopColor: "#1e293b", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-          <p style={{ marginTop: "1rem", color: "#64748b" }}>Загрузка чека...</p>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              className={styles.spinner}
+              style={{
+                width: "40px",
+                height: "40px",
+                border: "4px solid #e2e8f0",
+                borderTopColor: "#1e293b",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <p style={{ marginTop: "1rem", color: "#64748b" }}>Загрузка чека...</p>
+          </div>
+        }
+      >
         <SuccessPageContent />
       </Suspense>
     </div>

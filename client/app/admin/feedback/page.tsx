@@ -243,7 +243,7 @@ const FeedbackPage = () => {
               </div>
             </div>
 
-                <p className={styles.description}>{item.description || item.message}</p>
+            <p className={styles.description}>{item.description || item.message}</p>
 
             <div className={styles.cardFooter}>
               <div className={styles.userInfo}>

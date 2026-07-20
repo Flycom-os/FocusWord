@@ -38,10 +38,12 @@ export default function SettingsPage() {
       } catch (err) {
         // Fallback to dynamic import if synchronous call fails
         try {
-          groups = await import("@/src/shared/api/settings").then((m) => m.settingsApi.getSettingsGroups());
+          groups = await import("@/src/shared/api/settings").then((m) =>
+            m.settingsApi.getSettingsGroups(),
+          );
         } catch (err2) {
           // eslint-disable-next-line no-console
-          console.error('SettingsPage: failed to load settings groups via dynamic import', err2);
+          console.error("SettingsPage: failed to load settings groups via dynamic import", err2);
         }
       }
       const allSettings = await fetchSettings(accessToken);
@@ -50,8 +52,8 @@ export default function SettingsPage() {
       const settingsArray = Array.isArray(allSettings)
         ? allSettings
         : allSettings && Array.isArray((allSettings as any).settings)
-        ? (allSettings as any).settings
-        : [];
+          ? (allSettings as any).settings
+          : [];
 
       // Debug logging to help troubleshoot empty UI
       // eslint-disable-next-line no-console
@@ -79,7 +81,7 @@ export default function SettingsPage() {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('SettingsPage: loadSettings error', error);
+      console.error("SettingsPage: loadSettings error", error);
       showToast("Ошибка при загрузке настроек", "error");
     } finally {
       setLoading(false);
@@ -106,24 +108,26 @@ export default function SettingsPage() {
 
       // Protected keys must be updated with force flag
       const PROTECTED_DEFAULT_KEYS = [
-        'theme_mode',
-        'theme',
-        'site_name',
-        'site_description',
-        'site_url',
-        'maintenance_mode',
-        'auto_backup',
-        'backup_frequency',
-        'max_backups',
+        "theme_mode",
+        "theme",
+        "site_name",
+        "site_description",
+        "site_url",
+        "maintenance_mode",
+        "auto_backup",
+        "backup_frequency",
+        "max_backups",
       ];
 
-      const blocked = settingsToUpdate.map(s => s.key).filter(k => PROTECTED_DEFAULT_KEYS.includes(k));
+      const blocked = settingsToUpdate
+        .map((s) => s.key)
+        .filter((k) => PROTECTED_DEFAULT_KEYS.includes(k));
       let force = false;
       if (blocked.length > 0) {
-        const confirmMsg = `The following settings are protected and require force to override: ${blocked.join(', ')}. Proceed and force update?`;
+        const confirmMsg = `The following settings are protected and require force to override: ${blocked.join(", ")}. Proceed and force update?`;
         force = window.confirm(confirmMsg);
         if (!force) {
-          showToast('Обновление защищённых настроек отменено', 'warning');
+          showToast("Обновление защищённых настроек отменено", "warning");
           setSaving(false);
           return;
         }
@@ -211,7 +215,7 @@ export default function SettingsPage() {
         );
       case "json":
         // Special-case mailer_config to add validation + test button
-        if (setting.key === 'mailer_config') {
+        if (setting.key === "mailer_config") {
           let parsedOk = true;
           try {
             if (value && value.trim().length > 0) JSON.parse(value);
@@ -220,16 +224,18 @@ export default function SettingsPage() {
           }
 
           const handleTest = async () => {
-            const to = window.prompt('Enter recipient email for test:');
+            const to = window.prompt("Enter recipient email for test:");
             if (!to) return;
             try {
               const cfg = value && value.trim().length > 0 ? JSON.parse(value) : {};
               setSaving(true);
-              const res = await import('@/src/shared/api/settings').then(m => m.settingsApi.testMailer(accessToken, to, cfg));
-              showToast('Test email sent (check response)', 'success');
-              console.log('Mail test response', res);
+              const res = await import("@/src/shared/api/settings").then((m) =>
+                m.settingsApi.testMailer(accessToken, to, cfg),
+              );
+              showToast("Test email sent (check response)", "success");
+              console.log("Mail test response", res);
             } catch (err) {
-              showToast('Mailer test failed: ' + (err?.message || String(err)), 'error');
+              showToast(`Mailer test failed: ${err?.message || String(err)}`, "error");
             } finally {
               setSaving(false);
             }
@@ -244,11 +250,18 @@ export default function SettingsPage() {
                 rows={6}
                 placeholder="JSON формат"
               />
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
-                <button type="button" onClick={handleTest} className={styles.saveButton} disabled={!parsedOk || saving}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                <button
+                  type="button"
+                  onClick={handleTest}
+                  className={styles.saveButton}
+                  disabled={!parsedOk || saving}
+                >
                   Test config
                 </button>
-                <span style={{ color: parsedOk ? 'green' : 'red' }}>{parsedOk ? 'Valid JSON' : 'Invalid JSON'}</span>
+                <span style={{ color: parsedOk ? "green" : "red" }}>
+                  {parsedOk ? "Valid JSON" : "Invalid JSON"}
+                </span>
               </div>
             </div>
           );

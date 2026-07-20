@@ -70,7 +70,6 @@ Follow these rules:
 
 const seoSystemPrompt = `You are an expert SEO copywriter. Your task is to generate a concise and compelling meta description for a web page based on the user's prompt. The output should be a single paragraph of text, between 140 and 160 characters. Do not use any Markdown or other formatting.`;
 
-
 const CreatePagePage = () => {
   const router = useRouter();
   const { accessToken } = useAuth();
@@ -107,7 +106,7 @@ const CreatePagePage = () => {
           w.slug !== "header" &&
           w.slug !== "footer" &&
           !w.name.toLowerCase().includes("header") &&
-          !w.name.toLowerCase().includes("footer")
+          !w.name.toLowerCase().includes("footer"),
       );
       setWidgets(filtered);
     } catch (error) {
@@ -419,15 +418,12 @@ const CreatePagePage = () => {
             />
 
             <div className={styles.editorWrapper}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={pageSystemPrompt}
                   onGenerated={(content) => {
                     setEditorData({
-                      blocks: markdownToBlocks(
-                        content,
-                        (editorData?.blocks as PageBlock[]) || [],
-                      ),
+                      blocks: markdownToBlocks(content, (editorData?.blocks as PageBlock[]) || []),
                     });
                   }}
                 />
@@ -479,7 +475,10 @@ const CreatePagePage = () => {
             </div>
 
             {/* Checkbox enableFeedback */}
-            <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}>
+            <div
+              className={styles.formGroup}
+              style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}
+            >
               <input
                 type="checkbox"
                 id="enableFeedback"
@@ -487,7 +486,11 @@ const CreatePagePage = () => {
                 onChange={(e) => setForm((prev) => ({ ...prev, enableFeedback: e.target.checked }))}
                 style={{ cursor: "pointer", width: "16px", height: "16px" }}
               />
-              <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
+              <label
+                htmlFor="enableFeedback"
+                className={styles.label}
+                style={{ margin: 0, cursor: "pointer" }}
+              >
                 Enable Feedback
               </label>
             </div>
@@ -498,7 +501,12 @@ const CreatePagePage = () => {
               <select
                 className={styles.select}
                 value={form.paymentMethodId || ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null,
+                  }))
+                }
               >
                 <option value="">No payment method</option>
                 {paymentMethods.map((m) => (
@@ -518,11 +526,11 @@ const CreatePagePage = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={seoSystemPrompt}
                   onGenerated={(content) => {
-                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                    setForm((prev) => ({ ...prev, seoDescription: content }));
                   }}
                 />
               </div>

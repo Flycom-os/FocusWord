@@ -1,6 +1,6 @@
 "use client";
 
-export default function MiddlewareTestPage() {
+const MiddlewareTestPage = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Middleware Test Page</h1>
@@ -12,9 +12,12 @@ export default function MiddlewareTestPage() {
         <h2 className="font-semibold mb-2">Instructions:</h2>
         <ol className="list-decimal list-inside space-y-2">
           <li>Open the browser console (F12)</li>
-          <li>Check the "Network" and "Console" tabs</li>
+          <li>Check the &quot;Network&quot; and &quot;Console&quot; tabs</li>
           <li>Refresh this page</li>
-          <li>If the middleware is working, you should see logs starting with "=== MIDDLEWARE DEBUG ==="</li>
+          <li>
+            If the middleware is working, you should see logs starting with &quot;=== MIDDLEWARE
+            DEBUG ===&quot;
+          </li>
           <li>If there are no logs, the middleware is not starting</li>
         </ol>
       </div>
@@ -30,4 +33,6 @@ export default function MiddlewareTestPage() {
       </div>
     </div>
   );
-}
+};
+
+export default MiddlewareTestPage;

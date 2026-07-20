@@ -61,8 +61,6 @@ describe("BlockManagement component", () => {
 
     // Check for ChevronDown and Plus icons
     expect(screen.getByRole("button", { name: "File" }).querySelector("svg")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Add" }).querySelector("svg"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add" }).querySelector("svg")).toBeInTheDocument();
   });
 });

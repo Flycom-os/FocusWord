@@ -99,7 +99,13 @@ const ProductsPage = () => {
       <div className={styles.categoryTree}>
         <div className={styles.noCategory}>
           <label>
-            <input type="radio" name="product-category" checked={value === undefined || value === null} onChange={() => onChange(undefined)} /> No category
+            <input
+              type="radio"
+              name="product-category"
+              checked={value === undefined || value === null}
+              onChange={() => onChange(undefined)}
+            />{" "}
+            No category
           </label>
         </div>
         {tree.map((n) => renderNode(n))}
@@ -114,7 +120,16 @@ const ProductsPage = () => {
 
   const openCreate = () => {
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: 0, categoryId: undefined, sku: "", stock: 0, images: "", status: 'active' });
+    setForm({
+      name: "",
+      description: "",
+      price: 0,
+      categoryId: undefined,
+      sku: "",
+      stock: 0,
+      images: "",
+      status: "active",
+    });
     loadCategories();
     setShowModal(true);
   };
@@ -128,7 +143,7 @@ const ProductsPage = () => {
       categoryId: p.categoryId ? Number(p.categoryId) : undefined,
       sku: p.sku,
       stock: p.stock,
-      images: (p.images || []).join(','),
+      images: (p.images || []).join(","),
       status: p.status,
     });
     loadCategories();
@@ -159,7 +174,7 @@ const ProductsPage = () => {
 
       setCategories(buildTree(flat));
     } catch (err) {
-      console.error('Failed to load categories', err);
+      console.error("Failed to load categories", err);
       setCategories([]);
     }
   };
@@ -173,7 +188,7 @@ const ProductsPage = () => {
         categoryId: form.categoryId || null,
         sku: form.sku,
         stock: Number(form.stock),
-        images: form.images ? form.images.split(',').map(s => s.trim()) : [],
+        images: form.images ? form.images.split(",").map((s) => s.trim()) : [],
         status: form.status,
       };
       if (editingProduct) {
@@ -184,8 +199,8 @@ const ProductsPage = () => {
       setShowModal(false);
       await loadProducts();
     } catch (err) {
-      console.error('Failed to save product', err);
-      alert('Failed to save product');
+      console.error("Failed to save product", err);
+      alert("Failed to save product");
     }
   };
 
@@ -278,11 +293,11 @@ const ProductsPage = () => {
                 <td>
                   <div className={styles.actions}>
                     <button className={styles.actionButton}>
-                        <Edit size={16} />
+                      <Edit size={16} />
                     </button>
-                      <button className={styles.actionButton} onClick={() => openEdit(product)}>
-                        <Edit size={16} />
-                      </button>
+                    <button className={styles.actionButton} onClick={() => openEdit(product)}>
+                      <Edit size={16} />
+                    </button>
                     <button className={styles.actionButton} onClick={() => handleDelete(product)}>
                       <Trash2 size={16} />
                     </button>
@@ -312,19 +327,33 @@ const ProductsPage = () => {
       )}
 
       {showModal && (
-        <Modal open={showModal} onClose={() => setShowModal(false)} title={editingProduct ? 'Edit Product' : 'Create Product'}>
+        <Modal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingProduct ? "Edit Product" : "Create Product"}
+        >
           <div className={styles.productForm}>
             <div className={styles.formRow}>
               <label>Name</label>
-              <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>SKU</label>
-              <Input value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} />
+              <Input
+                value={form.sku}
+                onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Price</label>
-              <Input type="number" value={String(form.price)} onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))} />
+              <Input
+                type="number"
+                value={String(form.price)}
+                onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Category</label>
@@ -338,15 +367,23 @@ const ProductsPage = () => {
             </div>
             <div className={styles.formRow}>
               <label>Images (comma-separated URLs)</label>
-              <Input value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} />
+              <Input
+                value={form.images}
+                onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Description</label>
-              <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              />
             </div>
             <div className={styles.formActions}>
               <Button onClick={handleSaveProduct}>Save</Button>
-              <Button onClick={() => setShowModal(false)} variant="secondary">Cancel</Button>
+              <Button onClick={() => setShowModal(false)} variant="secondary">
+                Cancel
+              </Button>
             </div>
           </div>
         </Modal>

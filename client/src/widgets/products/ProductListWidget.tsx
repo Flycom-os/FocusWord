@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { productsApi } from '@/src/entities/Product/api';
-import styles from './product-list.module.css';
+import React, { useEffect, useState } from "react";
+import { productsApi } from "@/src/entities/Product/api";
+import styles from "./product-list.module.css";
 
 interface Props {
   config?: {
@@ -26,7 +26,12 @@ export default function ProductListWidget({ config = {} }: Props) {
     async function load() {
       try {
         setLoading(true);
-        const res = await productsApi.getProducts({ page, limit, search: config.search, categoryId: config.categoryId });
+        const res = await productsApi.getProducts({
+          page,
+          limit,
+          search: config.search,
+          categoryId: config.categoryId,
+        });
         if (!active) return;
         if (res && res.data) {
           setProducts(res.data);
@@ -39,7 +44,7 @@ export default function ProductListWidget({ config = {} }: Props) {
           setTotal(0);
         }
       } catch (err) {
-        console.error('ProductListWidget load error', err);
+        console.error("ProductListWidget load error", err);
         setProducts([]);
         setTotal(0);
       } finally {

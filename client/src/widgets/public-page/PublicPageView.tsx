@@ -93,7 +93,7 @@ export const PublicPageView = ({ page, showMeta = false }: PublicPageViewProps) 
     return (
       <div className={styles.checkoutCard}>
         <h2 className={styles.checkoutTitle}>{page.title || "Оплата заказа"}</h2>
-        
+
         <form onSubmit={handlePay}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Сумма к оплате (₽)</label>

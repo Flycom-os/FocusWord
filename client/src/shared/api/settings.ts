@@ -81,7 +81,7 @@ export const settingsApi = {
     settings: { key: string; value: string }[],
     force: boolean = false,
   ): Promise<SettingsDto[]> => {
-    const qs = force ? '?force=true' : '';
+    const qs = force ? "?force=true" : "";
     const { data } = await axios.put<SettingsDto[]>(
       `${API_URL}/settings/batch${qs}`,
       { settings },
@@ -214,7 +214,8 @@ export const settingsApi = {
           {
             key: "mailer_config",
             title: "Mailer config (JSON)",
-            description: "JSON-конфигурация для mailer (например провайдер, дополнительные опции). Можно задать массив/объект, например {\"host\":...,\"port\":...}.",
+            description:
+              'JSON-конфигурация для mailer (например провайдер, дополнительные опции). Можно задать массив/объект, например {"host":...,"port":...}.',
             type: "json",
             defaultValue: "{}",
           },
@@ -350,12 +351,27 @@ export const settingsApi = {
   },
 
   // Test mailer with transient config
-  testMailer: async (token: string | null, to: string, mailerConfig: any, subject?: string, text?: string, html?: string) => {
-    const body: any = { to, subject: subject || 'Test email from FocusWord', text: text || 'Test', html };
+  testMailer: async (
+    token: string | null,
+    to: string,
+    mailerConfig: any,
+    subject?: string,
+    text?: string,
+    html?: string,
+  ) => {
+    const body: any = {
+      to,
+      subject: subject || "Test email from FocusWord",
+      text: text || "Test",
+      html,
+    };
     if (mailerConfig) {
-      body.mailerConfig = typeof mailerConfig === 'string' ? mailerConfig : JSON.stringify(mailerConfig);
+      body.mailerConfig =
+        typeof mailerConfig === "string" ? mailerConfig : JSON.stringify(mailerConfig);
     }
-    const { data } = await axios.post(`${API_URL}/mailer/test`, body, { headers: authHeaders(token) });
+    const { data } = await axios.post(`${API_URL}/mailer/test`, body, {
+      headers: authHeaders(token),
+    });
     return data;
   },
 };

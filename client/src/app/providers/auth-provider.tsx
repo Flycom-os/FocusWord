@@ -155,22 +155,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const updateUser = useCallback((nextUser: AuthUser) => {
-    setUser(nextUser);
-    try {
-      setTheme(nextUser?.themeMode || "light");
-    } catch {}
-    if (typeof window !== "undefined") {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        try {
-          const parsed: StoredAuth = JSON.parse(raw);
-          parsed.user = nextUser;
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-        } catch (e) {}
+  const updateUser = useCallback(
+    (nextUser: AuthUser) => {
+      setUser(nextUser);
+      try {
+        setTheme(nextUser?.themeMode || "light");
+      } catch {}
+      if (typeof window !== "undefined") {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          try {
+            const parsed: StoredAuth = JSON.parse(raw);
+            parsed.user = nextUser;
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+          } catch (e) {}
+        }
       }
-    }
-  }, [setTheme]);
+    },
+    [setTheme],
+  );
 
   const login = useCallback(
     async (payload: LoginPayload) => {

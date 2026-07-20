@@ -37,14 +37,10 @@ const PageSlider: React.FC<PageSliderProps> = ({
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  if (!slider || !slider.slides || slider.slides.length === 0) {
-    return null;
-  }
-
-  const slides = slider.slides.sort((a, b) => a.sortOrder - b.sortOrder);
+  const slides = slider?.slides ? [...slider.slides].sort((a, b) => a.sortOrder - b.sortOrder) : [];
 
   useEffect(() => {
-    if (!autoPlay) return;
+    if (!autoPlay || slides.length === 0) return;
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -52,6 +48,10 @@ const PageSlider: React.FC<PageSliderProps> = ({
 
     return () => clearInterval(timer);
   }, [autoPlay, interval, slides.length]);
+
+  if (!slider || !slider.slides || slider.slides.length === 0) {
+    return null;
+  }
 
   const goToSlide = (index: number) => {
     setCurrentSlide(Math.max(0, Math.min(index, slides.length - 1)));

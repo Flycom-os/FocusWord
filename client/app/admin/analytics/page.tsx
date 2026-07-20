@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { BarChart3, TrendingUp, Users, ShoppingCart, DollarSign, Activity, Calendar, RefreshCw, Download } from "lucide-react";
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  DollarSign,
+  Activity,
+  Calendar,
+  RefreshCw,
+  Download,
+} from "lucide-react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { fetchAnalyticsStats, fetchAnalytics } from "@/src/shared/api/analytics";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
@@ -38,7 +48,7 @@ const AnalyticsPage = () => {
   });
   const [allEntries, setAllEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Date filter
   const today = new Date().toISOString().split("T")[0];
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
@@ -46,16 +56,18 @@ const AnalyticsPage = () => {
   const [endDate, setEndDate] = useState(today);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'all' | 'pages' | 'articles' | 'records' | 'blog'>('all');
+  const [activeTab, setActiveTab] = useState<"all" | "pages" | "articles" | "records" | "blog">(
+    "all",
+  );
 
   const loadData = async () => {
     try {
       setLoading(true);
       const statsData = await fetchAnalyticsStats(accessToken, { startDate, endDate });
-      
+
       // Fetch all to allow proper export and filtering, limit 10000 to get 'absolutely all values'
       const entriesData = await fetchAnalytics(accessToken, { limit: 10000, startDate, endDate });
-      
+
       setStats(statsData);
       setAllEntries(entriesData.data || []);
     } catch (error) {
@@ -105,26 +117,42 @@ const AnalyticsPage = () => {
 
   // Filtering based on active tab
   const getFilteredEntries = () => {
-    if (activeTab === 'all') return allEntries;
-    if (activeTab === 'pages') return allEntries.filter(e => e.pageId);
-    if (activeTab === 'articles') return allEntries.filter(e => e.articleId);
-    if (activeTab === 'records') return allEntries.filter(e => e.postId); // assuming postId is used for records/posts
-    if (activeTab === 'blog') return allEntries.filter(e => e.blogPostId);
+    if (activeTab === "all") return allEntries;
+    if (activeTab === "pages") return allEntries.filter((e) => e.pageId);
+    if (activeTab === "articles") return allEntries.filter((e) => e.articleId);
+    if (activeTab === "records") return allEntries.filter((e) => e.postId); // assuming postId is used for records/posts
+    if (activeTab === "blog") return allEntries.filter((e) => e.blogPostId);
     return allEntries;
   };
 
   const filteredEntries = getFilteredEntries();
 
   const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(filteredEntries.map(e => ({
-      Date: new Date(e.date).toLocaleDateString(),
-      Title: e.page?.title || e.post?.title || e.record?.title || e.blogPost?.title || e.article?.title || "Home",
-      TotalViews: e.totalViews,
-      UniqueViews: e.uniqueViews,
-      BounceRate: e.bounceRate || 0,
-      AvgTimeOnPage: e.avgTimeOnPage || 0,
-      Type: e.pageId ? 'Page' : e.articleId ? 'Article' : e.postId ? 'Record' : e.blogPostId ? 'Blog' : 'General'
-    })));
+    const ws = XLSX.utils.json_to_sheet(
+      filteredEntries.map((e) => ({
+        Date: new Date(e.date).toLocaleDateString(),
+        Title:
+          e.page?.title ||
+          e.post?.title ||
+          e.record?.title ||
+          e.blogPost?.title ||
+          e.article?.title ||
+          "Home",
+        TotalViews: e.totalViews,
+        UniqueViews: e.uniqueViews,
+        BounceRate: e.bounceRate || 0,
+        AvgTimeOnPage: e.avgTimeOnPage || 0,
+        Type: e.pageId
+          ? "Page"
+          : e.articleId
+            ? "Article"
+            : e.postId
+              ? "Record"
+              : e.blogPostId
+                ? "Blog"
+                : "General",
+      })),
+    );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Analytics");
     XLSX.writeFile(wb, `analytics_${activeTab}_${startDate}_to_${endDate}.xlsx`);
@@ -133,16 +161,29 @@ const AnalyticsPage = () => {
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.text(`Analytics (${activeTab}) - ${startDate} to ${endDate}`, 14, 15);
-    
+
     const tableColumn = ["Date", "Title", "Type", "Views", "Unique", "Bounce (%)", "Time (s)"];
-    const tableRows = filteredEntries.map(e => [
+    const tableRows = filteredEntries.map((e) => [
       new Date(e.date).toLocaleDateString(),
-      e.page?.title || e.post?.title || e.record?.title || e.blogPost?.title || e.article?.title || "Home",
-      e.pageId ? 'Page' : e.articleId ? 'Article' : e.postId ? 'Record' : e.blogPostId ? 'Blog' : 'General',
+      e.page?.title ||
+        e.post?.title ||
+        e.record?.title ||
+        e.blogPost?.title ||
+        e.article?.title ||
+        "Home",
+      e.pageId
+        ? "Page"
+        : e.articleId
+          ? "Article"
+          : e.postId
+            ? "Record"
+            : e.blogPostId
+              ? "Blog"
+              : "General",
       e.totalViews,
       e.uniqueViews,
       e.bounceRate || 0,
-      e.avgTimeOnPage || 0
+      e.avgTimeOnPage || 0,
     ]);
 
     (doc as any).autoTable({
@@ -150,7 +191,7 @@ const AnalyticsPage = () => {
       body: tableRows,
       startY: 20,
     });
-    
+
     doc.save(`analytics_${activeTab}_${startDate}_to_${endDate}.pdf`);
   };
 
@@ -161,7 +202,7 @@ const AnalyticsPage = () => {
           <h1>Traffic Analytics</h1>
           <p>Real data about the popularity of your content</p>
         </div>
-        
+
         <div className={styles.filterSection}>
           <div className={styles.datePicker}>
             <Calendar size={18} />
@@ -255,25 +296,127 @@ const AnalyticsPage = () => {
           </div>
 
           <div className={styles.tableSection}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setActiveTab('all')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'all' ? '#3b82f6' : '#fff', color: activeTab === 'all' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>All</button>
-                <button onClick={() => setActiveTab('pages')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'pages' ? '#3b82f6' : '#fff', color: activeTab === 'pages' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Pages</button>
-                <button onClick={() => setActiveTab('articles')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'articles' ? '#3b82f6' : '#fff', color: activeTab === 'articles' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Articles</button>
-                <button onClick={() => setActiveTab('records')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'records' ? '#3b82f6' : '#fff', color: activeTab === 'records' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Records</button>
-                <button onClick={() => setActiveTab('blog')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: activeTab === 'blog' ? '#3b82f6' : '#fff', color: activeTab === 'blog' ? '#fff' : '#0f172a', fontWeight: 500, cursor: 'pointer' }}>Blog</button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "1rem",
+                flexWrap: "wrap",
+                gap: "1rem",
+              }}
+            >
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={() => setActiveTab("all")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    background: activeTab === "all" ? "#3b82f6" : "#fff",
+                    color: activeTab === "all" ? "#fff" : "#0f172a",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setActiveTab("pages")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    background: activeTab === "pages" ? "#3b82f6" : "#fff",
+                    color: activeTab === "pages" ? "#fff" : "#0f172a",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  Pages
+                </button>
+                <button
+                  onClick={() => setActiveTab("articles")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    background: activeTab === "articles" ? "#3b82f6" : "#fff",
+                    color: activeTab === "articles" ? "#fff" : "#0f172a",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  Articles
+                </button>
+                <button
+                  onClick={() => setActiveTab("records")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    background: activeTab === "records" ? "#3b82f6" : "#fff",
+                    color: activeTab === "records" ? "#fff" : "#0f172a",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  Records
+                </button>
+                <button
+                  onClick={() => setActiveTab("blog")}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    background: activeTab === "blog" ? "#3b82f6" : "#fff",
+                    color: activeTab === "blog" ? "#fff" : "#0f172a",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
+                  Blog
+                </button>
               </div>
-              
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={exportExcel} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#10b981', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>
+
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  onClick={exportExcel}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#10b981",
+                    color: "#fff",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
                   <Download size={16} /> Excel
                 </button>
-                <button onClick={exportPDF} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#ef4444', color: '#fff', fontWeight: 500, cursor: 'pointer' }}>
+                <button
+                  onClick={exportPDF}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "#ef4444",
+                    color: "#fff",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                >
                   <Download size={16} /> PDF
                 </button>
               </div>
             </div>
-            
+
             <div className={styles.table}>
               <div className={styles.tableHeader}>
                 <span>Date</span>
@@ -285,11 +428,27 @@ const AnalyticsPage = () => {
                 <span>Time (s)</span>
               </div>
               {filteredEntries.length === 0 ? (
-                <div className={styles.emptyRow}>No data for the selected period in this category</div>
+                <div className={styles.emptyRow}>
+                  No data for the selected period in this category
+                </div>
               ) : (
                 filteredEntries.map((entry, index) => {
-                  const title = entry.page?.title || entry.post?.title || entry.record?.title || entry.blogPost?.title || entry.article?.title || "Home";
-                  const type = entry.pageId ? 'Page' : entry.articleId ? 'Article' : entry.postId ? 'Record' : entry.blogPostId ? 'Blog' : 'General';
+                  const title =
+                    entry.page?.title ||
+                    entry.post?.title ||
+                    entry.record?.title ||
+                    entry.blogPost?.title ||
+                    entry.article?.title ||
+                    "Home";
+                  const type = entry.pageId
+                    ? "Page"
+                    : entry.articleId
+                      ? "Article"
+                      : entry.postId
+                        ? "Record"
+                        : entry.blogPostId
+                          ? "Blog"
+                          : "General";
                   return (
                     <div key={index} className={styles.tableRow}>
                       <span>{new Date(entry.date).toLocaleDateString()}</span>

@@ -4,30 +4,21 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/app/providers/auth-provider";
 
-export default function SEOPage() {
-  const { hasPermission, user } = useAuth();
+const SEOPage = () => {
+  const { hasPermission } = useAuth();
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    console.log("=== DIRECT SEO PAGE PERMISSION CHECK ===");
-    console.log("User:", user);
-    console.log("User permissions:", user?.role?.permissions);
-    console.log("Checking permissions for: media-files 0");
-
     const hasAccess = hasPermission("media-files", 0);
 
-    console.log("Permission result:", hasAccess);
-
     if (!hasAccess) {
-      console.log("No permissions, redirecting to /admin-panel/settings");
-      window.location.href = "/admin-panel/settings";
+      router.push("/admin-panel/settings");
       return;
     }
 
-    console.log("Access granted, showing SEO page");
     setIsChecking(false);
-  }, [hasPermission, user, router]);
+  }, [hasPermission, router]);
 
   if (isChecking) {
     return (
@@ -49,8 +40,11 @@ export default function SEOPage() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>
+            <label htmlFor="meta-title" className="block text-sm font-medium text-gray-700 mb-2">
+              Meta Title
+            </label>
             <input
+              id="meta-title"
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter meta title"
@@ -58,8 +52,11 @@ export default function SEOPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
+            <label htmlFor="meta-desc" className="block text-sm font-medium text-gray-700 mb-2">
+              Meta Description
+            </label>
             <textarea
+              id="meta-desc"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={4}
               placeholder="Enter meta description"
@@ -67,8 +64,11 @@ export default function SEOPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Keywords</label>
+            <label htmlFor="meta-keywords" className="block text-sm font-medium text-gray-700 mb-2">
+              Keywords
+            </label>
             <input
+              id="meta-keywords"
               type="text"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter keywords separated by commas"
@@ -84,4 +84,6 @@ export default function SEOPage() {
       </div>
     </div>
   );
-}
+};
+
+export default SEOPage;

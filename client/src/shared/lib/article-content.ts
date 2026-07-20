@@ -158,10 +158,7 @@ function tryParseMarkerLine(line: string): ArticleBlock | null {
 
   const widget = trimmed.match(WIDGET_LINE);
   if (widget) {
-    return blockFromWidget(
-      { slug: widget[1], name: widget[2] },
-      `w-${Date.now()}`,
-    );
+    return blockFromWidget({ slug: widget[1], name: widget[2] }, `w-${Date.now()}`);
   }
 
   const legacyMedia = trimmed.match(LEGACY_MEDIA);
@@ -192,7 +189,10 @@ function tryParseMarkerLine(line: string): ArticleBlock | null {
 /** Markdown из редактора → блоки (сохраняет media/slider/widget при правке текста). */
 export function markdownToBlocks(markdown: string, keepBlocks?: ArticleBlock[]): ArticleBlock[] {
   if (!markdown?.trim()) {
-    return keepBlocks?.filter((b) => b.type === "media" || b.type === "slider" || b.type === "widget") || [];
+    return (
+      keepBlocks?.filter((b) => b.type === "media" || b.type === "slider" || b.type === "widget") ||
+      []
+    );
   }
 
   const result: ArticleBlock[] = [];
@@ -269,7 +269,9 @@ export function blocksFromArticle(article: ArticleDto): ArticleBlock[] {
         if (onlyText) {
           const merged = blocks.map((b) => String(b.data?.text ?? "")).join("\n");
           const parsed = markdownToBlocks(merged);
-          if (parsed.some((b) => b.type === "media" || b.type === "slider" || b.type === "widget")) {
+          if (
+            parsed.some((b) => b.type === "media" || b.type === "slider" || b.type === "widget")
+          ) {
             return parsed;
           }
         }

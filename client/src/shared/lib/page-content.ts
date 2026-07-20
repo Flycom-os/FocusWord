@@ -159,10 +159,7 @@ function tryParseMarkerLine(line: string): PageBlock | null {
 
   const widget = trimmed.match(WIDGET_LINE);
   if (widget) {
-    return blockFromWidget(
-      { slug: widget[1], name: widget[2] },
-      `w-${Date.now()}`,
-    );
+    return blockFromWidget({ slug: widget[1], name: widget[2] }, `w-${Date.now()}`);
   }
 
   const legacyMedia = trimmed.match(LEGACY_MEDIA);
@@ -270,7 +267,9 @@ export function blocksFromPage(page: PageDto): PageBlock[] {
         if (onlyText) {
           const merged = blocks.map((b) => String(b.data?.text ?? "")).join("\n");
           const parsed = markdownToBlocks(merged);
-          if (parsed.some((b) => b.type === "media" || b.type === "slider" || b.type === "widget")) {
+          if (
+            parsed.some((b) => b.type === "media" || b.type === "slider" || b.type === "widget")
+          ) {
             return parsed;
           }
         }

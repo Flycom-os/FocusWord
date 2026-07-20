@@ -148,11 +148,15 @@ const ProductCategoriesPage = () => {
         </div>
         <div className={styles.statCard}>
           <h3>Parent Categories</h3>
-          <p className={styles.statValue}>{(Array.isArray(categories) ? categories : []).filter((cat) => !cat.parentId).length}</p>
+          <p className={styles.statValue}>
+            {(Array.isArray(categories) ? categories : []).filter((cat) => !cat.parentId).length}
+          </p>
         </div>
         <div className={styles.statCard}>
           <h3>Subcategories</h3>
-          <p className={styles.statValue}>{(Array.isArray(categories) ? categories : []).filter((cat) => cat.parentId).length}</p>
+          <p className={styles.statValue}>
+            {(Array.isArray(categories) ? categories : []).filter((cat) => cat.parentId).length}
+          </p>
         </div>
       </div>
 

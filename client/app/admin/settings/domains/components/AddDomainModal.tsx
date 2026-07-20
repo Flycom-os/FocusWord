@@ -1,19 +1,21 @@
 // client/app/admin/settings/domains/components/AddDomainModal.tsx
+
 "use client";
 
-import React, { useState } from 'react';
-import Modal from '../../email/components/Modal'; // Re-using the generic modal
-import { DnsProviderType } from './domain-enums';
+import React, { useState } from "react";
+import Modal from "../../email/components/Modal"; // Re-using the generic modal
+import { DnsProviderType } from "./domain-enums";
 
 const apiClient = {
-  post: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
+  post: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
 };
 
 interface AddDomainModalProps {
@@ -23,8 +25,8 @@ interface AddDomainModalProps {
 }
 
 const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const [name, setName] = useState('');
-  const [dnsProviderType, setDnsProviderType] = useState<DnsProviderType | ''>('');
+  const [name, setName] = useState("");
+  const [dnsProviderType, setDnsProviderType] = useState<DnsProviderType | "">("");
   const [dnsProviderCredentials, setDnsProviderCredentials] = useState<Record<string, any>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -41,11 +43,11 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
     }
 
     try {
-      await apiClient.post('/domains', payload);
+      await apiClient.post("/domains", payload);
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to add domain.');
+      setError(err.message || "Failed to add domain.");
     } finally {
       setLoading(false);
     }
@@ -64,13 +66,13 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
       <input
         type="password"
         name="apiToken"
-        value={dnsProviderCredentials.apiToken || ''}
+        value={dnsProviderCredentials.apiToken || ""}
         onChange={handleCredentialsChange}
         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
       />
     </div>
   );
-  
+
   const renderRoute53Fields = () => (
     <>
       <div className="mb-4">
@@ -78,7 +80,7 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
         <input
           type="text"
           name="accessKeyId"
-          value={dnsProviderCredentials.accessKeyId || ''}
+          value={dnsProviderCredentials.accessKeyId || ""}
           onChange={handleCredentialsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
         />
@@ -88,7 +90,7 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
         <input
           type="password"
           name="secretAccessKey"
-          value={dnsProviderCredentials.secretAccessKey || ''}
+          value={dnsProviderCredentials.secretAccessKey || ""}
           onChange={handleCredentialsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
         />
@@ -100,7 +102,7 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
     <Modal isOpen={isOpen} onClose={onClose} title="Add Domain">
       <form onSubmit={handleSubmit}>
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Domain Name</label>
           <input
@@ -114,7 +116,9 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">DNS Provider (Optional for automated setup)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            DNS Provider (Optional for automated setup)
+          </label>
           <select
             value={dnsProviderType}
             onChange={(e) => {
@@ -124,7 +128,11 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           >
             <option value="">Manual Setup</option>
-            {Object.values(DnsProviderType).map(t => <option key={t} value={t}>{t}</option>)}
+            {Object.values(DnsProviderType).map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -144,7 +152,7 @@ const AddDomainModal: React.FC<AddDomainModalProps> = ({ isOpen, onClose, onSucc
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             disabled={loading}
           >
-            {loading ? 'Adding...' : 'Add Domain'}
+            {loading ? "Adding..." : "Add Domain"}
           </button>
         </div>
       </form>

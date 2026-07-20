@@ -9,12 +9,7 @@ import { useRouter } from "next/navigation";
 import BlockManagement from "@/src/widgets/block_management";
 import styles from "@/src/pages/records/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
-import {
-  fetchRecords,
-  deleteRecord,
-  changeStatus,
-  RecordDto,
-} from "@/src/shared/api/records";
+import { fetchRecords, deleteRecord, changeStatus, RecordDto } from "@/src/shared/api/records";
 import {
   Pagination,
   PermissionGate,
@@ -91,7 +86,7 @@ const RecordsPage = () => {
     try {
       await changeStatus(accessToken, id.toString(), "published");
       showToast("Запись опубликована", "success");
-      setRecords(records.map(r => r.id === id ? {...r, status: 'published'} : r));
+      setRecords(records.map((r) => (r.id === id ? { ...r, status: "published" } : r)));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось опубликовать запись";
       showToast(message, "error");
@@ -102,7 +97,7 @@ const RecordsPage = () => {
     try {
       await changeStatus(accessToken, id.toString(), "draft");
       showToast("Запись снята с публикации", "success");
-      setRecords(records.map(r => r.id === id ? {...r, status: 'draft'} : r));
+      setRecords(records.map((r) => (r.id === id ? { ...r, status: "draft" } : r)));
     } catch (error: any) {
       const message = error?.response?.data?.message || "Не удалось снять запись с публикации";
       showToast(message, "error");
@@ -135,7 +130,7 @@ const RecordsPage = () => {
           />
         </div>
         <PermissionGate resource="records" level={2}>
-          <UiButton theme="primary" onClick={() => router.push('/admin/records/create')}>
+          <UiButton theme="primary" onClick={() => router.push("/admin/records/create")}>
             Добавить запись
           </UiButton>
         </PermissionGate>
@@ -155,7 +150,10 @@ const RecordsPage = () => {
           {records.map((record) => (
             <TableRow key={record.id}>
               <TableCell>
-                <button className={styles.recordName} onClick={() => router.push(`/admin/records/edit/${record.id}`)}>
+                <button
+                  className={styles.recordName}
+                  onClick={() => router.push(`/admin/records/edit/${record.id}`)}
+                >
                   {record.title}
                 </button>
               </TableCell>
@@ -171,7 +169,10 @@ const RecordsPage = () => {
               </TableCell>
               <TableCell>{formatDate(record.createdAt)}</TableCell>
               <TableCell className={styles.actionsColumn}>
-                <UiButton theme="secondary" onClick={() => router.push(`/admin/records/edit/${record.id}`)}>
+                <UiButton
+                  theme="secondary"
+                  onClick={() => router.push(`/admin/records/edit/${record.id}`)}
+                >
                   Редактировать
                 </UiButton>
                 {record.status === "published" ? (

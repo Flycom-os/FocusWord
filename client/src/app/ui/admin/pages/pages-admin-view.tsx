@@ -428,9 +428,7 @@ const PagesPage = () => {
                     { value: "payment", label: "Страница оплаты (payment)" },
                   ]}
                   value={form.template}
-                  onChange={(value) =>
-                    setForm((prev) => ({ ...prev, template: value as string }))
-                  }
+                  onChange={(value) => setForm((prev) => ({ ...prev, template: value as string }))}
                 />
 
                 <label className={styles.label}>SEO заголовок</label>

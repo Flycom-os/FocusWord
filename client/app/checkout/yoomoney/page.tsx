@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./yoomoney.module.css";
 
-function YooMoneyCheckoutContent() {
+const YooMoneyCheckoutContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -18,9 +18,11 @@ function YooMoneyCheckoutContent() {
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
-  
+
   // Loading & simulation states
-  const [status, setStatus] = useState<"idle" | "connecting" | "authorizing" | "transferring" | "success">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "connecting" | "authorizing" | "transferring" | "success"
+  >("idle");
   const [loadingText, setLoadingText] = useState("");
 
   const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +100,8 @@ function YooMoneyCheckoutContent() {
         <form onSubmit={handlePay}>
           <div className={styles.orderInfo}>
             <div className={styles.amount}>
-              {parseFloat(amount).toLocaleString("ru-RU")} <span className={styles.amountCurrency}>₽</span>
+              {parseFloat(amount).toLocaleString("ru-RU")}{" "}
+              <span className={styles.amountCurrency}>₽</span>
             </div>
             <p className={styles.description}>{description}</p>
           </div>
@@ -143,7 +146,9 @@ function YooMoneyCheckoutContent() {
 
           <button
             type="submit"
-            disabled={cardNumber.replace(/\s/g, "").length < 16 || expiry.length < 5 || cvc.length < 3}
+            disabled={
+              cardNumber.replace(/\s/g, "").length < 16 || expiry.length < 5 || cvc.length < 3
+            }
             className={styles.payButton}
           >
             Оплатить {parseFloat(amount).toLocaleString("ru-RU")} ₽
@@ -158,17 +163,30 @@ function YooMoneyCheckoutContent() {
       )}
     </div>
   );
-}
+};
 
 export default function YooMoneyCheckoutPage() {
   return (
     <div className={styles.container}>
-      <Suspense fallback={
-        <div className={styles.checkoutCard} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
-          <div className={styles.spinner} />
-          <div className={styles.loaderText} style={{ marginTop: "1rem" }}>Загрузка платежной формы...</div>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div
+            className={styles.checkoutCard}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "300px",
+            }}
+          >
+            <div className={styles.spinner} />
+            <div className={styles.loaderText} style={{ marginTop: "1rem" }}>
+              Загрузка платежной формы...
+            </div>
+          </div>
+        }
+      >
         <YooMoneyCheckoutContent />
       </Suspense>
     </div>

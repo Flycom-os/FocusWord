@@ -1,21 +1,25 @@
 // client/app/admin/settings/domains/components/DomainList.tsx
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import AddDomainModal from './AddDomainModal';
-import DomainVerificationModal from './DomainVerificationModal';
+import React, { useState, useEffect } from "react";
+import AddDomainModal from "./AddDomainModal";
+import DomainVerificationModal from "./DomainVerificationModal";
 
 const apiClient = {
-  get: (url) => fetch(`http://localhost:3001/api${url}`).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
-  delete: (url) => fetch(`http://localhost:3001/api${url}`, { method: 'DELETE' }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-  }),
-  post: (url) => fetch(`http://localhost:3001/api${url}`, { method: 'POST' }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-  }),
+  get: (url) =>
+    fetch(`http://localhost:3001/api${url}`).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
+  delete: (url) =>
+    fetch(`http://localhost:3001/api${url}`, { method: "DELETE" }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+    }),
+  post: (url) =>
+    fetch(`http://localhost:3001/api${url}`, { method: "POST" }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+    }),
 };
 
 const DomainList = () => {
@@ -34,11 +38,11 @@ const DomainList = () => {
   const fetchDomains = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get('/domains');
+      const data = await apiClient.get("/domains");
       setDomains(data);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch domains.');
+      setError("Failed to fetch domains.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -46,31 +50,31 @@ const DomainList = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this domain?')) {
+    if (window.confirm("Are you sure you want to delete this domain?")) {
       try {
         await apiClient.delete(`/domains/${id}`);
         fetchDomains(); // Refresh the list
       } catch (err) {
-        setError('Failed to delete domain.');
+        setError("Failed to delete domain.");
         console.error(err);
       }
     }
   };
-  
+
   const handleCheckDns = async (id: number) => {
     try {
       await apiClient.post(`/domains/${id}/check-dns`);
       fetchDomains(); // Refresh the list
     } catch (err) {
-      setError('Failed to check DNS.');
+      setError("Failed to check DNS.");
       console.error(err);
     }
   };
-  
+
   const handleOpenVerifyModal = (domain: any) => {
     setDomainToVerify(domain);
     setIsVerifyModalOpen(true);
-  }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
@@ -80,7 +84,7 @@ const DomainList = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="p-4 flex justify-between items-center border-b">
           <h3 className="text-lg font-medium">Configured Domains</h3>
-          <button 
+          <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             onClick={() => setIsAddModalOpen(true)}
           >
@@ -97,25 +101,25 @@ const DomainList = () => {
                   <div>
                     <p className="font-semibold">{domain.name}</p>
                     <p className="text-sm text-gray-500">
-                      Status: {domain.status} - {domain.isVerified ? 'Verified' : 'Not Verified'}
+                      Status: {domain.status} - {domain.isVerified ? "Verified" : "Not Verified"}
                     </p>
                   </div>
                   <div className="space-x-2">
                     {!domain.isVerified && (
-                      <button 
+                      <button
                         className="text-sm text-blue-500 hover:underline"
                         onClick={() => handleOpenVerifyModal(domain)}
                       >
                         Verify
                       </button>
                     )}
-                    <button 
+                    <button
                       className="text-sm text-gray-500 hover:underline"
                       onClick={() => handleCheckDns(domain.id)}
                     >
                       Check DNS
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(domain.id)}
                       className="text-sm text-red-500 hover:underline"
                     >
@@ -131,12 +135,18 @@ const DomainList = () => {
       <AddDomainModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSuccess={() => { fetchDomains(); setIsAddModalOpen(false); }}
+        onSuccess={() => {
+          fetchDomains();
+          setIsAddModalOpen(false);
+        }}
       />
       <DomainVerificationModal
         isOpen={isVerifyModalOpen}
         onClose={() => setIsVerifyModalOpen(false)}
-        onSuccess={() => { fetchDomains(); setIsVerifyModalOpen(false); }}
+        onSuccess={() => {
+          fetchDomains();
+          setIsVerifyModalOpen(false);
+        }}
         domain={domainToVerify}
       />
     </>

@@ -17,16 +17,18 @@ import {
   TableRow,
   TableCell,
 } from "@/src/shared/ui";
-import dynamic from 'next/dynamic';
-
-const RichEditor = dynamic(() => import('@/src/features/Editor/RichEditor'), {
-  ssr: false,
-  loading: () => <div className="p-4 border rounded bg-gray-50 text-gray-400">Загрузка редактора...</div>
-});
+import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
+import { productsApi } from "@/src/entities/Product/api";
+import { fetchProductCategories } from "@/src/shared/api/products";
 import styles from "./widgets.module.css";
-import { productsApi } from '@/src/entities/Product/api';
-import { fetchProductCategories } from '@/src/shared/api/products';
+
+const RichEditor = dynamic(() => import("@/src/features/Editor/RichEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="p-4 border rounded bg-gray-50 text-gray-400">Загрузка редактора...</div>
+  ),
+});
 
 export default function WidgetsPage() {
   const router = useRouter();
@@ -80,14 +82,24 @@ export default function WidgetsPage() {
     }
   };
 
-  const CategoryTreeSelect = ({ categories, selectedId, onChange }: { categories: any[]; selectedId?: number | null; onChange: (v: number | null) => void }) => {
+  const CategoryTreeSelect = ({
+    categories,
+    selectedId,
+    onChange,
+  }: {
+    categories: any[];
+    selectedId?: number | null;
+    onChange: (v: number | null) => void;
+  }) => {
     const Node = ({ node, level = 0 }: { node: any; level?: number }) => {
       const [open, setOpen] = useState<boolean>(false);
       return (
         <div className={styles.treeNode} style={{ paddingLeft: `${level * 12}px` }}>
           <div className={styles.nodeLabel}>
             {node.children?.length > 0 && (
-              <button className={styles.toggleButton} onClick={() => setOpen((s) => !s)}>{open ? '▾' : '▸'}</button>
+              <button className={styles.toggleButton} onClick={() => setOpen((s) => !s)}>
+                {open ? "▾" : "▸"}
+              </button>
             )}
             <label>
               <input
@@ -115,7 +127,13 @@ export default function WidgetsPage() {
       <div className={styles.categoryTree}>
         <div className={styles.noCategory}>
           <label>
-            <input type="radio" name="category-select" checked={!selectedId} onChange={() => onChange(null)} /> No category
+            <input
+              type="radio"
+              name="category-select"
+              checked={!selectedId}
+              onChange={() => onChange(null)}
+            />{" "}
+            No category
           </label>
         </div>
         {categories.map((n) => (
@@ -125,8 +143,14 @@ export default function WidgetsPage() {
     );
   };
 
-  const ProductAutocomplete = ({ value, onChange }: { value?: string | number | null; onChange: (v: string | number | null) => void }) => {
-    const [q, setQ] = useState('');
+  const ProductAutocomplete = ({
+    value,
+    onChange,
+  }: {
+    value?: string | number | null;
+    onChange: (v: string | number | null) => void;
+  }) => {
+    const [q, setQ] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [loadingP, setLoadingP] = useState(false);
     const [open, setOpen] = useState(false);
@@ -160,15 +184,17 @@ export default function WidgetsPage() {
 
     const select = (item: any) => {
       onChange(item.id ?? item.slug);
-      setQ(item.name || item.slug || '');
+      setQ(item.name || item.slug || "");
       setOpen(false);
     };
 
     return (
       <div className={styles.autocomplete}>
         <input
-          value={q || String(value ?? '')}
-          onChange={(e) => { setQ(e.target.value); }}
+          value={q || String(value ?? "")}
+          onChange={(e) => {
+            setQ(e.target.value);
+          }}
           onFocus={() => setOpen(true)}
           placeholder="Поиск товара по имени или slug..."
           className={styles.autocompleteInput}
@@ -176,13 +202,22 @@ export default function WidgetsPage() {
         {open && (
           <div className={styles.autocompleteDropdown}>
             {loadingP && <div className={styles.autocompleteItem}>Загрузка...</div>}
-            {!loadingP && results.length === 0 && <div className={styles.autocompleteItem}>Ничего не найдено</div>}
-            {!loadingP && results.map((r) => (
-              <div key={r.id || r.slug} className={styles.autocompleteItem} onClick={() => select(r)}>
-                <div><strong>{r.name}</strong></div>
-                <div style={{ fontSize: 12, color: '#6b7280' }}>{r.slug}</div>
-              </div>
-            ))}
+            {!loadingP && results.length === 0 && (
+              <div className={styles.autocompleteItem}>Ничего не найдено</div>
+            )}
+            {!loadingP &&
+              results.map((r) => (
+                <div
+                  key={r.id || r.slug}
+                  className={styles.autocompleteItem}
+                  onClick={() => select(r)}
+                >
+                  <div>
+                    <strong>{r.name}</strong>
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>{r.slug}</div>
+                </div>
+              ))}
           </div>
         )}
       </div>
@@ -253,7 +288,12 @@ export default function WidgetsPage() {
     try {
       const widgetData: any = {
         ...form,
-        content: form.type === 'text' ? JSON.stringify(editorData) : (form.type === 'custom' && form.config && form.config.content ? JSON.stringify(form.config.content) : JSON.stringify(editorData)),
+        content:
+          form.type === "text"
+            ? JSON.stringify(editorData)
+            : form.type === "custom" && form.config && form.config.content
+              ? JSON.stringify(form.config.content)
+              : JSON.stringify(editorData),
         config: form.config || {},
       };
 
@@ -503,16 +543,19 @@ export default function WidgetsPage() {
             </div>
           )}
 
-          {form.type === 'custom' && (
+          {form.type === "custom" && (
             <div className={styles.formGroup}>
               <label>Конфигурация виджета</label>
 
               <div className={styles.formRow}>
                 <label>Тип кастомного виджета</label>
                 <select
-                  value={form.config?.widgetType || ''}
+                  value={form.config?.widgetType || ""}
                   onChange={(e) =>
-                    setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), widgetType: e.target.value } }))
+                    setForm((prev) => ({
+                      ...prev,
+                      config: { ...(prev.config || {}), widgetType: e.target.value },
+                    }))
                   }
                   className={styles.select}
                 >
@@ -522,14 +565,17 @@ export default function WidgetsPage() {
                 </select>
               </div>
 
-              {form.config?.widgetType === 'products-list' && (
+              {form.config?.widgetType === "products-list" && (
                 <>
                   <div className={styles.formRow}>
                     <label>Заголовок</label>
                     <Input
-                      value={form.config?.title || ''}
+                      value={form.config?.title || ""}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), title: e.target.value } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: { ...(prev.config || {}), title: e.target.value },
+                        }))
                       }
                       placeholder="Заголовок виджета"
                     />
@@ -541,7 +587,10 @@ export default function WidgetsPage() {
                       type="checkbox"
                       checked={!!form.config?.showPagination}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), showPagination: e.target.checked } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: { ...(prev.config || {}), showPagination: e.target.checked },
+                        }))
                       }
                     />
                   </div>
@@ -552,7 +601,10 @@ export default function WidgetsPage() {
                       type="number"
                       value={form.config?.limit ?? 10}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), limit: parseInt(e.target.value) || 10 } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: { ...(prev.config || {}), limit: parseInt(e.target.value) || 10 },
+                        }))
                       }
                     />
                   </div>
@@ -563,7 +615,12 @@ export default function WidgetsPage() {
                       <CategoryTreeSelect
                         categories={categoriesTree}
                         selectedId={form.config?.categoryId ?? null}
-                        onChange={(v) => setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), categoryId: v ?? undefined } }))}
+                        onChange={(v) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            config: { ...(prev.config || {}), categoryId: v ?? undefined },
+                          }))
+                        }
                       />
                     </div>
                   </div>
@@ -571,9 +628,12 @@ export default function WidgetsPage() {
                   <div className={styles.formRow}>
                     <label>Поиск</label>
                     <Input
-                      value={form.config?.search || ''}
+                      value={form.config?.search || ""}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), search: e.target.value } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: { ...(prev.config || {}), search: e.target.value },
+                        }))
                       }
                       placeholder="Фильтр по названию..."
                     />
@@ -581,16 +641,21 @@ export default function WidgetsPage() {
                 </>
               )}
 
-              {form.config?.widgetType === 'product-single' && (
+              {form.config?.widgetType === "product-single" && (
                 <div className={styles.formRow}>
                   <label>Товар</label>
                   <ProductAutocomplete
-                    value={form.config?.productId || ''}
-                    onChange={(v) => setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), productId: v } }))}
+                    value={form.config?.productId || ""}
+                    onChange={(v) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        config: { ...(prev.config || {}), productId: v },
+                      }))
+                    }
                   />
                 </div>
               )}
-              {form.config?.widgetType === 'product-single' && (
+              {form.config?.widgetType === "product-single" && (
                 <>
                   <div className={styles.formRow}>
                     <label>Показывать отзывы</label>
@@ -598,7 +663,10 @@ export default function WidgetsPage() {
                       type="checkbox"
                       checked={form.config?.showReviews ?? true}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), showReviews: e.target.checked } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: { ...(prev.config || {}), showReviews: e.target.checked },
+                        }))
                       }
                     />
                   </div>
@@ -609,7 +677,13 @@ export default function WidgetsPage() {
                       type="checkbox"
                       checked={form.config?.allowReviewSubmission ?? true}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), allowReviewSubmission: e.target.checked } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: {
+                            ...(prev.config || {}),
+                            allowReviewSubmission: e.target.checked,
+                          },
+                        }))
                       }
                     />
                   </div>
@@ -620,7 +694,13 @@ export default function WidgetsPage() {
                       type="number"
                       value={form.config?.reviewsLimit ?? 10}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, config: { ...(prev.config || {}), reviewsLimit: parseInt(e.target.value) || 10 } }))
+                        setForm((prev) => ({
+                          ...prev,
+                          config: {
+                            ...(prev.config || {}),
+                            reviewsLimit: parseInt(e.target.value) || 10,
+                          },
+                        }))
                       }
                     />
                   </div>

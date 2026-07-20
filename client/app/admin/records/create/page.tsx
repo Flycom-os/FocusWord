@@ -302,7 +302,7 @@ export default function CreateRecordPage() {
             />
 
             <div className={styles.editorWrapper}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={recordSystemPrompt}
                   onGenerated={(content) => {
@@ -373,11 +373,11 @@ export default function CreateRecordPage() {
 
             <div className={styles.formGroup}>
               <label className={styles.label}>SEO Description</label>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={seoSystemPrompt}
                   onGenerated={(content) => {
-                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                    setForm((prev) => ({ ...prev, seoDescription: content }));
                   }}
                 />
               </div>
