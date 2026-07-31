@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
 import { fetchWidgets, createWidget, updateWidget, deleteWidget } from "@/src/shared/api/widgets";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -16,17 +15,19 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  UiButton,
 } from "@/src/shared/ui";
 import dynamic from "next/dynamic";
 import { OutputData } from "@editorjs/editorjs";
 import { productsApi } from "@/src/entities/Product/api";
 import { fetchProductCategories } from "@/src/shared/api/products";
 import styles from "./widgets.module.css";
+import React from "react";
 
 const RichEditor = dynamic(() => import("@/src/features/Editor/RichEditor"), {
   ssr: false,
   loading: () => (
-    <div className="p-4 border rounded bg-gray-50 text-gray-400">Загрузка редактора...</div>
+    <div className="p-4 border rounded bg-gray-50 text-gray-400">Loading editor...</div>
   ),
 });
 
@@ -47,7 +48,7 @@ export default function WidgetsPage() {
     type: "text" as "text" | "image" | "slider" | "gallery" | "form" | "social" | "custom",
     status: "active" as "active" | "inactive",
     position: 0,
-    config: {},
+    config: {} as any,
   });
 
   const [categoriesFlat, setCategoriesFlat] = useState<any[]>([]);
@@ -101,44 +102,35 @@ export default function WidgetsPage() {
                 {open ? "▾" : "▸"}
               </button>
             )}
-            <label>
-              <input
-                type="radio"
-                name="category-select"
-                checked={selectedId === node.id}
-                onChange={() => onChange(node.id)}
-                className={styles.radio}
-              />
-              <span>{node.name}</span>
-            </label>
+            {node.children?.length === 0 && <span style={{ width: 20 }} />}
+            <span
+              className={`${styles.selectLabel} ${selectedId === node.id ? styles.selected : ""}`}
+              onClick={() => onChange(node.id)}
+            >
+              {node.name}
+            </span>
           </div>
-          {open && node.children?.length > 0 && (
-            <div className={styles.children}>
-              {node.children.map((c: any) => (
-                <Node key={c.id} node={c} level={level + 1} />
-              ))}
-            </div>
-          )}
+          {open && node.children?.map((child: any) => (
+            <Node key={child.id} node={child} level={level + 1} />
+          ))}
         </div>
       );
     };
 
     return (
-      <div className={styles.categoryTree}>
-        <div className={styles.noCategory}>
-          <label>
-            <input
-              type="radio"
-              name="category-select"
-              checked={!selectedId}
-              onChange={() => onChange(null)}
-            />{" "}
-            No category
-          </label>
+      <div className={styles.categorySelect}>
+        <div
+          className={styles.selectHeader}
+          onClick={() => onChange(null)}
+          style={{ cursor: "pointer", fontWeight: !selectedId ? "bold" : "normal" }}
+        >
+          No Category (All Products)
         </div>
-        {categories.map((n) => (
-          <Node key={n.id} node={n} />
-        ))}
+        <div className={styles.tree}>
+          {categories.map((cat) => (
+            <Node key={cat.id} node={cat} />
+          ))}
+        </div>
       </div>
     );
   };
@@ -147,35 +139,39 @@ export default function WidgetsPage() {
     value,
     onChange,
   }: {
-    value?: string | number | null;
-    onChange: (v: string | number | null) => void;
+    value: string | number;
+    onChange: (v: string | number) => void;
   }) => {
     const [q, setQ] = useState("");
     const [results, setResults] = useState<any[]>([]);
-    const [loadingP, setLoadingP] = useState(false);
     const [open, setOpen] = useState(false);
-    const timerRef = useRef<number | null>(null);
+    const [loadingP, setLoadingP] = useState(false);
+    const timerRef = React.useRef<number | null>(null);
 
     useEffect(() => {
-      if (!q) {
+      if (value && !q) {
+        const item = categoriesFlat.find((c) => c.id === value || c.slug === value);
+        if (item) setQ(item.name || item.slug || "");
+      }
+    }, [value, categoriesFlat]);
+
+    useEffect(() => {
+      if (!q.trim()) {
         setResults([]);
         return;
       }
-      setLoadingP(true);
       if (timerRef.current) window.clearTimeout(timerRef.current);
-      // debounce
       timerRef.current = window.setTimeout(async () => {
         try {
-          const res: any = await productsApi.getProducts({ page: 1, limit: 10, search: q });
-          const items = res && res.data ? res.data : res || [];
-          setResults(items || []);
+          setLoadingP(true);
+          const res = await productsApi.getProducts({ search: q, limit: 10 });
+          setResults(res.data || []);
         } catch (err) {
-          setResults([]);
+          // ignore
         } finally {
           setLoadingP(false);
-          setOpen(true);
         }
-      }, 250);
+      }, 300) as unknown as number;
 
       return () => {
         if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -196,14 +192,14 @@ export default function WidgetsPage() {
             setQ(e.target.value);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="Поиск товара по имени или slug..."
+          placeholder="Search product by name or slug..."
           className={styles.autocompleteInput}
         />
         {open && (
           <div className={styles.autocompleteDropdown}>
-            {loadingP && <div className={styles.autocompleteItem}>Загрузка...</div>}
+            {loadingP && <div className={styles.autocompleteItem}> Loading... </div>}
             {!loadingP && results.length === 0 && (
-              <div className={styles.autocompleteItem}>Ничего не найдено</div>
+              <div className={styles.autocompleteItem}>Nothing found</div>
             )}
             {!loadingP &&
               results.map((r) => (
@@ -225,13 +221,13 @@ export default function WidgetsPage() {
   };
 
   const widgetTypes = [
-    { value: "text", label: "Текстовый блок" },
-    { value: "image", label: "Изображение" },
-    { value: "slider", label: "Слайдер" },
-    { value: "gallery", label: "Галерея" },
-    { value: "form", label: "Форма" },
-    { value: "social", label: "Социальные сети" },
-    { value: "custom", label: "Пользовательский" },
+    { value: "text", label: "Text Block" },
+    { value: "image", label: "Image" },
+    { value: "slider", label: "Slider" },
+    { value: "gallery", label: "Gallery" },
+    { value: "form", label: "Form" },
+    { value: "social", label: "Social Networks" },
+    { value: "custom", label: "Custom" },
   ];
 
   useEffect(() => {
@@ -250,7 +246,7 @@ export default function WidgetsPage() {
       setWidgets(response.data);
       setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке виджетов", "error");
+      showToast("Error loading widgets", "error");
     } finally {
       setLoading(false);
     }
@@ -299,26 +295,26 @@ export default function WidgetsPage() {
 
       if (editingWidget) {
         await updateWidget(accessToken, editingWidget.id, widgetData);
-        showToast("Виджет обновлен", "success");
+        showToast("Widget updated", "success");
       } else {
         await createWidget(accessToken, widgetData);
-        showToast("Виджет создан", "success");
+        showToast("Widget created", "success");
       }
       setShowModal(false);
       loadWidgets();
     } catch (error) {
-      showToast("Ошибка при сохранении виджета", "error");
+      showToast("Error saving widget", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Вы уверены что хотите удалить этот виджет?")) {
+    if (confirm("Are you sure you want to delete this widget?")) {
       try {
         await deleteWidget(accessToken, id);
-        showToast("Виджет удален", "success");
+        showToast("Widget deleted", "success");
         loadWidgets();
       } catch (error) {
-        showToast("Ошибка при удалении виджета", "error");
+        showToast("Error deleting widget", "error");
       }
     }
   };
@@ -326,10 +322,10 @@ export default function WidgetsPage() {
   const handleStatusChange = async (id: number, status: "active" | "inactive") => {
     try {
       await updateWidget(accessToken, id, { status });
-      showToast("Статус изменен", "success");
+      showToast("Status changed", "success");
       loadWidgets();
     } catch (error) {
-      showToast("Ошибка при изменении статуса", "error");
+      showToast("Error changing status", "error");
     }
   };
 
@@ -362,14 +358,14 @@ export default function WidgetsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Виджеты</h1>
-        <p>Управление виджетами для сайта</p>
+        <h1> Widgets </h1>
+        <p>Manage widgets for site</p>
       </div>
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
           <Input
-            placeholder="Поиск виджетов..."
+            placeholder="Search widgets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.search}
@@ -379,7 +375,7 @@ export default function WidgetsPage() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className={styles.select}
           >
-            <option value="all">Все типы</option>
+            <option value="all"> All Types </option>
             {widgetTypes.map((type) => (
               <option key={type.value} value={type.value}>
                 {type.label}
@@ -387,24 +383,24 @@ export default function WidgetsPage() {
             ))}
           </select>
         </div>
-        <Button onClick={handleCreate} className={styles.createButton}>
-          ➕ Создать виджет
-        </Button>
+        <UiButton theme="primary" onClick={handleCreate} className={styles.createButton}>
+          ➕ Create Widget
+        </UiButton>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}> Loading... </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Тип</TableHead>
-                <TableHead>Название</TableHead>
+                <TableHead> Type </TableHead>
+                <TableHead> Name </TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Позиция</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead> Position </TableHead>
+                <TableHead> Status </TableHead>
+                <TableHead> Actions </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -419,15 +415,16 @@ export default function WidgetsPage() {
                   <TableCell>{widget.position}</TableCell>
                   <TableCell>
                     <span className={`${styles.status} ${styles[widget.status]}`}>
-                      {widget.status === "active" ? "Активен" : "Неактивен"}
+                      {widget.status === "active" ? "Active" : "Inactive"}
                     </span>
                   </TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button onClick={() => handleEdit(widget)} className={styles.editButton}>
-                        ✏️
-                      </Button>
-                      <Button
+                      <UiButton theme="secondary" onClick={() => handleEdit(widget)} className={styles.editButton}>
+                        ✏️ Edit
+                      </UiButton>
+                      <UiButton
+                        theme="secondary"
                         onClick={() =>
                           handleStatusChange(
                             widget.id,
@@ -436,14 +433,15 @@ export default function WidgetsPage() {
                         }
                         className={styles.statusButton}
                       >
-                        {widget.status === "active" ? "🔴" : "🟢"}
-                      </Button>
-                      <Button
+                        {widget.status === "active" ? "🔴 Disable" : "🟢 Enable"}
+                      </UiButton>
+                      <UiButton
+                        theme="warning"
                         onClick={() => handleDelete(widget.id)}
                         className={styles.deleteButton}
                       >
-                        🗑️
-                      </Button>
+                        🗑️ Delete
+                      </UiButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -467,15 +465,15 @@ export default function WidgetsPage() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editingWidget ? "Редактировать виджет" : "Создать виджет"}
+        title={editingWidget ? "Edit Widget" : "Create Widget"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Название</label>
+            <label> Name </label>
             <Input
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Введите название виджета"
+              placeholder="Enter widget name"
             />
           </div>
 
@@ -489,7 +487,7 @@ export default function WidgetsPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Тип виджета</label>
+            <label>Widget Type</label>
             <select
               value={form.type}
               onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value as any }))}
@@ -504,7 +502,7 @@ export default function WidgetsPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Позиция</label>
+            <label> Position </label>
             <Input
               type="number"
               value={form.position}
@@ -516,7 +514,7 @@ export default function WidgetsPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Статус</label>
+            <label> Status </label>
             <select
               value={form.status}
               onChange={(e) =>
@@ -524,20 +522,20 @@ export default function WidgetsPage() {
               }
               className={styles.select}
             >
-              <option value="active">Активен</option>
-              <option value="inactive">Неактивен</option>
+              <option value="active"> Active </option>
+              <option value="inactive"> Inactive </option>
             </select>
           </div>
 
           {form.type === "text" && (
             <div className={styles.formGroup}>
-              <label>Содержимое</label>
+              <label>Content</label>
               <div className={styles.editor}>
                 <RichEditor
                   holder="widget-rich-editor"
                   data={editorData}
                   onChange={setEditorData}
-                  placeholder="Введите содержимое виджета..."
+                  placeholder="Enter widget content..."
                 />
               </div>
             </div>
@@ -545,10 +543,10 @@ export default function WidgetsPage() {
 
           {form.type === "custom" && (
             <div className={styles.formGroup}>
-              <label>Конфигурация виджета</label>
+              <label>Widget Configuration</label>
 
               <div className={styles.formRow}>
-                <label>Тип кастомного виджета</label>
+                <label>Custom Widget Type</label>
                 <select
                   value={form.config?.widgetType || ""}
                   onChange={(e) =>
@@ -559,7 +557,7 @@ export default function WidgetsPage() {
                   }
                   className={styles.select}
                 >
-                  <option value="">Выбрать...</option>
+                  <option value="">Select...</option>
                   <option value="products-list">Products List</option>
                   <option value="product-single">Product Single</option>
                 </select>
@@ -568,7 +566,7 @@ export default function WidgetsPage() {
               {form.config?.widgetType === "products-list" && (
                 <>
                   <div className={styles.formRow}>
-                    <label>Заголовок</label>
+                    <label>Title</label>
                     <Input
                       value={form.config?.title || ""}
                       onChange={(e) =>
@@ -577,12 +575,12 @@ export default function WidgetsPage() {
                           config: { ...(prev.config || {}), title: e.target.value },
                         }))
                       }
-                      placeholder="Заголовок виджета"
+                      placeholder="Widget Title"
                     />
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Показывать пагинацию</label>
+                    <label>Show Pagination</label>
                     <input
                       type="checkbox"
                       checked={!!form.config?.showPagination}
@@ -596,7 +594,7 @@ export default function WidgetsPage() {
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Лимит</label>
+                    <label>Limit</label>
                     <Input
                       type="number"
                       value={form.config?.limit ?? 10}
@@ -610,7 +608,7 @@ export default function WidgetsPage() {
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Категория</label>
+                    <label> Category </label>
                     <div>
                       <CategoryTreeSelect
                         categories={categoriesTree}
@@ -626,7 +624,7 @@ export default function WidgetsPage() {
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Поиск</label>
+                    <label> Search </label>
                     <Input
                       value={form.config?.search || ""}
                       onChange={(e) =>
@@ -635,7 +633,7 @@ export default function WidgetsPage() {
                           config: { ...(prev.config || {}), search: e.target.value },
                         }))
                       }
-                      placeholder="Фильтр по названию..."
+                      placeholder="Filter by name..."
                     />
                   </div>
                 </>
@@ -643,7 +641,7 @@ export default function WidgetsPage() {
 
               {form.config?.widgetType === "product-single" && (
                 <div className={styles.formRow}>
-                  <label>Товар</label>
+                  <label>Product</label>
                   <ProductAutocomplete
                     value={form.config?.productId || ""}
                     onChange={(v) =>
@@ -658,7 +656,7 @@ export default function WidgetsPage() {
               {form.config?.widgetType === "product-single" && (
                 <>
                   <div className={styles.formRow}>
-                    <label>Показывать отзывы</label>
+                    <label>Show Reviews</label>
                     <input
                       type="checkbox"
                       checked={form.config?.showReviews ?? true}
@@ -672,7 +670,7 @@ export default function WidgetsPage() {
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Разрешить отправку отзывов</label>
+                    <label>Allow Review Submission</label>
                     <input
                       type="checkbox"
                       checked={form.config?.allowReviewSubmission ?? true}
@@ -689,7 +687,7 @@ export default function WidgetsPage() {
                   </div>
 
                   <div className={styles.formRow}>
-                    <label>Лимит отзывов</label>
+                    <label>Reviews Limit</label>
                     <Input
                       type="number"
                       value={form.config?.reviewsLimit ?? 10}
@@ -710,12 +708,10 @@ export default function WidgetsPage() {
           )}
 
           <div className={styles.modalActions}>
-            <Button onClick={handleSave} className={styles.saveButton}>
-              {editingWidget ? "Сохранить" : "Создать"}
-            </Button>
-            <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
-              Отмена
-            </Button>
+            <UiButton theme="primary" onClick={handleSave} className={styles.saveButton}>
+              {editingWidget ? "Save" : "Create"}
+            </UiButton>
+            <UiButton theme="secondary" onClick={() => setShowModal(false)} className={styles.cancelButton}> Cancel </UiButton>
           </div>
         </div>
       </Modal>

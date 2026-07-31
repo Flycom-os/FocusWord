@@ -35,7 +35,7 @@ export function withPermissions<P extends object>(
             "No permissions, redirecting to:",
             options.redirectTo || "/admin-panel/settings",
           );
-          // Пробуем разные способы редиректа
+          // Try different redirect methods
           window.location.href = options.redirectTo || "/admin-panel/settings";
           return;
         }
@@ -44,7 +44,7 @@ export function withPermissions<P extends object>(
         setIsChecking(false);
       };
 
-      // Добавляем небольшую задержку, чтобы AuthProvider успел загрузиться
+      // Add a small delay to allow AuthProvider to load
       const timer = setTimeout(checkPermissions, 100);
 
       return () => clearTimeout(timer);
@@ -55,7 +55,7 @@ export function withPermissions<P extends object>(
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-            <p>Проверка прав доступа...</p>
+            <p>Checking permissions...</p>
           </div>
         </div>
       );

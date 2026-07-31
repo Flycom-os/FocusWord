@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Этот endpoint используется middleware для проверки прав доступа
-// Он должен делать запрос к реальному API для верификации JWT
+// This endpoint is used by middleware to check access permissions
+// It should make a request to the real API for JWT verification
 
 export async function POST(request: NextRequest) {
   try {
     const { resource, minLevel } = await request.json();
 
-    // Получаем токен из заголовка
+    // Get token from header
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7);
 
-    // Запрос к реальному API для проверки токена и прав
+    // Request to the real API to verify the token and permissions
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
 
     try {
@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
     } catch (fetchError) {
       console.log("Backend API unavailable, using fallback logic");
 
-      // Fallback: если backend недоступен, делаем базовую проверку
-      // Это временная мера для разработки
+      // Fallback: if backend is unavailable, perform basic check
+      // This is a temporary measure for development
       if (token.includes("admin") || token.includes("full")) {
         return NextResponse.json({ hasPermission: true, source: "fallback-admin" });
       }
 
       if (token.includes("guest") || token.includes("user")) {
-        // Гости и обычные пользователи не имеют прав на защищенные ресурсы
+        // Guests and regular users do not have permissions for protected resources
         return NextResponse.json({ hasPermission: false, source: "fallback-guest" });
       }
 

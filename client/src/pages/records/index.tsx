@@ -52,7 +52,7 @@ const RecordsPage = () => {
         setTotalRecords(res.total || 0);
       } catch (error: any) {
         console.error("Records: Error loading records:", error);
-        const message = error?.response?.data?.message || "Не удалось загрузить записи";
+        const message = error?.response?.data?.message || "Failed to load records";
         showToast(message, "error");
       } finally {
         setIsLoading(false);
@@ -70,14 +70,14 @@ const RecordsPage = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить эту запись?")) return;
+    if (!confirm("Are you sure you want to delete this record?")) return;
     try {
       await deleteRecord(accessToken, id.toString());
-      showToast("Запись удалена", "success");
+      showToast("Record deleted", "success");
       // Re-fetch data
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить запись";
+      const message = error?.response?.data?.message || "Failed to delete record";
       showToast(message, "error");
     }
   };
@@ -85,10 +85,10 @@ const RecordsPage = () => {
   const handlePublish = async (id: number) => {
     try {
       await changeStatus(accessToken, id.toString(), "published");
-      showToast("Запись опубликована", "success");
+      showToast("Record published", "success");
       setRecords(records.map((r) => (r.id === id ? { ...r, status: "published" } : r)));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось опубликовать запись";
+      const message = error?.response?.data?.message || "Failed to publish record";
       showToast(message, "error");
     }
   };
@@ -96,17 +96,17 @@ const RecordsPage = () => {
   const handleUnpublish = async (id: number) => {
     try {
       await changeStatus(accessToken, id.toString(), "draft");
-      showToast("Запись снята с публикации", "success");
+      showToast("Record unpublished", "success");
       setRecords(records.map((r) => (r.id === id ? { ...r, status: "draft" } : r)));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось снять запись с публикации";
+      const message = error?.response?.data?.message || "Failed to unpublish record";
       showToast(message, "error");
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   const totalPages = useMemo(() => {
@@ -125,13 +125,13 @@ const RecordsPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск записей..."
+            placeholder="Search records..."
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <PermissionGate resource="records" level={2}>
           <UiButton theme="primary" onClick={() => router.push("/admin/records/create")}>
-            Добавить запись
+            Add Record
           </UiButton>
         </PermissionGate>
       </div>
@@ -139,11 +139,11 @@ const RecordsPage = () => {
       <Table className={styles.table}>
         <TableHeader>
           <TableRow>
-            <TableHead>Название</TableHead>
+            <TableHead>Title</TableHead>
             <TableHead>Slug</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Дата создания</TableHead>
-            <TableHead className={styles.actionsColumn}>Действия</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead className={styles.actionsColumn}>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -161,9 +161,9 @@ const RecordsPage = () => {
               <TableCell>
                 <span className={`${styles.status} ${styles[`status${record.status}`]}`}>
                   {record.status === "published"
-                    ? "Опубликовано"
+                    ? "Published"
                     : record.status === "draft"
-                      ? "Черновик"
+                      ? "Draft"
                       : record.status}
                 </span>
               </TableCell>
@@ -173,24 +173,24 @@ const RecordsPage = () => {
                   theme="secondary"
                   onClick={() => router.push(`/admin/records/edit/${record.id}`)}
                 >
-                  Редактировать
+                  Edit
                 </UiButton>
                 {record.status === "published" ? (
                   <PermissionGate resource="records" level={2}>
                     <UiButton theme="secondary" onClick={() => handleUnpublish(record.id)}>
-                      Снять с публикации
+                      Unpublish
                     </UiButton>
                   </PermissionGate>
                 ) : (
                   <PermissionGate resource="records" level={2}>
                     <UiButton theme="primary" onClick={() => handlePublish(record.id)}>
-                      Опубликовать
+                      Publish
                     </UiButton>
                   </PermissionGate>
                 )}
                 <PermissionGate resource="records" level={2}>
                   <UiButton theme="warning" onClick={() => handleDelete(record.id)}>
-                    Удалить
+                    Delete
                   </UiButton>
                 </PermissionGate>
               </TableCell>

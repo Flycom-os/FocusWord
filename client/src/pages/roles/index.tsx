@@ -60,7 +60,7 @@ const RolesPage = () => {
         setRoles(res);
         setRolesTotal(res.length);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить роли";
+        const message = error?.response?.data?.message || "Failed to load roles";
         showToast(message, "error");
       } finally {
         setIsLoading(false);
@@ -97,7 +97,7 @@ const RolesPage = () => {
 
   const handleSave = async () => {
     if (!name) {
-      showToast("Заполните обязательные поля", "error");
+      showToast("Please fill in the required fields", "error");
       return;
     }
     try {
@@ -107,31 +107,31 @@ const RolesPage = () => {
           description: description || undefined,
           permissions,
         });
-        showToast("Роль обновлена", "success");
+        showToast("Role updated", "success");
       } else {
         await createRole(accessToken, {
           name,
           description: description || undefined,
           permissions,
         });
-        showToast("Роль создана", "success");
+        showToast("Role created", "success");
       }
       setIsModalOpen(false);
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить роль";
+      const message = error?.response?.data?.message || "Failed to save role";
       showToast(message, "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить эту роль?")) return;
+    if (!confirm("Are you sure you want to delete this role?")) return;
     try {
       await deleteRole(accessToken, id);
-      showToast("Роль удалена", "success");
+      showToast("Role deleted", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить роль";
+      const message = error?.response?.data?.message || "Failed to delete role";
       showToast(message, "error");
     }
   };
@@ -149,7 +149,7 @@ const RolesPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
@@ -163,13 +163,13 @@ const RolesPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск ролей..."
+            placeholder="Search roles..."
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <PermissionGate resource="roles" level={2}>
           <UiButton theme="primary" onClick={handleCreate}>
-            Добавить роль
+            Add Role
           </UiButton>
         </PermissionGate>
       </div>
@@ -177,11 +177,11 @@ const RolesPage = () => {
       <Table className={styles.table}>
         <TableHeader>
           <TableRow>
-            <TableHead>Название</TableHead>
-            <TableHead>Описание</TableHead>
-            <TableHead>Права доступа</TableHead>
-            <TableHead>Дата создания</TableHead>
-            <TableHead className={styles.actionsColumn}>Действия</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Permissions</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead className={styles.actionsColumn}>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -207,12 +207,12 @@ const RolesPage = () => {
               <TableCell className={styles.actionsColumn}>
                 <PermissionGate resource="roles" level={1}>
                   <UiButton theme="secondary" onClick={() => handleEdit(role)}>
-                    Редактировать
+                    Edit
                   </UiButton>
                 </PermissionGate>
                 <PermissionGate resource="roles" level={2}>
                   <UiButton theme="warning" onClick={() => handleDelete(role.id)}>
-                    Удалить
+                    Delete
                   </UiButton>
                 </PermissionGate>
               </TableCell>
@@ -234,35 +234,35 @@ const RolesPage = () => {
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={editingRole ? "Редактировать роль" : "Создать роль"}
+          title={editingRole ? "Edit Role" : "Create Role"}
         >
           <div className={styles.modalContent}>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Название *</label>
+              <label className={styles.formLabel}>Name *</label>
               <Input
                 className={styles.input}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Название роли"
+                placeholder="Role Name"
               />
             </div>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Описание</label>
+              <label className={styles.formLabel}>Description</label>
               <Input
                 className={styles.input}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Описание роли"
+                placeholder="Role Description"
               />
             </div>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Права доступа</label>
+              <label className={styles.formLabel}>Permissions</label>
               <div className={styles.permissionsInput}>
                 <Input
                   className={styles.input}
                   value={permissionInput}
                   onChange={(e) => setPermissionInput(e.target.value)}
-                  placeholder="например: users:2, pages:1"
+                  placeholder="e.g., users:2, pages:1"
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -271,7 +271,7 @@ const RolesPage = () => {
                   }}
                 />
                 <UiButton theme="secondary" onClick={handleAddPermission}>
-                  Добавить
+                  Add
                 </UiButton>
               </div>
               <div className={styles.permissionsList}>
@@ -290,10 +290,10 @@ const RolesPage = () => {
             </div>
             <div className={styles.modalFooter}>
               <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
-                Отмена
+                Cancel
               </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
-                Сохранить
+                Save
               </UiButton>
             </div>
           </div>

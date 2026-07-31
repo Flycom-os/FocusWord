@@ -90,7 +90,7 @@ const PageSlider: React.FC<PageSliderProps> = ({
                 className={styles.slideImage}
               />
             ) : (
-              <div className={styles.slidePlaceholder}>Нет изображения</div>
+              <div className={styles.slidePlaceholder}>No image</div>
             )}
 
             {(slide.title || slide.description) && (
@@ -106,7 +106,7 @@ const PageSlider: React.FC<PageSliderProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Подробнее →
+                    Learn more →
                   </a>
                 )}
               </div>
@@ -117,10 +117,10 @@ const PageSlider: React.FC<PageSliderProps> = ({
 
       {showArrows && slides.length > 1 && (
         <>
-          <button className={styles.arrowPrev} onClick={prevSlide} aria-label="Предыдущий слайд">
+          <button className={styles.arrowPrev} onClick={prevSlide} aria-label="Previous slide">
             ←
           </button>
-          <button className={styles.arrowNext} onClick={nextSlide} aria-label="Следующий слайд">
+          <button className={styles.arrowNext} onClick={nextSlide} aria-label="Next slide">
             →
           </button>
         </>
@@ -133,7 +133,7 @@ const PageSlider: React.FC<PageSliderProps> = ({
               key={index}
               className={`${styles.dot} ${index === currentSlide ? styles.dotActive : ""}`}
               onClick={() => goToSlide(index)}
-              aria-label={`Перейти к слайду ${index + 1}`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

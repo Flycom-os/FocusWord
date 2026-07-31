@@ -7,8 +7,7 @@ import { productsApi } from "@/src/entities/Product/api";
 import { fetchProductCategories } from "@/src/shared/api/products";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
-import Modal from "@/src/shared/ui/Modal/ui-modal";
+import { UiButton, Modal } from "@/src/shared/ui";
 import styles from "./products.module.css";
 
 const ProductsPage = () => {
@@ -231,10 +230,10 @@ const ProductsPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Products</h1>
-        <button className={styles.addButton} onClick={openCreate}>
+        <UiButton theme="primary" onClick={openCreate}>
           <Plus size={20} />
           Add Product
-        </button>
+        </UiButton>
       </div>
 
       <div className={styles.filters}>
@@ -247,10 +246,10 @@ const ProductsPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className={styles.filterButton}>
+        <UiButton theme="secondary">
           <Filter size={20} />
           Filters
-        </button>
+        </UiButton>
       </div>
 
       <div className={styles.tableContainer}>
@@ -292,15 +291,12 @@ const ProductsPage = () => {
                 <td>{product.category?.name || "No category"}</td>
                 <td>
                   <div className={styles.actions}>
-                    <button className={styles.actionButton}>
+                    <UiButton theme="secondary" onClick={() => openEdit(product)}>
                       <Edit size={16} />
-                    </button>
-                    <button className={styles.actionButton} onClick={() => openEdit(product)}>
-                      <Edit size={16} />
-                    </button>
-                    <button className={styles.actionButton} onClick={() => handleDelete(product)}>
+                    </UiButton>
+                    <UiButton theme="warning" onClick={() => handleDelete(product)}>
                       <Trash2 size={16} />
-                    </button>
+                    </UiButton>
                   </div>
                 </td>
               </tr>
@@ -315,12 +311,12 @@ const ProductsPage = () => {
             <h3>Delete Product</h3>
             <p>Are you sure you want to delete "{selectedProduct?.name}"?</p>
             <div className={styles.modalActions}>
-              <button className={styles.cancelButton} onClick={() => setShowDeleteModal(false)}>
+              <UiButton theme="secondary" onClick={() => setShowDeleteModal(false)}>
                 Cancel
-              </button>
-              <button className={styles.deleteButton} onClick={confirmDelete}>
+              </UiButton>
+              <UiButton theme="warning" onClick={confirmDelete}>
                 Delete
-              </button>
+              </UiButton>
             </div>
           </div>
         </div>
@@ -380,10 +376,10 @@ const ProductsPage = () => {
               />
             </div>
             <div className={styles.formActions}>
-              <Button onClick={handleSaveProduct}>Save</Button>
-              <Button onClick={() => setShowModal(false)} variant="secondary">
+              <UiButton theme="primary" onClick={handleSaveProduct}>Save</UiButton>
+              <UiButton theme="secondary" onClick={() => setShowModal(false)}>
                 Cancel
-              </Button>
+              </UiButton>
             </div>
           </div>
         </Modal>

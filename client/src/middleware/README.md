@@ -1,35 +1,35 @@
-# Middleware для проверки прав доступа
+# Middleware for Access Permissions Verification
 
-Этот middleware обеспечивает защиту маршрутов на основе прав доступа пользователей.
+This middleware provides route protection based on user access permissions.
 
-## Как это работает
+## How it works
 
-1. **Middleware** перехватывает все запросы к страницам админ-панели
-2. **Проверяет маршрут** по конфигурации в `routes.ts`
-3. **Проверяет права** пользователя через API endpoint `/api/auth/check-permissions`
-4. **Перенаправляет** на страницу доступа запрещен, если прав недостаточно
+1. **Middleware** intercepts all requests to the admin panel pages.
+2. **Checks the route** based on the configuration in `routes.ts`.
+3. **Verifies the user's permissions** through the API endpoint `/api/auth/check-permissions`.
+4. **Redirects** to the access denied page if permissions are insufficient.
 
-## Структура файлов
+## File Structure
 
 ```
 src/middleware/
-├── middleware.ts          # Основной middleware
-├── routes.ts             # Конфигурация маршрутов
-└── README.md             # Документация
+├── middleware.ts          # Main middleware
+├── routes.ts             # Routes configuration
+└── README.md             # Documentation
 
 src/app/api/auth/check-permissions/
-└── route.ts              # API endpoint для проверки прав
+└── route.ts              # API endpoint for checking permissions
 
 src/app/ui/
-└── access-denied.tsx     # Компонент страницы доступа запрещен
+└── access-denied.tsx     # Access denied page component
 
 src/app/admin/access-denied/
-└── page.ts              # Страница доступа запрещен
+└── page.ts              # Access denied page
 ```
 
-## Конфигурация маршрутов
+## Route Configuration
 
-В `routes.ts` можно настроить защищенные маршруты:
+In `routes.ts`, you can configure protected routes:
 
 ```typescript
 export const protectedRoutes: Record<string, RouteConfig> = {
@@ -39,15 +39,15 @@ export const protectedRoutes: Record<string, RouteConfig> = {
 };
 ```
 
-## Уровни доступа
+## Access Levels
 
-- **Level 0**: Только просмотр
-- **Level 1**: Просмотр и редактирование
-- **Level 2**: Полные права включая удаление
+- **Level 0**: Read-only
+- **Level 1**: Read and update
+- **Level 2**: Full access, including deletion
 
-## Публичные маршруты
+## Public Routes
 
-Эти маршруты не требуют проверки прав:
+These routes do not require permissions verification:
 
 ```typescript
 export const publicRoutes = [
@@ -63,7 +63,7 @@ export const publicRoutes = [
 
 `POST /api/auth/check-permissions`
 
-Тело запроса:
+Request body:
 ```json
 {
   "resource": "media-files",
@@ -71,12 +71,12 @@ export const publicRoutes = [
 }
 ```
 
-Заголовки:
+Headers:
 ```
 Authorization: Bearer <token>
 ```
 
-Ответ:
+Response:
 ```json
 {
   "hasPermission": true,
@@ -86,28 +86,28 @@ Authorization: Bearer <token>
 }
 ```
 
-## Установка и настройка
+## Installation and Setup
 
-1. **Установить jsonwebtoken** (когда будет доступен npm):
+1. **Install jsonwebtoken** (when npm is available):
    ```bash
    npm install jsonwebtoken @types/jsonwebtoken
    ```
 
-2. **Настроить JWT_SECRET** в переменных окружения
+2. **Configure JWT_SECRET** in environment variables.
 
-3. **Заменить заглушку** в `check-permissions/route.ts` на реальную проверку JWT
+3. **Replace the stub** in `check-permissions/route.ts` with real JWT verification.
 
-4. **Настроить права** в соответствии с вашей системой авторизации
+4. **Configure permissions** according to your authorization system.
 
-## Тестирование
+## Testing
 
-Для тестирования можно использовать mock токены:
-- `mock-admin-token` - пользователь с полными правами (userId: 1)
-- `mock-user-token` - пользователь с ограниченными правами (userId: 2)
+For testing, you can use mock tokens:
+- `mock-admin-token` - user with full permissions (userId: 1)
+- `mock-user-token` - user with limited permissions (userId: 2)
 
-## Безопасность
+## Security
 
-- Middleware работает на сервере до загрузки страницы
-- Все проверки прав происходят до рендеринга компонентов
-- Невалидные токены блокируются на уровне middleware
-- Публичные маршруты исключены из проверок
+- Middleware runs on the server before the page loads.
+- All permission checks happen before components render.
+- Invalid tokens are blocked at the middleware level.
+- Public routes are excluded from verification checks.

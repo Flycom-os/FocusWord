@@ -98,7 +98,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
       };
 
       await updateSlider(accessToken, parseInt(params.id, 10), sliderData);
-      showToast("Слайдер обновлен", "success");
+      showToast("Slider updated", "success");
       router.push("/admin/sliders");
     } catch (error) {
       showToast("Ошибка при сохранении", "error");
@@ -108,7 +108,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
   };
 
   if (!slider) {
-    return <div className={styles.loading}>Загрузка...</div>;
+    return <div className={styles.loading}> Loading... </div>;
   }
 
   return (
@@ -121,7 +121,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
       <div className={styles.content}>
         <div className={styles.mainCol}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Название слайдера</label>
+            <label className={styles.label}>Name слайдера</label>
             <Input
               value={slider.name}
               onChange={(e) => setSlider((prev: any) => ({ ...prev, name: e.target.value }))}
@@ -139,11 +139,11 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Описание</label>
+            <label className={styles.label}> Description </label>
             <textarea
               value={slider.description || ""}
               onChange={(e) => setSlider((prev: any) => ({ ...prev, description: e.target.value }))}
-              placeholder="Описание слайдера"
+              placeholder="Description слайдера"
               className={styles.textarea}
               rows={3}
             />
@@ -151,9 +151,9 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
 
           <div className={styles.slidesSection}>
             <div className={styles.slidesHeader}>
-              <h3>Слайды</h3>
+              <h3> Slides </h3>
               <Button onClick={handleAddSlide} className={styles.addSlideButton}>
-                ➕ Добавить слайд
+                ➕ Add Slide
               </Button>
             </div>
 
@@ -161,7 +161,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
               {slides.map((slide, index) => (
                 <div key={slide.id} className={styles.slideCard}>
                   <div className={styles.slideHeader}>
-                    <span className={styles.slideNumber}>Слайд {index + 1}</span>
+                    <span className={styles.slideNumber}>Slide {index + 1}</span>
                     <Button
                       onClick={() => handleRemoveSlide(slide.id)}
                       className={styles.removeButton}
@@ -172,7 +172,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
 
                   <div className={styles.slideContent}>
                     <div className={styles.formGroup}>
-                      <label className={styles.label}>Медиафайл</label>
+                      <label className={styles.label}> Media File </label>
                       <div className={styles.mediaInput}>
                         <Input
                           value={slide.media?.filename || ""}
@@ -183,11 +183,11 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
                               caption: slide.media?.caption || "",
                             })
                           }
-                          placeholder="Выберите медиафайл"
+                          placeholder="Select Media File"
                           readOnly
                         />
                         <Button onClick={handleMediaSelect} className={styles.selectMediaButton}>
-                          📷 Выбрать
+                          📷 Select
                         </Button>
                       </div>
                     </div>
@@ -197,7 +197,7 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
                       <Input
                         value={slide.caption || ""}
                         onChange={(e) => handleSlideChange(slide.id, "caption", e.target.value)}
-                        placeholder="Подпись к слайду"
+                        placeholder="Slide Caption"
                       />
                     </div>
 
@@ -218,11 +218,9 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
 
           <div className={styles.actions}>
             <Button onClick={handleSave} disabled={loading} className={styles.saveButton}>
-              {loading ? "Сохранение..." : "Сохранить изменения"}
+              {loading ? "Saving..." : "Save изменения"}
             </Button>
-            <Button onClick={() => router.push("/admin/sliders")} className={styles.cancelButton}>
-              Отмена
-            </Button>
+            <Button onClick={() => router.push("/admin/sliders")} className={styles.cancelButton}> Cancel </Button>
           </div>
         </div>
       </div>

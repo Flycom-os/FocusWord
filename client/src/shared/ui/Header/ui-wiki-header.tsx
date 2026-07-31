@@ -37,7 +37,7 @@ const WikiHeader: React.FC<WikiHeaderProps> = ({
 
   const userName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Guest";
 
-  // Формируем полный URL для аватара
+  // Formulate full URL for avatar
   const avatarUrl = user?.avatarUrl
     ? user.avatarUrl.startsWith("http")
       ? user.avatarUrl

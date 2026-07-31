@@ -38,7 +38,7 @@ const SafeEditor: React.FC<SafeEditorProps> = ({ holder, data, onChange, placeho
       // Initialize editor
       const editor = new EditorJSClass({
         holder: containerRef.current,
-        placeholder: placeholder || "Начните писать...",
+        placeholder: placeholder || "Start writing...",
         data: data || {
           blocks: [],
         },
@@ -98,7 +98,7 @@ const SafeEditor: React.FC<SafeEditorProps> = ({ holder, data, onChange, placeho
   return (
     <div ref={containerRef} className="editor-container">
       {!isReady && (
-        <div className="editor-placeholder">{placeholder || "Загрузка редактора..."}</div>
+        <div className="editor-placeholder">{placeholder || "Loading editor..."}</div>
       )}
     </div>
   );

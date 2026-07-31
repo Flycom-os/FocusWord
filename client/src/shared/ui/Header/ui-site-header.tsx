@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({
               size={18}
               className="group-hover:-translate-x-0.5 transition-transform duration-200"
             />
-            <span>Назад</span>
+            <span>Back</span>
           </button>
 
           <div className="flex items-center gap-3">

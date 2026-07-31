@@ -21,7 +21,7 @@ export const PublicBlogPostView = ({ blogPost, showMeta = false }: PublicBlogPos
         <h1 className={styles.title}>{blogPost.title}</h1>
         {showMeta && blogPost.publishedAt && (
           <p className={styles.meta}>
-            Опубликовано: {new Date(blogPost.publishedAt).toLocaleDateString("ru-RU")}
+            Publishedо: {new Date(blogPost.publishedAt).toLocaleDateString("ru-RU")}
           </p>
         )}
       </header>
@@ -58,7 +58,7 @@ export const PublicBlogPostView = ({ blogPost, showMeta = false }: PublicBlogPos
 
       {blogPost.categories && blogPost.categories.length > 0 && (
         <section className={styles.categories}>
-          <h3>Категории:</h3>
+          <h3>Categories:</h3>
           <div className={styles.categoryTags}>
             {blogPost.categories.map((cat: any) => (
               <span key={cat.id} className={styles.categoryTag}>

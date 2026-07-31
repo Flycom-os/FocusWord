@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import fs from "fs";
+import path from "path";
 import WikiHeader from "@/src/shared/ui/Header/ui-wiki-header";
 import Footer from "@/src/shared/ui/Footer/ui-site-footer";
 import { AuthProvider } from "@/src/app/providers/auth-provider";
@@ -22,7 +24,107 @@ import {
 } from "lucide-react";
 import styles from "./index.module.css";
 
-const WikiHomePage = () => {
+interface ModuleDoc {
+  techSpec: string;
+  userGuide: string;
+}
+
+interface WikiHomePageProps {
+  docs: Record<string, ModuleDoc>;
+}
+
+const parseInline = (text: string) => {
+  const parts = [];
+  let current = text;
+  
+  // A simple tokenization regex to match bold (**text**) and inline code (`code`)
+  const regex = /(\*\*.*?\*\*|`.*?`)/g;
+  const tokens = current.split(regex);
+  
+  return tokens.map((token, i) => {
+    if (token.startsWith("**") && token.endsWith("**")) {
+      return <strong key={i}>{token.slice(2, -2)}</strong>;
+    }
+    if (token.startsWith("`") && token.endsWith("`")) {
+      return <code key={i} className={styles.inlineCode}>{token.slice(1, -1)}</code>;
+    }
+    return token;
+  });
+};
+
+const renderMarkdown = (md: string) => {
+  if (!md) return null;
+  const lines = md.split("\n");
+  let inList = false;
+  let inCode = false;
+  let codeLines: string[] = [];
+
+  return lines.map((line, index) => {
+    // Code block detection
+    if (line.trim().startsWith("```")) {
+      if (inCode) {
+        inCode = false;
+        const codeText = codeLines.join("\n");
+        codeLines = [];
+        return (
+          <pre key={index} className={styles.codeBlock}>
+            <code>{codeText}</code>
+          </pre>
+        );
+      } else {
+        inCode = true;
+        return null;
+      }
+    }
+
+    if (inCode) {
+      codeLines.push(line);
+      return null;
+    }
+
+    // Headers detection
+    if (line.startsWith("# ")) {
+      return <h1 key={index} className={styles.mdH1}>{line.substring(2)}</h1>;
+    }
+    if (line.startsWith("## ")) {
+      return <h2 key={index} className={styles.mdH2}>{line.substring(3)}</h2>;
+    }
+    if (line.startsWith("### ")) {
+      return <h3 key={index} className={styles.mdH3}>{line.substring(4)}</h3>;
+    }
+    if (line.startsWith("#### ")) {
+      return <h4 key={index} className={styles.mdH4}>{line.substring(5)}</h4>;
+    }
+
+    // List items (unordered)
+    if (line.trim().startsWith("* ") || line.trim().startsWith("- ")) {
+      return (
+        <li key={index} className={styles.mdLi}>
+          {parseInline(line.trim().substring(2))}
+        </li>
+      );
+    }
+    
+    // List items (ordered)
+    if (line.trim().match(/^\d+\.\s/)) {
+      return (
+        <li key={index} className={styles.mdOlLi}>
+          {parseInline(line.trim().replace(/^\d+\.\s/, ""))}
+        </li>
+      );
+    }
+
+    // Empty lines spacer
+    if (!line.trim()) {
+      return <div key={index} className={styles.mdSpacer} />;
+    }
+
+    // Paragraph
+    return <p key={index} className={styles.mdParagraph}>{parseInline(line)}</p>;
+  });
+};
+
+const WikiHomePage = ({ docs = {} }: WikiHomePageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Reset body margin for this page
@@ -183,6 +285,28 @@ const WikiHomePage = () => {
                         </li>
                       </ul>
                     </li>
+
+                    {Object.keys(docs).length > 0 && (
+                      <li className={styles.tocItem}>
+                        <a href="#system-modules" className={styles.tocLink}>
+                          <FileText size={16} />
+                          <span>System Modules</span>
+                        </a>
+                        <ul className={styles.tocSublist}>
+                          {Object.keys(docs).map((moduleKey) => {
+                            const label = moduleKey
+                              .split("-")
+                              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                              .join(" ");
+                            return (
+                              <li key={moduleKey}>
+                                <a href={`#${moduleKey}`}>{label}</a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    )}
                   </ul>
                 </nav>
               </aside>
@@ -535,6 +659,63 @@ PORT=1331`}</code>
                     </div>
                   </div>
                 </section>
+
+                {/* System Modules Overview */}
+                {Object.keys(docs).length > 0 && (
+                  <section id="system-modules" className={styles.contentSection}>
+                    <div className={styles.sectionHeader}>
+                      <FileText size={32} />
+                      <div>
+                        <h1>System Modules</h1>
+                        <p>Detailed specification and documentation for each FocusWord system module</p>
+                      </div>
+                    </div>
+                    <div className={styles.sectionContent}>
+                      <p>
+                        Below you will find comprehensive technical and user documentation for every
+                        module of the FocusWord application. Click on any module name in the Table of Contents
+                        to jump directly to it.
+                      </p>
+                    </div>
+                  </section>
+                )}
+
+                {/* Dynamic System Modules Documentation */}
+                {Object.entries(docs).map(([moduleKey, data]) => {
+                  const label = moduleKey
+                    .split("-")
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(" ");
+                  return (
+                    <section key={moduleKey} id={moduleKey} className={styles.contentSection}>
+                      <div className={styles.sectionHeader}>
+                        <FileText size={28} />
+                        <div>
+                          <h1>{label} Module</h1>
+                          <p>System documentation and specifications</p>
+                        </div>
+                      </div>
+                      <div className={styles.sectionContent}>
+                        {data.techSpec && (
+                          <div id={`${moduleKey}-tech-spec`} className={styles.subsection}>
+                            <h2>Technical Specification</h2>
+                            <div className={styles.markdownBody}>
+                              {renderMarkdown(data.techSpec)}
+                            </div>
+                          </div>
+                        )}
+                        {data.userGuide && (
+                          <div id={`${moduleKey}-user-guide`} className={styles.subsection}>
+                            <h2>User Guide</h2>
+                            <div className={styles.markdownBody}>
+                              {renderMarkdown(data.userGuide)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  );
+                })}
               </main>
             </div>
 
@@ -546,5 +727,44 @@ PORT=1331`}</code>
     </div>
   );
 };
+
+export async function getStaticProps() {
+  const docRoot = path.join(process.cwd(), "..", "documentation");
+  const docs: Record<string, ModuleDoc> = {};
+
+  try {
+    if (fs.existsSync(docRoot)) {
+      const folders = fs
+        .readdirSync(docRoot)
+        .filter((f) => fs.statSync(path.join(docRoot, f)).isDirectory());
+
+      folders.forEach((folder) => {
+        const folderPath = path.join(docRoot, folder);
+        const techSpecPath = path.join(folderPath, "technical_specification.md");
+        const userGuidePath = path.join(folderPath, "user_guide.md");
+
+        let techSpec = "";
+        let userGuide = "";
+
+        if (fs.existsSync(techSpecPath)) {
+          techSpec = fs.readFileSync(techSpecPath, "utf-8");
+        }
+        if (fs.existsSync(userGuidePath)) {
+          userGuide = fs.readFileSync(userGuidePath, "utf-8");
+        }
+
+        docs[folder] = { techSpec, userGuide };
+      });
+    }
+  } catch (error) {
+    console.error("Error reading documentation files:", error);
+  }
+
+  return {
+    props: {
+      docs,
+    },
+  };
+}
 
 export default WikiHomePage;

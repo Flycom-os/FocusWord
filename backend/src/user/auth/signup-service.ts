@@ -75,7 +75,19 @@ export class AuthService {
             targetPermissions = ['users:1', 'news:1', 'comments:1']; // Read, Create, Update
             break;
           case 2:
-            targetPermissions = ['users:2', 'news:2', 'comments:2']; // Read, Create, Delete
+            targetPermissions = ['users:2',
+              'roles:2',
+              'news:2',
+              'comments:2',
+              'history:2',
+              'process:2',
+              'ballons:2',
+              'tectechnical_gasses:2',
+              'media-files:2',
+              'pages:2',
+              'sliders:2',
+              'records:2',
+              'record-categories:2',]; // Read, Create, Delete
             break;
           default:
             // This case should ideally not be reached due to outer if

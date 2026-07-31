@@ -136,7 +136,7 @@ const ArticlesArticle = () => {
       });
       setArticles(data);
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Не удалось загрузить статьи", "error");
+      showToast(error?.response?.data?.message || "Failed to load articles", "error");
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +176,7 @@ const ArticlesArticle = () => {
   const handleAiAssist = async () => {
     if (!accessToken) return;
     const prompt = window.prompt(
-      'Что сделать с текстом? Например: "сделай короче и структурированнее"',
+      'What would you like to do with the text? For example: "make it shorter and more structured"',
     );
     if (!prompt?.trim() || !editorData) return;
     setIsAiLoading(true);
@@ -193,9 +193,9 @@ const ArticlesArticle = () => {
         blocks: [{ type: "paragraph", data: { text: result.text } }],
       });
 
-      showToast("AI обновил текст", "success");
+      showToast("AI updated the text", "success");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "AI недоступен", "error");
+      showToast(error?.response?.data?.message || "AI is unavailable", "error");
     } finally {
       setIsAiLoading(false);
     }
@@ -208,7 +208,7 @@ const ArticlesArticle = () => {
 
     if (form.featuredSliderId) {
       if (!accessToken) {
-        showToast("Токен доступа отсутствует для предпросмотра слайдера", "error");
+        showToast("Access token is missing for slider preview", "error");
         return;
       }
       setIsLoadingPreviewSlider(true);
@@ -217,7 +217,7 @@ const ArticlesArticle = () => {
         setPreviewSlider(slider);
       } catch (error: any) {
         showToast(
-          error?.response?.data?.message || "Не удалось загрузить слайдер для предпросмотра",
+          error?.response?.data?.message || "Failed to load slider for preview",
           "error",
         );
       } finally {
@@ -231,7 +231,7 @@ const ArticlesArticle = () => {
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast("Название и slug обязательны", "error");
+      showToast("Name and slug are required", "error");
       return;
     }
     setIsSaving(true);
@@ -262,15 +262,15 @@ const ArticlesArticle = () => {
       if (editingArticle) {
         const updated = await updateArticle(accessToken, editingArticle.id, articleData);
         setArticles((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        showToast("Статья обновлена", "success");
+        showToast("Article updated", "success");
       } else {
         const created = await createArticle(accessToken, articleData);
         setArticles((prev) => [created, ...prev]);
-        showToast("Статья создана", "success");
+        showToast("Article created", "success");
       }
       setIsModalOpen(false);
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Ошибка сохранения", "error");
+      showToast(error?.response?.data?.message || "Failed to save", "error");
     } finally {
       setIsSaving(false);
     }
@@ -278,13 +278,13 @@ const ArticlesArticle = () => {
 
   const handleDelete = async (id: number) => {
     if (!accessToken) return;
-    if (!confirm("Удалить статью?")) return;
+    if (!confirm("Are you sure you want to delete this article?")) return;
     try {
       await deleteArticle(accessToken, id);
       setArticles((prev) => prev.filter((item) => item.id !== id));
-      showToast("Статья удалена", "success");
+      showToast("Article deleted", "success");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Не удалось удалить статью", "error");
+      showToast(error?.response?.data?.message || "Failed to delete article", "error");
     }
   };
 
@@ -307,13 +307,13 @@ const ArticlesArticle = () => {
           className={styles.search}
           theme="secondary"
           icon="left"
-          placeholder="Поиск статей..."
+          placeholder="Search articles..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
         <PermissionGate resource="articles" level={2}>
           <UiButton theme="primary" onClick={handleCreateArticle}>
-            Создать статью
+            Create Article
           </UiButton>
         </PermissionGate>
       </div>
@@ -327,20 +327,20 @@ const ArticlesArticle = () => {
               isAllSelected={tableSelection.isAllSelected()}
               isPartiallySelected={tableSelection.isPartiallySelected()}
             />
-            <TableHead>Название</TableHead>
+            <TableHead> Name </TableHead>
             <TableHead>Slug</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Действия</TableHead>
+            <TableHead> Status </TableHead>
+            <TableHead> Actions </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={5}>Загрузка...</TableCell>
+              <TableCell colSpan={5}> Loading... </TableCell>
             </TableRow>
           ) : articles.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5}>Статьи не найдены</TableCell>
+              <TableCell colSpan={5}>Articles not found</TableCell>
             </TableRow>
           ) : (
             articles.map((article, index) => (
@@ -354,16 +354,12 @@ const ArticlesArticle = () => {
                 <TableCell>{article.title}</TableCell>
                 <TableCell>{article.slug}</TableCell>
                 <TableCell>
-                  {article.status === "published" ? "Опубликовано" : "Черновик"}
+                  {article.status === "published" ? "Published" : "Draft"}
                 </TableCell>
                 <TableCell className={styles.actions}>
-                  <UiButton theme="secondary" onClick={() => handleEditArticle(article)}>
-                    Редактировать
-                  </UiButton>
+                  <UiButton theme="secondary" onClick={() => handleEditArticle(article)}> Edit </UiButton>
                   <PermissionGate resource="articles" level={2}>
-                    <UiButton theme="warning" onClick={() => handleDelete(article.id)}>
-                      Удалить
-                    </UiButton>
+                    <UiButton theme="warning" onClick={() => handleDelete(article.id)}> Delete </UiButton>
                   </PermissionGate>
                 </TableCell>
               </SelectableTableRow>
@@ -385,7 +381,7 @@ const ArticlesArticle = () => {
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={editingArticle ? "Редактировать статью" : "Создать статью"}
+          title={editingArticle ? "Edit Article" : "Create Article"}
         >
           <div className={styles.modalContent}>
             <div className={styles.grid}>
@@ -394,7 +390,7 @@ const ArticlesArticle = () => {
                   className={styles.input}
                   value={form.title}
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  placeholder="Название"
+                  placeholder="Name"
                 />
                 <div className={styles.editorWrapper}>
                   <Editor holder="editorjs-container" data={editorData} onChange={setEditorData} />
@@ -413,17 +409,17 @@ const ArticlesArticle = () => {
                   onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
                 />
 
-                <label className={styles.label}>Статус</label>
+                <label className={styles.label}> Status </label>
                 <Select
                   options={[
-                    { value: "draft", label: "Черновик" },
-                    { value: "published", label: "Опубликовано" },
+                    { value: "draft", label: "Draft" },
+                    { value: "published", label: "Published" },
                   ]}
                   value={form.status}
                   onChange={(value) => setForm((prev) => ({ ...prev, status: value as string }))}
                 />
 
-                <label className={styles.label}>Шаблон</label>
+                <label className={styles.label}>Template</label>
                 <Input
                   value={form.template}
                   onChange={(event) =>
@@ -431,7 +427,7 @@ const ArticlesArticle = () => {
                   }
                 />
 
-                <label className={styles.label}>SEO заголовок</label>
+                <label className={styles.label}>SEO Title</label>
                 <Input
                   value={form.seoTitle}
                   onChange={(event) =>
@@ -439,7 +435,7 @@ const ArticlesArticle = () => {
                   }
                 />
 
-                <label className={styles.label}>SEO описание</label>
+                <label className={styles.label}>SEO Description</label>
                 <textarea
                   className={styles.textarea}
                   value={form.seoDescription}
@@ -448,7 +444,7 @@ const ArticlesArticle = () => {
                   }
                 />
 
-                <label className={styles.label}>Ключевые слова (через запятую)</label>
+                <label className={styles.label}>Meta Keywords (comma-separated)</label>
                 <Input
                   value={form.metaKeywords}
                   onChange={(event) =>
@@ -456,10 +452,10 @@ const ArticlesArticle = () => {
                   }
                 />
 
-                <label className={styles.label}>Основной слайдер</label>
+                <label className={styles.label}>Featured Slider</label>
                 <Select
                   options={[
-                    { value: "", label: "Без слайдера" },
+                    { value: "", label: "No Slider" },
                     ...sliders.map((slider) => ({
                       value: slider.id.toString(),
                       label: slider.name,
@@ -478,14 +474,10 @@ const ArticlesArticle = () => {
             </div>
 
             <div className={styles.modalActions}>
-              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
-                Отмена
-              </UiButton>
-              <UiButton theme="secondary" onClick={handlePreview}>
-                Предпросмотр
-              </UiButton>
+              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}> Cancel </UiButton>
+              <UiButton theme="secondary" onClick={handlePreview}> Preview </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
-                {isSaving ? "Сохранение..." : "Сохранить"}
+                {isSaving ? "Saving..." : "Save"}
               </UiButton>
             </div>
           </div>
@@ -495,35 +487,33 @@ const ArticlesArticle = () => {
       <Modal
         open={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
-        title="Предпросмотр статьи"
+        title="Article Preview"
       >
         <div className={styles.previewModalContent}>
           <div className={styles.previewHeader}>
-            <h2>{form.title || "Предпросмотр статьи"}</h2>
+            <h2>{form.title || "Article Preview"}</h2>
             <p className={styles.previewSubtitle}>
-              Статус: {form.status === "published" ? "Опубликовано" : "Черновик"} · Шаблон:{" "}
+              Status: {form.status === "published" ? "Published" : "Draft"} · Template:{" "}
               {form.template}
             </p>
           </div>
 
           {isLoadingPreviewSlider ? (
-            <div className={styles.previewLoader}>Загрузка слайдера...</div>
+            <div className={styles.previewLoader}>Loading slider...</div>
           ) : previewSlider ? (
             <div className={styles.previewSliderWrapper}>
               <PageSlider slider={previewSlider as any} autoPlay={false} showArrows showDots />
             </div>
           ) : form.featuredSliderId ? (
             <div className={styles.previewEmpty}>
-              Не удалось загрузить слайдер для предпросмотра.
+              Failed to load slider for preview.
             </div>
           ) : null}
 
           <div className={styles.previewBody} dangerouslySetInnerHTML={{ __html: previewHtml }} />
 
           <div className={styles.modalActions}>
-            <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}>
-              Закрыть
-            </UiButton>
+            <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}> Close </UiButton>
           </div>
         </div>
       </Modal>

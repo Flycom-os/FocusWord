@@ -86,7 +86,7 @@ const BasicEditor: React.FC<BasicEditorProps> = ({ holder, data, onChange, place
         id={holder}
         value={editorContent}
         onChange={handleContentChange}
-        placeholder={placeholder || "Начните писать контент страницы здесь..."}
+        placeholder={placeholder || "Start writing page content here..."}
         style={{
           width: "100%",
           minHeight: "400px",

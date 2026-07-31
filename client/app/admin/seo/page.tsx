@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
+import { UiButton } from "@/src/shared/ui";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
 import styles from "./seo.module.css";
 
@@ -142,13 +142,14 @@ export default function SEOPage() {
             placeholder="URL favicon"
             readOnly
           />
-          <Button
+          <UiButton
             type="button"
             onClick={() => handleImageSelect("favicon")}
             className={styles.mediaButton}
+            theme="secondary"
           >
             📷 Select
-          </Button>
+          </UiButton>
         </div>
         {seoSettings.favicon && (
           <div className={styles.preview}>
@@ -170,13 +171,14 @@ export default function SEOPage() {
             placeholder="URL of the image for social media"
             readOnly
           />
-          <Button
+          <UiButton
             type="button"
             onClick={() => handleImageSelect("ogImage")}
             className={styles.mediaButton}
+            theme="secondary"
           >
             📷 Select
-          </Button>
+          </UiButton>
         </div>
         {seoSettings.ogImage && (
           <div className={styles.preview}>
@@ -294,9 +296,9 @@ export default function SEOPage() {
         {activeTab === "technical" && renderTechnicalTab()}
 
         <div className={styles.actions}>
-          <Button onClick={handleSave} disabled={loading} className={styles.saveButton}>
+          <UiButton onClick={handleSave} disabled={loading} className={styles.saveButton} theme="primary">
             {loading ? "Saving..." : "Save Settings"}
-          </Button>
+          </UiButton>
         </div>
       </div>
     </div>

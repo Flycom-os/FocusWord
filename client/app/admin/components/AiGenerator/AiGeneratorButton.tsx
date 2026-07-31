@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  Sparkles
+} from "lucide-react";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
 import styles from "./AiGenerator.module.css";
 
@@ -61,10 +64,7 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={styles.aiButton}
-        title="Generate with AI"
-      >
-        ✨ Generate
+        className={styles.aiButton} title="Generate with AI" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Sparkles size={14} /> Generate
       </button>
 
       {isOpen && (

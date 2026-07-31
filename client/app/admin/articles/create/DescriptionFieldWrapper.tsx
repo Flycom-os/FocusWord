@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Image as ImageIcon, Presentation, Box } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTheme } from "@/src/shared/ui/DescriptionField/use-Theme";
 import MarkdownRenderer from "@/src/shared/ui/DescriptionField/MarkdownRenderer";
@@ -72,11 +73,11 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
               }
               return "";
             case "media":
-              return `📷 Media: ${block.data?.filename || "No name"}`;
+              return `[Media]: ${block.data?.filename || "No name"}`;
             case "slider":
-              return `🎠 Slider: ${block.data?.name || "No name"}`;
+              return `[Slider]: ${block.data?.name || "No name"}`;
             case "widget":
-              return `🧩 Widget: ${block.data?.name || block.data?.slug || "No name"}`;
+              return `[Widget]: ${block.data?.name || block.data?.slug || "No name"}`;
             default:
               return "";
           }
@@ -101,30 +102,24 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onMediaSelect}
-                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Add media file"
-              >
-                📷 Media
+                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5" title="Add media file" >
+              <ImageIcon size={14} /> Media
               </button>
             )}
             {onSliderSelect && (
               <button
                 type="button"
                 onClick={onSliderSelect}
-                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Add slider"
-              >
-                🎠 Slider
+                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5" title="Add slider" >
+              <Presentation size={14} /> Slider
               </button>
             )}
             {onWidgetSelect && (
               <button
                 type="button"
                 onClick={onWidgetSelect}
-                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-                title="Add widget"
-              >
-                🧩 Widget
+                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5" title="Add widget" >
+              <Box size={14} /> Widget
               </button>
             )}
           </div>

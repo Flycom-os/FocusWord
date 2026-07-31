@@ -34,7 +34,7 @@ interface StoredAuth {
   expiresAt: number;
 }
 
-const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 час в миллисекундах
+const TOKEN_LIFETIME = 60 * 60 * 1000; // 1 hour in milliseconds
 
 const parsePermission = (permission: PermissionString) => {
   const [resource, levelStr] = permission.split(":");
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     (storedAuth: StoredAuth) => {
       const now = Date.now();
       if (now >= storedAuth.expiresAt) {
-        // Токен истек, очищаем
+        // Token expired, clearing
         clear();
         return false;
       }
@@ -87,15 +87,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const parsed: StoredAuth = JSON.parse(raw);
       console.log("Auth: Parsed data:", parsed);
 
-      // Проверяем наличие полей времени
+      // Check for timestamp fields
       if (!parsed.createdAt || !parsed.expiresAt) {
         console.log("Auth: Old format data, clearing");
-        // Старый формат данных, очищаем
+        // Old format data, clearing
         clear();
         return;
       }
 
-      // Проверяем время жизни токена
+      // Check token lifetime
       if (!checkTokenExpiration(parsed)) {
         console.log("Auth: Token expired, clearing and redirecting");
         return;
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [checkTokenExpiration, clear, router]);
 
-  // Проверяем токен каждую минуту
+  // Check token every minute
   useEffect(() => {
     if (!accessToken || typeof window === "undefined") return;
 
@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           clear();
         }
       }
-    }, 60000); // Проверяем каждую минуту
+    }, 60000); // Check every minute
 
     return () => clearInterval(interval);
   }, [accessToken, checkTokenExpiration, clear, router]);

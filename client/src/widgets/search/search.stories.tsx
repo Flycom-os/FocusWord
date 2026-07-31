@@ -13,7 +13,7 @@ const SearchWrapper = () => {
   return (
     <Search
       setSearchValue={(val: string) => {
-        console.log("Поисковый запрос:", val);
+        console.log("Searchовый запрос:", val);
         setValue(val);
       }}
     />

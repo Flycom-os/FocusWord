@@ -60,7 +60,7 @@ export const MediaPickerModal = ({
           setMediaFiles(res.data);
           setMediaTotal(res.total);
         } catch (error: any) {
-          const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
+          const message = error?.response?.data?.message || "Failed to load media files";
           showToast(message, "error");
         } finally {
           setIsLoadingMedia(false);
@@ -76,12 +76,12 @@ export const MediaPickerModal = ({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Выбрать медиа" zIndex={zIndex}>
+    <Modal open={open} onClose={onClose} title="Select Media" zIndex={zIndex}>
       <div className={styles.mediaModalContent}>
         {isLoadingMedia ? (
-          <div className={styles.centeredMessage}>Загрузка медиафайлов...</div>
+          <div className={styles.centeredMessage}>Loading media files...</div>
         ) : mediaFiles.length === 0 ? (
-          <div className={styles.centeredMessage}>Медиафайлы не найдены</div>
+          <div className={styles.centeredMessage}>No media files found</div>
         ) : (
           <>
             <div className={styles.mediaGrid}>

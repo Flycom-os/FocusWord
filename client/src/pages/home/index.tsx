@@ -2,13 +2,12 @@
 
 import Input from "@/src/shared/ui/Input/ui-input";
 import styles from "@/src/pages/home/index.module.css";
-import { Checkbox } from "@/src/shared/ui";
-import Search from "@/src/widgets/search";
-import { useEffect, useState } from "react";
+import { Checkbox, UiButton } from "@/src/shared/ui";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import Button from "@/src/shared/ui/Button/ui-button";
 import DescriptionField from "@/src/shared/ui/DescriptionField/DescriptionField";
 import { Form } from "@/src/shared/ui/DescriptionField/form";
+
 /**
  * @page Home
  */
@@ -33,41 +32,60 @@ const HomePage = () => {
   const handleCheckboxChange = () => {
     setIsChecked(!isChecked);
     form.setValue("isActive", !isChecked);
-    console.log(!isChecked);
   };
 
   const onSubmit = (data: HomeFormData) => {
     console.log("Form data:", data);
-    // Здесь можно добавить логику сохранения данных
+    // Add save logic here
   };
 
   return (
     <div className={styles.container}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Input
-            className={styles.input}
-            type="text"
-            theme="secondary"
-            icon="right"
-            placeholder="Primary Input"
-            {...form.register("title")}
-          />
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <h1>Home Page Settings</h1>
+          <p>Configure home page metadata and configuration parameters</p>
+        </div>
 
-          <DescriptionField
-            form={form}
-            name="description"
-            label="Description"
-            placeholder="Enter description in Markdown..."
-          />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className={styles.formGroup}>
+              <label>Title</label>
+              <Input
+                className={styles.input}
+                type="text"
+                theme="secondary"
+                icon="right"
+                placeholder="Enter page title"
+                {...form.register("title")}
+              />
+            </div>
 
-          <Checkbox checked={isChecked} onChange={handleCheckboxChange} />
+            <div className={styles.formGroup}>
+              <label>Description</label>
+              <DescriptionField
+                form={form}
+                name="description"
+                label=""
+                placeholder="Enter description in Markdown..."
+              />
+            </div>
 
-          <Button type="submit" theme="primary" className="mt-4">
-            Save
-          </Button>
-        </form>
-      </Form>
+            <div className={styles.checkboxContainer}>
+              <Checkbox checked={isChecked} onChange={handleCheckboxChange} />
+              <span className={styles.checkboxLabel} onClick={handleCheckboxChange}>
+                Is Active Page
+              </span>
+            </div>
+
+            <div className={styles.actions}>
+              <UiButton type="submit" theme="primary">
+                Save Settings
+              </UiButton>
+            </div>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 };

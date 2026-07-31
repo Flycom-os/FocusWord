@@ -227,7 +227,7 @@
   background: #4b5563;
 }
 
-/* Стили для разных типов полей */
+/* Styles for different types of fields */
 .settingField:has(.input[type="password"]) .input {
   font-family: monospace;
   letter-spacing: 0.1em;
@@ -241,7 +241,7 @@
   grid-column: 1 / -1;
 }
 
-/* Валидация */
+/* Validation */
 .input:invalid,
 .select:invalid,
 .textarea:invalid {
@@ -279,7 +279,7 @@
   }
 }
 
-/* Темная тема */
+/* Dark theme */
 :global(.dark) .settingsPage {
   background: #1f2937;
   color: white;

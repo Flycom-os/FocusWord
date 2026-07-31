@@ -64,14 +64,14 @@ const Slider: React.FC<SliderProps> = ({
   return (
     <div className={styles.slider}>
       {onClose && (
-        <button className={styles.closeButton} onClick={onClose} aria-label="Закрыть">
+        <button className={styles.closeButton} onClick={onClose} aria-label="Close">
           ×
         </button>
       )}
 
       <div className={styles.sliderContent}>
         {showControls && items.length > 1 && (
-          <button className={styles.navButton} onClick={goToPrevious} aria-label="Предыдущий">
+          <button className={styles.navButton} onClick={goToPrevious} aria-label="Previous">
             ‹
           </button>
         )}
@@ -100,7 +100,7 @@ const Slider: React.FC<SliderProps> = ({
         </div>
 
         {showControls && items.length > 1 && (
-          <button className={styles.navButton} onClick={goToNext} aria-label="Следующий">
+          <button className={styles.navButton} onClick={goToNext} aria-label="Next">
             ›
           </button>
         )}
@@ -113,7 +113,7 @@ const Slider: React.FC<SliderProps> = ({
               key={index}
               className={`${styles.dot} ${index === currentIndex ? styles.active : ""}`}
               onClick={() => goToSlide(index)}
-              aria-label={`Перейти к слайду ${index + 1}`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

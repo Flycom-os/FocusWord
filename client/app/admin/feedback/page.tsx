@@ -15,6 +15,7 @@ import { Feedback } from "@/src/entities/Feedback";
 import { feedbackApi } from "@/src/entities/Feedback/api";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import styles from "./feedback.module.css";
+import { UiButton } from "@/src/shared/ui";
 
 const FeedbackPage = () => {
   const [feedback, setFeedback] = useState<Feedback[]>([]);
@@ -124,10 +125,10 @@ const FeedbackPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Feedback & Requests</h1>
-        <button className={styles.addButton}>
+        <UiButton theme="primary" className={styles.addButton}>
           <Plus size={20} />
           New Feedback
-        </button>
+        </UiButton>
       </div>
 
       <div className={styles.statsContainer}>

@@ -1,4 +1,15 @@
 "use client";
+import {
+  CreditCard,
+  Landmark,
+  Coins,
+  Plus,
+  Edit3,
+  Trash2,
+  Eye,
+  EyeOff
+} from "lucide-react";
+
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -138,13 +149,13 @@ export default function PaymentsPage() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "card":
-        return "💳";
+        return <CreditCard size={18} />;
       case "bank":
-        return "🏦";
+        return <Landmark size={18} />;
       case "crypto":
         return "₿";
       default:
-        return "💰";
+        return <Coins size={18} />;
     }
   };
 
@@ -177,8 +188,7 @@ export default function PaymentsPage() {
           {activeTab === "gateways" && (
             <div className={styles.content}>
               <div className={styles.toolbar}>
-                <Button onClick={handleCreateGateway} className={styles.createButton}>
-                  ➕ Create Gateway
+                <Button onClick={handleCreateGateway} className={styles.createButton} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Plus size={16} /> Create Gateway
                 </Button>
               </div>
 
@@ -216,21 +226,15 @@ export default function PaymentsPage() {
                         <div className={styles.actions}>
                           <Button
                             onClick={() => handleEditGateway(gateway)}
-                            className={styles.editButton}
-                          >
-                            ✏️
+                            className={styles.editButton} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><Edit3 size={16} />
                           </Button>
                           <Button
                             onClick={() => handleToggle(gateway.id, !gateway.isEnabled)}
-                            className={`${styles.toggleButton} ${gateway.isEnabled ? styles.disable : styles.enable}`}
-                          >
-                            {gateway.isEnabled ? "🔴" : "🟢"}
+                            className={`${styles.toggleButton} ${gateway.isEnabled ? styles.disable : styles.enable}`} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{gateway.isEnabled ? <EyeOff size={16} /> : <Eye size={16} />}
                           </Button>
                           <Button
                             onClick={() => handleDelete(gateway.id)}
-                            className={styles.deleteButton}
-                          >
-                            🗑️
+                            className={styles.deleteButton} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><Trash2 size={16} />
                           </Button>
                         </div>
                       </TableCell>

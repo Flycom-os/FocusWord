@@ -47,7 +47,7 @@ const MediaBlockView = ({ data }: { data: Record<string, unknown> }) => {
       )}
       {kind === "file" && (
         <a href={url} className={styles.mediaFileLink} target="_blank" rel="noopener noreferrer">
-          {filename || "Скачать файл"}
+          {filename || "Download File"}
         </a>
       )}
       {caption && <figcaption>{caption}</figcaption>}

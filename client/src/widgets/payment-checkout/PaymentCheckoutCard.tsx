@@ -102,7 +102,7 @@ export const PaymentCheckoutCard = ({ title, paymentMethodId }: PaymentCheckoutC
             className={styles.formInput}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Имя Фамилия"
+            placeholder="First Name Last Name"
           />
         </div>
 
