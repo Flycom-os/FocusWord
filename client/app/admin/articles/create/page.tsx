@@ -105,7 +105,7 @@ const CreateArticleArticle = () => {
           w.slug !== "header" &&
           w.slug !== "footer" &&
           !w.name.toLowerCase().includes("header") &&
-          !w.name.toLowerCase().includes("footer")
+          !w.name.toLowerCase().includes("footer"),
       );
       setWidgets(filtered);
     } catch (error) {
@@ -424,7 +424,7 @@ const CreateArticleArticle = () => {
             />
 
             <div className={styles.editorWrapper}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={articleSystemPrompt}
                   onGenerated={(content) => {
@@ -489,7 +489,10 @@ const CreateArticleArticle = () => {
             </div>
 
             {/* Checkbox enableFeedback */}
-            <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}>
+            <div
+              className={styles.formGroup}
+              style={{ display: "flex", alignItems: "center", gap: "8px", margin: "16px 0" }}
+            >
               <input
                 type="checkbox"
                 id="enableFeedback"
@@ -497,7 +500,11 @@ const CreateArticleArticle = () => {
                 onChange={(e) => setForm((prev) => ({ ...prev, enableFeedback: e.target.checked }))}
                 style={{ cursor: "pointer", width: "16px", height: "16px" }}
               />
-              <label htmlFor="enableFeedback" className={styles.label} style={{ margin: 0, cursor: "pointer" }}>
+              <label
+                htmlFor="enableFeedback"
+                className={styles.label}
+                style={{ margin: 0, cursor: "pointer" }}
+              >
                 Enable Feedback
               </label>
             </div>
@@ -508,7 +515,12 @@ const CreateArticleArticle = () => {
               <select
                 className={styles.select}
                 value={form.paymentMethodId || ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null }))}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    paymentMethodId: e.target.value ? parseInt(e.target.value, 10) : null,
+                  }))
+                }
               >
                 <option value="">No payment method</option>
                 {paymentMethods.map((m) => (
@@ -528,11 +540,11 @@ const CreateArticleArticle = () => {
             </div>
 
             <div className={styles.formGroup}>
-              <div style={{ marginBottom: '10px' }}>
+              <div style={{ marginBottom: "10px" }}>
                 <AiGeneratorButton
                   systemPrompt={seoSystemPrompt}
                   onGenerated={(content) => {
-                    setForm((prev) => ({ ...prev, seoDescription: content }))
+                    setForm((prev) => ({ ...prev, seoDescription: content }));
                   }}
                 />
               </div>

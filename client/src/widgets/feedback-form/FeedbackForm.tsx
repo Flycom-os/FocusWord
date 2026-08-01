@@ -44,8 +44,8 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ className = "" }) =>
       console.error("Feedback submit error:", error);
       setStatus("error");
       setErrorMessage(
-        error?.response?.data?.message || 
-        "Произошла ошибка при отправке отзыва. Пожалуйста, попробуйте позже."
+        error?.response?.data?.message ||
+          "Произошла ошибка при отправке отзыва. Пожалуйста, попробуйте позже.",
       );
     }
   };
@@ -68,20 +68,13 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ className = "" }) =>
             <p className={styles.successText}>
               Ваш отзыв успешно отправлен и будет опубликован после модерации.
             </p>
-            <button 
-              onClick={() => setStatus("idle")} 
-              className={styles.resetButton}
-            >
+            <button onClick={() => setStatus("idle")} className={styles.resetButton}>
               Отправить еще один
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.form}>
-            {status === "error" && (
-              <div className={styles.errorAlert}>
-                {errorMessage}
-              </div>
-            )}
+            {status === "error" && <div className={styles.errorAlert}>{errorMessage}</div>}
 
             <div className={styles.ratingGroup}>
               <span className={styles.ratingLabel}>Ваша оценка:</span>
@@ -153,11 +146,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ className = "" }) =>
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={status === "submitting"}
-              className={styles.submitBtn}
-            >
+            <button type="submit" disabled={status === "submitting"} className={styles.submitBtn}>
               {status === "submitting" ? "Отправка..." : "Отправить отзыв"}
             </button>
           </form>

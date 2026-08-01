@@ -8,11 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { RecordsService } from './records.service';
-import {
-  ApiOkResponse,
-  ApiTags,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('public records')
 @Controller('public/records')

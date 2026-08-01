@@ -4,7 +4,7 @@ import App from "@/src/app/app";
 
 export const metadata: Metadata = {
   title: "TypeWord CMS",
-  description: "Добро пожаловать в TypeWord CMS",
+  description: "Welcome to TypeWord CMS",
 };
 
 const RootLayout = ({
@@ -13,7 +13,7 @@ const RootLayout = ({
   children: React.ReactNode;
 }>) => {
   return (
-    <html lang="ru">
+    <html lang="en">
       <head />
       <body>
         <App>{children}</App>

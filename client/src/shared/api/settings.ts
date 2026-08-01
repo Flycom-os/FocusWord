@@ -81,7 +81,7 @@ export const settingsApi = {
     settings: { key: string; value: string }[],
     force: boolean = false,
   ): Promise<SettingsDto[]> => {
-    const qs = force ? '?force=true' : '';
+    const qs = force ? "?force=true" : "";
     const { data } = await axios.put<SettingsDto[]>(
       `${API_URL}/settings/batch${qs}`,
       { settings },
@@ -98,37 +98,37 @@ export const settingsApi = {
     return [
       {
         category: "general",
-        title: "Общие настройки",
-        description: "Основные настройки сайта",
+        title: "General Settings",
+        description: "Main configuration options for the website",
         settings: [
           {
             key: "site_name",
-            title: "Название сайта",
-            description: "Название вашего сайта",
+            title: "Site Name",
+            description: "The name of your website",
             type: "string",
             defaultValue: "FocusWord",
             validation: { required: true },
           },
           {
             key: "site_description",
-            title: "Описание сайта",
-            description: "Краткое описание сайта",
+            title: "Site Description",
+            description: "A short description of the website",
             type: "string",
             defaultValue: "",
             validation: { max: 500 },
           },
           {
             key: "site_url",
-            title: "URL сайта",
-            description: "Основной URL сайта",
+            title: "Site URL",
+            description: "The primary URL of the website",
             type: "string",
             defaultValue: "https://focusword.com",
             validation: { required: true, pattern: "^https?://.+" },
           },
           {
             key: "maintenance_mode",
-            title: "Режим обслуживания",
-            description: "Включить режим обслуживания",
+            title: "Maintenance Mode",
+            description: "Enable maintenance mode",
             type: "boolean",
             defaultValue: "false",
           },
@@ -136,42 +136,42 @@ export const settingsApi = {
       },
       {
         category: "appearance",
-        title: "Внешний вид",
-        description: "Настройки внешнего вида сайта",
+        title: "Appearance",
+        description: "Website theme and appearance settings",
         settings: [
           {
             key: "theme_mode",
-            title: "Режим темы",
-            description: "Переключение между дневной и ночной темой",
+            title: "Theme Mode",
+            description: "Switch between light and dark themes",
             type: "string",
             defaultValue: "light",
           },
           {
             key: "theme",
-            title: "Тема",
-            description: "Основная тема сайта",
+            title: "Theme",
+            description: "The main website theme",
             type: "string",
             defaultValue: "default",
           },
           {
             key: "primary_color",
-            title: "Основной цвет",
-            description: "Основной цвет темы",
+            title: "Primary Color",
+            description: "The primary color of the theme",
             type: "string",
             defaultValue: "#3b82f6",
             validation: { pattern: "^#[0-9a-fA-F]{6}$" },
           },
           {
             key: "logo_url",
-            title: "URL логотипа",
-            description: "URL логотипа сайта",
+            title: "Logo URL",
+            description: "URL of the website logo",
             type: "string",
             defaultValue: "",
           },
           {
             key: "favicon_url",
-            title: "URL фавикона",
-            description: "URL фавикона сайта",
+            title: "Favicon URL",
+            description: "URL of the website favicon",
             type: "string",
             defaultValue: "",
           },
@@ -179,49 +179,50 @@ export const settingsApi = {
       },
       {
         category: "email",
-        title: "Email настройки",
-        description: "Настройки отправки email",
+        title: "Email Settings",
+        description: "Configuration for outgoing email notifications",
         settings: [
           {
             key: "smtp_host",
-            title: "SMTP хост",
-            description: "SMTP сервер для отправки email",
+            title: "SMTP Host",
+            description: "SMTP server host name",
             type: "string",
             defaultValue: "",
           },
           {
             key: "smtp_port",
-            title: "SMTP порт",
-            description: "Порт SMTP сервера",
+            title: "SMTP Port",
+            description: "SMTP server port number",
             type: "number",
             defaultValue: "587",
             validation: { min: 1, max: 65535 },
           },
           {
             key: "smtp_username",
-            title: "SMTP пользователь",
-            description: "Имя пользователя SMTP",
+            title: "SMTP Username",
+            description: "Username for SMTP authentication",
             type: "string",
             defaultValue: "",
           },
           {
             key: "smtp_password",
-            title: "SMTP пароль",
-            description: "Пароль SMTP",
+            title: "SMTP Password",
+            description: "Password for SMTP authentication",
             type: "string",
             defaultValue: "",
           },
           {
             key: "mailer_config",
-            title: "Mailer config (JSON)",
-            description: "JSON-конфигурация для mailer (например провайдер, дополнительные опции). Можно задать массив/объект, например {\"host\":...,\"port\":...}.",
+            title: "Mailer Config (JSON)",
+            description:
+              'JSON configuration for mailer (e.g. provider, extra options) like {"host":...,"port":...}.',
             type: "json",
             defaultValue: "{}",
           },
           {
             key: "email_from",
-            title: "Email отправителя",
-            description: "Email адрес для отправки",
+            title: "Sender Email",
+            description: "The email address outgoing mails will be sent from",
             type: "string",
             defaultValue: "noreply@focusword.com",
             validation: { required: true, pattern: "^[^@]+@[^@]+.[^@]+$" },
@@ -230,36 +231,36 @@ export const settingsApi = {
       },
       {
         category: "security",
-        title: "Безопасность",
-        description: "Настройки безопасности сайта",
+        title: "Security",
+        description: "Website security and authentication policies",
         settings: [
           {
             key: "enable_2fa",
-            title: "Двухфакторная аутентификация",
-            description: "Включить 2FA для пользователей",
+            title: "Two-Factor Authentication",
+            description: "Enable 2FA for website users",
             type: "boolean",
             defaultValue: "false",
           },
           {
             key: "session_timeout",
-            title: "Время сессии",
-            description: "Время жизни сессии в минутах",
+            title: "Session Timeout",
+            description: "Session lifetime duration in minutes",
             type: "number",
             defaultValue: "60",
             validation: { min: 5, max: 1440 },
           },
           {
             key: "max_login_attempts",
-            title: "Макс. попыток входа",
-            description: "Максимальное количество попыток входа",
+            title: "Max Login Attempts",
+            description: "Maximum number of allowed login attempts",
             type: "number",
             defaultValue: "5",
             validation: { min: 1, max: 20 },
           },
           {
             key: "lockout_duration",
-            title: "Время блокировки",
-            description: "Время блокировки в минутах",
+            title: "Lockout Duration",
+            description: "Account lockout duration in minutes",
             type: "number",
             defaultValue: "15",
             validation: { min: 1, max: 1440 },
@@ -268,27 +269,27 @@ export const settingsApi = {
       },
       {
         category: "analytics",
-        title: "Аналитика",
-        description: "Настройки аналитики и метрик",
+        title: "Analytics",
+        description: "Settings for visitor analytics and metrics tracking",
         settings: [
           {
             key: "google_analytics_id",
             title: "Google Analytics ID",
-            description: "ID Google Analytics",
+            description: "ID parameter for Google Analytics",
             type: "string",
             defaultValue: "",
           },
           {
             key: "yandex_metrica_id",
-            title: "Яндекс.Метрика ID",
-            description: "ID Яндекс.Метрики",
+            title: "Yandex Metrika ID",
+            description: "ID parameter for Yandex Metrica",
             type: "string",
             defaultValue: "",
           },
           {
             key: "enable_tracking",
-            title: "Включить отслеживание",
-            description: "Включить отслеживание пользователей",
+            title: "Enable Tracking",
+            description: "Enable user activity tracking",
             type: "boolean",
             defaultValue: "true",
           },
@@ -296,27 +297,27 @@ export const settingsApi = {
       },
       {
         category: "database",
-        title: "Управление базой данных",
-        description: "Импорт и экспорт базы данных",
+        title: "Database Management",
+        description: "Database export and import configuration",
         settings: [
           {
             key: "auto_backup",
-            title: "Автоматическое резервное копирование",
-            description: "Включить автоматическое создание резервных копий",
+            title: "Automatic Backup",
+            description: "Enable automated database backups",
             type: "boolean",
             defaultValue: "true",
           },
           {
             key: "backup_frequency",
-            title: "Частота резервного копирования",
-            description: "Как часто создавать резервные копии",
+            title: "Backup Frequency",
+            description: "How often backups should be created",
             type: "string",
             defaultValue: "daily",
           },
           {
             key: "max_backups",
-            title: "Максимальное количество копий",
-            description: "Максимальное количество хранимых резервных копий",
+            title: "Max Backups Limit",
+            description: "Maximum number of stored backup archives",
             type: "number",
             defaultValue: "7",
             validation: { min: 1, max: 30 },
@@ -350,12 +351,27 @@ export const settingsApi = {
   },
 
   // Test mailer with transient config
-  testMailer: async (token: string | null, to: string, mailerConfig: any, subject?: string, text?: string, html?: string) => {
-    const body: any = { to, subject: subject || 'Test email from FocusWord', text: text || 'Test', html };
+  testMailer: async (
+    token: string | null,
+    to: string,
+    mailerConfig: any,
+    subject?: string,
+    text?: string,
+    html?: string,
+  ) => {
+    const body: any = {
+      to,
+      subject: subject || "Test email from FocusWord",
+      text: text || "Test",
+      html,
+    };
     if (mailerConfig) {
-      body.mailerConfig = typeof mailerConfig === 'string' ? mailerConfig : JSON.stringify(mailerConfig);
+      body.mailerConfig =
+        typeof mailerConfig === "string" ? mailerConfig : JSON.stringify(mailerConfig);
     }
-    const { data } = await axios.post(`${API_URL}/mailer/test`, body, { headers: authHeaders(token) });
+    const { data } = await axios.post(`${API_URL}/mailer/test`, body, {
+      headers: authHeaders(token),
+    });
     return data;
   },
 };

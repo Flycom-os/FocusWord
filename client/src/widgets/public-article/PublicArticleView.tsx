@@ -21,7 +21,7 @@ export const PublicArticleView = ({ article, showMeta = false }: PublicArticleVi
         <h1 className={styles.title}>{article.title}</h1>
         {showMeta && article.publishedAt && (
           <p className={styles.meta}>
-            Опубликовано: {new Date(article.publishedAt).toLocaleDateString("ru-RU")}
+            Publishedо: {new Date(article.publishedAt).toLocaleDateString("ru-RU")}
           </p>
         )}
       </header>
@@ -58,7 +58,7 @@ export const PublicArticleView = ({ article, showMeta = false }: PublicArticleVi
 
       {article.categories && article.categories.length > 0 && (
         <section className={styles.categories}>
-          <h3>Категории:</h3>
+          <h3>Categories:</h3>
           <div className={styles.categoryTags}>
             {article.categories.map((cat: any) => (
               <span key={cat.id} className={styles.categoryTag}>

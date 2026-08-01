@@ -28,14 +28,23 @@ export class EmailProviderService {
   }
 
   private decryptSettings(settings: Prisma.JsonValue): Record<string, any> {
-    if (!settings || typeof settings !== 'object' || !('iv' in settings) || !('encryptedData' in settings)) {
+    if (
+      !settings ||
+      typeof settings !== 'object' ||
+      !('iv' in settings) ||
+      !('encryptedData' in settings)
+    ) {
       return {};
     }
-    const decryptedString = this.cryptoService.decrypt(settings as { iv: string; encryptedData: string });
+    const decryptedString = this.cryptoService.decrypt(
+      settings as { iv: string; encryptedData: string },
+    );
     return JSON.parse(decryptedString);
   }
 
-  async create(createEmailProviderDto: CreateEmailProviderDto): Promise<EmailProvider> {
+  async create(
+    createEmailProviderDto: CreateEmailProviderDto,
+  ): Promise<EmailProvider> {
     const { settings, ...rest } = createEmailProviderDto;
     const data: Prisma.EmailProviderCreateInput = { ...rest };
     if (settings) {
@@ -47,21 +56,26 @@ export class EmailProviderService {
   async findAll(): Promise<EmailProvider[]> {
     const providers = await this.prisma.emailProvider.findMany();
     // Decrypt settings for all providers, but be cautious in production with sensitive data exposure
-    return providers.map(provider => ({
+    return providers.map((provider) => ({
       ...provider,
       settings: this.decryptSettings(provider.settings),
     }));
   }
 
   async findOne(id: number): Promise<EmailProvider | null> {
-    const provider = await this.prisma.emailProvider.findUnique({ where: { id } });
+    const provider = await this.prisma.emailProvider.findUnique({
+      where: { id },
+    });
     if (provider) {
       return { ...provider, settings: this.decryptSettings(provider.settings) };
     }
     return null;
   }
 
-  async update(id: number, updateEmailProviderDto: UpdateEmailProviderDto): Promise<EmailProvider> {
+  async update(
+    id: number,
+    updateEmailProviderDto: UpdateEmailProviderDto,
+  ): Promise<EmailProvider> {
     const { settings, ...rest } = updateEmailProviderDto;
     const data: Prisma.EmailProviderUpdateInput = { ...rest };
     if (settings) {
@@ -71,7 +85,10 @@ export class EmailProviderService {
       where: { id },
       data,
     });
-    return { ...updatedProvider, settings: this.decryptSettings(updatedProvider.settings) };
+    return {
+      ...updatedProvider,
+      settings: this.decryptSettings(updatedProvider.settings),
+    };
   }
 
   async remove(id: number): Promise<EmailProvider> {
@@ -87,20 +104,34 @@ export class EmailProviderService {
     textBody?: string,
     attachments?: any[], // Adjust type as needed for Nodemailer
   ): Promise<any> {
-    const providerConfig = await this.prisma.emailProvider.findUnique({ where: { id: providerConfigId } });
+    const providerConfig = await this.prisma.emailProvider.findUnique({
+      where: { id: providerConfigId },
+    });
 
     if (!providerConfig) {
       throw new Error('Email provider configuration not found.');
     }
-    
+
     const decryptedSettings = this.decryptSettings(providerConfig.settings);
 
     const strategy = this.strategies.get(providerConfig.type);
     if (!strategy) {
-      throw new Error(`No email sending strategy found for type: ${providerConfig.type}`);
+      throw new Error(
+        `No email sending strategy found for type: ${providerConfig.type}`,
+      );
     }
 
-    this.logger.log(`Sending email using ${providerConfig.type} provider (ID: ${providerConfigId})`);
-    return strategy.send(decryptedSettings, from, to, subject, htmlBody, textBody, attachments);
+    this.logger.log(
+      `Sending email using ${providerConfig.type} provider (ID: ${providerConfigId})`,
+    );
+    return strategy.send(
+      decryptedSettings,
+      from,
+      to,
+      subject,
+      htmlBody,
+      textBody,
+      attachments,
+    );
   }
 }

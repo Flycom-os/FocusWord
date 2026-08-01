@@ -702,3 +702,75 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Markdown styling classes */
+.markdownBody {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.mdH1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.mdH2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 4px;
+}
+
+.mdH3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.mdH4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #4b5563;
+}
+
+.mdParagraph {
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+.mdLi {
+  margin-bottom: 6px;
+  list-style-type: disc;
+  margin-left: 20px;
+}
+
+.mdOlLi {
+  margin-bottom: 6px;
+  list-style-type: decimal;
+  margin-left: 20px;
+}
+
+.inlineCode {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+}
+
+.mdSpacer {
+  height: 12px;
+}

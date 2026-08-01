@@ -38,7 +38,9 @@ export class WidgetsController {
   @HasPermission('widgets:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new widget' })
-  @ApiCreatedResponse({ description: 'The widget has been successfully created.' })
+  @ApiCreatedResponse({
+    description: 'The widget has been successfully created.',
+  })
   create(@Body() createWidgetDto: CreateWidgetDto) {
     return this.widgetsService.create(createWidgetDto);
   }
@@ -84,8 +86,13 @@ export class WidgetsController {
   @HasPermission('widgets:1')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Change widget status' })
-  @ApiOkResponse({ description: 'The status of the widget has been successfully changed.' })
-  changeStatus(@Param('id') id: string, @Body('status') status: 'active' | 'inactive') {
+  @ApiOkResponse({
+    description: 'The status of the widget has been successfully changed.',
+  })
+  changeStatus(
+    @Param('id') id: string,
+    @Body('status') status: 'active' | 'inactive',
+  ) {
     return this.widgetsService.changeStatus(+id, status);
   }
 
@@ -93,7 +100,9 @@ export class WidgetsController {
   @HasPermission('widgets:1')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Change widget position' })
-  @ApiOkResponse({ description: 'The position of the widget has been successfully changed.' })
+  @ApiOkResponse({
+    description: 'The position of the widget has been successfully changed.',
+  })
   changePosition(@Param('id') id: string, @Body('position') position: number) {
     return this.widgetsService.changePosition(+id, position);
   }

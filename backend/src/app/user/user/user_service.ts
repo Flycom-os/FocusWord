@@ -1,7 +1,15 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException, Inject, BadRequestException, Logger } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+  Inject,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
-import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUserDto
+import { UpdateUserDto, SearchUsersDto } from '../../../dto/user.dto';
+import { CreateUserDto } from '../../../dto/create-user.dto'; // Import CreateUserDto
 import * as bcrypt from 'bcrypt'; // Import bcrypt
 import { Cache } from 'cache-manager'; // Keep Cache import for type if needed, but won't be used for injection
 import { Prisma } from '@prisma/client';
@@ -19,7 +27,7 @@ export class UserService {
     // This log is no longer relevant for the in-memory cache, but will remain for clarity on the change
     this.logger.log('UserService is now using direct IORedis client.');
   }
-  
+
   async getUserInfo(userId: number) {
     const cacheKey = `user_${userId}`;
     this.logger.log(`[GET] Checking Redis for key: ${cacheKey}`);
@@ -30,13 +38,14 @@ export class UserService {
       return JSON.parse(cachedUser); // Parse the stored string back to an object
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         comments: {
-          include: {
-          }
+          include: {},
         },
         role: true,
       },
@@ -54,7 +63,7 @@ export class UserService {
   async updateUser(userId: number, dto: UpdateUserDto) {
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: ({
+      data: {
         email: dto.email,
         password: dto.password,
         firstName: dto.firstName,
@@ -62,18 +71,19 @@ export class UserService {
         avatarUrl: dto.avatarUrl,
         themeMode: dto.themeMode,
         updatedAt: new Date(),
-      } as any),
+      } as any,
       include: {
         comments: {
-          include: {
-          }
+          include: {},
         },
         role: true, // Assuming Role is a direct relation as per schema.prisma
       },
     });
 
     const { password, ...safeUser } = user;
-    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: user_${userId}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting Redis cache for key: user_${userId}`,
+    );
     await this.redisClient.del(`user_${userId}`); // Invalidate cache
     this.logger.log(`[INVALIDATE] Deleting Redis cache for key: users`);
     await this.redisClient.del('users');
@@ -84,7 +94,9 @@ export class UserService {
     await this.prisma.user.delete({
       where: { id: userId },
     });
-    this.logger.log(`[INVALIDATE] Deleting Redis cache for key: user_${userId}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting Redis cache for key: user_${userId}`,
+    );
     await this.redisClient.del(`user_${userId}`); // Invalidate cache
     this.logger.log(`[INVALIDATE] Deleting Redis cache for key: users`);
     await this.redisClient.del('users');
@@ -143,9 +155,11 @@ export class UserService {
       return JSON.parse(cachedUsers); // Parse the stored string back to an object
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { search, sortBy, sortOrder } = searchDto;
-    
+
     // Use default values if not provided (inherited from SearchQueryDto)
     const currentPage = searchDto.page || 1;
     const currentLimit = searchDto.limit || 10;

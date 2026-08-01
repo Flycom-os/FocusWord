@@ -86,7 +86,7 @@ const SlidersPage = () => {
         setSliders(res.data);
         setTotal(res.total);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить слайдеры";
+        const message = error?.response?.data?.message || "Failed to load sliders";
         showToast(message, "error");
       } finally {
         setIsLoading(false);
@@ -103,7 +103,7 @@ const SlidersPage = () => {
           setSlides(res.data);
           setSlidesTotal(res.total);
         } catch (error: any) {
-          const message = error?.response?.data?.message || "Не удалось загрузить слайды";
+          const message = error?.response?.data?.message || "Failed to load slides";
           showToast(message, "error");
         }
       };
@@ -144,7 +144,7 @@ const SlidersPage = () => {
 
   const handleSaveSlider = async () => {
     if (!sliderName || !sliderSlug) {
-      showToast("Заполните обязательные поля", "error");
+      showToast("Please fill in the required fields", "error");
       return;
     }
     try {
@@ -154,41 +154,41 @@ const SlidersPage = () => {
           slug: sliderSlug,
           description: sliderDescription || undefined,
         });
-        showToast("Слайдер обновлен", "success");
+        showToast("Slider updated", "success");
       } else {
         await createSlider(accessToken, {
           name: sliderName,
           slug: sliderSlug,
           description: sliderDescription || undefined,
         });
-        showToast("Слайдер создан", "success");
+        showToast("Slider created", "success");
       }
       setIsSliderModalOpen(false);
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить слайдер";
+      const message = error?.response?.data?.message || "Failed to save slider";
       showToast(message, "error");
     }
   };
 
   const handleDeleteSlider = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить этот слайдер?")) return;
+    if (!confirm("Are you sure you want to delete this slider?")) return;
     try {
       await deleteSlider(accessToken, id);
-      showToast("Слайдер удален", "success");
+      showToast("Slider deleted", "success");
       if (selectedSliderId === id) {
         setSelectedSliderId(null);
       }
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить слайдер";
+      const message = error?.response?.data?.message || "Failed to delete slider";
       showToast(message, "error");
     }
   };
 
   const handleCreateSlide = () => {
     if (!selectedSliderId) {
-      showToast("Выберите слайдер", "error");
+      showToast("Please select a slider", "error");
       return;
     }
     setEditingSlide(null);
@@ -237,28 +237,28 @@ const SlidersPage = () => {
       };
       if (editingSlide) {
         await updateSlide(accessToken, selectedSliderId, editingSlide.id, slideData);
-        showToast("Слайд обновлен", "success");
+        showToast("Slide updated", "success");
       } else {
         await createSlide(accessToken, selectedSliderId, slideData);
-        showToast("Слайд создан", "success");
+        showToast("Slide created", "success");
       }
       setIsSlideModalOpen(false);
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить слайд";
+      const message = error?.response?.data?.message || "Failed to save slide";
       showToast(message, "error");
     }
   };
 
   const handleDeleteSlide = async (slideId: number) => {
     if (!selectedSliderId) return;
-    if (!confirm("Вы уверены, что хотите удалить этот слайд?")) return;
+    if (!confirm("Are you sure you want to delete this slide?")) return;
     try {
       await deleteSlide(accessToken, selectedSliderId, slideId);
-      showToast("Слайд удален", "success");
+      showToast("Slide deleted", "success");
       setSlidesQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить слайд";
+      const message = error?.response?.data?.message || "Failed to delete slide";
       showToast(message, "error");
     }
   };
@@ -276,7 +276,7 @@ const SlidersPage = () => {
         : `${API_URL}/backend/uploads/${slide.image.filepath}`;
       return <img src={imageUrl} alt={slide.image.filename} className={styles.slidePreview} />;
     }
-    return <div className={styles.slidePreviewPlaceholder}>Нет изображения</div>;
+    return <div className={styles.slidePreviewPlaceholder}>No image</div>;
   };
 
   const getFileUrl = (item: MediaFileDto) => {
@@ -298,27 +298,27 @@ const SlidersPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск слайдеров..."
+            placeholder="Search sliders..."
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <PermissionGate resource="sliders" level={2}>
           <UiButton theme="primary" onClick={handleCreateSlider}>
-            Добавить слайдер
+            Add Slider
           </UiButton>
         </PermissionGate>
       </div>
 
       <div className={styles.content}>
         <div className={styles.slidersSection}>
-          <h2 className={styles.sectionTitle}>Слайдеры</h2>
+          <h2 className={styles.sectionTitle}>Sliders</h2>
           <Table className={styles.table}>
             <TableHeader>
               <TableRow>
-                <TableHead>Название</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Описание</TableHead>
-                <TableHead className={styles.actionsColumn}>Действия</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className={styles.actionsColumn}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -334,12 +334,12 @@ const SlidersPage = () => {
                   <TableCell className={styles.actionsColumn} onClick={(e) => e.stopPropagation()}>
                     <PermissionGate resource="sliders" level={1}>
                       <UiButton theme="secondary" onClick={() => handleEditSlider(slider)}>
-                        Редактировать
+                        Edit
                       </UiButton>
                     </PermissionGate>
                     <PermissionGate resource="sliders" level={2}>
                       <UiButton theme="warning" onClick={() => handleDeleteSlider(slider.id)}>
-                        Удалить
+                        Delete
                       </UiButton>
                     </PermissionGate>
                   </TableCell>
@@ -360,10 +360,10 @@ const SlidersPage = () => {
         {selectedSliderId && (
           <div className={styles.slidesSection}>
             <div className={styles.slidesHeader}>
-              <h2 className={styles.sectionTitle}>Слайды</h2>
+              <h2 className={styles.sectionTitle}>Slides</h2>
               <PermissionGate resource="sliders" level={1}>
                 <UiButton theme="primary" onClick={handleCreateSlide}>
-                  Добавить слайд
+                  Add Slide
                 </UiButton>
               </PermissionGate>
             </div>
@@ -371,12 +371,12 @@ const SlidersPage = () => {
             <Table className={styles.table}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Превью</TableHead>
-                  <TableHead>Заголовок</TableHead>
-                  <TableHead>Описание</TableHead>
-                  <TableHead>Ссылка</TableHead>
-                  <TableHead>Порядок</TableHead>
-                  <TableHead className={styles.actionsColumn}>Действия</TableHead>
+                  <TableHead>Preview</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Link</TableHead>
+                  <TableHead>Order</TableHead>
+                  <TableHead className={styles.actionsColumn}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -390,12 +390,12 @@ const SlidersPage = () => {
                     <TableCell className={styles.actionsColumn}>
                       <PermissionGate resource="sliders" level={1}>
                         <UiButton theme="secondary" onClick={() => handleEditSlide(slide)}>
-                          Редактировать
+                          Edit
                         </UiButton>
                       </PermissionGate>
                       <PermissionGate resource="sliders" level={2}>
                         <UiButton theme="warning" onClick={() => handleDeleteSlide(slide.id)}>
-                          Удалить
+                          Delete
                         </UiButton>
                       </PermissionGate>
                     </TableCell>
@@ -419,16 +419,16 @@ const SlidersPage = () => {
       <Modal
         open={isSliderModalOpen}
         onClose={() => setIsSliderModalOpen(false)}
-        title={editingSlider ? "Редактировать слайдер" : "Создать слайдер"}
+        title={editingSlider ? "Edit Slider" : "Create Slider"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Название</label>
+            <label className={styles.formLabel}>Name</label>
             <Input
               className={styles.input}
               value={sliderName}
               onChange={(e) => setSliderName(e.target.value)}
-              placeholder="Название слайдера"
+              placeholder="Slider Name"
             />
           </div>
 
@@ -443,22 +443,22 @@ const SlidersPage = () => {
           </div>
 
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Описание</label>
+            <label className={styles.formLabel}>Description</label>
             <textarea
               className={styles.textarea}
               value={sliderDescription}
               onChange={(e) => setSliderDescription(e.target.value)}
-              placeholder="Описание слайдера"
+              placeholder="Slider Description"
               rows={3}
             />
           </div>
 
           <div className={styles.modalFooter}>
             <UiButton theme="secondary" onClick={() => setIsSliderModalOpen(false)}>
-              Отмена
+              Cancel
             </UiButton>
             <UiButton theme="primary" onClick={handleSaveSlider}>
-              {editingSlider ? "Обновить" : "Создать"}
+              {editingSlider ? "Update" : "Create"}
             </UiButton>
           </div>
         </div>
@@ -468,32 +468,32 @@ const SlidersPage = () => {
       <Modal
         open={isSlideModalOpen}
         onClose={() => setIsSlideModalOpen(false)}
-        title={editingSlide ? "Редактировать слайд" : "Создать слайд"}
+        title={editingSlide ? "Edit Slide" : "Create Slide"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Заголовок</label>
+            <label className={styles.formLabel}>Title</label>
             <Input
               className={styles.input}
               value={slideTitle}
               onChange={(e) => setSlideTitle(e.target.value)}
-              placeholder="Заголовок слайда"
+              placeholder="Slide Title"
             />
           </div>
 
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Описание</label>
+            <label className={styles.formLabel}>Description</label>
             <textarea
               className={styles.textarea}
               value={slideDescription}
               onChange={(e) => setSlideDescription(e.target.value)}
-              placeholder="Описание слайда"
+              placeholder="Slide Description"
               rows={3}
             />
           </div>
 
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Ссылка</label>
+            <label className={styles.formLabel}>Link</label>
             <Input
               className={styles.input}
               value={slideLinkUrl}
@@ -503,7 +503,7 @@ const SlidersPage = () => {
           </div>
 
           <div className={styles.formField}>
-            <label className={styles.formLabel}>Порядок сортировки</label>
+            <label className={styles.formLabel}>Sort Order</label>
             <Input
               className={styles.input}
               type="number"
@@ -514,24 +514,24 @@ const SlidersPage = () => {
           </div>
 
           <div className={styles.imageSelector}>
-            <label className={styles.formLabel}>Изображение</label>
+            <label className={styles.formLabel}>Image</label>
             <div className={styles.selectedImage}>
               {selectedImage ? (
                 <>
                   <img src={getFileUrl(selectedImage)} alt={selectedImage.filename} />
                   <div className={styles.imageActions}>
                     <UiButton theme="secondary" onClick={() => setIsMediaModalOpen(true)}>
-                      Изменить
+                      Change
                     </UiButton>
                     <UiButton theme="warning" onClick={() => setSelectedImage(null)}>
-                      Удалить
+                      Delete
                     </UiButton>
                   </div>
                 </>
               ) : (
                 <div className={styles.imagePlaceholder}>
                   <UiButton theme="primary" onClick={() => setIsMediaModalOpen(true)}>
-                    Выбрать изображение
+                    Select Image
                   </UiButton>
                 </div>
               )}
@@ -540,10 +540,10 @@ const SlidersPage = () => {
 
           <div className={styles.modalFooter}>
             <UiButton theme="secondary" onClick={() => setIsSlideModalOpen(false)}>
-              Отмена
+              Cancel
             </UiButton>
             <UiButton theme="primary" onClick={handleSaveSlide}>
-              {editingSlide ? "Обновить" : "Создать"}
+              {editingSlide ? "Update" : "Create"}
             </UiButton>
           </div>
         </div>

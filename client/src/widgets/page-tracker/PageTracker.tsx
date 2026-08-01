@@ -8,7 +8,7 @@ interface PageTrackerProps {
   entityId: number;
 }
 
-export function PageTracker({ entityType, entityId }: PageTrackerProps) {
+export const PageTracker = ({ entityType, entityId }: PageTrackerProps) => {
   const trackedRef = useRef(false);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function PageTracker({ entityType, entityId }: PageTrackerProps) {
 
     const cookieName = `viewed_${entityType}_${entityId}`;
     let isUnique = true;
-    
+
     // Check if user has a cookie
     if (document.cookie.split(";").some((item) => item.trim().startsWith(`${cookieName}=`))) {
       isUnique = false;
@@ -46,4 +46,4 @@ export function PageTracker({ entityType, entityId }: PageTrackerProps) {
   }, [entityType, entityId]);
 
   return null;
-}
+};

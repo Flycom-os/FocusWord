@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, Inject, Logger, BadRequestException, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  Logger,
+  BadRequestException,
+  BadGatewayException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateArticleDto } from '../dto/articles/create-article.dto';
@@ -35,8 +42,10 @@ export class ArticlesService {
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('#')) continue;
-        if (trimmed.startsWith('DEEPSEEK_API_KEY=')) return trimmed.slice('DEEPSEEK_API_KEY='.length).trim();
-        if (trimmed.startsWith('NEXT_PUBLIC_DEEPSEEK_API_KEY=')) return trimmed.slice('NEXT_PUBLIC_DEEPSEEK_API_KEY='.length).trim();
+        if (trimmed.startsWith('DEEPSEEK_API_KEY='))
+          return trimmed.slice('DEEPSEEK_API_KEY='.length).trim();
+        if (trimmed.startsWith('NEXT_PUBLIC_DEEPSEEK_API_KEY='))
+          return trimmed.slice('NEXT_PUBLIC_DEEPSEEK_API_KEY='.length).trim();
       }
     }
     return undefined;
@@ -44,7 +53,8 @@ export class ArticlesService {
 
   private async generateUniqueSlug(base: string): Promise<string> {
     const normalized = (base || 'new-article')
-      .toLowerCase().trim()
+      .toLowerCase()
+      .trim()
       .replace(/[^a-z0-9\u0430-\u044f\u0451\s-]/gi, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
@@ -70,23 +80,33 @@ export class ArticlesService {
       seoTitle: dto.seoTitle,
       seoDescription: dto.seoDescription,
       metaKeywords: dto.metaKeywords || [],
-      contentBlocks: dto.contentBlocks === null || dto.contentBlocks === undefined ? [] : dto.contentBlocks,
+      contentBlocks:
+        dto.contentBlocks === null || dto.contentBlocks === undefined
+          ? []
+          : dto.contentBlocks,
       author: dto.authorId ? { connect: { id: dto.authorId } } : undefined,
-      featuredImage: dto.featuredImageId ? { connect: { id: dto.featuredImageId } } : undefined,
-      featuredSlider: dto.featuredSliderId ? { connect: { id: dto.featuredSliderId } } : undefined,
-      categories: dto.categoryIds && dto.categoryIds.length > 0
-        ? { connect: dto.categoryIds.map((id: number) => ({ id })) }
+      featuredImage: dto.featuredImageId
+        ? { connect: { id: dto.featuredImageId } }
         : undefined,
+      featuredSlider: dto.featuredSliderId
+        ? { connect: { id: dto.featuredSliderId } }
+        : undefined,
+      categories:
+        dto.categoryIds && dto.categoryIds.length > 0
+          ? { connect: dto.categoryIds.map((id: number) => ({ id })) }
+          : undefined,
       enableFeedback: dto.enableFeedback ?? true,
-      paymentMethod: dto.paymentMethodId ? { connect: { id: dto.paymentMethodId } } : undefined,
+      paymentMethod: dto.paymentMethodId
+        ? { connect: { id: dto.paymentMethodId } }
+        : undefined,
     };
     const newArticle = await this.prisma.article.create({
       data,
       include: {
         categories: {
-          select: { id: true, name: true, slug: true }
-        }
-      }
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
     const keys = await this.redisClient.keys('articles_*');
     if (keys.length > 0) await this.redisClient.del(keys);
@@ -97,35 +117,65 @@ export class ArticlesService {
     const title = dto.title?.trim() || 'New Article';
     const slug = await this.generateUniqueSlug(title);
     const draft = await this.prisma.article.create({
-      data: { title, slug, content: dto.content || '', status: 'draft', template: 'default', authorId: dto.authorId },
+      data: {
+        title,
+        slug,
+        content: dto.content || '',
+        status: 'draft',
+        template: 'default',
+        authorId: dto.authorId,
+      },
     });
     const keys = await this.redisClient.keys('articles_*');
     if (keys.length > 0) await this.redisClient.del(keys);
     return draft;
   }
 
-  async completeWithAi(prompt: string, content?: string): Promise<{ text: string }> {
-    const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY') ||
+  async completeWithAi(
+    prompt: string,
+    content?: string,
+  ): Promise<{ text: string }> {
+    const apiKey =
+      this.configService.get<string>('DEEPSEEK_API_KEY') ||
       this.configService.get<string>('NEXT_PUBLIC_DEEPSEEK_API_KEY') ||
-      process.env.DEEPSEEK_API_KEY || process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY ||
+      process.env.DEEPSEEK_API_KEY ||
+      process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY ||
       this.readKeyFromEnvFile();
-    if (!apiKey) throw new BadRequestException('DeepSeek API key is not configured on server');
-    const baseUrlRaw = this.configService.get<string>('DEEPSEEK_BASE_URL') || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1';
+    if (!apiKey)
+      throw new BadRequestException(
+        'DeepSeek API key is not configured on server',
+      );
+    const baseUrlRaw =
+      this.configService.get<string>('DEEPSEEK_BASE_URL') ||
+      process.env.DEEPSEEK_BASE_URL ||
+      'https://api.deepseek.com/v1';
     const baseUrl = baseUrlRaw.replace(/\/$/, '');
     const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
-    const endpoint = baseUrl.endsWith('/v1') ? `${baseUrl}/chat/completions` : `${baseUrl}/v1/chat/completions`;
+    const endpoint = baseUrl.endsWith('/v1')
+      ? `${baseUrl}/chat/completions`
+      : `${baseUrl}/v1/chat/completions`;
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
         model,
         messages: [
-          { role: 'system', content: 'You are an assistant that edits article content. Return only the final HTML body fragment.' },
-          { role: 'user', content: `Instruction:
+          {
+            role: 'system',
+            content:
+              'You are an assistant that edits article content. Return only the final HTML body fragment.',
+          },
+          {
+            role: 'user',
+            content: `Instruction:
 ${prompt}
 
 Current content:
-${content || ''}` },
+${content || ''}`,
+          },
         ],
         temperature: 0.7,
       }),
@@ -134,14 +184,21 @@ ${content || ''}` },
       const errorText = await response.text();
       let providerMessage = 'AI generation failed';
       try {
-        const parsed = JSON.parse(errorText) as { error?: { message?: string } | string; message?: string };
+        const parsed = JSON.parse(errorText) as {
+          error?: { message?: string } | string;
+          message?: string;
+        };
         if (typeof parsed.error === 'string') providerMessage = parsed.error;
         else if (parsed.error?.message) providerMessage = parsed.error.message;
         else if (parsed.message) providerMessage = parsed.message;
-      } catch { if (errorText?.trim()) providerMessage = errorText.slice(0, 300); }
+      } catch {
+        if (errorText?.trim()) providerMessage = errorText.slice(0, 300);
+      }
       throw new BadGatewayException(`AI generation failed: ${providerMessage}`);
     }
-    const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
     const text = data.choices?.[0]?.message?.content?.trim();
     if (!text) throw new BadRequestException('AI returned empty response');
     return { text };
@@ -156,13 +213,23 @@ ${content || ''}` },
     const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
     const skip = (pageNum - 1) * limitNum;
     const where: Prisma.ArticleWhereInput = {};
-    if (search) { where.OR = [{ title: { contains: search, mode: 'insensitive' } }, { content: { contains: search, mode: 'insensitive' } }]; }
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+      ];
+    }
     if (status) where.status = status;
     if (authorId) where.authorId = authorId;
     const articles = await this.prisma.article.findMany({
-      where, skip, take: limitNum, orderBy: { createdAt: 'desc' },
+      where,
+      skip,
+      take: limitNum,
+      orderBy: { createdAt: 'desc' },
       include: {
-        author: { select: { id: true, username: true, firstName: true, lastName: true } },
+        author: {
+          select: { id: true, username: true, firstName: true, lastName: true },
+        },
         featuredImage: { select: { id: true, filename: true, filepath: true } },
         categories: { select: { id: true, name: true, slug: true } },
       },
@@ -178,25 +245,50 @@ ${content || ''}` },
     const article = await this.prisma.article.findUnique({
       where: { id },
       include: {
-        author: { select: { id: true, username: true, firstName: true, lastName: true } },
+        author: {
+          select: { id: true, username: true, firstName: true, lastName: true },
+        },
         featuredImage: { select: { id: true, filename: true, filepath: true } },
-        featuredSlider: { select: { id: true, name: true, slug: true, description: true, slides: { orderBy: { sortOrder: 'asc' }, include: { image: true } } } },
+        featuredSlider: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            slides: { orderBy: { sortOrder: 'asc' }, include: { image: true } },
+          },
+        },
         categories: { select: { id: true, name: true, slug: true } },
-        paymentMethod: true
+        paymentMethod: true,
       },
     });
-    if (article) await this.redisClient.set(cacheKey, JSON.stringify(article), 'EX', 3600);
+    if (article)
+      await this.redisClient.set(cacheKey, JSON.stringify(article), 'EX', 3600);
     return article;
   }
 
   async findPublished(search?: string): Promise<any[]> {
     const where: Prisma.ArticleWhereInput = { status: 'published' };
     if (search?.trim()) {
-      where.OR = [{ title: { contains: search.trim(), mode: 'insensitive' } }, { slug: { contains: search.trim(), mode: 'insensitive' } }];
+      where.OR = [
+        { title: { contains: search.trim(), mode: 'insensitive' } },
+        { slug: { contains: search.trim(), mode: 'insensitive' } },
+      ];
     }
     return this.prisma.article.findMany({
-      where, orderBy: { publishedAt: 'desc' },
-      select: { id: true, title: true, slug: true, excerpt: true, status: true, publishedAt: true, updatedAt: true, seoTitle: true, seoDescription: true },
+      where,
+      orderBy: { publishedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        status: true,
+        publishedAt: true,
+        updatedAt: true,
+        seoTitle: true,
+        seoDescription: true,
+      },
     });
   }
 
@@ -207,35 +299,71 @@ ${content || ''}` },
     const article = await this.prisma.article.findUnique({
       where: { slug },
       include: {
-        author: { select: { id: true, username: true, firstName: true, lastName: true } },
+        author: {
+          select: { id: true, username: true, firstName: true, lastName: true },
+        },
         featuredImage: { select: { id: true, filename: true, filepath: true } },
-        featuredSlider: { select: { id: true, name: true, slug: true, description: true, slides: { orderBy: { sortOrder: 'asc' }, include: { image: true } } } },
+        featuredSlider: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            slides: { orderBy: { sortOrder: 'asc' }, include: { image: true } },
+          },
+        },
         categories: { select: { id: true, name: true, slug: true } },
-        paymentMethod: true
+        paymentMethod: true,
       },
     });
-    if (article) await this.redisClient.set(cacheKey, JSON.stringify(article), 'EX', 3600);
+    if (article)
+      await this.redisClient.set(cacheKey, JSON.stringify(article), 'EX', 3600);
     return article;
   }
 
   async update(id: number, dto: UpdateArticleDto): Promise<Article> {
     const existing = await this.prisma.article.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException(`Article with ID ${id} not found.`);
-    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, categoryIds, ...rest } = dto;
+    if (!existing)
+      throw new NotFoundException(`Article with ID ${id} not found.`);
+    const {
+      metaKeywords,
+      publishedAt,
+      contentBlocks,
+      featuredSliderId,
+      categoryIds,
+      ...rest
+    } = dto;
     const data: Prisma.ArticleUpdateInput = {
       ...rest,
       ...(metaKeywords !== undefined && { metaKeywords }),
-      ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
-      ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
-      ...(contentBlocks !== undefined && { contentBlocks: contentBlocks === null ? Prisma.DbNull : (contentBlocks as InputJsonValue) }),
+      ...(publishedAt !== undefined && {
+        publishedAt: publishedAt ? new Date(publishedAt) : null,
+      }),
+      ...(featuredSliderId !== undefined && {
+        featuredSliderId: featuredSliderId || null,
+      }),
+      ...(contentBlocks !== undefined && {
+        contentBlocks:
+          contentBlocks === null
+            ? Prisma.DbNull
+            : (contentBlocks as InputJsonValue),
+      }),
       ...(categoryIds !== undefined && {
         categories: categoryIds
           ? { set: categoryIds.map((cId: number) => ({ id: cId })) }
-          : undefined
+          : undefined,
       }),
       updatedAt: new Date(),
     };
-    const updated = await this.prisma.article.update({ where: { id }, data, include: { featuredSlider: true, featuredImage: true, categories: { select: { id: true, name: true, slug: true } } } });
+    const updated = await this.prisma.article.update({
+      where: { id },
+      data,
+      include: {
+        featuredSlider: true,
+        featuredImage: true,
+        categories: { select: { id: true, name: true, slug: true } },
+      },
+    });
     await this.redisClient.del(`article_${id}`);
     await this.redisClient.del(`article_slug_${existing.slug}`);
     const keys = await this.redisClient.keys('articles_*');
@@ -245,7 +373,8 @@ ${content || ''}` },
 
   async remove(id: number): Promise<void> {
     const existing = await this.prisma.article.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException(`Article with ID ${id} not found.`);
+    if (!existing)
+      throw new NotFoundException(`Article with ID ${id} not found.`);
     await this.prisma.article.delete({ where: { id } });
     await this.redisClient.del(`article_${id}`);
     await this.redisClient.del(`article_slug_${existing.slug}`);
@@ -255,7 +384,12 @@ ${content || ''}` },
 
   async publish(id: number): Promise<Article> {
     const updated = await this.prisma.article.update({
-      where: { id }, data: { status: 'published', publishedAt: new Date(), updatedAt: new Date() },
+      where: { id },
+      data: {
+        status: 'published',
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      },
     });
     await this.redisClient.del(`article_${id}`);
     await this.redisClient.del(`article_slug_${updated.slug}`);
@@ -266,7 +400,8 @@ ${content || ''}` },
 
   async unpublish(id: number): Promise<Article> {
     const updated = await this.prisma.article.update({
-      where: { id }, data: { status: 'draft', publishedAt: null, updatedAt: new Date() },
+      where: { id },
+      data: { status: 'draft', publishedAt: null, updatedAt: new Date() },
     });
     await this.redisClient.del(`article_${id}`);
     await this.redisClient.del(`article_slug_${updated.slug}`);

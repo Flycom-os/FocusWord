@@ -34,7 +34,10 @@ export const fetchRoles = async (token: string | null, params: RolesQuery): Prom
   return data.roles || [];
 };
 
-export const fetchRolesResponse = async (token: string | null, params: RolesQuery): Promise<PaginatedRolesResponse> => {
+export const fetchRolesResponse = async (
+  token: string | null,
+  params: RolesQuery,
+): Promise<PaginatedRolesResponse> => {
   const { data } = await axios.get<PaginatedRolesResponse>(`${API_URL}/roles`, {
     params: {
       ...params,

@@ -1,5 +1,7 @@
 "use client";
 
+import { Plus, Edit3, Eye, EyeOff, Trash2 } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
@@ -204,8 +206,12 @@ export default function PostsPage() {
             <option value="published">Published</option>
           </select>
         </div>
-        <Button onClick={handleCreate} className={styles.createButton}>
-          ➕ Create Post
+        <Button
+          onClick={handleCreate}
+          className={styles.createButton}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+        >
+          <Plus size={16} /> Create Post
         </Button>
       </div>
 
@@ -247,26 +253,52 @@ export default function PostsPage() {
                   <TableCell>{new Date(post.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button onClick={() => handleEdit(post)} className={styles.editButton}>
-                        ✏️
+                      <Button
+                        onClick={() => handleEdit(post)}
+                        className={styles.editButton}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Edit3 size={16} />
                       </Button>
                       {post.status === "draft" ? (
                         <Button
                           onClick={() => handlePublish(post.id)}
                           className={styles.publishButton}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
                         >
-                          📤
+                          <Eye size={16} />
                         </Button>
                       ) : (
                         <Button
                           onClick={() => handleUnpublish(post.id)}
                           className={styles.unpublishButton}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
                         >
-                          📥
+                          <EyeOff size={16} />
                         </Button>
                       )}
-                      <Button onClick={() => handleDelete(post.id)} className={styles.deleteButton}>
-                        🗑️
+                      <Button
+                        onClick={() => handleDelete(post.id)}
+                        className={styles.deleteButton}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Trash2 size={16} />
                       </Button>
                     </div>
                   </TableCell>

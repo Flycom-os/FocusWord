@@ -212,6 +212,13 @@
   justify-content: flex-end;
 }
 
+.formActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
 .cancelButton {
   padding: 8px 16px;
   border: 1px solid #d1d5db;

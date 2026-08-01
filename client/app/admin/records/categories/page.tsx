@@ -1,9 +1,10 @@
 "use client";
 
+import { Plus, Edit3, Trash2, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
+import { UiButton } from "@/src/shared/ui";
 import {
   recordsApi,
   RecordDto,
@@ -123,9 +124,14 @@ export default function RecordCategoriesPage() {
             className={styles.searchInput}
           />
         </div>
-        <Button onClick={handleCreateCategory} className={styles.createButton}>
-          ➕ Create Category
-        </Button>
+        <UiButton
+          theme="primary"
+          onClick={handleCreateCategory}
+          className={styles.createButton}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+        >
+          <Plus size={16} /> Create Category
+        </UiButton>
       </div>
 
       <div className={styles.content}>
@@ -135,7 +141,9 @@ export default function RecordCategoriesPage() {
           <div className={styles.empty}>
             <h3>No categories</h3>
             <p>Create the first category for records</p>
-            <Button onClick={handleCreateCategory}>Create Category</Button>
+            <UiButton theme="primary" onClick={handleCreateCategory}>
+              Create Category
+            </UiButton>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -162,18 +170,20 @@ export default function RecordCategoriesPage() {
                 </div>
 
                 <div className={styles.cardActions}>
-                  <Button
+                  <UiButton
                     onClick={() => handleEditCategory(category)}
                     className={styles.editButton}
+                    theme="secondary"
                   >
-                    ✏️ Edit
-                  </Button>
-                  <Button
+                    <Edit3 size={16} /> Edit
+                  </UiButton>
+                  <UiButton
                     onClick={() => handleDeleteCategory(category.id.toString())}
                     className={styles.deleteButton}
+                    theme="warning"
                   >
-                    🗑️ Delete
-                  </Button>
+                    <Trash2 size={16} /> Delete
+                  </UiButton>
                 </div>
               </div>
             ))}
@@ -184,23 +194,25 @@ export default function RecordCategoriesPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
-          <Button
+          <UiButton
             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
             className={styles.paginationButton}
+            theme="secondary"
           >
             ←
-          </Button>
+          </UiButton>
           <span className={styles.paginationInfo}>
             Page {currentPage} of {totalPages}
           </span>
-          <Button
+          <UiButton
             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
             className={styles.paginationButton}
+            theme="secondary"
           >
             →
-          </Button>
+          </UiButton>
         </div>
       )}
 
@@ -249,12 +261,16 @@ export default function RecordCategoriesPage() {
             </div>
 
             <div className={styles.modalActions}>
-              <Button onClick={() => setShowCreateModal(false)} className={styles.cancelButton}>
+              <UiButton
+                theme="secondary"
+                onClick={() => setShowCreateModal(false)}
+                className={styles.cancelButton}
+              >
                 Cancel
-              </Button>
-              <Button onClick={handleSaveCategory} className={styles.saveButton}>
+              </UiButton>
+              <UiButton theme="primary" onClick={handleSaveCategory} className={styles.saveButton}>
                 {editingCategory ? "Save Changes" : "Create Category"}
-              </Button>
+              </UiButton>
             </div>
           </div>
         </div>

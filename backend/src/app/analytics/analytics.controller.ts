@@ -34,7 +34,10 @@ export class AnalyticsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Record a page view (public or user view)' })
-  @ApiCreatedResponse({ description: 'The analytics entry has been successfully created/incremented.' })
+  @ApiCreatedResponse({
+    description:
+      'The analytics entry has been successfully created/incremented.',
+  })
   create(@Body() dto: CreateAnalyticsEntryDto) {
     return this.analyticsService.create(dto);
   }

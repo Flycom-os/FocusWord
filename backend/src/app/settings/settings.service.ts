@@ -1,11 +1,18 @@
-import { Injectable, NotFoundException, Inject, Logger, OnModuleInit, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  Logger,
+  OnModuleInit,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreateSettingDto } from "../../dto/settings/create-setting.dto";
-import { UpdateSettingDto } from "../../dto/settings/update-setting.dto";
-import { SearchSettingsDto } from "../../dto/settings/search-settings.dto";
+import { CreateSettingDto } from '../../dto/settings/create-setting.dto';
+import { UpdateSettingDto } from '../../dto/settings/update-setting.dto';
+import { SearchSettingsDto } from '../../dto/settings/search-settings.dto';
 import { Prisma } from '@prisma/client';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 
 @Injectable()
 export class SettingsService implements OnModuleInit {
@@ -31,27 +38,83 @@ export class SettingsService implements OnModuleInit {
 
   async onModuleInit() {
     const defaults = [
-      { key: 'theme_mode', value: 'light', type: 'string', category: 'appearance', description: 'Theme mode (light/dark)' },
-      { key: 'theme', value: 'default', type: 'string', category: 'appearance', description: 'Color theme' },
-      { key: 'site_name', value: 'FocusWord', type: 'string', category: 'general', description: 'Site name' },
-      { key: 'site_description', value: '', type: 'string', category: 'general', description: 'Site description' },
-      { key: 'site_url', value: 'https://focusword.com', type: 'string', category: 'general', description: 'Site URL' },
-      { key: 'maintenance_mode', value: 'false', type: 'boolean', category: 'general', description: 'Maintenance mode' },
-      { key: 'auto_backup', value: 'true', type: 'boolean', category: 'database', description: 'Automatic backup' },
-      { key: 'backup_frequency', value: 'daily', type: 'string', category: 'database', description: 'Backup frequency' },
-      { key: 'max_backups', value: '7', type: 'number', category: 'database', description: 'Maximum number of backups' }
+      {
+        key: 'theme_mode',
+        value: 'light',
+        type: 'string',
+        category: 'appearance',
+        description: 'Theme mode (light/dark)',
+      },
+      {
+        key: 'theme',
+        value: 'default',
+        type: 'string',
+        category: 'appearance',
+        description: 'Color theme',
+      },
+      {
+        key: 'site_name',
+        value: 'FocusWord',
+        type: 'string',
+        category: 'general',
+        description: 'Site name',
+      },
+      {
+        key: 'site_description',
+        value: '',
+        type: 'string',
+        category: 'general',
+        description: 'Site description',
+      },
+      {
+        key: 'site_url',
+        value: 'https://focusword.com',
+        type: 'string',
+        category: 'general',
+        description: 'Site URL',
+      },
+      {
+        key: 'maintenance_mode',
+        value: 'false',
+        type: 'boolean',
+        category: 'general',
+        description: 'Maintenance mode',
+      },
+      {
+        key: 'auto_backup',
+        value: 'true',
+        type: 'boolean',
+        category: 'database',
+        description: 'Automatic backup',
+      },
+      {
+        key: 'backup_frequency',
+        value: 'daily',
+        type: 'string',
+        category: 'database',
+        description: 'Backup frequency',
+      },
+      {
+        key: 'max_backups',
+        value: '7',
+        type: 'number',
+        category: 'database',
+        description: 'Maximum number of backups',
+      },
     ];
 
     for (const item of defaults) {
       try {
         const existing = await this.prisma.setting.findUnique({
-          where: { key: item.key }
+          where: { key: item.key },
         });
         if (!existing) {
           await this.prisma.setting.create({
-            data: item
+            data: item,
           });
-          this.logger.log(`Seeded default setting: ${item.key} = ${item.value}`);
+          this.logger.log(
+            `Seeded default setting: ${item.key} = ${item.value}`,
+          );
         }
       } catch (err) {
         this.logger.error(`Error seeding default setting ${item.key}:`, err);
@@ -63,14 +126,14 @@ export class SettingsService implements OnModuleInit {
     const setting = await this.prisma.setting.create({
       data: createSettingDto,
     });
-    
+
     // Invalidate cache
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'settings_*'`);
     const keys = await this.redisClient.keys('settings_*');
     if (keys.length > 0) {
       await this.redisClient.del(keys);
     }
-    
+
     return setting;
   }
 
@@ -84,7 +147,9 @@ export class SettingsService implements OnModuleInit {
       return JSON.parse(cachedSettings);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { search, sortBy, sortOrder, page = 1, limit = 10 } = searchDto;
 
     const skip = (page - 1) * limit;
@@ -123,7 +188,7 @@ export class SettingsService implements OnModuleInit {
       limit,
       totalPages: Math.ceil(total / limit),
     };
-    
+
     this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
     await this.redisClient.set(cacheKey, JSON.stringify(result), 'EX', 3600);
     return result;
@@ -139,7 +204,9 @@ export class SettingsService implements OnModuleInit {
       return JSON.parse(cachedSettings);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const settings = await this.prisma.setting.findMany({
       where: { category },
       orderBy: { key: 'asc' },
@@ -160,7 +227,9 @@ export class SettingsService implements OnModuleInit {
       return JSON.parse(cachedSetting);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const setting = await this.prisma.setting.findUnique({
       where: { key },
     });
@@ -182,9 +251,15 @@ export class SettingsService implements OnModuleInit {
     return this._update(key, updateSettingDto, false);
   }
 
-  private async _update(key: string, updateSettingDto: UpdateSettingDto, force = false) {
+  private async _update(
+    key: string,
+    updateSettingDto: UpdateSettingDto,
+    force = false,
+  ) {
     if (this.PROTECTED_DEFAULT_KEYS.includes(key) && !force) {
-      throw new ForbiddenException(`Setting "${key}" is protected. Use ?force=true to override.`);
+      throw new ForbiddenException(
+        `Setting "${key}" is protected. Use ?force=true to override.`,
+      );
     }
 
     const setting = await this.prisma.setting.update({
@@ -195,7 +270,7 @@ export class SettingsService implements OnModuleInit {
     // Invalidate caches
     this.logger.log(`[INVALIDATE] Deleting cache for key: setting_${key}`);
     await this.redisClient.del(`setting_${key}`);
-    
+
     const keys = await this.redisClient.keys('settings_*');
     if (keys.length > 0) {
       await this.redisClient.del(keys);
@@ -204,10 +279,13 @@ export class SettingsService implements OnModuleInit {
     return setting;
   }
 
-  async updateMultiple(settings: { key: string; value: string }[], force = false) {
+  async updateMultiple(
+    settings: { key: string; value: string }[],
+    force = false,
+  ) {
     const blocked = settings
-      .map(s => s.key)
-      .filter(k => this.PROTECTED_DEFAULT_KEYS.includes(k));
+      .map((s) => s.key)
+      .filter((k) => this.PROTECTED_DEFAULT_KEYS.includes(k));
 
     if (blocked.length > 0 && !force) {
       throw new ForbiddenException(
@@ -220,7 +298,7 @@ export class SettingsService implements OnModuleInit {
         where: { key },
         update: { value },
         create: { key, value, type: 'string', category: 'general' },
-      })
+      }),
     );
 
     const results = await Promise.all(updatePromises);

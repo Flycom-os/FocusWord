@@ -136,7 +136,7 @@ const PagesPage = () => {
       });
       setPages(data);
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Не удалось загрузить страницы", "error");
+      showToast(error?.response?.data?.message || "Failed to load pages", "error");
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +176,7 @@ const PagesPage = () => {
   const handleAiAssist = async () => {
     if (!accessToken) return;
     const prompt = window.prompt(
-      'Что сделать с текстом? Например: "сделай короче и структурированнее"',
+      'What would you like to do with the text? For example: "make it shorter and more structured"',
     );
     if (!prompt?.trim() || !editorData) return;
     setIsAiLoading(true);
@@ -193,9 +193,9 @@ const PagesPage = () => {
         blocks: [{ type: "paragraph", data: { text: result.text } }],
       });
 
-      showToast("AI обновил текст", "success");
+      showToast("AI updated the text", "success");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "AI недоступен", "error");
+      showToast(error?.response?.data?.message || "AI is unavailable", "error");
     } finally {
       setIsAiLoading(false);
     }
@@ -208,7 +208,7 @@ const PagesPage = () => {
 
     if (form.featuredSliderId) {
       if (!accessToken) {
-        showToast("Токен доступа отсутствует для предпросмотра слайдера", "error");
+        showToast("Access token is missing for slider preview", "error");
         return;
       }
       setIsLoadingPreviewSlider(true);
@@ -216,10 +216,7 @@ const PagesPage = () => {
         const slider = await getSlider(accessToken, form.featuredSliderId);
         setPreviewSlider(slider);
       } catch (error: any) {
-        showToast(
-          error?.response?.data?.message || "Не удалось загрузить слайдер для предпросмотра",
-          "error",
-        );
+        showToast(error?.response?.data?.message || "Failed to load slider for preview", "error");
       } finally {
         setIsLoadingPreviewSlider(false);
       }
@@ -231,7 +228,7 @@ const PagesPage = () => {
   const handleSave = async () => {
     if (!accessToken) return;
     if (!form.title.trim() || !form.slug.trim()) {
-      showToast("Название и slug обязательны", "error");
+      showToast("Name and slug are required", "error");
       return;
     }
     setIsSaving(true);
@@ -262,15 +259,15 @@ const PagesPage = () => {
       if (editingPage) {
         const updated = await updatePage(accessToken, editingPage.id, pageData);
         setPages((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        showToast("Страница обновлена", "success");
+        showToast("Page updated", "success");
       } else {
         const created = await createPage(accessToken, pageData);
         setPages((prev) => [created, ...prev]);
-        showToast("Страница создана", "success");
+        showToast("Page created", "success");
       }
       setIsModalOpen(false);
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Ошибка сохранения", "error");
+      showToast(error?.response?.data?.message || "Failed to save", "error");
     } finally {
       setIsSaving(false);
     }
@@ -278,13 +275,13 @@ const PagesPage = () => {
 
   const handleDelete = async (id: number) => {
     if (!accessToken) return;
-    if (!confirm("Удалить страницу?")) return;
+    if (!confirm("Are you sure you want to delete this page?")) return;
     try {
       await deletePage(accessToken, id);
       setPages((prev) => prev.filter((item) => item.id !== id));
-      showToast("Страница удалена", "success");
+      showToast("Page deleted", "success");
     } catch (error: any) {
-      showToast(error?.response?.data?.message || "Не удалось удалить страницу", "error");
+      showToast(error?.response?.data?.message || "Failed to delete page", "error");
     }
   };
 
@@ -307,13 +304,13 @@ const PagesPage = () => {
           className={styles.search}
           theme="secondary"
           icon="left"
-          placeholder="Поиск страниц..."
+          placeholder="Search pages..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
         <PermissionGate resource="pages" level={2}>
           <UiButton theme="primary" onClick={handleCreatePage}>
-            Создать страницу
+            Create Page
           </UiButton>
         </PermissionGate>
       </div>
@@ -327,20 +324,20 @@ const PagesPage = () => {
               isAllSelected={tableSelection.isAllSelected()}
               isPartiallySelected={tableSelection.isPartiallySelected()}
             />
-            <TableHead>Название</TableHead>
+            <TableHead> Name </TableHead>
             <TableHead>Slug</TableHead>
-            <TableHead>Статус</TableHead>
-            <TableHead>Действия</TableHead>
+            <TableHead> Status </TableHead>
+            <TableHead> Actions </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={5}>Загрузка...</TableCell>
+              <TableCell colSpan={5}> Loading... </TableCell>
             </TableRow>
           ) : pages.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5}>Страницы не найдены</TableCell>
+              <TableCell colSpan={5}>Pages not found</TableCell>
             </TableRow>
           ) : (
             pages.map((page, index) => (
@@ -353,14 +350,16 @@ const PagesPage = () => {
               >
                 <TableCell>{page.title}</TableCell>
                 <TableCell>{page.slug}</TableCell>
-                <TableCell>{page.status === "published" ? "Опубликовано" : "Черновик"}</TableCell>
+                <TableCell>{page.status === "published" ? "Published" : "Draft"}</TableCell>
                 <TableCell className={styles.actions}>
                   <UiButton theme="secondary" onClick={() => handleEditPage(page)}>
-                    Редактировать
+                    {" "}
+                    Edit{" "}
                   </UiButton>
                   <PermissionGate resource="pages" level={2}>
                     <UiButton theme="warning" onClick={() => handleDelete(page.id)}>
-                      Удалить
+                      {" "}
+                      Delete{" "}
                     </UiButton>
                   </PermissionGate>
                 </TableCell>
@@ -383,7 +382,7 @@ const PagesPage = () => {
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={editingPage ? "Редактировать страницу" : "Создать страницу"}
+          title={editingPage ? "Edit Page" : "Create Page"}
         >
           <div className={styles.modalContent}>
             <div className={styles.grid}>
@@ -392,7 +391,7 @@ const PagesPage = () => {
                   className={styles.input}
                   value={form.title}
                   onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  placeholder="Название"
+                  placeholder="Name"
                 />
                 <div className={styles.editorWrapper}>
                   <Editor holder="editorjs-container" data={editorData} onChange={setEditorData} />
@@ -411,29 +410,27 @@ const PagesPage = () => {
                   onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
                 />
 
-                <label className={styles.label}>Статус</label>
+                <label className={styles.label}> Status </label>
                 <Select
                   options={[
-                    { value: "draft", label: "Черновик" },
-                    { value: "published", label: "Опубликовано" },
+                    { value: "draft", label: "Draft" },
+                    { value: "published", label: "Published" },
                   ]}
                   value={form.status}
                   onChange={(value) => setForm((prev) => ({ ...prev, status: value as string }))}
                 />
 
-                <label className={styles.label}>Шаблон</label>
+                <label className={styles.label}>Template</label>
                 <Select
                   options={[
-                    { value: "default", label: "Стандартный (default)" },
-                    { value: "payment", label: "Страница оплаты (payment)" },
+                    { value: "default", label: "Standard (default)" },
+                    { value: "payment", label: "Payment Page (payment)" },
                   ]}
                   value={form.template}
-                  onChange={(value) =>
-                    setForm((prev) => ({ ...prev, template: value as string }))
-                  }
+                  onChange={(value) => setForm((prev) => ({ ...prev, template: value as string }))}
                 />
 
-                <label className={styles.label}>SEO заголовок</label>
+                <label className={styles.label}>SEO Title</label>
                 <Input
                   value={form.seoTitle}
                   onChange={(event) =>
@@ -441,7 +438,7 @@ const PagesPage = () => {
                   }
                 />
 
-                <label className={styles.label}>SEO описание</label>
+                <label className={styles.label}>SEO Description</label>
                 <textarea
                   className={styles.textarea}
                   value={form.seoDescription}
@@ -450,7 +447,7 @@ const PagesPage = () => {
                   }
                 />
 
-                <label className={styles.label}>Ключевые слова (через запятую)</label>
+                <label className={styles.label}>Meta Keywords (comma-separated)</label>
                 <Input
                   value={form.metaKeywords}
                   onChange={(event) =>
@@ -458,10 +455,10 @@ const PagesPage = () => {
                   }
                 />
 
-                <label className={styles.label}>Основной слайдер</label>
+                <label className={styles.label}>Featured Slider</label>
                 <Select
                   options={[
-                    { value: "", label: "Без слайдера" },
+                    { value: "", label: "No Slider" },
                     ...sliders.map((slider) => ({
                       value: slider.id.toString(),
                       label: slider.name,
@@ -481,50 +478,47 @@ const PagesPage = () => {
 
             <div className={styles.modalActions}>
               <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
-                Отмена
+                {" "}
+                Cancel{" "}
               </UiButton>
               <UiButton theme="secondary" onClick={handlePreview}>
-                Предпросмотр
+                {" "}
+                Preview{" "}
               </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
-                {isSaving ? "Сохранение..." : "Сохранить"}
+                {isSaving ? "Saving..." : "Save"}
               </UiButton>
             </div>
           </div>
         </Modal>
       </PermissionGate>
 
-      <Modal
-        open={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        title="Предпросмотр страницы"
-      >
+      <Modal open={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Page Preview">
         <div className={styles.previewModalContent}>
           <div className={styles.previewHeader}>
-            <h2>{form.title || "Предпросмотр страницы"}</h2>
+            <h2>{form.title || "Page Preview"}</h2>
             <p className={styles.previewSubtitle}>
-              Статус: {form.status === "published" ? "Опубликовано" : "Черновик"} · Шаблон:{" "}
+              Status: {form.status === "published" ? "Published" : "Draft"} · Template:{" "}
               {form.template}
             </p>
           </div>
 
           {isLoadingPreviewSlider ? (
-            <div className={styles.previewLoader}>Загрузка слайдера...</div>
+            <div className={styles.previewLoader}>Loading slider...</div>
           ) : previewSlider ? (
             <div className={styles.previewSliderWrapper}>
               <PageSlider slider={previewSlider as any} autoPlay={false} showArrows showDots />
             </div>
           ) : form.featuredSliderId ? (
-            <div className={styles.previewEmpty}>
-              Не удалось загрузить слайдер для предпросмотра.
-            </div>
+            <div className={styles.previewEmpty}>Failed to load slider for preview.</div>
           ) : null}
 
           <div className={styles.previewBody} dangerouslySetInnerHTML={{ __html: previewHtml }} />
 
           <div className={styles.modalActions}>
             <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}>
-              Закрыть
+              {" "}
+              Close{" "}
             </UiButton>
           </div>
         </div>

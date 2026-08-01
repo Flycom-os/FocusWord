@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 
 @Injectable()
 export class ProductCategoriesService {
@@ -13,7 +13,13 @@ export class ProductCategoriesService {
     @Inject(REDIS_CLIENT) private readonly redisClient: IORedis,
   ) {}
 
-  async create(data: { name: string; slug: string; description?: string; parentId?: number; status?: string }) {
+  async create(data: {
+    name: string;
+    slug: string;
+    description?: string;
+    parentId?: number;
+    status?: string;
+  }) {
     const category = await this.prisma.productCategory.create({
       data: {
         name: data.name,
@@ -93,7 +99,16 @@ export class ProductCategoriesService {
     return category;
   }
 
-  async update(id: number, data: { name?: string; slug?: string; description?: string; parentId?: number; status?: string }) {
+  async update(
+    id: number,
+    data: {
+      name?: string;
+      slug?: string;
+      description?: string;
+      parentId?: number;
+      status?: string;
+    },
+  ) {
     const category = await this.prisma.productCategory.update({
       where: { id },
       data: {

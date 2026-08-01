@@ -249,4 +249,4 @@ export const createPaymentMethod = paymentsApi.createMethod;
 export const updatePaymentMethod = paymentsApi.updateMethod;
 export const deletePaymentMethod = paymentsApi.deleteMethod;
 export const togglePaymentMethod = paymentsApi.toggleMethod;
-export const createYooMoneyPayment = paymentsApi.createYooMoneyPayment;
+export const { createYooMoneyPayment } = paymentsApi;

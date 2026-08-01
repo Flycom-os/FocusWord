@@ -1,26 +1,36 @@
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags, ApiBody } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+  ApiBody,
+} from '@nestjs/swagger';
 import {
   Body,
-  Controller, Delete, Get,
-  Param, Patch,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
   Post,
-  Put, Query,
+  Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
-} from "@nestjs/common";
-import { JwtAuthGuard } from "../../../jwt-auth.guard";
-import { GetUserId } from "../../../user/auth/get-user-id.decorator";
-import { UpdateUserDto, SearchUsersDto } from "../../../dto/user.dto";
-import { CreateUserDto } from "../../../dto/create-user.dto"; // Import CreateUserDto
-import { UserService } from "./user_service";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { extname } from "node:path";
-import { Express } from "express";
-import { Roles } from "../../common/decorators/roles.decorator";
-import { UsersGuard } from "../../../common/guards/users.guard"; // Import RolesGuard
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../../../jwt-auth.guard';
+import { GetUserId } from '../../../user/auth/get-user-id.decorator';
+import { UpdateUserDto, SearchUsersDto } from '../../../dto/user.dto';
+import { CreateUserDto } from '../../../dto/create-user.dto'; // Import CreateUserDto
+import { UserService } from './user_service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'node:path';
+import { Express } from 'express';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UsersGuard } from '../../../common/guards/users.guard'; // Import RolesGuard
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -54,13 +64,14 @@ export class UserController {
   @Patch('me')
   @UseGuards(JwtAuthGuard) // Only JwtAuthGuard needed for self-operations
   @ApiOperation({ summary: 'Update current user data' })
-  @ApiConsumes("multipart/form-data")
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileInterceptor("face", {
+    FileInterceptor('face', {
       storage: diskStorage({
-        destination: "./uploads", // Folder for saving images
+        destination: './uploads', // Folder for saving images
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const fileName = `${uniqueSuffix}${extname(file.originalname)}`; // Generate unique file name
           callback(null, fileName);
         },
@@ -70,15 +81,15 @@ export class UserController {
   async updateMe(
     @GetUserId() userId: number,
     @UploadedFile() file: Express.Multer.File, // File type
-    @Body() dto: UpdateUserDto // DTO for data
+    @Body() dto: UpdateUserDto, // DTO for data
   ) {
-    let updatedDto = { ...dto };
-    
+    const updatedDto = { ...dto };
+
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
       updatedDto.avatarUrl = imagePath;
     }
-    
+
     return this.userService.updateUser(userId, updatedDto);
   }
 
@@ -99,13 +110,14 @@ export class UserController {
   @Patch(':id')
   @Roles('users:1') // Read/Update access (level 1) required for updating users
   @ApiOperation({ summary: 'Update user by ID' })
-  @ApiConsumes("multipart/form-data")
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileInterceptor("face", {
+    FileInterceptor('face', {
       storage: diskStorage({
-        destination: "./uploads",
+        destination: './uploads',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const fileName = `${uniqueSuffix}${extname(file.originalname)}`;
           callback(null, fileName);
         },
@@ -115,21 +127,23 @@ export class UserController {
   async updateUser(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UpdateUserDto
+    @Body() dto: UpdateUserDto,
   ) {
-    let updatedDto = { ...dto };
-    
+    const updatedDto = { ...dto };
+
     if (file) {
       const imagePath = `/uploads/${file.filename}`;
       updatedDto.avatarUrl = imagePath;
     }
-    
+
     return this.userService.updateUser(parseInt(id), updatedDto);
   }
 
   @Delete(':id')
   @Roles('users:2') // Full access (level 2) required for deleting users
-  @ApiOperation({ summary: 'Delete user by ID (requires user:delete permission)' })
+  @ApiOperation({
+    summary: 'Delete user by ID (requires user:delete permission)',
+  })
   deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(parseInt(id));
   }

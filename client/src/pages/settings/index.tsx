@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
+import { UiButton } from "@/src/shared/ui";
 import { fetchSettings, updateMultipleSettings, settingsApi } from "@/src/shared/api/settings";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -38,10 +38,12 @@ export default function SettingsPage() {
       } catch (err) {
         // Fallback to dynamic import if synchronous call fails
         try {
-          groups = await import("@/src/shared/api/settings").then((m) => m.settingsApi.getSettingsGroups());
+          groups = await import("@/src/shared/api/settings").then((m) =>
+            m.settingsApi.getSettingsGroups(),
+          );
         } catch (err2) {
           // eslint-disable-next-line no-console
-          console.error('SettingsPage: failed to load settings groups via dynamic import', err2);
+          console.error("SettingsPage: failed to load settings groups via dynamic import", err2);
         }
       }
       const allSettings = await fetchSettings(accessToken);
@@ -50,8 +52,8 @@ export default function SettingsPage() {
       const settingsArray = Array.isArray(allSettings)
         ? allSettings
         : allSettings && Array.isArray((allSettings as any).settings)
-        ? (allSettings as any).settings
-        : [];
+          ? (allSettings as any).settings
+          : [];
 
       // Debug logging to help troubleshoot empty UI
       // eslint-disable-next-line no-console
@@ -59,7 +61,7 @@ export default function SettingsPage() {
       // eslint-disable-next-line no-console
       console.log("SettingsPage: fetched settings:", allSettings);
 
-      // Создаем объект с текущими значениями
+      // Create object with current values
       const initialData: Record<string, string> = {};
       settingsArray.forEach((setting: any) => {
         initialData[setting.key] = setting.value;
@@ -79,8 +81,8 @@ export default function SettingsPage() {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('SettingsPage: loadSettings error', error);
-      showToast("Ошибка при загрузке настроек", "error");
+      console.error("SettingsPage: loadSettings error", error);
+      showToast("Failed to load settings", "error");
     } finally {
       setLoading(false);
     }
@@ -106,24 +108,26 @@ export default function SettingsPage() {
 
       // Protected keys must be updated with force flag
       const PROTECTED_DEFAULT_KEYS = [
-        'theme_mode',
-        'theme',
-        'site_name',
-        'site_description',
-        'site_url',
-        'maintenance_mode',
-        'auto_backup',
-        'backup_frequency',
-        'max_backups',
+        "theme_mode",
+        "theme",
+        "site_name",
+        "site_description",
+        "site_url",
+        "maintenance_mode",
+        "auto_backup",
+        "backup_frequency",
+        "max_backups",
       ];
 
-      const blocked = settingsToUpdate.map(s => s.key).filter(k => PROTECTED_DEFAULT_KEYS.includes(k));
+      const blocked = settingsToUpdate
+        .map((s) => s.key)
+        .filter((k) => PROTECTED_DEFAULT_KEYS.includes(k));
       let force = false;
       if (blocked.length > 0) {
-        const confirmMsg = `The following settings are protected and require force to override: ${blocked.join(', ')}. Proceed and force update?`;
+        const confirmMsg = `The following settings are protected and require force to override: ${blocked.join(", ")}. Proceed and force update?`;
         force = window.confirm(confirmMsg);
         if (!force) {
-          showToast('Обновление защищённых настроек отменено', 'warning');
+          showToast("Protected settings update cancelled", "warning");
           setSaving(false);
           return;
         }
@@ -136,9 +140,9 @@ export default function SettingsPage() {
         setTheme(formData.theme_mode);
       }
 
-      showToast("Настройки сохранены", "success");
+      showToast("Settings saved", "success");
     } catch (error) {
-      showToast("Ошибка при сохранении настроек", "error");
+      showToast("Failed to save settings", "error");
     } finally {
       setSaving(false);
     }
@@ -156,9 +160,9 @@ export default function SettingsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      showToast("База данных успешно экспортирована", "success");
+      showToast("Database successfully exported", "success");
     } catch (error) {
-      showToast("Ошибка при экспорте базы данных", "error");
+      showToast("Failed to export database", "error");
     } finally {
       setExporting(false);
     }
@@ -171,11 +175,11 @@ export default function SettingsPage() {
     try {
       setImporting(true);
       await settingsApi.importDatabase(accessToken, file);
-      showToast("База данных успешно импортирована", "success");
+      showToast("Database successfully imported", "success");
       // Reload settings after import
       loadSettings();
     } catch (error) {
-      showToast("Ошибка при импорте базы данных", "error");
+      showToast("Failed to import database", "error");
     } finally {
       setImporting(false);
       // Clear file input
@@ -194,8 +198,8 @@ export default function SettingsPage() {
             onChange={(e) => handleInputChange(setting.key, e.target.value)}
             className={styles.select}
           >
-            <option value="true">Да</option>
-            <option value="false">Нет</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
           </select>
         );
       case "number":
@@ -211,7 +215,7 @@ export default function SettingsPage() {
         );
       case "json":
         // Special-case mailer_config to add validation + test button
-        if (setting.key === 'mailer_config') {
+        if (setting.key === "mailer_config") {
           let parsedOk = true;
           try {
             if (value && value.trim().length > 0) JSON.parse(value);
@@ -220,16 +224,18 @@ export default function SettingsPage() {
           }
 
           const handleTest = async () => {
-            const to = window.prompt('Enter recipient email for test:');
+            const to = window.prompt("Enter recipient email for test:");
             if (!to) return;
             try {
               const cfg = value && value.trim().length > 0 ? JSON.parse(value) : {};
               setSaving(true);
-              const res = await import('@/src/shared/api/settings').then(m => m.settingsApi.testMailer(accessToken, to, cfg));
-              showToast('Test email sent (check response)', 'success');
-              console.log('Mail test response', res);
-            } catch (err) {
-              showToast('Mailer test failed: ' + (err?.message || String(err)), 'error');
+              const res = await import("@/src/shared/api/settings").then((m) =>
+                m.settingsApi.testMailer(accessToken, to, cfg),
+              );
+              showToast("Test email sent (check response)", "success");
+              console.log("Mail test response", res);
+            } catch (err: any) {
+              showToast(`Mailer test failed: ${err?.message || String(err)}`, "error");
             } finally {
               setSaving(false);
             }
@@ -242,13 +248,21 @@ export default function SettingsPage() {
                 onChange={(e) => handleInputChange(setting.key, e.target.value)}
                 className={styles.textarea}
                 rows={6}
-                placeholder="JSON формат"
+                placeholder="JSON format"
               />
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
-                <button type="button" onClick={handleTest} className={styles.saveButton} disabled={!parsedOk || saving}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                <UiButton
+                  type="button"
+                  onClick={handleTest}
+                  className={styles.saveButton}
+                  disabled={!parsedOk || saving}
+                  theme="secondary"
+                >
                   Test config
-                </button>
-                <span style={{ color: parsedOk ? 'green' : 'red' }}>{parsedOk ? 'Valid JSON' : 'Invalid JSON'}</span>
+                </UiButton>
+                <span style={{ color: parsedOk ? "green" : "red" }}>
+                  {parsedOk ? "Valid JSON" : "Invalid JSON"}
+                </span>
               </div>
             </div>
           );
@@ -260,7 +274,7 @@ export default function SettingsPage() {
             onChange={(e) => handleInputChange(setting.key, e.target.value)}
             className={styles.textarea}
             rows={4}
-            placeholder="JSON формат"
+            placeholder="JSON format"
           />
         );
       default:
@@ -273,14 +287,14 @@ export default function SettingsPage() {
                 className={`${styles.themeButton} ${value === "light" ? styles.active : ""}`}
                 onClick={() => handleInputChange(setting.key, "light")}
               >
-                ☀️ Дневная
+                ☀️ Light
               </button>
               <button
                 type="button"
                 className={`${styles.themeButton} ${value === "dark" ? styles.active : ""}`}
                 onClick={() => handleInputChange(setting.key, "dark")}
               >
-                🌙 Ночная
+                🌙 Dark
               </button>
             </div>
           );
@@ -308,7 +322,7 @@ export default function SettingsPage() {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner} />
-        <p>Загрузка настроек...</p>
+        <p>Loading settings...</p>
       </div>
     );
   }
@@ -316,7 +330,7 @@ export default function SettingsPage() {
   if (settingsGroups.length === 0) {
     return (
       <div className={styles.loading}>
-        <p>Нет доступных групп настроек. Проверьте консоль и сетевые запросы.</p>
+        <p>No settings groups available. Check console and network requests.</p>
       </div>
     );
   }
@@ -324,8 +338,8 @@ export default function SettingsPage() {
   return (
     <div className={styles.settingsPage}>
       <div className={styles.header}>
-        <h1>Настройки сайта</h1>
-        <p>Управление параметрами и конфигурацией сайта</p>
+        <h1>Site Settings</h1>
+        <p>Manage site parameters and configuration</p>
       </div>
 
       <div className={styles.tabs}>
@@ -365,15 +379,16 @@ export default function SettingsPage() {
                 {/* Add database import/export buttons for database category */}
                 {group.category === "database" && (
                   <div className={styles.databaseActions}>
-                    <h3>Управление базой данных</h3>
+                    <h3> Database Management </h3>
                     <div className={styles.buttonGroup}>
-                      <Button
+                      <UiButton
                         onClick={handleExportDatabase}
                         disabled={exporting}
                         className={styles.exportButton}
+                        theme="primary"
                       >
-                        {exporting ? "Экспорт..." : "📤 Экспорт БД"}
-                      </Button>
+                        {exporting ? "Exporting..." : "📤 Export DB"}
+                      </UiButton>
                       <div className={styles.importWrapper}>
                         <input
                           type="file"
@@ -383,18 +398,19 @@ export default function SettingsPage() {
                           disabled={importing}
                           className={styles.fileInput}
                         />
-                        <Button
+                        <UiButton
                           onClick={() => document.getElementById("db-import")?.click()}
                           disabled={importing}
                           className={styles.importButton}
+                          theme="secondary"
                         >
-                          {importing ? "Импорт..." : "📥 Импорт БД"}
-                        </Button>
+                          {importing ? "Importing..." : "📥 Import DB"}
+                        </UiButton>
                       </div>
                     </div>
                     <p className={styles.importWarning}>
-                      ⚠️ Внимание: Импорт базы данных заменит все текущие данные. Рекомендуется
-                      создать резервную копию перед импортом.
+                      ⚠️ Warning: Importing the database will replace all current data. It is
+                      recommended to create a backup before importing.
                     </p>
                   </div>
                 )}
@@ -404,12 +420,22 @@ export default function SettingsPage() {
       </div>
 
       <div className={styles.actions}>
-        <Button onClick={handleSave} disabled={saving} className={styles.saveButton}>
-          {saving ? "Сохранение..." : "Сохранить настройки"}
-        </Button>
-        <Button onClick={() => router.push("/admin")} className={styles.cancelButton}>
-          Вернуться к дашборду
-        </Button>
+        <UiButton
+          onClick={handleSave}
+          disabled={saving}
+          className={styles.saveButton}
+          theme="primary"
+        >
+          {saving ? "Saving..." : "Save Settings"}
+        </UiButton>
+        <UiButton
+          onClick={() => router.push("/admin")}
+          className={styles.cancelButton}
+          theme="secondary"
+        >
+          {" "}
+          Return to Dashboard{" "}
+        </UiButton>
       </div>
     </div>
   );

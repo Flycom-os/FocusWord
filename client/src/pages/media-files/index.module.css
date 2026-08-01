@@ -15,7 +15,7 @@
 }
 
 .dragging::before {
-  content: "Перетащите файлы сюда для загрузки";
+  content: "Drag files here to upload";
   position: absolute;
   top: 50%;
   left: 50%;

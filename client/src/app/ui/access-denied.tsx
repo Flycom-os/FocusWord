@@ -17,11 +17,11 @@ const AccessDenied = () => {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Доступ запрещен</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
 
         <p className="text-gray-600 mb-6">
-          У вас нет прав доступа к этой странице. Пожалуйста, обратитесь к администратору для
-          получения необходимых разрешений.
+          You do not have permission to access this page. Please contact the administrator to obtain
+          the necessary permissions.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -31,7 +31,7 @@ const AccessDenied = () => {
             className="flex items-center justify-center gap-2"
           >
             <Home size={16} />
-            На главную
+            Go to Home
           </Button>
 
           <Button
@@ -40,7 +40,7 @@ const AccessDenied = () => {
             className="flex items-center justify-center gap-2"
           >
             <ArrowLeft size={16} />
-            Назад
+            Go Back
           </Button>
         </div>
       </div>

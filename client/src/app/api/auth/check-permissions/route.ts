@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Временная заглушка - в реальном приложении здесь должна быть проверка JWT токена
-// и получение прав пользователя из базы данных или токена
+// Temporary mockup - in a real application, there should be a JWT token validation here
+// and fetching user permissions from the database or token
 const MOCK_USER_PERMISSIONS: Record<string, Record<string, number>> = {
   // userId -> { resource -> level }
   "1": {
@@ -20,10 +20,10 @@ const MOCK_USER_PERMISSIONS: Record<string, Record<string, number>> = {
   },
 };
 
-// Временная функция для извлечения userId из токена (заглушка)
+// Temporary function to extract userId from token (mockup)
 function extractUserIdFromToken(token: string): string | null {
-  // В реальном приложении здесь будет верификация JWT
-  // Пока просто возвращаем mock userId на основе токена
+  // In a real application, there will be JWT verification here
+  // For now we just return mock userId based on the token
   if (token === "mock-admin-token") return "1";
   if (token === "mock-user-token") return "2";
   return null;
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   try {
     const { resource, minLevel } = await request.json();
 
-    // Получаем токен из заголовка
+    // Get token from header
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,13 +41,13 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7);
 
-    // Извлекаем userId из токена
+    // Extract userId from token
     const userId = extractUserIdFromToken(token);
     if (!userId) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
-    // Получаем права пользователя
+    // Get user permissions
     const userPermissions = MOCK_USER_PERMISSIONS[userId] || {};
     const userPermissionLevel = userPermissions[resource] ?? -1;
     const hasPermission = userPermissionLevel >= minLevel;

@@ -10,7 +10,11 @@ export class TagFilterDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiProperty({ description: 'Number of items per page', required: false, default: 10 })
+  @ApiProperty({
+    description: 'Number of items per page',
+    required: false,
+    default: 10,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()

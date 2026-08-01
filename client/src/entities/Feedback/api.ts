@@ -28,24 +28,44 @@ export const feedbackApi = {
     return response.data;
   },
 
-  updateFeedback: async (token: string | null, id: string, data: Partial<FeedbackFormData>): Promise<Feedback> => {
+  updateFeedback: async (
+    token: string | null,
+    id: string,
+    data: Partial<FeedbackFormData>,
+  ): Promise<Feedback> => {
     const response = await axios.put(`${API_URL}/feedback/${id}`, data, {
       headers: authHeaders(token),
     });
     return response.data;
   },
 
-  updateFeedbackStatus: async (token: string | null, id: string, status: Feedback["status"]): Promise<Feedback> => {
-    const response = await axios.patch(`${API_URL}/feedback/${id}/status`, { status }, {
-      headers: authHeaders(token),
-    });
+  updateFeedbackStatus: async (
+    token: string | null,
+    id: string,
+    status: Feedback["status"],
+  ): Promise<Feedback> => {
+    const response = await axios.patch(
+      `${API_URL}/feedback/${id}/status`,
+      { status },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return response.data;
   },
 
-  assignFeedback: async (token: string | null, id: string, assignedToId: string): Promise<Feedback> => {
-    const response = await axios.patch(`${API_URL}/feedback/${id}/assign`, { assignedToId }, {
-      headers: authHeaders(token),
-    });
+  assignFeedback: async (
+    token: string | null,
+    id: string,
+    assignedToId: string,
+  ): Promise<Feedback> => {
+    const response = await axios.patch(
+      `${API_URL}/feedback/${id}/assign`,
+      { assignedToId },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return response.data;
   },
 
@@ -56,7 +76,10 @@ export const feedbackApi = {
   },
 
   // Comments
-  getFeedbackComments: async (token: string | null, feedbackId: string): Promise<FeedbackComment[]> => {
+  getFeedbackComments: async (
+    token: string | null,
+    feedbackId: string,
+  ): Promise<FeedbackComment[]> => {
     const response = await axios.get(`${API_URL}/feedback/${feedbackId}/comments`, {
       headers: authHeaders(token),
     });
@@ -69,12 +92,16 @@ export const feedbackApi = {
     content: string,
     isInternal: boolean = false,
   ): Promise<FeedbackComment> => {
-    const response = await axios.post(`${API_URL}/feedback/${feedbackId}/comments`, {
-      content,
-      isInternal,
-    }, {
-      headers: authHeaders(token),
-    });
+    const response = await axios.post(
+      `${API_URL}/feedback/${feedbackId}/comments`,
+      {
+        content,
+        isInternal,
+      },
+      {
+        headers: authHeaders(token),
+      },
+    );
     return response.data;
   },
 

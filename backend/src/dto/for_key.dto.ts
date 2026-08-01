@@ -1,16 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumberString, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumberString, IsOptional } from 'class-validator';
 
-
-
-export class PromocodesDto{
+export class PromocodesDto {
   @ApiProperty({
     type: 'string',
-    description: 'promocode'
+    description: 'promocode',
   })
   @IsNotEmpty()
   promocode: string;
-  @ApiProperty({example:'2025-15-12', description:'date expired'})
+  @ApiProperty({ example: '2025-15-12', description: 'date expired' })
   @IsNotEmpty()
-  date_expired: string
+  date_expired: string;
 }

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreateRoleDto } from "../../dto/roles/create-role.dto";
-import { UpdateRoleDto } from "../../dto/roles/update-role.dto";
-import { SearchRolesDto } from "../../dto/roles/search-roles.dto";
+import { CreateRoleDto } from '../../dto/roles/create-role.dto';
+import { UpdateRoleDto } from '../../dto/roles/update-role.dto';
+import { SearchRolesDto } from '../../dto/roles/search-roles.dto';
 import { Prisma } from '@prisma/client';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 
 @Injectable()
 export class RoleService {
@@ -38,9 +38,11 @@ export class RoleService {
       return JSON.parse(cachedRoles);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { search, sortBy, sortOrder } = searchDto;
-    
+
     // Use default values if not provided (inherited from SearchQueryDto)
     const currentPage = searchDto.page || 1;
     const currentLimit = searchDto.limit || 10;
@@ -92,7 +94,9 @@ export class RoleService {
       return JSON.parse(cachedRole);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const role = await this.prisma.role.findUnique({
       where: { id },
     });

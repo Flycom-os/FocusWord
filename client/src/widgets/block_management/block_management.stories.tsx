@@ -43,33 +43,33 @@ const BlockManagement = ({ type }: searchProps) => {
           <Button className={styless.close} theme="close">
             <X className={styless.x} />
           </Button>
-          <div className={styless.text}>Выбранно: {choosen}</div>
-          <Button theme="warning">Удалить</Button>
+          <div className={styless.text}>Selected: {choosen}</div>
+          <Button theme="warning">Delete</Button>
         </div>
       )}
       {type === "secondary" && (
         <div className={styless.secondary_or_third}>
-          <Button theme="third">Открыть оригинал</Button>
-          <Button theme="third">Открыть миниатюру</Button>
-          <Button theme="third">Редактировать</Button>
+          <Button theme="third">Open Original</Button>
+          <Button theme="third">Open Thumbnail</Button>
+          <Button theme="third">Edit</Button>
         </div>
       )}
       {type === "third" && (
         <div className={styles.secondary_or_third}>
           <Button theme="third">
-            Файл <ChevronDown />
+            File <ChevronDown />
           </Button>
           <Button theme="third">
-            Автор <ChevronDown />
+            Author <ChevronDown />
           </Button>
           <Button theme="third">
-            Дата <ChevronDown />
+            Date <ChevronDown />
           </Button>
         </div>
       )}
       <Button theme="third" className={styless.add}>
         <Plus />
-        Добавить
+        Add
       </Button>
     </div>
   );

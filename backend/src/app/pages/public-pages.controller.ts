@@ -8,11 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { PagesService } from './pages.service';
-import {
-  ApiOkResponse,
-  ApiTags,
-  ApiOperation,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('public pages')
 @Controller('public/pages')

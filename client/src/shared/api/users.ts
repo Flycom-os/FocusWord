@@ -45,7 +45,10 @@ export const fetchUsers = async (token: string | null, params: UsersQuery): Prom
   return data.users || [];
 };
 
-export const fetchUsersResponse = async (token: string | null, params: UsersQuery): Promise<PaginatedUsersResponse> => {
+export const fetchUsersResponse = async (
+  token: string | null,
+  params: UsersQuery,
+): Promise<PaginatedUsersResponse> => {
   const { data } = await axios.get<PaginatedUsersResponse>(`${API_URL}/user/all`, {
     params: {
       ...params,

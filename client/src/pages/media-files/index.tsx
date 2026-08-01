@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import BlockManagement from "@/src/widgets/block_management";
+
 import styles from "@/src/pages/media-files/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import {
@@ -76,7 +76,7 @@ const MediaFilesPage = () => {
         setTotal(res.total);
         setSelectedIds([]);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить медиафайлы";
+        const message = error?.response?.data?.message || "Failed to load media files";
         showToast(message, "error");
       } finally {
         setIsLoading(false);
@@ -113,7 +113,7 @@ const MediaFilesPage = () => {
 
     console.log("Range IDs:", rangeIds);
 
-    // При Shift+click заменяем выделение на новый диапазон
+    // On Shift+click replace the selection with the new range
     setSelectedIds(rangeIds);
     setLastSelectedIndex(index);
   };
@@ -133,15 +133,15 @@ const MediaFilesPage = () => {
       console.log("Shift+click detected");
       handleShiftSelect(id, index);
     } else {
-      // При обычном клике переключаем выделение одного элемента
+      // On a normal click, toggle selection of a single item
       if (e.ctrlKey || e.metaKey) {
-        // Multi-select с Ctrl/Cmd
+        // Multi-select with Ctrl/Cmd
         console.log("Ctrl/Cmd+click detected");
         setSelectedIds((prev) =>
           prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
         );
       } else {
-        // Обычный клик - выделяем только этот элемент
+        // Normal click - select only this item
         console.log("Normal click - selecting single item");
         setSelectedIds([id]);
       }
@@ -177,29 +177,29 @@ const MediaFilesPage = () => {
 
   const handleSave = async () => {
     if (editingFile) {
-      // Редактирование
+      // Edit
       try {
         await updateMediaFile(accessToken, editingFile.id, {
           altText,
           caption: caption || undefined,
         });
-        showToast("Файл обновлен", "success");
+        showToast("File updated", "success");
         setIsModalOpen(false);
         setEditingFile(null);
         setQuery((prev) => ({ ...prev }));
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось обновить файл";
+        const message = error?.response?.data?.message || "Failed to update file";
         showToast(message, "error");
       }
     } else {
-      // Создание
+      // Create
       if (!fileToUpload) {
-        showToast("Выберите файл для загрузки", "error");
+        showToast("Select file to upload", "error");
         return;
       }
       try {
         await uploadMediaFile(accessToken, fileToUpload, { altText, caption });
-        showToast("Файл загружен", "success");
+        showToast("File uploaded", "success");
         setIsModalOpen(false);
         setFileToUpload(null);
         setFilename("");
@@ -207,24 +207,24 @@ const MediaFilesPage = () => {
         setCaption("");
         setQuery((prev) => ({ ...prev }));
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить файл";
+        const message = error?.response?.data?.message || "Failed to upload file";
         showToast(message, "error");
       }
     }
   };
 
   const handleDeleteFile = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить этот файл?")) return;
+    if (!confirm("Are you sure you want to delete this file?")) return;
     try {
       await deleteMediaFile(accessToken, id);
-      showToast("Файл удален", "success");
+      showToast("File deleted", "success");
       setQuery((prev) => ({ ...prev }));
       if (editingFile?.id === id) {
         setIsModalOpen(false);
         setEditingFile(null);
       }
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить файл";
+      const message = error?.response?.data?.message || "Failed to delete file";
       showToast(message, "error");
     }
   };
@@ -233,10 +233,10 @@ const MediaFilesPage = () => {
     if (!selectedIds.length) return;
     try {
       await Promise.all(selectedIds.map((id) => deleteMediaFile(accessToken, id)));
-      showToast("Файлы удалены", "success");
+      showToast("Files deleted", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить файлы";
+      const message = error?.response?.data?.message || "Failed to delete files";
       showToast(message, "error");
     }
   };
@@ -246,7 +246,7 @@ const MediaFilesPage = () => {
     if (file) {
       setFileToUpload(file);
       if (!editingFile) {
-        // При создании используем имя файла
+        // On create use the filename
         setFilename(file.name);
       }
     }
@@ -340,17 +340,17 @@ const MediaFilesPage = () => {
   };
 
   const getFileUrl = (item: MediaFileDto) => {
-    // filepath теперь уже содержит полный URL с http://
+    // filepath already contains full URL with http://
     if (item.filepath && item.filepath.startsWith("http")) {
       return item.filepath;
     }
-    // Fallback для старых записей
+    // Fallback for old records
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:1331";
-    // Если filepath это имя файла, используем backend/uploads
+    // If filepath is a filename, use backend/uploads
     if (item.filepath && !item.filepath.includes("/")) {
       return `${API_URL}/backend/uploads/${item.filepath}`;
     }
-    // Если filepath уже содержит путь, используем его
+    // If filepath already contains path, use it
     if (item.filepath && item.filepath.startsWith("/")) {
       return `${API_URL}${item.filepath}`;
     }
@@ -367,7 +367,7 @@ const MediaFilesPage = () => {
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
@@ -385,21 +385,22 @@ const MediaFilesPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск"
+            placeholder="Search"
             onChange={(e) => handleSearchChange(e.target.value)}
           />
           <UiButton theme="secondary" className={styles.searchButton}>
-            Поиск
+            {" "}
+            Search{" "}
           </UiButton>
         </div>
         <div className={styles.filters}>
           <Select
             className={styles.filterSelect}
             options={[
-              { value: "", label: "Файл" },
-              { value: "image", label: "Изображения" },
-              { value: "video", label: "Видео" },
-              { value: "audio", label: "Аудио" },
+              { value: "", label: "File Type" },
+              { value: "image", label: "Images" },
+              { value: "video", label: "Videos" },
+              { value: "audio", label: "Audios" },
             ]}
             value={fileTypeFilter}
             onChange={(value) => handleFileTypeFilter(value as string)}
@@ -407,8 +408,8 @@ const MediaFilesPage = () => {
           <Select
             className={styles.filterSelect}
             options={[
-              { value: "", label: "Автор" },
-              { value: "admin", label: "Админ" },
+              { value: "", label: "Author" },
+              { value: "admin", label: "Admin" },
             ]}
             value={authorFilter}
             onChange={(value) => handleAuthorFilter(value as string)}
@@ -416,9 +417,9 @@ const MediaFilesPage = () => {
           <Select
             className={styles.filterSelect}
             options={[
-              { value: "", label: "Дата" },
-              { value: "newest", label: "Новые" },
-              { value: "oldest", label: "Старые" },
+              { value: "", label: "Date" },
+              { value: "newest", label: "Newest" },
+              { value: "oldest", label: "Oldest" },
             ]}
             value={dateFilter}
             onChange={(value) => handleDateFilter(value as string)}
@@ -428,7 +429,7 @@ const MediaFilesPage = () => {
           <button
             className={`${styles.viewButton} ${viewMode === "grid" ? styles.viewButtonActive : ""}`}
             onClick={() => setViewMode("grid")}
-            title="Режим карточек"
+            title="Grid view"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect
@@ -472,7 +473,7 @@ const MediaFilesPage = () => {
           <button
             className={`${styles.viewButton} ${viewMode === "table" ? styles.viewButtonActive : ""}`}
             onClick={() => setViewMode("table")}
-            title="Режим таблицы"
+            title="Table view"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <line x1="1" y1="4" x2="15" y2="4" stroke="currentColor" strokeWidth="1.5" />
@@ -483,20 +484,21 @@ const MediaFilesPage = () => {
         </div>
         <PermissionGate resource="media-files" level={2}>
           <UiButton theme="primary" onClick={handleCreate}>
-            + Добавить
+            + Add
           </UiButton>
         </PermissionGate>
       </div>
 
-      {/* Отдельная строка для индикатора выбранных элементов */}
+      {/* Separate line for selected items indicator */}
       <div className={styles.selectionBar}>
         <div className={styles.selectionInfo}>
           {selectedIds.length > 0 ? (
             <>
-              <span>Выбрано: {selectedIds.length}</span>
+              <span>Selected: {selectedIds.length}</span>
               <PermissionGate resource="media-files" level={2}>
                 <UiButton theme="warning" onClick={handleDeleteSelected}>
-                  Удалить
+                  {" "}
+                  Delete{" "}
                 </UiButton>
               </PermissionGate>
               {selectedIds.length === 1 && (
@@ -508,7 +510,7 @@ const MediaFilesPage = () => {
                       if (file) window.open(getFileUrl(file), "_blank");
                     }}
                   >
-                    Открыть оригинал
+                    Open original
                   </UiButton>
                   <UiButton
                     theme="secondary"
@@ -518,7 +520,7 @@ const MediaFilesPage = () => {
                       else if (file) window.open(getFileUrl(file), "_blank");
                     }}
                   >
-                    Открыть миниатюру
+                    Open thumbnail
                   </UiButton>
                   <UiButton
                     theme="secondary"
@@ -527,13 +529,14 @@ const MediaFilesPage = () => {
                       if (file) handleEdit(file);
                     }}
                   >
-                    Редактировать
+                    {" "}
+                    Edit{" "}
                   </UiButton>
                 </>
               )}
             </>
           ) : (
-            <span className={styles.selectionEmpty}>Пусто</span>
+            <span className={styles.selectionEmpty}>Empty</span>
           )}
         </div>
       </div>
@@ -549,9 +552,9 @@ const MediaFilesPage = () => {
                   onChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead>Название</TableHead>
-              <TableHead>Автор</TableHead>
-              <TableHead>Дата</TableHead>
+              <TableHead> Name </TableHead>
+              <TableHead>Author</TableHead>
+              <TableHead>Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -560,16 +563,16 @@ const MediaFilesPage = () => {
                 key={item.id}
                 className={`${selectedIds.includes(item.id) ? styles.rowSelected : ""} ${styles.clickableRow}`}
                 onMouseDown={(e) => {
-                  // Если клик на чекбокс, не обрабатываем здесь
+                  // If click on checkbox, do not handle here
                   if (
                     (e.target as HTMLElement).tagName === "INPUT" ||
                     (e.target as HTMLElement).closest("input")
                   ) {
                     return;
                   }
-                  // Обрабатываем выделение
+                  // Handle selection
                   handleItemClick(item.id, index, e);
-                  // Открываем редактирование только если не нажаты модификаторы
+                  // Open editing only if no modifiers are pressed
                   if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
                     handleEdit(item);
                   }
@@ -581,7 +584,7 @@ const MediaFilesPage = () => {
                     checked={selectedIds.includes(item.id)}
                     onChange={(e) => {
                       e.stopPropagation();
-                      // Для чекбокса используем логику множественного выделения
+                      // Use multi-selection logic for checkbox
                       setSelectedIds((prev) =>
                         prev.includes(item.id)
                           ? prev.filter((x) => x !== item.id)
@@ -616,7 +619,7 @@ const MediaFilesPage = () => {
                     <span className={styles.filename}>{item.filename}</span>
                   </div>
                 </TableCell>
-                <TableCell>Админ</TableCell>
+                <TableCell>Admin</TableCell>
                 <TableCell>{formatDate(item.uploadedAt)}</TableCell>
               </TableRow>
             ))}
@@ -629,16 +632,16 @@ const MediaFilesPage = () => {
               key={item.id}
               className={`${styles.card} ${selectedIds.includes(item.id) ? styles.cardSelected : ""}`}
               onMouseDown={(e) => {
-                // Если клик на чекбокс, только выбираем
+                // If click on checkbox, only select
                 if (
                   (e.target as HTMLElement).tagName === "INPUT" ||
                   (e.target as HTMLElement).closest("input")
                 ) {
-                  return; // Чекбокс обрабатывается отдельно
+                  return; // Checkbox handled separately
                 }
-                // Иначе обрабатываем выделение
+                // Otherwise handle selection
                 handleItemClick(item.id, index, e);
-                // Открываем редактирование только если не нажаты модификаторы
+                // Open editing only if no modifiers are pressed
                 if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
                   handleEdit(item);
                 }
@@ -650,7 +653,7 @@ const MediaFilesPage = () => {
                   checked={selectedIds.includes(item.id)}
                   onChange={(e) => {
                     e.stopPropagation();
-                    // Для чекбокса используем логику множественного выделения
+                    // Use multi-selection logic for checkbox
                     setSelectedIds((prev) =>
                       prev.includes(item.id)
                         ? prev.filter((x) => x !== item.id)
@@ -662,7 +665,7 @@ const MediaFilesPage = () => {
                 />
               </div>
 
-              {/* Иконка типа медиа в левом верхнем углу */}
+              {/* Media type icon in top left corner */}
               <div className={styles.mediaTypeIcon}>
                 {item.isImage ? (
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
@@ -725,7 +728,7 @@ const MediaFilesPage = () => {
                 )}
               </div>
               <div className={styles.meta}>
-                <div className={styles.filename}>{item.filename || "Название"}</div>
+                <div className={styles.filename}>{item.filename || "Name"}</div>
               </div>
             </div>
           ))}
@@ -750,7 +753,7 @@ const MediaFilesPage = () => {
         >
           <div className={styles.editModalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.editModalHeader}>
-              <h2>{editingFile ? "Редактирование файла" : "Загрузка файла"}</h2>
+              <h2>{editingFile ? "Edit File" : "Upload File"}</h2>
               <button className={styles.closeButton} onClick={() => setIsModalOpen(false)}>
                 ×
               </button>
@@ -769,13 +772,13 @@ const MediaFilesPage = () => {
                     ) : editingFile.isAudio ? (
                       <AudioPlayer src={getFileUrl(editingFile)} theme="primary" />
                     ) : (
-                      <div className={styles.previewPlaceholder}>миниатюра</div>
+                      <div className={styles.previewPlaceholder}>thumbnail</div>
                     )}
                   </div>
                 </div>
                 <div className={styles.formSection}>
                   <div className={styles.formField}>
-                    <label>Название</label>
+                    <label> Name </label>
                     <Input
                       value={filename}
                       onChange={(e) => setFilename(e.target.value)}
@@ -783,19 +786,19 @@ const MediaFilesPage = () => {
                     />
                   </div>
                   <div className={styles.formField}>
-                    <label>Alt-атрибут</label>
+                    <label>Alt Attribute</label>
                     <Input value={altText} onChange={(e) => setAltText(e.target.value)} />
                   </div>
                   <div className={styles.formField}>
-                    <label>Сжатие</label>
+                    <label>Compression</label>
                     <Select
-                      options={[{ value: "none", label: "Отсутствует" }]}
+                      options={[{ value: "none", label: "None" }]}
                       value="none"
                       onChange={() => {}}
                     />
                   </div>
                   <div className={styles.formField}>
-                    <label>Размер файла</label>
+                    <label>File Size</label>
                     <div className={styles.fileSize}>{formatFileSize(editingFile.fileSize)}</div>
                   </div>
                 </div>
@@ -805,7 +808,8 @@ const MediaFilesPage = () => {
                       theme="warning"
                       onClick={() => editingFile && handleDeleteFile(editingFile.id)}
                     >
-                      Удалить
+                      {" "}
+                      Delete{" "}
                     </UiButton>
                   </PermissionGate>
                   <UiButton
@@ -814,11 +818,12 @@ const MediaFilesPage = () => {
                       if (editingFile) window.open(getFileUrl(editingFile), "_blank");
                     }}
                   >
-                    Скачать оригинал
+                    Download original
                   </UiButton>
                   <PermissionGate resource="media-files" level={1}>
                     <UiButton theme="primary" onClick={handleSave}>
-                      Сохранить
+                      {" "}
+                      Save{" "}
                     </UiButton>
                   </PermissionGate>
                 </div>
@@ -839,20 +844,20 @@ const MediaFilesPage = () => {
                       ) : fileToUpload.type.startsWith("audio/") ? (
                         <AudioPlayer src={URL.createObjectURL(fileToUpload)} theme="primary" />
                       ) : (
-                        <div className={styles.previewPlaceholder}>миниатюра</div>
+                        <div className={styles.previewPlaceholder}>thumbnail</div>
                       )
                     ) : (
-                      <div className={styles.previewPlaceholder}>миниатюра</div>
+                      <div className={styles.previewPlaceholder}>thumbnail</div>
                     )}
                   </div>
                 </div>
                 <div className={styles.formSection}>
                   <div className={styles.formField}>
-                    <label>Файл</label>
+                    <label>File</label>
                     <input type="file" onChange={handleFileSelect} className={styles.fileInput} />
                   </div>
                   <div className={styles.formField}>
-                    <label>Название</label>
+                    <label> Name </label>
                     <Input
                       value={filename}
                       onChange={(e) => setFilename(e.target.value)}
@@ -860,20 +865,20 @@ const MediaFilesPage = () => {
                     />
                   </div>
                   <div className={styles.formField}>
-                    <label>Alt-атрибут</label>
+                    <label>Alt Attribute</label>
                     <Input value={altText} onChange={(e) => setAltText(e.target.value)} />
                   </div>
                   <div className={styles.formField}>
-                    <label>Сжатие</label>
+                    <label>Compression</label>
                     <Select
-                      options={[{ value: "none", label: "Отсутствует" }]}
+                      options={[{ value: "none", label: "None" }]}
                       value="none"
                       onChange={() => {}}
                     />
                   </div>
                   {fileToUpload && (
                     <div className={styles.formField}>
-                      <label>Размер файла</label>
+                      <label>File Size</label>
                       <div className={styles.fileSize}>{formatFileSize(fileToUpload.size)}</div>
                     </div>
                   )}
@@ -881,7 +886,8 @@ const MediaFilesPage = () => {
                 <div className={styles.editModalActions}>
                   <PermissionGate resource="media-files" level={1}>
                     <UiButton theme="primary" onClick={handleSave} disabled={!fileToUpload}>
-                      Сохранить
+                      {" "}
+                      Save{" "}
                     </UiButton>
                   </PermissionGate>
                 </div>

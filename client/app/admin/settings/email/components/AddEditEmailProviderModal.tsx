@@ -1,27 +1,30 @@
 // client/app/admin/settings/email/components/AddEditEmailProviderModal.tsx
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Modal from './Modal';
-import { EmailProviderType } from '@/app/admin/settings/email/components/email-provider-enums'; // Assuming you have this enum on the frontend
+import React, { useState, useEffect } from "react";
+import { EmailProviderType } from "@/app/admin/settings/email/components/email-provider-enums"; // Assuming you have this enum on the frontend
+import Modal from "./Modal";
 
 const apiClient = {
-  post: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
-  patch: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
+  post: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
+  patch: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
 };
 
 interface AddEditEmailProviderModalProps {
@@ -37,7 +40,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
   onSuccess,
   providerToEdit,
 }) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [type, setType] = useState<EmailProviderType>(EmailProviderType.SMTP);
   const [isActive, setIsActive] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
@@ -54,7 +57,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
       setSettings(providerToEdit.settings || {});
     } else {
       // Reset form
-      setName('');
+      setName("");
       setType(EmailProviderType.SMTP);
       setIsActive(true);
       setIsDefault(false);
@@ -73,12 +76,12 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
       if (providerToEdit) {
         await apiClient.patch(`/email-providers/${providerToEdit.id}`, payload);
       } else {
-        await apiClient.post('/email-providers', payload);
+        await apiClient.post("/email-providers", payload);
       }
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to save provider.');
+      setError(err.message || "Failed to save provider.");
     } finally {
       setLoading(false);
     }
@@ -98,7 +101,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
         <input
           type="text"
           name="host"
-          value={settings.host || ''}
+          value={settings.host || ""}
           onChange={handleSettingsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           required
@@ -109,7 +112,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
         <input
           type="number"
           name="port"
-          value={settings.port || ''}
+          value={settings.port || ""}
           onChange={handleSettingsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           required
@@ -120,7 +123,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
         <input
           type="text"
           name="auth_user"
-          value={settings.auth_user || ''}
+          value={settings.auth_user || ""}
           onChange={handleSettingsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           required
@@ -131,7 +134,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
         <input
           type="password"
           name="auth_pass"
-          value={settings.auth_pass || ''}
+          value={settings.auth_pass || ""}
           onChange={handleSettingsChange}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           required
@@ -146,21 +149,25 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
       <input
         type="password"
         name="apiKey"
-        value={settings.apiKey || ''}
+        value={settings.apiKey || ""}
         onChange={handleSettingsChange}
         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
         required
       />
     </div>
   );
-  
+
   // You can add more render functions for other provider types (Mailgun, AWS SES)
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={providerToEdit ? 'Edit Provider' : 'Add Provider'}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={providerToEdit ? "Edit Provider" : "Add Provider"}
+    >
       <form onSubmit={handleSubmit}>
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Provider Name</label>
           <input
@@ -183,7 +190,11 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
             required
           >
-            {Object.values(EmailProviderType).map(t => <option key={t} value={t}>{t}</option>)}
+            {Object.values(EmailProviderType).map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -224,7 +235,7 @@ const AddEditEmailProviderModal: React.FC<AddEditEmailProviderModalProps> = ({
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             disabled={loading}
           >
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? "Saving..." : "Save"}
           </button>
         </div>
       </form>

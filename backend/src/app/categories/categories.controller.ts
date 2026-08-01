@@ -1,14 +1,14 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
-  Delete, 
-  Param, 
-  Body, 
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
   Query,
   HttpStatus,
-  HttpException
+  HttpException,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 
@@ -20,12 +20,15 @@ export class CategoriesController {
   async getAllCategories(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('search') search?: string
+    @Query('search') search?: string,
   ) {
     try {
       return await this.categoriesService.findAll(page, limit, search);
     } catch (error) {
-      throw new HttpException('Failed to fetch categories', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to fetch categories',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -38,7 +41,10 @@ export class CategoriesController {
       }
       return category;
     } catch (error) {
-      throw new HttpException('Failed to fetch category', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to fetch category',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -47,16 +53,28 @@ export class CategoriesController {
     try {
       return await this.categoriesService.create(createCategoryDto);
     } catch (error) {
-      throw new HttpException('Failed to create category', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to create category',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Put(':id')
-  async updateCategory(@Param('id') id: string, @Body() updateCategoryDto: any) {
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: any,
+  ) {
     try {
-      return await this.categoriesService.update(parseInt(id), updateCategoryDto);
+      return await this.categoriesService.update(
+        parseInt(id),
+        updateCategoryDto,
+      );
     } catch (error) {
-      throw new HttpException('Failed to update category', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to update category',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -66,7 +84,10 @@ export class CategoriesController {
       await this.categoriesService.delete(parseInt(id));
       return { message: 'Category deleted successfully' };
     } catch (error) {
-      throw new HttpException('Failed to delete category', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to delete category',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

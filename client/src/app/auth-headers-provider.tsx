@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { clearAuthCookie, setAuthCookie } from "@/src/shared/auth/auth-cookie";
 import { useAuth } from "./providers/auth-provider";
 
-// Cookie для middleware (нет доступа к localStorage)
+// Cookie for middleware (no access to localStorage)
 export const AuthHeadersProvider = ({ children }: { children: React.ReactNode }) => {
   const { accessToken } = useAuth();
 

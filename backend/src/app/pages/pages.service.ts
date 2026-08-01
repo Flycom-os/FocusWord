@@ -1,12 +1,19 @@
-import { Injectable, NotFoundException, Inject, Logger, BadRequestException, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  Logger,
+  BadRequestException,
+  BadGatewayException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreatePageDto } from "../dto/pages/create-page.dto";
-import { CreatePageDraftDto } from "../dto/pages/create-page-draft.dto";
-import { PageFilterDto } from "../dto/pages/page-filter.dto";
-import { UpdatePageDto } from "../dto/pages/update-page.dto";
+import { CreatePageDto } from '../dto/pages/create-page.dto';
+import { CreatePageDraftDto } from '../dto/pages/create-page-draft.dto';
+import { PageFilterDto } from '../dto/pages/page-filter.dto';
+import { UpdatePageDto } from '../dto/pages/update-page.dto';
 import IORedis from 'ioredis';
-import { REDIS_CLIENT } from "../../redis/redis.module";
+import { REDIS_CLIENT } from '../../redis/redis.module';
 import { Prisma, Page } from '@prisma/client';
 import { InputJsonValue } from '@prisma/client/runtime/library';
 import { existsSync, readFileSync } from 'fs';
@@ -75,30 +82,45 @@ export class PagesService {
       slug: createPageDto.slug,
       content: createPageDto.content,
       status: createPageDto.status || 'draft',
-      template: createPageDto.template || 'default', 
+      template: createPageDto.template || 'default',
       seoTitle: createPageDto.seoTitle,
       seoDescription: createPageDto.seoDescription,
       metaKeywords: createPageDto.metaKeywords || [],
-      contentBlocks: createPageDto.contentBlocks === null || createPageDto.contentBlocks === undefined ? [] : createPageDto.contentBlocks,
+      contentBlocks:
+        createPageDto.contentBlocks === null ||
+        createPageDto.contentBlocks === undefined
+          ? []
+          : createPageDto.contentBlocks,
 
-      author: createPageDto.authorId ? { connect: { id: createPageDto.authorId } } : undefined,
-      featuredImage: createPageDto.featuredImageId ? { connect: { id: createPageDto.featuredImageId } } : undefined,
-      featuredSlider: createPageDto.featuredSliderId ? { connect: { id: createPageDto.featuredSliderId } } : undefined,
-      parentPage: createPageDto.parentPageId ? { connect: { id: createPageDto.parentPageId } } : undefined,
-      categories: createPageDto.categoryIds && createPageDto.categoryIds.length > 0
-        ? { connect: createPageDto.categoryIds.map((id: number) => ({ id })) }
+      author: createPageDto.authorId
+        ? { connect: { id: createPageDto.authorId } }
         : undefined,
+      featuredImage: createPageDto.featuredImageId
+        ? { connect: { id: createPageDto.featuredImageId } }
+        : undefined,
+      featuredSlider: createPageDto.featuredSliderId
+        ? { connect: { id: createPageDto.featuredSliderId } }
+        : undefined,
+      parentPage: createPageDto.parentPageId
+        ? { connect: { id: createPageDto.parentPageId } }
+        : undefined,
+      categories:
+        createPageDto.categoryIds && createPageDto.categoryIds.length > 0
+          ? { connect: createPageDto.categoryIds.map((id: number) => ({ id })) }
+          : undefined,
       enableFeedback: createPageDto.enableFeedback ?? true,
-      paymentMethod: createPageDto.paymentMethodId ? { connect: { id: createPageDto.paymentMethodId } } : undefined,
+      paymentMethod: createPageDto.paymentMethodId
+        ? { connect: { id: createPageDto.paymentMethodId } }
+        : undefined,
     };
 
     const newPage = await this.prisma.page.create({
       data,
       include: {
         categories: {
-          select: { id: true, name: true, slug: true }
-        }
-      }
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
@@ -131,7 +153,10 @@ export class PagesService {
     return draft;
   }
 
-  async completeWithAi(prompt: string, content?: string): Promise<{ text: string }> {
+  async completeWithAi(
+    prompt: string,
+    content?: string,
+  ): Promise<{ text: string }> {
     const apiKey =
       this.configService.get<string>('DEEPSEEK_API_KEY') ||
       this.configService.get<string>('NEXT_PUBLIC_DEEPSEEK_API_KEY') ||
@@ -139,7 +164,9 @@ export class PagesService {
       process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY ||
       this.readKeyFromEnvFile();
     if (!apiKey) {
-      throw new BadRequestException('DeepSeek API key is not configured on server');
+      throw new BadRequestException(
+        'DeepSeek API key is not configured on server',
+      );
     }
 
     const baseUrlRaw =
@@ -148,7 +175,9 @@ export class PagesService {
       'https://api.deepseek.com/v1';
     const baseUrl = baseUrlRaw.replace(/\/$/, '');
     const model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
-    const endpoint = baseUrl.endsWith('/v1') ? `${baseUrl}/chat/completions` : `${baseUrl}/v1/chat/completions`;
+    const endpoint = baseUrl.endsWith('/v1')
+      ? `${baseUrl}/chat/completions`
+      : `${baseUrl}/v1/chat/completions`;
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -161,7 +190,8 @@ export class PagesService {
         messages: [
           {
             role: 'system',
-            content: 'You are an assistant that edits web page content. Return only the final HTML body fragment.',
+            content:
+              'You are an assistant that edits web page content. Return only the final HTML body fragment.',
           },
           {
             role: 'user',
@@ -178,11 +208,16 @@ ${content || ''}`,
 
     if (!response.ok) {
       const errorText = await response.text();
-      this.logger.error(`DeepSeek request failed: ${response.status} ${errorText}`);
+      this.logger.error(
+        `DeepSeek request failed: ${response.status} ${errorText}`,
+      );
 
       let providerMessage = 'AI generation failed';
       try {
-        const parsed = JSON.parse(errorText) as { error?: { message?: string } | string; message?: string };
+        const parsed = JSON.parse(errorText) as {
+          error?: { message?: string } | string;
+          message?: string;
+        };
         if (typeof parsed.error === 'string') {
           providerMessage = parsed.error;
         } else if (parsed.error?.message) {
@@ -221,7 +256,9 @@ ${content || ''}`,
       return JSON.parse(cachedPages);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const { search, status, authorId, page = 1, limit = 10 } = filterDto;
     const pageNum = typeof page === 'string' ? parseInt(page, 10) : page;
     const limitNum = typeof limit === 'string' ? parseInt(limit, 10) : limit;
@@ -264,8 +301,8 @@ ${content || ''}`,
           },
         },
         categories: {
-          select: { id: true, name: true, slug: true }
-        }
+          select: { id: true, name: true, slug: true },
+        },
       },
     });
 
@@ -284,7 +321,9 @@ ${content || ''}`,
       return JSON.parse(cachedPage);
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     const page = await this.prisma.page.findUnique({
       where: { id },
       include: {
@@ -318,9 +357,9 @@ ${content || ''}`,
           },
         },
         categories: {
-          select: { id: true, name: true, slug: true }
+          select: { id: true, name: true, slug: true },
         },
-        paymentMethod: true
+        paymentMethod: true,
       },
     });
 
@@ -358,7 +397,7 @@ ${content || ''}`,
 
   async findOneBySlug(slug: string): Promise<any | null> {
     console.log(`[PagesService] findOneBySlug called with slug: "${slug}"`);
-    
+
     const cacheKey = `page_slug_${slug}`;
     this.logger.log(`[GET] Checking cache for key: ${cacheKey}`);
     const cachedPage = await this.redisClient.get(cacheKey);
@@ -366,13 +405,19 @@ ${content || ''}`,
     if (cachedPage) {
       this.logger.log(`[HIT] Cache hit for key: ${cacheKey}`);
       const parsed = JSON.parse(cachedPage);
-      console.log(`[PagesService] Returning cached page:`, { id: parsed.id, slug: parsed.slug, title: parsed.title });
+      console.log(`[PagesService] Returning cached page:`, {
+        id: parsed.id,
+        slug: parsed.slug,
+        title: parsed.title,
+      });
       return parsed;
     }
 
-    this.logger.log(`[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`);
+    this.logger.log(
+      `[MISS] Cache miss for key: ${cacheKey}. Fetching from DB.`,
+    );
     console.log(`[PagesService] Querying database for slug: "${slug}"`);
-    
+
     const page = await this.prisma.page.findUnique({
       where: { slug },
       include: {
@@ -406,13 +451,23 @@ ${content || ''}`,
           },
         },
         categories: {
-          select: { id: true, name: true, slug: true }
+          select: { id: true, name: true, slug: true },
         },
-        paymentMethod: true
+        paymentMethod: true,
       },
     });
 
-    console.log(`[PagesService] Database query result:`, page ? { id: page.id, slug: page.slug, title: page.title, status: page.status } : 'null');
+    console.log(
+      `[PagesService] Database query result:`,
+      page
+        ? {
+            id: page.id,
+            slug: page.slug,
+            title: page.title,
+            status: page.status,
+          }
+        : 'null',
+    );
 
     if (page) {
       this.logger.log(`[SET] Setting cache for key: ${cacheKey}`);
@@ -428,18 +483,34 @@ ${content || ''}`,
       throw new NotFoundException(`Page with ID ${id} not found.`);
     }
 
-    const { metaKeywords, publishedAt, contentBlocks, featuredSliderId, categoryIds, ...rest } = updatePageDto;
+    const {
+      metaKeywords,
+      publishedAt,
+      contentBlocks,
+      featuredSliderId,
+      categoryIds,
+      ...rest
+    } = updatePageDto;
 
     const data: Prisma.PageUpdateInput = {
       ...rest,
       ...(metaKeywords !== undefined && { metaKeywords }),
-      ...(publishedAt !== undefined && { publishedAt: publishedAt ? new Date(publishedAt) : null }),
-      ...(featuredSliderId !== undefined && { featuredSliderId: featuredSliderId || null }),
-      ...(contentBlocks !== undefined && { contentBlocks: contentBlocks === null ? Prisma.DbNull : (contentBlocks as InputJsonValue) }),
+      ...(publishedAt !== undefined && {
+        publishedAt: publishedAt ? new Date(publishedAt) : null,
+      }),
+      ...(featuredSliderId !== undefined && {
+        featuredSliderId: featuredSliderId || null,
+      }),
+      ...(contentBlocks !== undefined && {
+        contentBlocks:
+          contentBlocks === null
+            ? Prisma.DbNull
+            : (contentBlocks as InputJsonValue),
+      }),
       ...(categoryIds !== undefined && {
         categories: categoryIds
           ? { set: categoryIds.map((cId: number) => ({ id: cId })) }
-          : undefined
+          : undefined,
       }),
       updatedAt: new Date(),
     };
@@ -451,14 +522,16 @@ ${content || ''}`,
         featuredSlider: true,
         featuredImage: true,
         categories: {
-          select: { id: true, name: true, slug: true }
-        }
+          select: { id: true, name: true, slug: true },
+        },
       },
     });
 
     this.logger.log(`[INVALIDATE] Deleting cache for key: page_${id}`);
     await this.redisClient.del(`page_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: page_slug_${existingPage.slug}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: page_slug_${existingPage.slug}`,
+    );
     await this.redisClient.del(`page_slug_${existingPage.slug}`);
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
@@ -478,7 +551,9 @@ ${content || ''}`,
 
     this.logger.log(`[INVALIDATE] Deleting cache for key: page_${id}`);
     await this.redisClient.del(`page_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: page_slug_${existingPage.slug}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: page_slug_${existingPage.slug}`,
+    );
     await this.redisClient.del(`page_slug_${existingPage.slug}`);
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
@@ -498,7 +573,9 @@ ${content || ''}`,
     });
     this.logger.log(`[INVALIDATE] Deleting cache for key: page_${id}`);
     await this.redisClient.del(`page_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: page_slug_${updatedPage.slug}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: page_slug_${updatedPage.slug}`,
+    );
     await this.redisClient.del(`page_slug_${updatedPage.slug}`);
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');
@@ -519,7 +596,9 @@ ${content || ''}`,
     });
     this.logger.log(`[INVALIDATE] Deleting cache for key: page_${id}`);
     await this.redisClient.del(`page_${id}`);
-    this.logger.log(`[INVALIDATE] Deleting cache for key: page_slug_${updatedPage.slug}`);
+    this.logger.log(
+      `[INVALIDATE] Deleting cache for key: page_slug_${updatedPage.slug}`,
+    );
     await this.redisClient.del(`page_slug_${updatedPage.slug}`);
     this.logger.log(`[INVALIDATE] Deleting cache for key: 'pages'`);
     const keys = await this.redisClient.keys('pages_*');

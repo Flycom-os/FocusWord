@@ -10,14 +10,21 @@ export class AnalyticsFilterDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiProperty({ description: 'Number of items per page', required: false, default: 10 })
+  @ApiProperty({
+    description: 'Number of items per page',
+    required: false,
+    default: 10,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
   @Type(() => Number)
   limit?: number = 10;
 
-  @ApiProperty({ description: 'Start date range (YYYY-MM-DD)', required: false })
+  @ApiProperty({
+    description: 'Start date range (YYYY-MM-DD)',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   startDate?: string;

@@ -1,17 +1,20 @@
 // client/app/admin/settings/email/components/EmailTemplatesList.tsx
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import AddEditEmailTemplateModal from './AddEditEmailTemplateModal';
+import React, { useState, useEffect } from "react";
+import AddEditEmailTemplateModal from "./AddEditEmailTemplateModal";
 
 const apiClient = {
-  get: (url) => fetch(`http://localhost:3001/api${url}`).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
-  delete: (url) => fetch(`http://localhost:3001/api${url}`, { method: 'DELETE' }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-  }),
+  get: (url) =>
+    fetch(`http://localhost:3001/api${url}`).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
+  delete: (url) =>
+    fetch(`http://localhost:3001/api${url}`, { method: "DELETE" }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+    }),
 };
 
 const EmailTemplatesList = () => {
@@ -28,11 +31,11 @@ const EmailTemplatesList = () => {
   const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get('/email-templates');
+      const data = await apiClient.get("/email-templates");
       setTemplates(data);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch email templates.');
+      setError("Failed to fetch email templates.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -40,12 +43,12 @@ const EmailTemplatesList = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
+    if (window.confirm("Are you sure you want to delete this template?")) {
       try {
         await apiClient.delete(`/email-templates/${id}`);
         fetchTemplates(); // Refresh the list
       } catch (err) {
-        setError('Failed to delete template.');
+        setError("Failed to delete template.");
         console.error(err);
       }
     }
@@ -59,9 +62,12 @@ const EmailTemplatesList = () => {
       <div className="bg-white shadow rounded-lg mt-8">
         <div className="p-4 flex justify-between items-center border-b">
           <h3 className="text-lg font-medium">Email Templates</h3>
-          <button 
+          <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            onClick={() => { setTemplateToEdit(null); setIsModalOpen(true); }}
+            onClick={() => {
+              setTemplateToEdit(null);
+              setIsModalOpen(true);
+            }}
           >
             Add Template
           </button>
@@ -78,13 +84,16 @@ const EmailTemplatesList = () => {
                     <p className="text-sm text-gray-500">{template.subject}</p>
                   </div>
                   <div className="space-x-2">
-                    <button 
+                    <button
                       className="text-sm text-blue-500 hover:underline"
-                      onClick={() => { setTemplateToEdit(template); setIsModalOpen(true); }}
+                      onClick={() => {
+                        setTemplateToEdit(template);
+                        setIsModalOpen(true);
+                      }}
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(template.id)}
                       className="text-sm text-red-500 hover:underline"
                     >
@@ -100,7 +109,10 @@ const EmailTemplatesList = () => {
       <AddEditEmailTemplateModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => { fetchTemplates(); setIsModalOpen(false); }}
+        onSuccess={() => {
+          fetchTemplates();
+          setIsModalOpen(false);
+        }}
         templateToEdit={templateToEdit}
       />
     </>

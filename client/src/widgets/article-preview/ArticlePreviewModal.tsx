@@ -31,7 +31,7 @@ export const ArticlePreviewModal = ({
 
   const previewArticle: ArticleDto = {
     id: 0,
-    title: title || "Без названия",
+    title: title || "Untitled",
     slug: slug || "preview",
     content: editorData?.blocks?.length
       ? serializeArticleBlocks(editorData.blocks as ArticleBlock[])
@@ -63,11 +63,11 @@ export const ArticlePreviewModal = ({
       <div className={styles.modal}>
         <div className={styles.toolbar}>
           <div>
-            <h3>Предпросмотр</h3>
+            <h3>Preview</h3>
             <p>/{slug || "slug"}</p>
           </div>
           <UiButton theme="secondary" onClick={onClose}>
-            Закрыть
+            Close
           </UiButton>
         </div>
         <div className={styles.body}>

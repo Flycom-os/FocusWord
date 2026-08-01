@@ -1,10 +1,20 @@
-import { Controller, Post, Body, Get, Req, Query, UseGuards, Patch, Delete } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  Query,
+  UseGuards,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { AuthService } from './signup-service';
 import { RegisterDto } from '../../dto/register.dto';
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { LoginDto } from "../../dto/login.dto";
-import { JwtAuthGuard } from "../../jwt-auth.guard";
-import { GetUserId } from "./get-user-id.decorator";
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginDto } from '../../dto/login.dto';
+import { JwtAuthGuard } from '../../jwt-auth.guard';
+import { GetUserId } from './get-user-id.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -17,7 +27,6 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     return this.authService.signIn(dto.identifier, dto.password);
   }
-
 
   @Post('register')
   @ApiOperation({ summary: 'Registration new user' })

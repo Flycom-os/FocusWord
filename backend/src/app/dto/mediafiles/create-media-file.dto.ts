@@ -19,7 +19,10 @@ export class CreateMediaFileDto {
   @IsInt()
   fileSize: number;
 
-  @ApiProperty({ description: 'Alternative text for the media file', required: false })
+  @ApiProperty({
+    description: 'Alternative text for the media file',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   altText?: string;
@@ -29,44 +32,73 @@ export class CreateMediaFileDto {
   @IsString()
   caption?: string;
 
-  @ApiProperty({ description: 'True if the media file is an image', required: false })
+  @ApiProperty({
+    description: 'True if the media file is an image',
+    required: false,
+  })
   @IsOptional()
   @IsBoolean()
   isImage?: boolean;
 
-  @ApiProperty({ description: 'True if the media file is a video', required: false })
+  @ApiProperty({
+    description: 'True if the media file is a video',
+    required: false,
+  })
   @IsOptional()
   @IsBoolean()
   isVideo?: boolean;
 
-  @ApiProperty({ description: 'True if the media file is an audio file', required: false })
+  @ApiProperty({
+    description: 'True if the media file is an audio file',
+    required: false,
+  })
   @IsOptional()
   @IsBoolean()
   isAudio?: boolean;
 
-  @ApiProperty({ description: 'URL of the thumbnail for the media file (if applicable)', required: false })
+  @ApiProperty({
+    description: 'URL of the thumbnail for the media file (if applicable)',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   thumbnailUrl?: string;
 
-  @ApiProperty({ description: 'Duration of the media file in seconds (if video/audio)', required: false })
+  @ApiProperty({
+    description: 'Duration of the media file in seconds (if video/audio)',
+    required: false,
+  })
   @IsOptional()
   @IsInt()
   duration?: number;
 
-  @ApiProperty({ description: 'Width of the media file in pixels (if image/video)', required: false })
+  @ApiProperty({
+    description: 'Width of the media file in pixels (if image/video)',
+    required: false,
+  })
   @IsOptional()
   @IsInt()
   width?: number;
 
-  @ApiProperty({ description: 'Height of the media file in pixels (if image/video)', required: false })
+  @ApiProperty({
+    description: 'Height of the media file in pixels (if image/video)',
+    required: false,
+  })
   @IsOptional()
   @IsInt()
   height?: number;
 
   // Static property for Swagger schema when used with ApiFileWithBody
   static swaggerSchema: Record<string, SwaggerSchemaProperty> = {
-    altText: { type: 'string', required: false, description: 'Alternative text for the media file' },
-    caption: { type: 'string', required: false, description: 'Caption for the media file' },
+    altText: {
+      type: 'string',
+      required: false,
+      description: 'Alternative text for the media file',
+    },
+    caption: {
+      type: 'string',
+      required: false,
+      description: 'Caption for the media file',
+    },
   };
 }

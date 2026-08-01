@@ -376,6 +376,11 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
 .modalActions {
   display: flex;
   gap: 12px;

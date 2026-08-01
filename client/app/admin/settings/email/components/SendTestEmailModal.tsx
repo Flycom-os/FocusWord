@@ -1,18 +1,20 @@
 // client/app/admin/settings/email/components/SendTestEmailModal.tsx
+
 "use client";
 
-import React, { useState } from 'react';
-import Modal from './Modal';
+import React, { useState } from "react";
+import Modal from "./Modal";
 
 const apiClient = {
-  post: (url, data) => fetch(`http://localhost:3001/api${url}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
+  post: (url, data) =>
+    fetch(`http://localhost:3001/api${url}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
 };
 
 interface SendTestEmailModalProps {
@@ -22,11 +24,11 @@ interface SendTestEmailModalProps {
 }
 
 const SendTestEmailModal: React.FC<SendTestEmailModalProps> = ({ isOpen, onClose, providerId }) => {
-  const [to, setTo] = useState('');
-  const [from, setFrom] = useState('');
-  const [subject, setSubject] = useState('Test Email');
-  const [htmlBody, setHtmlBody] = useState('<p>This is a test email.</p>');
-  const [textBody, setTextBody] = useState('This is a test email.');
+  const [to, setTo] = useState("");
+  const [from, setFrom] = useState("");
+  const [subject, setSubject] = useState("Test Email");
+  const [htmlBody, setHtmlBody] = useState("<p>This is a test email.</p>");
+  const [textBody, setTextBody] = useState("This is a test email.");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ const SendTestEmailModal: React.FC<SendTestEmailModalProps> = ({ isOpen, onClose
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!providerId) {
-      setError('No provider selected.');
+      setError("No provider selected.");
       return;
     }
     setLoading(true);
@@ -44,10 +46,10 @@ const SendTestEmailModal: React.FC<SendTestEmailModalProps> = ({ isOpen, onClose
     const payload = { providerConfigId: providerId, to, from, subject, htmlBody, textBody };
 
     try {
-      await apiClient.post('/email-providers/send-test', payload);
-      setSuccess('Test email sent successfully!');
+      await apiClient.post("/email-providers/send-test", payload);
+      setSuccess("Test email sent successfully!");
     } catch (err) {
-      setError(err.message || 'Failed to send test email.');
+      setError(err.message || "Failed to send test email.");
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,7 @@ const SendTestEmailModal: React.FC<SendTestEmailModalProps> = ({ isOpen, onClose
             placeholder="sender@example.com"
           />
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">To Email</label>
           <input
@@ -117,7 +119,7 @@ const SendTestEmailModal: React.FC<SendTestEmailModalProps> = ({ isOpen, onClose
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
             disabled={loading}
           >
-            {loading ? 'Sending...' : 'Send Test'}
+            {loading ? "Sending..." : "Send Test"}
           </button>
         </div>
       </form>

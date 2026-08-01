@@ -1,4 +1,10 @@
-import { IsString, IsBoolean, IsObject, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { EmailProviderType } from '../email-provider.enums'; // Adjust path if necessary
 
 export class CreateEmailProviderDto {

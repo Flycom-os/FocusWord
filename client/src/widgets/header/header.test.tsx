@@ -16,8 +16,8 @@ describe("Header component", () => {
   it("renders with default username", () => {
     render(<Header />);
 
-    // Проверка текста "Назад"
-    expect(screen.getByText("Назад")).toBeInTheDocument();
+    // Проверка текста "Back"
+    expect(screen.getByText("Back")).toBeInTheDocument();
 
     // Проверка имени пользователя
     expect(screen.getByText("Global_layout")).toBeInTheDocument();

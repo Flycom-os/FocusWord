@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import { ChevronLeft, ChevronDown, Settings, LogOut, User, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { UiButton } from "@/src/shared/ui";
 import Profile from "@/src/pages/profile";
 import styles from "./ui-site-header.module.css";
@@ -17,12 +18,22 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = () => {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   const userName = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Guest";
 
-  // Формируем полный URL для аватара
+  // Formulate full URL for avatar
   const avatarUrl = user?.avatarUrl
     ? user.avatarUrl.startsWith("http")
       ? user.avatarUrl
@@ -70,11 +81,17 @@ const Header: React.FC<HeaderProps> = () => {
           <span>Back</span>
         </UiButton>
 
-        <div className={styles.userSection} onClick={toggleDropdown}>
-          <div className={styles.userName}>{userName}</div>
-          <button className={styles.dropdownButton}>
-            <ChevronDown size={16} />
+        <div className={styles.rightSection}>
+          <button className={styles.themeToggle} onClick={toggleTheme} aria-label="Toggle theme">
+            {mounted && theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+
+          <div className={styles.userSection} onClick={toggleDropdown}>
+            <div className={styles.userName}>{userName}</div>
+            <button className={styles.dropdownButton}>
+              <ChevronDown size={16} />
+            </button>
+          </div>
         </div>
       </div>
 

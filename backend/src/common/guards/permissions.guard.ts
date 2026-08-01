@@ -1,10 +1,18 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector, private prisma: PrismaService) {}
+  constructor(
+    private reflector: Reflector,
+    private prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermissions = this.reflector.get<string[]>(
@@ -38,13 +46,17 @@ export class PermissionsGuard implements CanActivate {
       const [resource, level] = requiredPermission.split(':');
       const requiredLevel = parseInt(level, 10);
 
-      const hasPermission = userPermissions.some(p => {
+      const hasPermission = userPermissions.some((p) => {
         const [userResource, userLevel] = p.split(':');
-        return userResource === resource && parseInt(userLevel, 10) >= requiredLevel;
+        return (
+          userResource === resource && parseInt(userLevel, 10) >= requiredLevel
+        );
       });
 
       if (!hasPermission) {
-        throw new UnauthorizedException(`Missing permission: ${requiredPermission}`);
+        throw new UnauthorizedException(
+          `Missing permission: ${requiredPermission}`,
+        );
       }
     }
 

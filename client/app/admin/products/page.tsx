@@ -7,8 +7,7 @@ import { productsApi } from "@/src/entities/Product/api";
 import { fetchProductCategories } from "@/src/shared/api/products";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
-import Modal from "@/src/shared/ui/Modal/ui-modal";
+import { UiButton, Modal } from "@/src/shared/ui";
 import styles from "./products.module.css";
 
 const ProductsPage = () => {
@@ -39,7 +38,8 @@ const ProductsPage = () => {
 
   const loadProducts = async () => {
     try {
-      const data = await productsApi.getProducts();
+      const res = await productsApi.getProducts();
+      const data = res && res.data ? res.data : res || [];
       setProducts(data);
     } catch (error) {
       console.error("Failed to load products:", error);
@@ -98,7 +98,13 @@ const ProductsPage = () => {
       <div className={styles.categoryTree}>
         <div className={styles.noCategory}>
           <label>
-            <input type="radio" name="product-category" checked={value === undefined || value === null} onChange={() => onChange(undefined)} /> No category
+            <input
+              type="radio"
+              name="product-category"
+              checked={value === undefined || value === null}
+              onChange={() => onChange(undefined)}
+            />{" "}
+            No category
           </label>
         </div>
         {tree.map((n) => renderNode(n))}
@@ -113,7 +119,16 @@ const ProductsPage = () => {
 
   const openCreate = () => {
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: 0, categoryId: undefined, sku: "", stock: 0, images: "", status: 'active' });
+    setForm({
+      name: "",
+      description: "",
+      price: 0,
+      categoryId: undefined,
+      sku: "",
+      stock: 0,
+      images: "",
+      status: "active",
+    });
     loadCategories();
     setShowModal(true);
   };
@@ -127,7 +142,7 @@ const ProductsPage = () => {
       categoryId: p.categoryId ? Number(p.categoryId) : undefined,
       sku: p.sku,
       stock: p.stock,
-      images: (p.images || []).join(','),
+      images: (p.images || []).join(","),
       status: p.status,
     });
     loadCategories();
@@ -158,7 +173,7 @@ const ProductsPage = () => {
 
       setCategories(buildTree(flat));
     } catch (err) {
-      console.error('Failed to load categories', err);
+      console.error("Failed to load categories", err);
       setCategories([]);
     }
   };
@@ -172,7 +187,7 @@ const ProductsPage = () => {
         categoryId: form.categoryId || null,
         sku: form.sku,
         stock: Number(form.stock),
-        images: form.images ? form.images.split(',').map(s => s.trim()) : [],
+        images: form.images ? form.images.split(",").map((s) => s.trim()) : [],
         status: form.status,
       };
       if (editingProduct) {
@@ -183,8 +198,8 @@ const ProductsPage = () => {
       setShowModal(false);
       await loadProducts();
     } catch (err) {
-      console.error('Failed to save product', err);
-      alert('Failed to save product');
+      console.error("Failed to save product", err);
+      alert("Failed to save product");
     }
   };
 
@@ -201,7 +216,7 @@ const ProductsPage = () => {
     }
   };
 
-  const filteredProducts = products.filter(
+  const filteredProducts = (Array.isArray(products) ? products : []).filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -215,10 +230,10 @@ const ProductsPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Products</h1>
-        <button className={styles.addButton} onClick={openCreate}>
+        <UiButton theme="primary" onClick={openCreate}>
           <Plus size={20} />
           Add Product
-        </button>
+        </UiButton>
       </div>
 
       <div className={styles.filters}>
@@ -231,10 +246,10 @@ const ProductsPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <button className={styles.filterButton}>
+        <UiButton theme="secondary">
           <Filter size={20} />
           Filters
-        </button>
+        </UiButton>
       </div>
 
       <div className={styles.tableContainer}>
@@ -276,15 +291,12 @@ const ProductsPage = () => {
                 <td>{product.category?.name || "No category"}</td>
                 <td>
                   <div className={styles.actions}>
-                    <button className={styles.actionButton}>
-                        <Edit size={16} />
-                    </button>
-                      <button className={styles.actionButton} onClick={() => openEdit(product)}>
-                        <Edit size={16} />
-                      </button>
-                    <button className={styles.actionButton} onClick={() => handleDelete(product)}>
+                    <UiButton theme="secondary" onClick={() => openEdit(product)}>
+                      <Edit size={16} />
+                    </UiButton>
+                    <UiButton theme="warning" onClick={() => handleDelete(product)}>
                       <Trash2 size={16} />
-                    </button>
+                    </UiButton>
                   </div>
                 </td>
               </tr>
@@ -299,31 +311,45 @@ const ProductsPage = () => {
             <h3>Delete Product</h3>
             <p>Are you sure you want to delete "{selectedProduct?.name}"?</p>
             <div className={styles.modalActions}>
-              <button className={styles.cancelButton} onClick={() => setShowDeleteModal(false)}>
+              <UiButton theme="secondary" onClick={() => setShowDeleteModal(false)}>
                 Cancel
-              </button>
-              <button className={styles.deleteButton} onClick={confirmDelete}>
+              </UiButton>
+              <UiButton theme="warning" onClick={confirmDelete}>
                 Delete
-              </button>
+              </UiButton>
             </div>
           </div>
         </div>
       )}
 
       {showModal && (
-        <Modal open={showModal} onClose={() => setShowModal(false)} title={editingProduct ? 'Edit Product' : 'Create Product'}>
+        <Modal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingProduct ? "Edit Product" : "Create Product"}
+        >
           <div className={styles.productForm}>
             <div className={styles.formRow}>
               <label>Name</label>
-              <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>SKU</label>
-              <Input value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} />
+              <Input
+                value={form.sku}
+                onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Price</label>
-              <Input type="number" value={String(form.price)} onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))} />
+              <Input
+                type="number"
+                value={String(form.price)}
+                onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Category</label>
@@ -337,15 +363,25 @@ const ProductsPage = () => {
             </div>
             <div className={styles.formRow}>
               <label>Images (comma-separated URLs)</label>
-              <Input value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} />
+              <Input
+                value={form.images}
+                onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))}
+              />
             </div>
             <div className={styles.formRow}>
               <label>Description</label>
-              <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              />
             </div>
             <div className={styles.formActions}>
-              <Button onClick={handleSaveProduct}>Save</Button>
-              <Button onClick={() => setShowModal(false)} variant="secondary">Cancel</Button>
+              <UiButton theme="primary" onClick={handleSaveProduct}>
+                Save
+              </UiButton>
+              <UiButton theme="secondary" onClick={() => setShowModal(false)}>
+                Cancel
+              </UiButton>
             </div>
           </div>
         </Modal>

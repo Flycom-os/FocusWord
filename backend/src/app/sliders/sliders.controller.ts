@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { SlidersService } from './sliders.service';
 import { CreateSliderDto } from '../dto/sliders/create-slider.dto';
 import { UpdateSliderDto } from '../dto/sliders/update-slider.dto';
@@ -6,7 +16,13 @@ import { CreateSlideDto } from '../dto/sliders/create-slide.dto';
 import { UpdateSlideDto } from '../dto/sliders/update-slide.dto';
 import { QuerySliderDto } from '../dto/sliders/query-slider.dto';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
 
@@ -21,7 +37,10 @@ export class SlidersController {
   @Post()
   @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Create a new slider' })
-  @ApiResponse({ status: 201, description: 'The slider has been successfully created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The slider has been successfully created.',
+  })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   createSlider(@Body() createSliderDto: CreateSliderDto) {
     return this.slidersService.createSlider(createSliderDto);
@@ -29,18 +48,45 @@ export class SlidersController {
 
   @Get()
   @HasPermission('sliders:0')
-  @ApiOperation({ summary: 'Retrieve all sliders with pagination and filtering' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for slider name or description' })
-  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Field to sort by' })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'], description: 'Sort order' })
+  @ApiOperation({
+    summary: 'Retrieve all sliders with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term for slider name or description',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    description: 'Field to sort by',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of sliders.',
     schema: {
       properties: {
-        data: { type: 'array', items: { '$ref': '#/components/schemas/Slider' } },
+        data: { type: 'array', items: { $ref: '#/components/schemas/Slider' } },
         total: { type: 'number' },
         page: { type: 'number' },
         limit: { type: 'number' },
@@ -65,17 +111,26 @@ export class SlidersController {
   @Patch(':id')
   @HasPermission('sliders:1')
   @ApiOperation({ summary: 'Update a slider by ID' })
-  @ApiResponse({ status: 200, description: 'The slider has been successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The slider has been successfully updated.',
+  })
   @ApiResponse({ status: 404, description: 'Slider not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  updateSlider(@Param('id') id: string, @Body() updateSliderDto: UpdateSliderDto) {
+  updateSlider(
+    @Param('id') id: string,
+    @Body() updateSliderDto: UpdateSliderDto,
+  ) {
     return this.slidersService.updateSlider(+id, updateSliderDto);
   }
 
   @Delete(':id')
   @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Delete a slider by ID' })
-  @ApiResponse({ status: 200, description: 'The slider has been successfully deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The slider has been successfully deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Slider not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   removeSlider(@Param('id') id: string) {
@@ -86,26 +141,60 @@ export class SlidersController {
   @Post(':sliderId/slides')
   @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Create a new slide for a specific slider' })
-  @ApiResponse({ status: 201, description: 'The slide has been successfully created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The slide has been successfully created.',
+  })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  createSlide(@Param('sliderId') sliderId: string, @Body() createSlideDto: CreateSlideDto) {
+  createSlide(
+    @Param('sliderId') sliderId: string,
+    @Body() createSlideDto: CreateSlideDto,
+  ) {
     return this.slidersService.createSlide(+sliderId, createSlideDto);
   }
 
   @Get(':sliderId/slides')
   @HasPermission('sliders:0')
-  @ApiOperation({ summary: 'Retrieve all slides for a specific slider with pagination and filtering' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for slide title or description' })
-  @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Field to sort by' })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'], description: 'Sort order' })
+  @ApiOperation({
+    summary:
+      'Retrieve all slides for a specific slider with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term for slide title or description',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    description: 'Field to sort by',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of slides for the slider.',
     schema: {
       properties: {
-        data: { type: 'array', items: { '$ref': '#/components/schemas/Slide' } },
+        data: { type: 'array', items: { $ref: '#/components/schemas/Slide' } },
         total: { type: 'number' },
         page: { type: 'number' },
         limit: { type: 'number' },
@@ -113,13 +202,18 @@ export class SlidersController {
     },
   })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  findAllSlides(@Param('sliderId') sliderId: string, @Query() query: QuerySliderDto) {
+  findAllSlides(
+    @Param('sliderId') sliderId: string,
+    @Query() query: QuerySliderDto,
+  ) {
     return this.slidersService.findAllSlides(+sliderId, query);
   }
 
   @Get(':sliderId/slides/:slideId')
   @HasPermission('sliders:0')
-  @ApiOperation({ summary: 'Retrieve a single slide by ID for a specific slider' })
+  @ApiOperation({
+    summary: 'Retrieve a single slide by ID for a specific slider',
+  })
   @ApiResponse({ status: 200, description: 'The slide.' })
   @ApiResponse({ status: 404, description: 'Slide not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
@@ -130,17 +224,26 @@ export class SlidersController {
   @Patch(':sliderId/slides/:slideId')
   @HasPermission('sliders:1')
   @ApiOperation({ summary: 'Update a slide by ID for a specific slider' })
-  @ApiResponse({ status: 200, description: 'The slide has been successfully updated.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The slide has been successfully updated.',
+  })
   @ApiResponse({ status: 404, description: 'Slide not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  updateSlide(@Param('slideId') slideId: string, @Body() updateSlideDto: UpdateSlideDto) {
+  updateSlide(
+    @Param('slideId') slideId: string,
+    @Body() updateSlideDto: UpdateSlideDto,
+  ) {
     return this.slidersService.updateSlide(+slideId, updateSlideDto);
   }
 
   @Delete(':sliderId/slides/:slideId')
   @HasPermission('sliders:2')
   @ApiOperation({ summary: 'Delete a slide by ID for a specific slider' })
-  @ApiResponse({ status: 200, description: 'The slide has been successfully deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The slide has been successfully deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Slide not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   removeSlide(@Param('slideId') slideId: string) {

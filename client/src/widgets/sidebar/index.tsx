@@ -126,7 +126,6 @@ const menuItems: MenuItem[] = [
     resource: "roles",
     minLevel: 0,
   },
-  { icon: <User size={24} />, label: "Profile", url: "/admin/profile" },
   { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings" },
   {
     icon: <CreditCard size={24} />,

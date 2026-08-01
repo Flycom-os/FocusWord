@@ -1,12 +1,26 @@
 import {
-  Controller, Get, Post, Body, Patch, Param, Delete,
-  UseGuards, HttpCode, HttpStatus, Query, Req,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Req,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import {
-  ApiBearerAuth, ApiCreatedResponse, ApiOkResponse,
-  ApiTags, ApiOperation, ApiQuery,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CreateBlogPostDto } from '../dto/blog/create-blog-post.dto';
 import { CreateBlogPostDraftDto } from '../dto/blog/create-blog-post-draft.dto';
@@ -28,7 +42,9 @@ export class BlogController {
   @HasPermission('blog:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new blog post' })
-  @ApiCreatedResponse({ description: 'The blog post has been successfully created.' })
+  @ApiCreatedResponse({
+    description: 'The blog post has been successfully created.',
+  })
   async create(@Body() dto: CreateBlogPostDto, @Req() req: RequestWithUser) {
     dto.authorId = req.user.userId;
     return this.blogService.create(dto);
@@ -38,8 +54,13 @@ export class BlogController {
   @HasPermission('blog:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a blog post draft with defaults' })
-  @ApiCreatedResponse({ description: 'The blog post draft has been successfully created.' })
-  async createDraft(@Body() dto: CreateBlogPostDraftDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The blog post draft has been successfully created.',
+  })
+  async createDraft(
+    @Body() dto: CreateBlogPostDraftDto,
+    @Req() req: RequestWithUser,
+  ) {
     dto.authorId = req.user.userId;
     return this.blogService.createDraft(dto);
   }
@@ -56,7 +77,9 @@ export class BlogController {
   @Get()
   @HasPermission('blog:0')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retrieve a list of blog posts with optional filtering' })
+  @ApiOperation({
+    summary: 'Retrieve a list of blog posts with optional filtering',
+  })
   @ApiOkResponse({ description: 'A list of blog posts.' })
   findAll(@Query() filterDto: BlogFilterDto) {
     return this.blogService.findAll(filterDto);
@@ -84,7 +107,9 @@ export class BlogController {
   @HasPermission('blog:1')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update an existing blog post' })
-  @ApiOkResponse({ description: 'The blog post has been successfully updated.' })
+  @ApiOkResponse({
+    description: 'The blog post has been successfully updated.',
+  })
   update(@Param('id') id: string, @Body() dto: UpdateBlogPostDto) {
     return this.blogService.update(+id, dto);
   }
@@ -93,7 +118,9 @@ export class BlogController {
   @HasPermission('blog:2')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a blog post' })
-  @ApiOkResponse({ description: 'The blog post has been successfully deleted.' })
+  @ApiOkResponse({
+    description: 'The blog post has been successfully deleted.',
+  })
   remove(@Param('id') id: string) {
     return this.blogService.remove(+id);
   }
@@ -102,7 +129,9 @@ export class BlogController {
   @HasPermission('blog:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publish a blog post' })
-  @ApiOkResponse({ description: 'The blog post has been successfully published.' })
+  @ApiOkResponse({
+    description: 'The blog post has been successfully published.',
+  })
   publish(@Param('id') id: string) {
     return this.blogService.publish(+id);
   }
@@ -111,7 +140,9 @@ export class BlogController {
   @HasPermission('blog:2')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Unpublish a blog post' })
-  @ApiOkResponse({ description: 'The blog post has been successfully unpublished.' })
+  @ApiOkResponse({
+    description: 'The blog post has been successfully unpublished.',
+  })
   unpublish(@Param('id') id: string) {
     return this.blogService.unpublish(+id);
   }

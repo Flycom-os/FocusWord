@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsArray, ValidateNested, IsDefined, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  IsDefined,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class MxRecordDto {
@@ -12,7 +19,7 @@ export class MxRecordDto {
 export class DkimRecordDto {
   @IsString()
   selector: string; // e.g., 's1'
-  
+
   @IsString()
   publicKey: string; // The value of the DKIM TXT record
 }

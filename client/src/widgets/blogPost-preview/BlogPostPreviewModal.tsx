@@ -31,7 +31,7 @@ export const BlogPostPreviewModal = ({
 
   const previewBlogPost: BlogPostDto = {
     id: 0,
-    title: title || "Без названия",
+    title: title || "Untitled",
     slug: slug || "preview",
     content: editorData?.blocks?.length
       ? serializeBlogPostBlocks(editorData.blocks as BlogPostBlock[])
@@ -63,11 +63,11 @@ export const BlogPostPreviewModal = ({
       <div className={styles.modal}>
         <div className={styles.toolbar}>
           <div>
-            <h3>Предпросмотр</h3>
+            <h3>Preview</h3>
             <p>/{slug || "slug"}</p>
           </div>
           <UiButton theme="secondary" onClick={onClose}>
-            Закрыть
+            Close
           </UiButton>
         </div>
         <div className={styles.body}>

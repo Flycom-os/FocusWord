@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from "react";
-import BlockManagement from "@/src/widgets/block_management";
+
 import styles from "@/src/pages/users/index.module.css";
 import { useAuth } from "@/src/app/providers/auth-provider";
 import {
@@ -81,7 +81,7 @@ const UsersPage = () => {
         setUsersTotal(usersRes.length);
         setRoles(rolesRes);
       } catch (error: any) {
-        const message = error?.response?.data?.message || "Не удалось загрузить пользователей";
+        const message = error?.response?.data?.message || "Failed to load users";
         showToast(message, "error");
       } finally {
         setIsLoading(false);
@@ -122,7 +122,7 @@ const UsersPage = () => {
 
   const handleSave = async () => {
     if (!email || (!editingUser && !password)) {
-      showToast("Заполните обязательные поля", "error");
+      showToast("Please fill in the required fields", "error");
       return;
     }
     try {
@@ -134,9 +134,9 @@ const UsersPage = () => {
           lastName: lastName || undefined,
           roleId: roleId || undefined,
         });
-        showToast("Пользователь обновлен", "success");
+        showToast("User updated", "success");
       } else {
-        // Для создания используем roleName вместо roleId, так как бекенд принимает roleName
+        // To create we use roleName instead of roleId, because backend accepts roleName
         const selectedRole = roles.find((r) => r.id === roleId);
         await createUser(accessToken, {
           email,
@@ -146,37 +146,36 @@ const UsersPage = () => {
           lastName: lastName || undefined,
           roleName: selectedRole?.name || undefined,
         });
-        showToast("Пользователь создан", "success");
+        showToast("User created", "success");
       }
       setIsModalOpen(false);
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось сохранить пользователя";
+      const message = error?.response?.data?.message || "Failed to save user";
       showToast(message, "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Вы уверены, что хотите удалить этого пользователя?")) return;
+    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
       await deleteUser(accessToken, id);
-      showToast("Пользователь удален", "success");
+      showToast("User deleted", "success");
       setQuery((prev) => ({ ...prev }));
     } catch (error: any) {
-      const message = error?.response?.data?.message || "Не удалось удалить пользователя";
+      const message = error?.response?.data?.message || "Failed to delete user";
       showToast(message, "error");
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
 
   return (
     <div className={styles.root}>
       <Notifications />
-      <BlockManagement type="third" />
 
       <div className={styles.toolbar}>
         <div className={styles.searchContainer}>
@@ -184,13 +183,14 @@ const UsersPage = () => {
             className={styles.search}
             theme="secondary"
             icon="left"
-            placeholder="Поиск пользователей..."
+            placeholder="Search users..."
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
         <PermissionGate resource="users" level={2}>
           <UiButton theme="primary" onClick={handleCreate}>
-            Добавить пользователя
+            {" "}
+            Add User{" "}
           </UiButton>
         </PermissionGate>
       </div>
@@ -205,10 +205,10 @@ const UsersPage = () => {
               isPartiallySelected={tableSelection.isPartiallySelected()}
             />
             <TableHead>Email</TableHead>
-            <TableHead>Имя</TableHead>
-            <TableHead>Роль</TableHead>
-            <TableHead>Дата создания</TableHead>
-            <TableHead className={styles.actionsColumn}>Действия</TableHead>
+            <TableHead> First Name </TableHead>
+            <TableHead> Role </TableHead>
+            <TableHead> Created At </TableHead>
+            <TableHead className={styles.actionsColumn}> Actions </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -231,12 +231,14 @@ const UsersPage = () => {
               <TableCell className={styles.actionsColumn}>
                 <PermissionGate resource="users" level={1}>
                   <UiButton theme="secondary" onClick={() => handleEdit(user)}>
-                    Редактировать
+                    {" "}
+                    Edit{" "}
                   </UiButton>
                 </PermissionGate>
                 <PermissionGate resource="users" level={2}>
                   <UiButton theme="warning" onClick={() => handleDelete(user.id)}>
-                    Удалить
+                    {" "}
+                    Delete{" "}
                   </UiButton>
                 </PermissionGate>
               </TableCell>
@@ -258,7 +260,7 @@ const UsersPage = () => {
         <Modal
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={editingUser ? "Редактировать пользователя" : "Создать пользователя"}
+          title={editingUser ? "Edit User" : "Create User"}
         >
           <div className={styles.modalContent}>
             <div className={styles.formField}>
@@ -273,49 +275,49 @@ const UsersPage = () => {
             </div>
             {!editingUser && (
               <div className={styles.formField}>
-                <label className={styles.formLabel}>Пароль *</label>
+                <label className={styles.formLabel}> Password * </label>
                 <Input
                   className={styles.input}
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Пароль"
+                  placeholder="Password"
                 />
               </div>
             )}
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Имя пользователя</label>
+              <label className={styles.formLabel}> Username </label>
               <Input
                 className={styles.input}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Имя пользователя"
+                placeholder="Username"
               />
             </div>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Имя</label>
+              <label className={styles.formLabel}> First Name </label>
               <Input
                 className={styles.input}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Имя"
+                placeholder="First Name"
               />
             </div>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Фамилия</label>
+              <label className={styles.formLabel}> Last Name </label>
               <Input
                 className={styles.input}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                placeholder="Фамилия"
+                placeholder="Last Name"
               />
             </div>
             <div className={styles.formField}>
-              <label className={styles.formLabel}>Роль</label>
+              <label className={styles.formLabel}> Role </label>
               <Select
                 className={styles.input}
                 options={[
-                  { value: "", label: "Без роли" },
+                  { value: "", label: "No Role" },
                   ...roles.map((role) => ({ value: role.id.toString(), label: role.name })),
                 ]}
                 value={roleId?.toString() || ""}
@@ -324,10 +326,12 @@ const UsersPage = () => {
             </div>
             <div className={styles.modalFooter}>
               <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
-                Отмена
+                {" "}
+                Cancel{" "}
               </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
-                Сохранить
+                {" "}
+                Save{" "}
               </UiButton>
             </div>
           </div>

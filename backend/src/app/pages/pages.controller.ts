@@ -22,11 +22,11 @@ import {
   ApiOperation,
   ApiQuery,
 } from '@nestjs/swagger';
-import { CreatePageDto } from "../dto/pages/create-page.dto";
-import { CreatePageDraftDto } from "../dto/pages/create-page-draft.dto";
-import { PageAiCompleteDto } from "../dto/pages/page-ai-complete.dto";
-import { PageFilterDto } from "../dto/pages/page-filter.dto";
-import { UpdatePageDto } from "../dto/pages/update-page.dto";
+import { CreatePageDto } from '../dto/pages/create-page.dto';
+import { CreatePageDraftDto } from '../dto/pages/create-page-draft.dto';
+import { PageAiCompleteDto } from '../dto/pages/page-ai-complete.dto';
+import { PageFilterDto } from '../dto/pages/page-filter.dto';
+import { UpdatePageDto } from '../dto/pages/update-page.dto';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
 import { RequestWithUser } from '../../common/interfaces/request-with-user.interface';
@@ -42,8 +42,13 @@ export class PagesController {
   @HasPermission('pages:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new page' })
-  @ApiCreatedResponse({ description: 'The page has been successfully created.' })
-  async create(@Body() createPageDto: CreatePageDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The page has been successfully created.',
+  })
+  async create(
+    @Body() createPageDto: CreatePageDto,
+    @Req() req: RequestWithUser,
+  ) {
     createPageDto.authorId = req.user.userId;
     return this.pagesService.create(createPageDto);
   }
@@ -52,8 +57,13 @@ export class PagesController {
   @HasPermission('pages:2')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a page draft with defaults' })
-  @ApiCreatedResponse({ description: 'The page draft has been successfully created.' })
-  async createDraft(@Body() createPageDraftDto: CreatePageDraftDto, @Req() req: RequestWithUser) {
+  @ApiCreatedResponse({
+    description: 'The page draft has been successfully created.',
+  })
+  async createDraft(
+    @Body() createPageDraftDto: CreatePageDraftDto,
+    @Req() req: RequestWithUser,
+  ) {
     createPageDraftDto.authorId = req.user.userId;
     return this.pagesService.createDraft(createPageDraftDto);
   }
@@ -67,11 +77,38 @@ export class PagesController {
     return this.pagesService.completeWithAi(dto.prompt, dto.content);
   }
 
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term for title or content' })
-  @ApiQuery({ name: 'status', required: false, type: String, description: 'Filter by page status (e.g., draft, published)' })
-  @ApiQuery({ name: 'authorId', required: false, type: Number, description: 'Filter by author ID' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for pagination', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page', example: 10 })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term for title or content',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Filter by page status (e.g., draft, published)',
+  })
+  @ApiQuery({
+    name: 'authorId',
+    required: false,
+    type: Number,
+    description: 'Filter by author ID',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
   @Get()
   @HasPermission('pages:0')
   @HttpCode(HttpStatus.OK)

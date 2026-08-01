@@ -1,4 +1,10 @@
-import { Injectable, OnModuleInit, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -24,7 +30,8 @@ export class PaymentsService implements OnModuleInit {
           data: {
             name: 'YooMoney',
             slug: 'yoomoney',
-            description: 'Popular Russian payment service for accepting card and wallet payments.',
+            description:
+              'Popular Russian payment service for accepting card and wallet payments.',
             isEnabled: true,
             displayOrder: 1,
             settings: {
@@ -47,7 +54,8 @@ export class PaymentsService implements OnModuleInit {
           data: {
             name: 'Bank Card',
             slug: 'yoomoney-card',
-            description: 'Payment by debit or credit card via YooMoney (Visa, Mastercard, MIR)',
+            description:
+              'Payment by debit or credit card via YooMoney (Visa, Mastercard, MIR)',
             isEnabled: true,
             type: 'card',
             paymentGatewayId: yoomoneyGateway.id,
@@ -72,7 +80,9 @@ export class PaymentsService implements OnModuleInit {
             paymentGatewayId: yoomoneyGateway.id,
           },
         });
-        this.logger.log('Payment Method "YooMoney Wallet" seeded successfully.');
+        this.logger.log(
+          'Payment Method "YooMoney Wallet" seeded successfully.',
+        );
       }
     } catch (error) {
       this.logger.error('Failed to seed default payments', error);
@@ -91,7 +101,8 @@ export class PaymentsService implements OnModuleInit {
       where: { id },
       include: { paymentMethods: true },
     });
-    if (!gateway) throw new NotFoundException(`Payment gateway #${id} not found`);
+    if (!gateway)
+      throw new NotFoundException(`Payment gateway #${id} not found`);
     return gateway;
   }
 
@@ -209,12 +220,16 @@ export class PaymentsService implements OnModuleInit {
     });
 
     if (!gateway || !gateway.isEnabled) {
-      throw new BadRequestException('YooMoney payment gateway is disabled or does not exist.');
+      throw new BadRequestException(
+        'YooMoney payment gateway is disabled or does not exist.',
+      );
     }
 
     const { shopId } = (gateway.settings as any) || {};
     if (!shopId) {
-      throw new BadRequestException('Incorrect YooMoney gateway configuration.');
+      throw new BadRequestException(
+        'Incorrect YooMoney gateway configuration.',
+      );
     }
 
     // Build the mock checkout redirect URL pointing to the Next.js client yoomoney page

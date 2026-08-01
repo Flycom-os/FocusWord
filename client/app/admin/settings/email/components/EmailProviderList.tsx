@@ -1,32 +1,34 @@
 // client/app/admin/settings/email/components/EmailProviderList.tsx
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import AddEditEmailProviderModal from './AddEditEmailProviderModal';
-import SendTestEmailModal from './SendTestEmailModal';
+import React, { useState, useEffect } from "react";
+import AddEditEmailProviderModal from "./AddEditEmailProviderModal";
+import SendTestEmailModal from "./SendTestEmailModal";
 
 // A mock API client. In a real app, this would be a proper service.
 const apiClient = {
-  get: (url) => fetch(`http://localhost:3001/api${url}`).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-    return res.json();
-  }),
-  delete: (url) => fetch(`http://localhost:3001/api${url}`, { method: 'DELETE' }).then(res => {
-    if (!res.ok) throw new Error('Network response was not ok');
-  }),
+  get: (url) =>
+    fetch(`http://localhost:3001/api${url}`).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    }),
+  delete: (url) =>
+    fetch(`http://localhost:3001/api${url}`, { method: "DELETE" }).then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+    }),
 };
 
 const EmailProviderList = () => {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
   const [providerToEdit, setProviderToEdit] = useState<any | null>(null);
-  
+
   const [isTestSendModalOpen, setIsTestSendModalOpen] = useState(false);
   const [providerIdForTestSend, setProviderIdForTestSend] = useState<number | null>(null);
-
 
   useEffect(() => {
     fetchProviders();
@@ -35,11 +37,11 @@ const EmailProviderList = () => {
   const fetchProviders = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.get('/email-providers');
+      const data = await apiClient.get("/email-providers");
       setProviders(data);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch email providers.');
+      setError("Failed to fetch email providers.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -47,12 +49,12 @@ const EmailProviderList = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this provider?')) {
+    if (window.confirm("Are you sure you want to delete this provider?")) {
       try {
         await apiClient.delete(`/email-providers/${id}`);
         fetchProviders(); // Refresh the list
       } catch (err) {
-        setError('Failed to delete provider.');
+        setError("Failed to delete provider.");
         console.error(err);
       }
     }
@@ -67,7 +69,7 @@ const EmailProviderList = () => {
     setProviderToEdit(provider);
     setIsAddEditModalOpen(true);
   };
-  
+
   const handleSuccess = () => {
     fetchProviders();
     setIsAddEditModalOpen(false);
@@ -86,7 +88,7 @@ const EmailProviderList = () => {
       <div className="bg-white shadow rounded-lg">
         <div className="p-4 flex justify-between items-center border-b">
           <h3 className="text-lg font-medium">Configured Providers</h3>
-          <button 
+          <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
             onClick={handleAdd}
           >
@@ -102,22 +104,24 @@ const EmailProviderList = () => {
                 <li key={provider.id} className="py-3 flex justify-between items-center">
                   <div>
                     <p className="font-semibold">{provider.name}</p>
-                    <p className="text-sm text-gray-500">{provider.type} - {provider.isActive ? 'Active' : 'Inactive'}</p>
+                    <p className="text-sm text-gray-500">
+                      {provider.type} - {provider.isActive ? "Active" : "Inactive"}
+                    </p>
                   </div>
                   <div className="space-x-2">
-                    <button 
+                    <button
                       className="text-sm text-blue-500 hover:underline"
                       onClick={() => handleEdit(provider)}
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(provider.id)}
                       className="text-sm text-red-500 hover:underline"
                     >
                       Delete
                     </button>
-                    <button 
+                    <button
                       className="text-sm text-green-500 hover:underline"
                       onClick={() => handleTestSend(provider.id)}
                     >

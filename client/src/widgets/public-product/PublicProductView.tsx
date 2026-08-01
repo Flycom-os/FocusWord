@@ -1,17 +1,24 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { productsApi } from '@/src/entities/Product/api';
-import styles from './public-product.module.css';
+import React, { useEffect, useState } from "react";
+import { productsApi } from "@/src/entities/Product/api";
+import styles from "./public-product.module.css";
 
-export default function PublicProductView({ productId, config }: { productId: string | number | null; config?: any }) {
+export default function PublicProductView({
+  productId,
+  config,
+}: {
+  productId: string | number | null;
+  config?: any;
+}) {
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<any | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: '', email: '', message: '', rating: 5 });
+  const [form, setForm] = useState({ name: "", email: "", message: "", rating: 5 });
 
   const showReviews = config?.showReviews !== undefined ? config.showReviews : true;
-  const allowReviewSubmission = config?.allowReviewSubmission !== undefined ? config.allowReviewSubmission : true;
+  const allowReviewSubmission =
+    config?.allowReviewSubmission !== undefined ? config.allowReviewSubmission : true;
   const reviewsLimit = config?.reviewsLimit ? Number(config.reviewsLimit) : undefined;
 
   useEffect(() => {
@@ -20,14 +27,14 @@ export default function PublicProductView({ productId, config }: { productId: st
       if (!productId) return setLoading(false);
       try {
         setLoading(true);
-          const p = await productsApi.getProduct(String(productId));
-          const r = await productsApi.getProductReviews(String(productId));
-          if (!active) return;
-          setProduct(p);
-          const list = r || [];
-          setReviews(reviewsLimit ? list.slice(0, reviewsLimit) : list);
+        const p = await productsApi.getProduct(String(productId));
+        const r = await productsApi.getProductReviews(String(productId));
+        if (!active) return;
+        setProduct(p);
+        const list = r || [];
+        setReviews(reviewsLimit ? list.slice(0, reviewsLimit) : list);
       } catch (err) {
-        console.error('PublicProductView load error', err);
+        console.error("PublicProductView load error", err);
         setProduct(null);
         setReviews([]);
       } finally {
@@ -35,7 +42,9 @@ export default function PublicProductView({ productId, config }: { productId: st
       }
     }
     load();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [productId]);
 
   const submitReview = async (e: React.FormEvent) => {
@@ -44,9 +53,9 @@ export default function PublicProductView({ productId, config }: { productId: st
     try {
       const newReview = await productsApi.addProductReview(String(productId), form);
       setReviews((s) => [newReview, ...s].slice(0, reviewsLimit || Infinity));
-      setForm({ name: '', email: '', message: '', rating: 5 });
+      setForm({ name: "", email: "", message: "", rating: 5 });
     } catch (err) {
-      console.error('Failed to submit review', err);
+      console.error("Failed to submit review", err);
     }
   };
 
@@ -73,12 +82,27 @@ export default function PublicProductView({ productId, config }: { productId: st
           <h3>Reviews</h3>
           {allowReviewSubmission && (
             <form onSubmit={submitReview} className={styles.reviewForm}>
-              <input placeholder="Name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
-              <input placeholder="Email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
-              <textarea placeholder="Message" value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} />
+              <input
+                placeholder="Name"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              />
+              <input
+                placeholder="Email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              />
+              <textarea
+                placeholder="Message"
+                value={form.message}
+                onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+              />
               <div>
                 <label>Rating</label>
-                <select value={form.rating} onChange={(e) => setForm((f) => ({ ...f, rating: Number(e.target.value) }))}>
+                <select
+                  value={form.rating}
+                  onChange={(e) => setForm((f) => ({ ...f, rating: Number(e.target.value) }))}
+                >
                   <option value={5}>5</option>
                   <option value={4}>4</option>
                   <option value={3}>3</option>

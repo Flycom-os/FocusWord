@@ -1,4 +1,10 @@
-import { IsEmail, IsString, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -13,17 +19,29 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
-  @ApiProperty({ example: 'John', description: 'User first name', required: false })
+  @ApiProperty({
+    example: 'John',
+    description: 'User first name',
+    required: false,
+  })
   @IsOptional()
   @IsString({ message: 'First name must be a string' })
   firstName?: string;
 
-  @ApiProperty({ example: 'Doe', description: 'User last name', required: false })
+  @ApiProperty({
+    example: 'Doe',
+    description: 'User last name',
+    required: false,
+  })
   @IsOptional()
   @IsString({ message: 'Last name must be a string' })
   lastName?: string;
 
-  @ApiProperty({ example: 'admin', description: 'User role name (e.g., "admin", "user")', required: false })
+  @ApiProperty({
+    example: 'admin',
+    description: 'User role name (e.g., "admin", "user")',
+    required: false,
+  })
   @IsOptional()
   @IsString({ message: 'Role name must be a string' })
   roleName?: string; // Optional: to assign a role during creation

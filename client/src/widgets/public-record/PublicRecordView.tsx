@@ -19,7 +19,7 @@ export const PublicRecordView = ({ record, showMeta = false }: PublicRecordViewP
         <h1 className={styles.title}>{record.title}</h1>
         {showMeta && record.createdAt && (
           <p className={styles.meta}>
-            Создано: {new Date(record.createdAt).toLocaleDateString("ru-RU")}
+            Created: {new Date(record.createdAt).toLocaleDateString("ru-RU")}
           </p>
         )}
       </header>

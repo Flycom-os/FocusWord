@@ -20,7 +20,9 @@ export class SmtpEmailServiceStrategy implements IEmailServiceStrategy {
     const { host, port, secure, auth_user, auth_pass } = settings;
 
     if (!host || !port || !auth_user || !auth_pass) {
-      throw new Error('Missing SMTP settings: host, port, auth_user, or auth_pass.');
+      throw new Error(
+        'Missing SMTP settings: host, port, auth_user, or auth_pass.',
+      );
     }
 
     const transporter = nodemailer.createTransport({
@@ -45,7 +47,10 @@ export class SmtpEmailServiceStrategy implements IEmailServiceStrategy {
       this.logger.log(`Email sent: ${info.messageId}`);
       return info;
     } catch (error) {
-      this.logger.error(`Failed to send email via SMTP: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to send email via SMTP: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

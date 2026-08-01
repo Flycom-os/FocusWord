@@ -1,9 +1,25 @@
-import { Controller, Get, Post, Res, UseGuards, UseInterceptors, UploadedFile, HttpStatus, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Res,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { JwtAuthGuard } from '../../jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { HasPermission } from '../../common/decorators/has-permission.decorator';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -26,7 +42,10 @@ export class DatabaseController {
       });
       res.send(zipBuffer);
     } catch (error) {
-      throw new HttpException('Failed to export database', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to export database',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -54,7 +73,10 @@ export class DatabaseController {
       await this.databaseService.importDatabase(file.buffer);
       return { success: true, message: 'Database imported successfully' };
     } catch (error) {
-      throw new HttpException('Failed to import database', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to import database',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

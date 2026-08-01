@@ -93,7 +93,7 @@ export const PublicPageView = ({ page, showMeta = false }: PublicPageViewProps) 
     return (
       <div className={styles.checkoutCard}>
         <h2 className={styles.checkoutTitle}>{page.title || "Оплата заказа"}</h2>
-        
+
         <form onSubmit={handlePay}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Сумма к оплате (₽)</label>
@@ -127,7 +127,7 @@ export const PublicPageView = ({ page, showMeta = false }: PublicPageViewProps) 
               className={styles.formInput}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Имя Фамилия"
+              placeholder="First Name Last Name"
             />
           </div>
 
@@ -190,7 +190,7 @@ export const PublicPageView = ({ page, showMeta = false }: PublicPageViewProps) 
         <h1 className={styles.title}>{page.title}</h1>
         {showMeta && page.publishedAt && (
           <p className={styles.meta}>
-            Опубликовано: {new Date(page.publishedAt).toLocaleDateString("ru-RU")}
+            Publishedо: {new Date(page.publishedAt).toLocaleDateString("ru-RU")}
           </p>
         )}
       </header>
@@ -221,7 +221,7 @@ export const PublicPageView = ({ page, showMeta = false }: PublicPageViewProps) 
 
       {page.categories && page.categories.length > 0 && (
         <section className={styles.categories}>
-          <h3>Категории:</h3>
+          <h3>Categories:</h3>
           <div className={styles.categoryTags}>
             {page.categories.map((cat: any) => (
               <span key={cat.id} className={styles.categoryTag}>

@@ -44,7 +44,7 @@ export class SeoService {
 
   async saveSettings(settings: SEOSettings): Promise<void> {
     const keys = Object.keys(settings) as Array<keyof SEOSettings>;
-    
+
     await Promise.all(
       keys.map(async (key) => {
         await this.prisma.sEOSetting.upsert({
@@ -52,13 +52,16 @@ export class SeoService {
           update: { value: settings[key] },
           create: { key, value: settings[key] },
         });
-      })
+      }),
     );
   }
 
   async generateRobotsTxt(): Promise<string> {
     const settings = await this.getSettings();
-    return settings.robotsTxt || 'User-agent: *\nDisallow: /admin\nSitemap: /sitemap.xml';
+    return (
+      settings.robotsTxt ||
+      'User-agent: *\nDisallow: /admin\nSitemap: /sitemap.xml'
+    );
   }
 
   async generateSitemap(): Promise<string> {
@@ -71,10 +74,22 @@ export class SeoService {
     const baseUrl = 'http://localhost:3000'; // Fallback base URL
 
     const [pages, blogPosts, articles, records] = await Promise.all([
-      this.prisma.page.findMany({ where: { status: 'published' }, select: { slug: true, updatedAt: true } }),
-      this.prisma.blogPost.findMany({ where: { status: 'published' }, select: { slug: true, updatedAt: true } }),
-      this.prisma.article.findMany({ where: { status: 'published' }, select: { slug: true, updatedAt: true } }),
-      this.prisma.record.findMany({ where: { status: 'published' }, select: { slug: true, updatedAt: true } }),
+      this.prisma.page.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true },
+      }),
+      this.prisma.blogPost.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true },
+      }),
+      this.prisma.article.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true },
+      }),
+      this.prisma.record.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true },
+      }),
     ]);
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
@@ -113,10 +128,22 @@ export class SeoService {
 
     // Check records first, then blog posts, articles, and pages
     const [record, blogPost, article, page] = await Promise.all([
-      this.prisma.record.findUnique({ where: { slug }, include: { featuredImage: true } }),
-      this.prisma.blogPost.findUnique({ where: { slug }, include: { featuredImage: true } }),
-      this.prisma.article.findUnique({ where: { slug }, include: { featuredImage: true } }),
-      this.prisma.page.findUnique({ where: { slug }, include: { featuredImage: true } }),
+      this.prisma.record.findUnique({
+        where: { slug },
+        include: { featuredImage: true },
+      }),
+      this.prisma.blogPost.findUnique({
+        where: { slug },
+        include: { featuredImage: true },
+      }),
+      this.prisma.article.findUnique({
+        where: { slug },
+        include: { featuredImage: true },
+      }),
+      this.prisma.page.findUnique({
+        where: { slug },
+        include: { featuredImage: true },
+      }),
     ]);
 
     const entity = record || blogPost || article || page;
@@ -132,9 +159,10 @@ export class SeoService {
 
     const title = entity.seoTitle || entity.title || siteSettings.siteTitle;
     const description = entity.seoDescription || siteSettings.siteDescription;
-    const keywords = (entity.metaKeywords && entity.metaKeywords.length > 0)
-      ? entity.metaKeywords.join(', ')
-      : siteSettings.siteKeywords;
+    const keywords =
+      entity.metaKeywords && entity.metaKeywords.length > 0
+        ? entity.metaKeywords.join(', ')
+        : siteSettings.siteKeywords;
 
     const ogImage = entity.featuredImage?.filepath || siteSettings.ogImage;
 

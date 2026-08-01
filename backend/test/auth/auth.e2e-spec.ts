@@ -20,7 +20,6 @@ describe('Auth (E2E)', () => {
     prisma = moduleFixture.get<PrismaService>(PrismaService);
 
     // Manually create user before tests
-
   });
 
   // afterAll(async () => {

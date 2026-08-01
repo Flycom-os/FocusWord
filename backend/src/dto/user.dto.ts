@@ -1,37 +1,53 @@
-import { IsOptional, IsString, IsNotEmpty, IsEmail, IsEnum, IsInt, Min, Max } from "class-validator";
-import { Type } from "class-transformer";
-import { ApiProperty } from "@nestjs/swagger";
-import { SearchQueryDto, SortOrder } from "./common/search-query.dto";
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { SearchQueryDto, SortOrder } from './common/search-query.dto';
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'John', description:'user first name'})
+  @ApiProperty({ example: 'John', description: 'user first name' })
   firstName?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'Doe', description:'user last name'})
+  @ApiProperty({ example: 'Doe', description: 'user last name' })
   lastName?: string;
 
   @IsOptional()
   @IsEmail()
-  @ApiProperty({example:'user@example.com', description:'user email'})
+  @ApiProperty({ example: 'user@example.com', description: 'user email' })
   email?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'password123', description:'user password'})
+  @ApiProperty({ example: 'password123', description: 'user password' })
   password?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'/uploads/avatar.jpg', description:'URL to user avatar'})
+  @ApiProperty({
+    example: '/uploads/avatar.jpg',
+    description: 'URL to user avatar',
+  })
   avatarUrl?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'light', description:'User theme preference: light or dark', required: false})
+  @ApiProperty({
+    example: 'light',
+    description: 'User theme preference: light or dark',
+    required: false,
+  })
   themeMode?: string;
 }
 
@@ -91,12 +107,19 @@ export class SearchUsersDto {
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'John', description:'search by first name', required: false})
+  @ApiProperty({
+    example: 'John',
+    description: 'search by first name',
+    required: false,
+  })
   firstName?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({example:'Doe', description:'search by last name', required: false})
+  @ApiProperty({
+    example: 'Doe',
+    description: 'search by last name',
+    required: false,
+  })
   lastName?: string;
 }
-

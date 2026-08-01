@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
-import Button from "@/src/shared/ui/Button/ui-button";
 import { fetchTags, createTag, updateTag, deleteTag } from "@/src/shared/api/tags";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
 import { useAuth } from "@/src/app/providers/auth-provider";
@@ -16,6 +15,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  UiButton,
 } from "@/src/shared/ui";
 import styles from "./tags.module.css";
 
@@ -49,7 +49,7 @@ export default function TagsPage() {
       setTags(response.data);
       setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке тегов", "error");
+      showToast("Error loading tags", "error");
     } finally {
       setLoading(false);
     }
@@ -79,26 +79,26 @@ export default function TagsPage() {
     try {
       if (editingTag) {
         await updateTag(accessToken, editingTag.id, form);
-        showToast("Тег обновлен", "success");
+        showToast("Tag updated", "success");
       } else {
         await createTag(accessToken, form);
-        showToast("Тег создан", "success");
+        showToast("Tag created", "success");
       }
       setShowModal(false);
       loadTags();
     } catch (error) {
-      showToast("Ошибка при сохранении тега", "error");
+      showToast("Error saving tag", "error");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Вы уверены что хотите удалить этот тег?")) {
+    if (confirm("Are you sure you want to delete this tag?")) {
       try {
         await deleteTag(accessToken, id);
-        showToast("Тег удален", "success");
+        showToast("Tag deleted", "success");
         loadTags();
       } catch (error) {
-        showToast("Ошибка при удалении тега", "error");
+        showToast("Error deleting tag", "error");
       }
     }
   };
@@ -106,34 +106,34 @@ export default function TagsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Теги</h1>
-        <p>Управление тегами для постов</p>
+        <h1> Tags </h1>
+        <p>Manage tags for posts</p>
       </div>
 
       <div className={styles.toolbar}>
         <div className={styles.search}>
           <Input
-            placeholder="Поиск тегов..."
+            placeholder="Search tags..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button onClick={handleCreate} className={styles.createButton}>
-          ➕ Создать тег
-        </Button>
+        <UiButton theme="primary" onClick={handleCreate} className={styles.createButton}>
+          ➕ Create Tag
+        </UiButton>
       </div>
 
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>Загрузка...</div>
+          <div className={styles.loading}> Loading... </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Название</TableHead>
+                <TableHead> Name </TableHead>
                 <TableHead>Slug</TableHead>
-                <TableHead>Описание</TableHead>
-                <TableHead>Действия</TableHead>
+                <TableHead> Description </TableHead>
+                <TableHead> Actions </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,12 +144,20 @@ export default function TagsPage() {
                   <TableCell>{tag.description || "-"}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button onClick={() => handleEdit(tag)} className={styles.editButton}>
-                        ✏️
-                      </Button>
-                      <Button onClick={() => handleDelete(tag.id)} className={styles.deleteButton}>
-                        🗑️
-                      </Button>
+                      <UiButton
+                        theme="secondary"
+                        onClick={() => handleEdit(tag)}
+                        className={styles.editButton}
+                      >
+                        ✏️ Edit
+                      </UiButton>
+                      <UiButton
+                        theme="warning"
+                        onClick={() => handleDelete(tag.id)}
+                        className={styles.deleteButton}
+                      >
+                        🗑️ Delete
+                      </UiButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -173,15 +181,15 @@ export default function TagsPage() {
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editingTag ? "Редактировать тег" : "Создать тег"}
+        title={editingTag ? "Edit Tag" : "Create Tag"}
       >
         <div className={styles.modalContent}>
           <div className={styles.formGroup}>
-            <label>Название</label>
+            <label> Name </label>
             <Input
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Введите название тега"
+              placeholder="Enter tag name"
             />
           </div>
 
@@ -195,23 +203,28 @@ export default function TagsPage() {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Описание</label>
+            <label> Description </label>
             <textarea
               value={form.description}
               onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Описание тега"
+              placeholder="Tag description"
               className={styles.textarea}
               rows={3}
             />
           </div>
 
           <div className={styles.modalActions}>
-            <Button onClick={handleSave} className={styles.saveButton}>
-              {editingTag ? "Сохранить" : "Создать"}
-            </Button>
-            <Button onClick={() => setShowModal(false)} className={styles.cancelButton}>
-              Отмена
-            </Button>
+            <UiButton theme="primary" onClick={handleSave} className={styles.saveButton}>
+              {editingTag ? "Save" : "Create"}
+            </UiButton>
+            <UiButton
+              theme="secondary"
+              onClick={() => setShowModal(false)}
+              className={styles.cancelButton}
+            >
+              {" "}
+              Cancel{" "}
+            </UiButton>
           </div>
         </div>
       </Modal>

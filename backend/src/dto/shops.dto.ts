@@ -1,39 +1,35 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumberString, IsOptional } from "class-validator";
-
-
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumberString, IsOptional } from 'class-validator';
 
 export class ShopsDto {
-
-  @ApiProperty({example:'text text text...', description:'text offer'})
+  @ApiProperty({ example: 'text text text...', description: 'text offer' })
   @IsNotEmpty()
-  locate: string
-  @ApiProperty({example:'text text text...', description:'text offer'})
+  locate: string;
+  @ApiProperty({ example: 'text text text...', description: 'text offer' })
   @IsNotEmpty()
-  name: string
-  @ApiProperty({example:'text text text...', description:'text offer'})
+  name: string;
+  @ApiProperty({ example: 'text text text...', description: 'text offer' })
   @IsNotEmpty()
-  abount: string
-  @ApiProperty({example:0, description:'text offer'})
+  abount: string;
+  @ApiProperty({ example: 0, description: 'text offer' })
   @IsNotEmpty()
-  stats: number
+  stats: number;
 }
-export class ShopoCommentDto{
-  @ApiProperty({example:'text text text...', description:'name'})
+export class ShopoCommentDto {
+  @ApiProperty({ example: 'text text text...', description: 'name' })
   @IsNotEmpty()
-  name:string;
-  @ApiProperty({example:'text text text...', description:'street'})
+  name: string;
+  @ApiProperty({ example: 'text text text...', description: 'street' })
   @IsNotEmpty()
-  description:string;
-  @ApiProperty({example:100, description:'price'})
+  description: string;
+  @ApiProperty({ example: 100, description: 'price' })
   @IsNotEmpty()
-  about:string;
+  about: string;
   @ApiProperty({
     type: 'string',
     format: 'binary',
-    description: 'image balloon'
+    description: 'image balloon',
   })
   @IsNotEmpty()
   image: string;
-
 }

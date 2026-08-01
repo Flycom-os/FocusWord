@@ -23,7 +23,10 @@ const createNoopRedisClient = () => ({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('RedisModule');
-        const redisEnabled = (configService.get<string>('REDIS_ENABLED') || 'true').toLowerCase() === 'true';
+        const redisEnabled =
+          (
+            configService.get<string>('REDIS_ENABLED') || 'true'
+          ).toLowerCase() === 'true';
         const host = configService.get<string>('REDIS_HOST') || '127.0.0.1';
         const resolvedHost = host === 'localhost' ? '127.0.0.1' : host;
         const port = parseInt(
@@ -33,11 +36,15 @@ const createNoopRedisClient = () => ({
         const ttl = configService.get<number>('CACHE_TTL') || 3600;
 
         if (!redisEnabled) {
-          logger.warn('Redis disabled by REDIS_ENABLED=false. Using in-memory cache.');
+          logger.warn(
+            'Redis disabled by REDIS_ENABLED=false. Using in-memory cache.',
+          );
           return { ttl };
         }
 
-        logger.log(`Attempting to connect to CacheManager Redis at host: ${host}, port: ${port}, ttl: ${ttl}`);
+        logger.log(
+          `Attempting to connect to CacheManager Redis at host: ${host}, port: ${port}, ttl: ${ttl}`,
+        );
 
         try {
           const store = await redisStore({
@@ -47,24 +54,33 @@ const createNoopRedisClient = () => ({
             },
             ttl,
           });
-          logger.log('Successfully connected to CacheManager Redis and created store.');
+          logger.log(
+            'Successfully connected to CacheManager Redis and created store.',
+          );
           logger.log('Returning CacheManager store object:', store);
           return {
             store: store,
           };
         } catch (error) {
-          logger.error('Failed to connect to CacheManager Redis. Falling back to in-memory cache.', error?.stack);
+          logger.error(
+            'Failed to connect to CacheManager Redis. Falling back to in-memory cache.',
+            error?.stack,
+          );
           return { ttl };
         }
       },
     }),
   ],
-  providers: [ // Add our custom Redis client provider
+  providers: [
+    // Add our custom Redis client provider
     {
       provide: REDIS_CLIENT,
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('RedisModule');
-        const redisEnabled = (configService.get<string>('REDIS_ENABLED') || 'true').toLowerCase() === 'true';
+        const redisEnabled =
+          (
+            configService.get<string>('REDIS_ENABLED') || 'true'
+          ).toLowerCase() === 'true';
         const host = configService.get<string>('REDIS_HOST') || '127.0.0.1';
         const resolvedHost = host === 'localhost' ? '127.0.0.1' : host;
         const port = parseInt(
@@ -73,11 +89,15 @@ const createNoopRedisClient = () => ({
         );
 
         if (!redisEnabled) {
-          logger.warn('Redis client disabled by REDIS_ENABLED=false. Using noop Redis client.');
+          logger.warn(
+            'Redis client disabled by REDIS_ENABLED=false. Using noop Redis client.',
+          );
           return createNoopRedisClient();
         }
 
-        logger.log(`Attempting to connect to direct IORedis client at host: ${resolvedHost}, port: ${port}`);
+        logger.log(
+          `Attempting to connect to direct IORedis client at host: ${resolvedHost}, port: ${port}`,
+        );
         const client = new IORedis({
           host: resolvedHost,
           port,
@@ -99,7 +119,10 @@ const createNoopRedisClient = () => ({
           await client.ping();
           return client;
         } catch (error) {
-          logger.error('Failed to connect direct IORedis client. Using noop Redis client.', error?.stack);
+          logger.error(
+            'Failed to connect direct IORedis client. Using noop Redis client.',
+            error?.stack,
+          );
           try {
             client.disconnect();
           } catch {
@@ -114,4 +137,3 @@ const createNoopRedisClient = () => ({
   exports: [CacheModule, REDIS_CLIENT], // Export both CacheModule and our custom Redis client
 })
 export class RedisModule {}
-

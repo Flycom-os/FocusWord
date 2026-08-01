@@ -18,6 +18,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  UiButton,
 } from "@/src/shared/ui";
 import styles from "./structured-data.module.css";
 
@@ -44,20 +45,20 @@ export default function StructuredDataPage() {
       setData(response.data);
       setPagination((prev) => ({ ...prev, total: response.total }));
     } catch (error) {
-      showToast("Ошибка при загрузке структурированных данных", "error");
+      showToast("Error loading structured data", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Вы уверены что хотите удалить эти данные?")) {
+    if (confirm("Are you sure you want to delete this data?")) {
       try {
         await deleteStructuredData(accessToken, id);
-        showToast("Данные удалены", "success");
+        showToast("Data deleted", "success");
         loadData();
       } catch (error) {
-        showToast("Ошибка при удалении данных", "error");
+        showToast("Error deleting data", "error");
       }
     }
   };
@@ -65,14 +66,14 @@ export default function StructuredDataPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>Структурированные данные</h1>
-        <p>JSON-LD разметка для SEO</p>
+        <h1>Structured Data</h1>
+        <p>JSON-LD markup for SEO</p>
       </div>
 
       <div className={styles.toolbar}>
         <input
           type="text"
-          placeholder="Поиск данных..."
+          placeholder="Search data..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.search}
@@ -80,15 +81,15 @@ export default function StructuredDataPage() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}> Loading... </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Тип</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Дата создания</TableHead>
-              <TableHead>Действия</TableHead>
+              <TableHead> Type </TableHead>
+              <TableHead> Status </TableHead>
+              <TableHead> Created At </TableHead>
+              <TableHead> Actions </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -104,15 +105,19 @@ export default function StructuredDataPage() {
                   <span
                     className={`${styles.status} ${item.isActive ? styles.active : styles.inactive}`}
                   >
-                    {item.isActive ? "Активен" : "Неактивен"}
+                    {item.isActive ? "Active" : "Inactive"}
                   </span>
                 </TableCell>
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <div className={styles.actions}>
-                    <button onClick={() => handleDelete(item.id)} className={styles.deleteButton}>
-                      🗑️
-                    </button>
+                    <UiButton
+                      theme="warning"
+                      onClick={() => handleDelete(item.id)}
+                      className={styles.deleteButton}
+                    >
+                      🗑️ Delete
+                    </UiButton>
                   </div>
                 </TableCell>
               </TableRow>

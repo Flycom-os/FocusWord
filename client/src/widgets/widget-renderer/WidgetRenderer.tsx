@@ -3,10 +3,14 @@
 import { useEffect, useState } from "react";
 import { fetchPublicWidgetBySlug, WidgetDto } from "@/src/shared/api/widgets";
 import { ContentRenderer } from "@/src/widgets/content-renderer/ContentRenderer";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const ProductListWidget = dynamic(() => import('@/src/widgets/products/ProductListWidget'), { ssr: false });
-const PublicProductView = dynamic(() => import('@/src/widgets/public-product/PublicProductView'), { ssr: false });
+const ProductListWidget = dynamic(() => import("@/src/widgets/products/ProductListWidget"), {
+  ssr: false,
+});
+const PublicProductView = dynamic(() => import("@/src/widgets/public-product/PublicProductView"), {
+  ssr: false,
+});
 
 interface WidgetRendererProps {
   slug: string;
@@ -72,14 +76,14 @@ export const WidgetRenderer = ({ slug, fallback = null }: WidgetRendererProps) =
     // Handle custom widget types stored in widget.config
     try {
       const cfg = widget.config || {};
-      if (cfg.widgetType === 'products-list') {
+      if (cfg.widgetType === "products-list") {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return <ProductListWidget config={cfg} /> as any;
+        return (<ProductListWidget config={cfg} />) as any;
       }
-      if (cfg.widgetType === 'product-single') {
+      if (cfg.widgetType === "product-single") {
         const productId = cfg.productId || cfg.id || null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return <PublicProductView productId={productId} config={cfg} /> as any;
+        return (<PublicProductView productId={productId} config={cfg} />) as any;
       }
     } catch {
       // fallback to default

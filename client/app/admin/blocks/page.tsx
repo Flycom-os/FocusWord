@@ -1,5 +1,7 @@
 "use client";
 
+import { Edit3, Copy, Trash2 } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchBlocks, createBlock, updateBlock, deleteBlock } from "@/src/shared/api/blocks";
@@ -133,10 +135,36 @@ export default function BlocksPage() {
                 <TableCell>{new Date(block.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <div className={styles.actions}>
-                    <button className={styles.editButton}>✏️</button>
-                    <button className={styles.cloneButton}>📋</button>
-                    <button onClick={() => handleDelete(block.id)} className={styles.deleteButton}>
-                      🗑️
+                    <button
+                      className={styles.editButton}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button
+                      className={styles.cloneButton}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(block.id)}
+                      className={styles.deleteButton}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </TableCell>

@@ -10,14 +10,21 @@ export class ActivityLogFilterDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiProperty({ description: 'Number of items per page', required: false, default: 10 })
+  @ApiProperty({
+    description: 'Number of items per page',
+    required: false,
+    default: 10,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
   @Type(() => Number)
   limit?: number = 10;
 
-  @ApiProperty({ description: 'Search term inside action or details', required: false })
+  @ApiProperty({
+    description: 'Search term inside action or details',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   search?: string;

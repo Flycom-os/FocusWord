@@ -7,13 +7,15 @@ export class CategoriesService {
 
   async findAll(page = 1, limit = 10, search?: string) {
     const skip = (page - 1) * limit;
-    
-    const where = search ? {
-      OR: [
-        { name: { contains: search, mode: 'insensitive' as const } },
-        { description: { contains: search, mode: 'insensitive' as const } },
-      ],
-    } : {};
+
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { description: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
 
     const [data, total] = await Promise.all([
       this.prisma.category.findMany({
@@ -23,24 +25,24 @@ export class CategoriesService {
         orderBy: { createdAt: 'desc' },
         include: {
           posts: {
-            select: { id: true, title: true, slug: true, status: true }
+            select: { id: true, title: true, slug: true, status: true },
           },
           parentCategory: {
-            select: { id: true, name: true, slug: true }
+            select: { id: true, name: true, slug: true },
           },
           childCategories: {
-            select: { id: true, name: true, slug: true }
-          }
-        }
+            select: { id: true, name: true, slug: true },
+          },
+        },
       }),
-      this.prisma.category.count({ where })
+      this.prisma.category.count({ where }),
     ]);
 
     return {
       data,
       total,
       page,
-      limit
+      limit,
     };
   }
 
@@ -49,15 +51,21 @@ export class CategoriesService {
       where: { id },
       include: {
         posts: {
-          select: { id: true, title: true, slug: true, status: true, createdAt: true }
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            status: true,
+            createdAt: true,
+          },
         },
         parentCategory: {
-          select: { id: true, name: true, slug: true }
+          select: { id: true, name: true, slug: true },
         },
         childCategories: {
-          select: { id: true, name: true, slug: true }
-        }
-      }
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
   }
 
@@ -66,15 +74,15 @@ export class CategoriesService {
       data: createCategoryDto,
       include: {
         posts: {
-          select: { id: true, title: true, slug: true, status: true }
+          select: { id: true, title: true, slug: true, status: true },
         },
         parentCategory: {
-          select: { id: true, name: true, slug: true }
+          select: { id: true, name: true, slug: true },
         },
         childCategories: {
-          select: { id: true, name: true, slug: true }
-        }
-      }
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
   }
 
@@ -84,21 +92,21 @@ export class CategoriesService {
       data: updateCategoryDto,
       include: {
         posts: {
-          select: { id: true, title: true, slug: true, status: true }
+          select: { id: true, title: true, slug: true, status: true },
         },
         parentCategory: {
-          select: { id: true, name: true, slug: true }
+          select: { id: true, name: true, slug: true },
         },
         childCategories: {
-          select: { id: true, name: true, slug: true }
-        }
-      }
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
   }
 
   async delete(id: number) {
     return this.prisma.category.delete({
-      where: { id }
+      where: { id },
     });
   }
 }

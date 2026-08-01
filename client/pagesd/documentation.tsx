@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchPublicPageBySlug, PageDto } from '@/src/shared/api/pages';
-import { Body, Header, Footer, PageSlider } from "@/src/shared/ui";
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
-import { ContentRenderer } from '@/src/widgets/content-renderer/ContentRenderer';
+import { fetchPublicPageBySlug, PageDto } from '../src/shared/api/pages';
+import { Body, Footer, Header, PageSlider } from '../src/shared/ui';
+import { ContentRenderer } from '../src/widgets/content-renderer/ContentRenderer';
 
 const DocumentationPage = () => {
   const [page, setPage] = useState<PageDto | null>(null);

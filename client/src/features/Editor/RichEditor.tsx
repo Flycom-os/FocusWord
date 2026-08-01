@@ -43,9 +43,9 @@ const RichEditor: React.FC<RichEditorProps> = ({
               type="button"
               onClick={onMediaSelect}
               className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-              title="Добавить медиафайл"
+              title="Add Media File"
             >
-              📷 Медиа
+              📷 Media
             </button>
           )}
           {onSliderSelect && (
@@ -53,9 +53,9 @@ const RichEditor: React.FC<RichEditorProps> = ({
               type="button"
               onClick={onSliderSelect}
               className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100"
-              title="Добавить слайдер"
+              title="Add Slider"
             >
-              🎠 Слайдер
+              🎠 Slider
             </button>
           )}
         </div>

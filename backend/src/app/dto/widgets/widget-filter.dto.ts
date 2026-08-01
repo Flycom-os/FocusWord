@@ -10,7 +10,11 @@ export class WidgetFilterDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiProperty({ description: 'Number of items per page', required: false, default: 10 })
+  @ApiProperty({
+    description: 'Number of items per page',
+    required: false,
+    default: 10,
+  })
   @IsInt()
   @Min(1)
   @IsOptional()
@@ -22,17 +26,21 @@ export class WidgetFilterDto {
   @IsOptional()
   search?: string;
 
-  @ApiProperty({ 
-    description: 'Filter by widget type', 
+  @ApiProperty({
+    description: 'Filter by widget type',
     enum: ['text', 'image', 'slider', 'gallery', 'form', 'social', 'custom'],
-    required: false 
+    required: false,
   })
   @IsString()
   @IsOptional()
   @IsIn(['text', 'image', 'slider', 'gallery', 'form', 'social', 'custom'])
   type?: string;
 
-  @ApiProperty({ description: 'Filter by status', enum: ['active', 'inactive'], required: false })
+  @ApiProperty({
+    description: 'Filter by status',
+    enum: ['active', 'inactive'],
+    required: false,
+  })
   @IsString()
   @IsOptional()
   @IsIn(['active', 'inactive'])

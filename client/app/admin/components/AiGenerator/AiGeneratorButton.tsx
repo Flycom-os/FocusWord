@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import styles from "./AiGenerator.module.css";
+import { Sparkles } from "lucide-react";
 import { showToast } from "@/src/shared/ui/Notifications/ui-notifications";
+import styles from "./AiGenerator.module.css";
 
 type Props = {
   onGenerated: (content: string) => void;
@@ -27,15 +28,15 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_CEREBRAS_API_KEY}`
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_CEREBRAS_API_KEY}`,
         },
         body: JSON.stringify({
           model: "zai-glm-4.7",
           messages: [
             { role: "system", content: systemPrompt },
-            { role: "user", content: prompt }
-          ]
-        })
+            { role: "user", content: prompt },
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -48,7 +49,6 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
       onGenerated(reply);
       setIsOpen(false);
       setPrompt("");
-
     } catch (e: any) {
       console.error(e);
       showToast(`Generation error: ${e.message}`, "error");
@@ -64,8 +64,9 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
         onClick={() => setIsOpen(true)}
         className={styles.aiButton}
         title="Generate with AI"
+        style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
       >
-        ✨ Generate
+        <Sparkles size={14} /> Generate
       </button>
 
       {isOpen && (
@@ -73,8 +74,8 @@ const AiGeneratorButton: React.FC<Props> = ({ onGenerated, systemPrompt }) => {
           <div className={styles.modalContent}>
             <h3 className={styles.modalTitle}>AI Content Generation</h3>
             <p className={styles.modalDescription}>
-              Enter a topic or keywords, and the neural network will generate text for you.
-              The system prompt is already configured to get high-quality HTML markup.
+              Enter a topic or keywords, and the neural network will generate text for you. The
+              system prompt is already configured to get high-quality HTML markup.
             </p>
             <textarea
               className={styles.promptTextarea}

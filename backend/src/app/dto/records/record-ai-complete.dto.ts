@@ -7,7 +7,10 @@ export class RecordAiCompleteDto {
   @IsNotEmpty()
   prompt: string;
 
-  @ApiProperty({ description: 'Current record content context', required: false })
+  @ApiProperty({
+    description: 'Current record content context',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   content?: string;

@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsInt,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -19,7 +26,11 @@ export class CreateRecordDto {
   @IsNotEmpty()
   content: string;
 
-  @ApiProperty({ description: 'The status of the record (e.g., draft, published)', required: false, default: 'draft' })
+  @ApiProperty({
+    description: 'The status of the record (e.g., draft, published)',
+    required: false,
+    default: 'draft',
+  })
   @IsString()
   @IsOptional()
   status?: string;
@@ -34,7 +45,10 @@ export class CreateRecordDto {
   @IsOptional()
   featuredImageId?: number;
 
-  @ApiProperty({ description: 'The ID of the featured slider', required: false })
+  @ApiProperty({
+    description: 'The ID of the featured slider',
+    required: false,
+  })
   @IsInt()
   @IsOptional()
   featuredSliderId?: number | null;
@@ -44,32 +58,47 @@ export class CreateRecordDto {
   @IsOptional()
   seoTitle?: string;
 
-  @ApiProperty({ description: 'The SEO description for the record', required: false })
+  @ApiProperty({
+    description: 'The SEO description for the record',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   seoDescription?: string;
 
-  @ApiProperty({ description: 'Keywords for SEO', required: false, type: [String] })
+  @ApiProperty({
+    description: 'Keywords for SEO',
+    required: false,
+    type: [String],
+  })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
   metaKeywords?: string[];
 
-  @ApiProperty({ 
-    description: 'Content blocks configuration', 
+  @ApiProperty({
+    description: 'Content blocks configuration',
     required: false,
-    type: 'array'
+    type: 'array',
   })
   @IsOptional()
   @Type(() => Object)
   contentBlocks?: Record<string, any>[] | null;
 
-  @ApiProperty({ description: 'Record template name', required: false, default: 'default' })
+  @ApiProperty({
+    description: 'Record template name',
+    required: false,
+    default: 'default',
+  })
   @IsString()
   @IsOptional()
   template?: string;
 
-  @ApiProperty({ description: 'Category IDs associated with the record', required: false, type: [Number] })
+  @ApiProperty({
+    description: 'Category IDs associated with the record',
+    required: false,
+    type: [Number],
+  })
   @IsArray()
   @IsInt({ each: true })
   @IsOptional()

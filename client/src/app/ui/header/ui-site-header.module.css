@@ -236,3 +236,30 @@
 .dropdownItem:hover svg {
   transform: scale(1.1);
 }
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.themeToggle {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.themeToggle:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
