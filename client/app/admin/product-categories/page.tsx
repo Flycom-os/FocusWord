@@ -102,7 +102,13 @@ const ProductCategoriesPage = () => {
       }
 
       const parentIdNum = form.parentId ? Number(form.parentId) : null;
-      const slugVal = form.slug.trim() || form.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      const slugVal =
+        form.slug.trim() ||
+        form.name
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
 
       const dataToSave = {
         name: form.name.trim(),
@@ -288,7 +294,10 @@ const ProductCategoriesPage = () => {
         onClose={() => setShowModal(false)}
         title={editingCategory ? "Edit Category" : "Create Category"}
       >
-        <div className={styles.modalContent} style={{ width: "100%", maxWidth: "100%", padding: 0 }}>
+        <div
+          className={styles.modalContent}
+          style={{ width: "100%", maxWidth: "100%", padding: 0 }}
+        >
           <div className={styles.formGroup}>
             <label className={styles.label}>Category Name</label>
             <Input
@@ -327,7 +336,9 @@ const ProductCategoriesPage = () => {
             <label className={styles.label}>Status</label>
             <select
               value={form.status}
-              onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as "active" | "inactive" }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, status: e.target.value as "active" | "inactive" }))
+              }
               className={styles.select}
             >
               <option value="active">Active</option>

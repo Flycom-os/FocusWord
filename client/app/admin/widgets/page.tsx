@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/src/shared/ui/Input/ui-input";
 import { fetchWidgets, createWidget, updateWidget, deleteWidget } from "@/src/shared/api/widgets";
@@ -22,7 +22,6 @@ import { OutputData } from "@editorjs/editorjs";
 import { productsApi } from "@/src/entities/Product/api";
 import { fetchProductCategories } from "@/src/shared/api/products";
 import styles from "./widgets.module.css";
-import React from "react";
 
 const RichEditor = dynamic(() => import("@/src/features/Editor/RichEditor"), {
   ssr: false,
@@ -110,9 +109,10 @@ export default function WidgetsPage() {
               {node.name}
             </span>
           </div>
-          {open && node.children?.map((child: any) => (
-            <Node key={child.id} node={child} level={level + 1} />
-          ))}
+          {open &&
+            node.children?.map((child: any) => (
+              <Node key={child.id} node={child} level={level + 1} />
+            ))}
         </div>
       );
     };
@@ -420,7 +420,11 @@ export default function WidgetsPage() {
                   </TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <UiButton theme="secondary" onClick={() => handleEdit(widget)} className={styles.editButton}>
+                      <UiButton
+                        theme="secondary"
+                        onClick={() => handleEdit(widget)}
+                        className={styles.editButton}
+                      >
                         ✏️ Edit
                       </UiButton>
                       <UiButton
@@ -711,7 +715,14 @@ export default function WidgetsPage() {
             <UiButton theme="primary" onClick={handleSave} className={styles.saveButton}>
               {editingWidget ? "Save" : "Create"}
             </UiButton>
-            <UiButton theme="secondary" onClick={() => setShowModal(false)} className={styles.cancelButton}> Cancel </UiButton>
+            <UiButton
+              theme="secondary"
+              onClick={() => setShowModal(false)}
+              className={styles.cancelButton}
+            >
+              {" "}
+              Cancel{" "}
+            </UiButton>
           </div>
         </div>
       </Modal>

@@ -35,18 +35,22 @@ interface WikiHomePageProps {
 
 const parseInline = (text: string) => {
   const parts = [];
-  let current = text;
-  
+  const current = text;
+
   // A simple tokenization regex to match bold (**text**) and inline code (`code`)
   const regex = /(\*\*.*?\*\*|`.*?`)/g;
   const tokens = current.split(regex);
-  
+
   return tokens.map((token, i) => {
     if (token.startsWith("**") && token.endsWith("**")) {
       return <strong key={i}>{token.slice(2, -2)}</strong>;
     }
     if (token.startsWith("`") && token.endsWith("`")) {
-      return <code key={i} className={styles.inlineCode}>{token.slice(1, -1)}</code>;
+      return (
+        <code key={i} className={styles.inlineCode}>
+          {token.slice(1, -1)}
+        </code>
+      );
     }
     return token;
   });
@@ -55,7 +59,7 @@ const parseInline = (text: string) => {
 const renderMarkdown = (md: string) => {
   if (!md) return null;
   const lines = md.split("\n");
-  let inList = false;
+  const inList = false;
   let inCode = false;
   let codeLines: string[] = [];
 
@@ -71,10 +75,9 @@ const renderMarkdown = (md: string) => {
             <code>{codeText}</code>
           </pre>
         );
-      } else {
-        inCode = true;
-        return null;
       }
+      inCode = true;
+      return null;
     }
 
     if (inCode) {
@@ -84,16 +87,32 @@ const renderMarkdown = (md: string) => {
 
     // Headers detection
     if (line.startsWith("# ")) {
-      return <h1 key={index} className={styles.mdH1}>{line.substring(2)}</h1>;
+      return (
+        <h1 key={index} className={styles.mdH1}>
+          {line.substring(2)}
+        </h1>
+      );
     }
     if (line.startsWith("## ")) {
-      return <h2 key={index} className={styles.mdH2}>{line.substring(3)}</h2>;
+      return (
+        <h2 key={index} className={styles.mdH2}>
+          {line.substring(3)}
+        </h2>
+      );
     }
     if (line.startsWith("### ")) {
-      return <h3 key={index} className={styles.mdH3}>{line.substring(4)}</h3>;
+      return (
+        <h3 key={index} className={styles.mdH3}>
+          {line.substring(4)}
+        </h3>
+      );
     }
     if (line.startsWith("#### ")) {
-      return <h4 key={index} className={styles.mdH4}>{line.substring(5)}</h4>;
+      return (
+        <h4 key={index} className={styles.mdH4}>
+          {line.substring(5)}
+        </h4>
+      );
     }
 
     // List items (unordered)
@@ -104,7 +123,7 @@ const renderMarkdown = (md: string) => {
         </li>
       );
     }
-    
+
     // List items (ordered)
     if (line.trim().match(/^\d+\.\s/)) {
       return (
@@ -120,7 +139,11 @@ const renderMarkdown = (md: string) => {
     }
 
     // Paragraph
-    return <p key={index} className={styles.mdParagraph}>{parseInline(line)}</p>;
+    return (
+      <p key={index} className={styles.mdParagraph}>
+        {parseInline(line)}
+      </p>
+    );
   });
 };
 
@@ -667,14 +690,16 @@ PORT=1331`}</code>
                       <FileText size={32} />
                       <div>
                         <h1>System Modules</h1>
-                        <p>Detailed specification and documentation for each FocusWord system module</p>
+                        <p>
+                          Detailed specification and documentation for each FocusWord system module
+                        </p>
                       </div>
                     </div>
                     <div className={styles.sectionContent}>
                       <p>
                         Below you will find comprehensive technical and user documentation for every
-                        module of the FocusWord application. Click on any module name in the Table of Contents
-                        to jump directly to it.
+                        module of the FocusWord application. Click on any module name in the Table
+                        of Contents to jump directly to it.
                       </p>
                     </div>
                   </section>

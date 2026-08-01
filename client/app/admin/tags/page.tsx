@@ -144,10 +144,18 @@ export default function TagsPage() {
                   <TableCell>{tag.description || "-"}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <UiButton theme="secondary" onClick={() => handleEdit(tag)} className={styles.editButton}>
+                      <UiButton
+                        theme="secondary"
+                        onClick={() => handleEdit(tag)}
+                        className={styles.editButton}
+                      >
                         ✏️ Edit
                       </UiButton>
-                      <UiButton theme="warning" onClick={() => handleDelete(tag.id)} className={styles.deleteButton}>
+                      <UiButton
+                        theme="warning"
+                        onClick={() => handleDelete(tag.id)}
+                        className={styles.deleteButton}
+                      >
                         🗑️ Delete
                       </UiButton>
                     </div>
@@ -209,7 +217,14 @@ export default function TagsPage() {
             <UiButton theme="primary" onClick={handleSave} className={styles.saveButton}>
               {editingTag ? "Save" : "Create"}
             </UiButton>
-            <UiButton theme="secondary" onClick={() => setShowModal(false)} className={styles.cancelButton}> Cancel </UiButton>
+            <UiButton
+              theme="secondary"
+              onClick={() => setShowModal(false)}
+              className={styles.cancelButton}
+            >
+              {" "}
+              Cancel{" "}
+            </UiButton>
           </div>
         </div>
       </Modal>

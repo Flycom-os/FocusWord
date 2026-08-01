@@ -14,8 +14,8 @@ import {
 import { Feedback } from "@/src/entities/Feedback";
 import { feedbackApi } from "@/src/entities/Feedback/api";
 import { useAuth } from "@/src/app/providers/auth-provider";
-import styles from "./feedback.module.css";
 import { UiButton } from "@/src/shared/ui";
+import styles from "./feedback.module.css";
 
 const FeedbackPage = () => {
   const [feedback, setFeedback] = useState<Feedback[]>([]);

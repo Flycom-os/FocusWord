@@ -20,8 +20,8 @@ const AccessDenied = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
 
         <p className="text-gray-600 mb-6">
-          You do not have permission to access this page. Please contact the administrator to
-          obtain the necessary permissions.
+          You do not have permission to access this page. Please contact the administrator to obtain
+          the necessary permissions.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

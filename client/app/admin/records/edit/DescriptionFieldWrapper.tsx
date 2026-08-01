@@ -98,16 +98,20 @@ const DescriptionFieldWrapper: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onMediaSelect}
-                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5" title="Add media file" >
-              <ImageIcon size={14} /> Media
+                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5"
+                title="Add media file"
+              >
+                <ImageIcon size={14} /> Media
               </button>
             )}
             {onSliderSelect && (
               <button
                 type="button"
                 onClick={onSliderSelect}
-                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5" title="Add slider" >
-              <Presentation size={14} /> Slider
+                className="px-3 py-1 text-sm border bg-white rounded hover:bg-gray-100 inline-flex items-center gap-1.5"
+                title="Add slider"
+              >
+                <Presentation size={14} /> Slider
               </button>
             )}
           </div>

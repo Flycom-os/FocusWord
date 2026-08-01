@@ -296,7 +296,12 @@ export default function SEOPage() {
         {activeTab === "technical" && renderTechnicalTab()}
 
         <div className={styles.actions}>
-          <UiButton onClick={handleSave} disabled={loading} className={styles.saveButton} theme="primary">
+          <UiButton
+            onClick={handleSave}
+            disabled={loading}
+            className={styles.saveButton}
+            theme="primary"
+          >
             {loading ? "Saving..." : "Save Settings"}
           </UiButton>
         </div>

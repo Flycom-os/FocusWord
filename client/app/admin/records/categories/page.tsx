@@ -124,7 +124,13 @@ export default function RecordCategoriesPage() {
             className={styles.searchInput}
           />
         </div>
-        <UiButton theme="primary" onClick={handleCreateCategory} className={styles.createButton} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><Plus size={16} /> Create Category
+        <UiButton
+          theme="primary"
+          onClick={handleCreateCategory}
+          className={styles.createButton}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+        >
+          <Plus size={16} /> Create Category
         </UiButton>
       </div>
 
@@ -135,7 +141,9 @@ export default function RecordCategoriesPage() {
           <div className={styles.empty}>
             <h3>No categories</h3>
             <p>Create the first category for records</p>
-            <UiButton theme="primary" onClick={handleCreateCategory}>Create Category</UiButton>
+            <UiButton theme="primary" onClick={handleCreateCategory}>
+              Create Category
+            </UiButton>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -253,7 +261,11 @@ export default function RecordCategoriesPage() {
             </div>
 
             <div className={styles.modalActions}>
-              <UiButton theme="secondary" onClick={() => setShowCreateModal(false)} className={styles.cancelButton}>
+              <UiButton
+                theme="secondary"
+                onClick={() => setShowCreateModal(false)}
+                className={styles.cancelButton}
+              >
                 Cancel
               </UiButton>
               <UiButton theme="primary" onClick={handleSaveCategory} className={styles.saveButton}>

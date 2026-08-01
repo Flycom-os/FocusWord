@@ -216,10 +216,7 @@ const ArticlesArticle = () => {
         const slider = await getSlider(accessToken, form.featuredSliderId);
         setPreviewSlider(slider);
       } catch (error: any) {
-        showToast(
-          error?.response?.data?.message || "Failed to load slider for preview",
-          "error",
-        );
+        showToast(error?.response?.data?.message || "Failed to load slider for preview", "error");
       } finally {
         setIsLoadingPreviewSlider(false);
       }
@@ -353,13 +350,17 @@ const ArticlesArticle = () => {
               >
                 <TableCell>{article.title}</TableCell>
                 <TableCell>{article.slug}</TableCell>
-                <TableCell>
-                  {article.status === "published" ? "Published" : "Draft"}
-                </TableCell>
+                <TableCell>{article.status === "published" ? "Published" : "Draft"}</TableCell>
                 <TableCell className={styles.actions}>
-                  <UiButton theme="secondary" onClick={() => handleEditArticle(article)}> Edit </UiButton>
+                  <UiButton theme="secondary" onClick={() => handleEditArticle(article)}>
+                    {" "}
+                    Edit{" "}
+                  </UiButton>
                   <PermissionGate resource="articles" level={2}>
-                    <UiButton theme="warning" onClick={() => handleDelete(article.id)}> Delete </UiButton>
+                    <UiButton theme="warning" onClick={() => handleDelete(article.id)}>
+                      {" "}
+                      Delete{" "}
+                    </UiButton>
                   </PermissionGate>
                 </TableCell>
               </SelectableTableRow>
@@ -474,8 +475,14 @@ const ArticlesArticle = () => {
             </div>
 
             <div className={styles.modalActions}>
-              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}> Cancel </UiButton>
-              <UiButton theme="secondary" onClick={handlePreview}> Preview </UiButton>
+              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
+                {" "}
+                Cancel{" "}
+              </UiButton>
+              <UiButton theme="secondary" onClick={handlePreview}>
+                {" "}
+                Preview{" "}
+              </UiButton>
               <UiButton theme="primary" onClick={handleSave}>
                 {isSaving ? "Saving..." : "Save"}
               </UiButton>
@@ -484,11 +491,7 @@ const ArticlesArticle = () => {
         </Modal>
       </PermissionGate>
 
-      <Modal
-        open={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        title="Article Preview"
-      >
+      <Modal open={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Article Preview">
         <div className={styles.previewModalContent}>
           <div className={styles.previewHeader}>
             <h2>{form.title || "Article Preview"}</h2>
@@ -505,15 +508,16 @@ const ArticlesArticle = () => {
               <PageSlider slider={previewSlider as any} autoPlay={false} showArrows showDots />
             </div>
           ) : form.featuredSliderId ? (
-            <div className={styles.previewEmpty}>
-              Failed to load slider for preview.
-            </div>
+            <div className={styles.previewEmpty}>Failed to load slider for preview.</div>
           ) : null}
 
           <div className={styles.previewBody} dangerouslySetInnerHTML={{ __html: previewHtml }} />
 
           <div className={styles.modalActions}>
-            <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}> Close </UiButton>
+            <UiButton theme="secondary" onClick={() => setIsPreviewOpen(false)}>
+              {" "}
+              Close{" "}
+            </UiButton>
           </div>
         </div>
       </Modal>

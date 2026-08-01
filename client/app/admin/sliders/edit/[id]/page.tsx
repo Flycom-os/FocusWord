@@ -220,7 +220,10 @@ export default function EditSliderPage({ params }: { params: { id: string } }) {
             <Button onClick={handleSave} disabled={loading} className={styles.saveButton}>
               {loading ? "Saving..." : "Save изменения"}
             </Button>
-            <Button onClick={() => router.push("/admin/sliders")} className={styles.cancelButton}> Cancel </Button>
+            <Button onClick={() => router.push("/admin/sliders")} className={styles.cancelButton}>
+              {" "}
+              Cancel{" "}
+            </Button>
           </div>
         </div>
       </div>

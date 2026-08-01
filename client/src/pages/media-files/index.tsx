@@ -388,7 +388,10 @@ const MediaFilesPage = () => {
             placeholder="Search"
             onChange={(e) => handleSearchChange(e.target.value)}
           />
-          <UiButton theme="secondary" className={styles.searchButton}> Search </UiButton>
+          <UiButton theme="secondary" className={styles.searchButton}>
+            {" "}
+            Search{" "}
+          </UiButton>
         </div>
         <div className={styles.filters}>
           <Select
@@ -493,7 +496,10 @@ const MediaFilesPage = () => {
             <>
               <span>Selected: {selectedIds.length}</span>
               <PermissionGate resource="media-files" level={2}>
-                <UiButton theme="warning" onClick={handleDeleteSelected}> Delete </UiButton>
+                <UiButton theme="warning" onClick={handleDeleteSelected}>
+                  {" "}
+                  Delete{" "}
+                </UiButton>
               </PermissionGate>
               {selectedIds.length === 1 && (
                 <>
@@ -522,7 +528,10 @@ const MediaFilesPage = () => {
                       const file = data.find((f) => f.id === selectedIds[0]);
                       if (file) handleEdit(file);
                     }}
-                  > Edit </UiButton>
+                  >
+                    {" "}
+                    Edit{" "}
+                  </UiButton>
                 </>
               )}
             </>
@@ -798,7 +807,10 @@ const MediaFilesPage = () => {
                     <UiButton
                       theme="warning"
                       onClick={() => editingFile && handleDeleteFile(editingFile.id)}
-                    > Delete </UiButton>
+                    >
+                      {" "}
+                      Delete{" "}
+                    </UiButton>
                   </PermissionGate>
                   <UiButton
                     theme="secondary"
@@ -809,7 +821,10 @@ const MediaFilesPage = () => {
                     Download original
                   </UiButton>
                   <PermissionGate resource="media-files" level={1}>
-                    <UiButton theme="primary" onClick={handleSave}> Save </UiButton>
+                    <UiButton theme="primary" onClick={handleSave}>
+                      {" "}
+                      Save{" "}
+                    </UiButton>
                   </PermissionGate>
                 </div>
               </>
@@ -870,7 +885,10 @@ const MediaFilesPage = () => {
                 </div>
                 <div className={styles.editModalActions}>
                   <PermissionGate resource="media-files" level={1}>
-                    <UiButton theme="primary" onClick={handleSave} disabled={!fileToUpload}> Save </UiButton>
+                    <UiButton theme="primary" onClick={handleSave} disabled={!fileToUpload}>
+                      {" "}
+                      Save{" "}
+                    </UiButton>
                   </PermissionGate>
                 </div>
               </>

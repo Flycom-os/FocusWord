@@ -111,7 +111,11 @@ export default function StructuredDataPage() {
                 <TableCell>{new Date(item.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <div className={styles.actions}>
-                    <UiButton theme="warning" onClick={() => handleDelete(item.id)} className={styles.deleteButton}>
+                    <UiButton
+                      theme="warning"
+                      onClick={() => handleDelete(item.id)}
+                      className={styles.deleteButton}
+                    >
                       🗑️ Delete
                     </UiButton>
                   </div>

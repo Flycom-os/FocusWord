@@ -376,7 +376,9 @@ const ProductsPage = () => {
               />
             </div>
             <div className={styles.formActions}>
-              <UiButton theme="primary" onClick={handleSaveProduct}>Save</UiButton>
+              <UiButton theme="primary" onClick={handleSaveProduct}>
+                Save
+              </UiButton>
               <UiButton theme="secondary" onClick={() => setShowModal(false)}>
                 Cancel
               </UiButton>

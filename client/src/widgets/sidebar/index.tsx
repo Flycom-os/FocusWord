@@ -119,7 +119,13 @@ const menuItems: MenuItem[] = [
     resource: "users",
     minLevel: 0,
   },
-  { icon: <Shield size={24} />, label: "Roles", url: "/admin/roles", resource: "roles", minLevel: 0 },
+  {
+    icon: <Shield size={24} />,
+    label: "Roles",
+    url: "/admin/roles",
+    resource: "roles",
+    minLevel: 0,
+  },
   { icon: <Settings size={24} />, label: "Settings", url: "/admin/settings" },
   {
     icon: <CreditCard size={24} />,

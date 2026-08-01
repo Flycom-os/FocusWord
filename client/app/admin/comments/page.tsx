@@ -1,11 +1,6 @@
 "use client";
-import {
-  Edit3,
-  Check,
-  X,
-  Trash2
-} from "lucide-react";
 
+import { Edit3, Check, X, Trash2 } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -206,19 +201,51 @@ export default function CommentsPage() {
                   <TableCell>{new Date(comment.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className={styles.actions}>
-                      <Button onClick={() => handleEdit(comment)} className={styles.editButton} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><Edit3 size={16} />
+                      <Button
+                        onClick={() => handleEdit(comment)}
+                        className={styles.editButton}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Edit3 size={16} />
                       </Button>
                       <Button
                         onClick={() => handleStatusChange(comment.id, "approved")}
-                        className={styles.approveButton} title="Approve" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><Check size={16} />
+                        className={styles.approveButton}
+                        title="Approve"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Check size={16} />
                       </Button>
                       <Button
                         onClick={() => handleStatusChange(comment.id, "rejected")}
-                        className={styles.rejectButton} title="Reject" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><X size={16} />
+                        className={styles.rejectButton}
+                        title="Reject"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <X size={16} />
                       </Button>
                       <Button
                         onClick={() => handleDelete(comment.id)}
-                        className={styles.deleteButton} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}><Trash2 size={16} />
+                        className={styles.deleteButton}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Trash2 size={16} />
                       </Button>
                     </div>
                   </TableCell>

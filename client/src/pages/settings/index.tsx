@@ -391,12 +391,12 @@ export default function SettingsPage() {
                       </UiButton>
                       <div className={styles.importWrapper}>
                         <input
-                           type="file"
-                           id="db-import"
-                           accept=".zip"
-                           onChange={handleImportDatabase}
-                           disabled={importing}
-                           className={styles.fileInput}
+                          type="file"
+                          id="db-import"
+                          accept=".zip"
+                          onChange={handleImportDatabase}
+                          disabled={importing}
+                          className={styles.fileInput}
                         />
                         <UiButton
                           onClick={() => document.getElementById("db-import")?.click()}
@@ -409,8 +409,8 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <p className={styles.importWarning}>
-                      ⚠️ Warning: Importing the database will replace all current data. It is recommended
-                      to create a backup before importing.
+                      ⚠️ Warning: Importing the database will replace all current data. It is
+                      recommended to create a backup before importing.
                     </p>
                   </div>
                 )}
@@ -420,10 +420,22 @@ export default function SettingsPage() {
       </div>
 
       <div className={styles.actions}>
-        <UiButton onClick={handleSave} disabled={saving} className={styles.saveButton} theme="primary">
+        <UiButton
+          onClick={handleSave}
+          disabled={saving}
+          className={styles.saveButton}
+          theme="primary"
+        >
           {saving ? "Saving..." : "Save Settings"}
         </UiButton>
-        <UiButton onClick={() => router.push("/admin")} className={styles.cancelButton} theme="secondary"> Return to Dashboard </UiButton>
+        <UiButton
+          onClick={() => router.push("/admin")}
+          className={styles.cancelButton}
+          theme="secondary"
+        >
+          {" "}
+          Return to Dashboard{" "}
+        </UiButton>
       </div>
     </div>
   );

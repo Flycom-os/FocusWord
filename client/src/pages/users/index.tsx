@@ -188,7 +188,10 @@ const UsersPage = () => {
           />
         </div>
         <PermissionGate resource="users" level={2}>
-          <UiButton theme="primary" onClick={handleCreate}> Add User </UiButton>
+          <UiButton theme="primary" onClick={handleCreate}>
+            {" "}
+            Add User{" "}
+          </UiButton>
         </PermissionGate>
       </div>
 
@@ -227,10 +230,16 @@ const UsersPage = () => {
               <TableCell>{formatDate(user.createdAt)}</TableCell>
               <TableCell className={styles.actionsColumn}>
                 <PermissionGate resource="users" level={1}>
-                  <UiButton theme="secondary" onClick={() => handleEdit(user)}> Edit </UiButton>
+                  <UiButton theme="secondary" onClick={() => handleEdit(user)}>
+                    {" "}
+                    Edit{" "}
+                  </UiButton>
                 </PermissionGate>
                 <PermissionGate resource="users" level={2}>
-                  <UiButton theme="warning" onClick={() => handleDelete(user.id)}> Delete </UiButton>
+                  <UiButton theme="warning" onClick={() => handleDelete(user.id)}>
+                    {" "}
+                    Delete{" "}
+                  </UiButton>
                 </PermissionGate>
               </TableCell>
             </SelectableTableRow>
@@ -316,8 +325,14 @@ const UsersPage = () => {
               />
             </div>
             <div className={styles.modalFooter}>
-              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}> Cancel </UiButton>
-              <UiButton theme="primary" onClick={handleSave}> Save </UiButton>
+              <UiButton theme="secondary" onClick={() => setIsModalOpen(false)}>
+                {" "}
+                Cancel{" "}
+              </UiButton>
+              <UiButton theme="primary" onClick={handleSave}>
+                {" "}
+                Save{" "}
+              </UiButton>
             </div>
           </div>
         </Modal>

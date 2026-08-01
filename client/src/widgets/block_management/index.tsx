@@ -9,7 +9,7 @@ type VariantsType = "primary" | "secondary" | "third" | "";
 const choosen = 2;
 const BlockManagement = ({ type }: searchProps) => {
   return (
-    <div></div>
+    <div />
     // <div className={styles.default}>
     //   {(type === "primary" || type === "secondary") && (
     //     <div className={styles.primary_or_secondary}>

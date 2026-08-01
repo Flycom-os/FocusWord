@@ -136,9 +136,7 @@ const SimpleEditor: React.FC<SimpleEditorProps> = ({ holder, data, onChange, pla
 
   return (
     <div ref={containerRef} className="editor-container">
-      {!isReady && (
-        <div className="editor-placeholder">{placeholder || "Loading editor..."}</div>
-      )}
+      {!isReady && <div className="editor-placeholder">{placeholder || "Loading editor..."}</div>}
     </div>
   );
 };
